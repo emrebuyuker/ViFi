@@ -1,30 +1,21 @@
 package com.salticusteam.vifi;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.parse.ParseException;
-import com.parse.ParseFile;
-import com.parse.ParseObject;
-import com.parse.SaveCallback;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class Main4Activity extends AppCompatActivity {
 
@@ -35,11 +26,20 @@ public class Main4Activity extends AppCompatActivity {
     EditText addTextLessonName;
     Bitmap chosenImage;
 
+    private StorageReference mStorageRef;
+
+    Uri selected;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main4);
+
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("message");
 
         imageView =(ImageView) findViewById(R.id.imageView);
         addTextUniName = findViewById(R.id.addEditTextUniName);
@@ -56,6 +56,14 @@ public class Main4Activity extends AppCompatActivity {
         String addFakName = this.addTextFakName.getText().toString();
         String addBolName = this.addTextBolName.getText().toString();
         String addLessonName = this.addTextLessonName.getText().toString();
+
+        /*StorageReference storageReference = mStorageRef.child("images/images.jpg");
+        storageReference.putFile(selected);*/
+
+
+
+
+    /*    //Parse and back4app codes
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         chosenImage.compress(Bitmap.CompressFormat.PNG,50,byteArrayOutputStream);
@@ -82,14 +90,14 @@ public class Main4Activity extends AppCompatActivity {
                 }
 
             }
-        });
+        });*/
     }
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void addLessonSelect (View view){
 
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+        /*if (ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
 
             ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.READ_EXTERNAL_STORAGE},2);
 
@@ -98,14 +106,14 @@ public class Main4Activity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_PICK , MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent,1);
 
-        }
+        }*/
     }
 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-        if (requestCode == 2){
+       /* if (requestCode == 2){
 
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
@@ -115,19 +123,19 @@ public class Main4Activity extends AppCompatActivity {
             }
         }
 
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);*/
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == 1 && resultCode == RESULT_OK && data != null){
+       /* if (requestCode == 1 && resultCode == RESULT_OK && data != null){
 
-            Uri uri = data.getData();
+            selected = data.getData();
 
             try {
 
-                chosenImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(),uri);
+                chosenImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selected);
                 imageView.setImageBitmap(chosenImage);
 
             } catch (IOException e) {
@@ -138,7 +146,7 @@ public class Main4Activity extends AppCompatActivity {
 
         }
 
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);*/
 
     }
 

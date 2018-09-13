@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "584934181191-uhd693u7t84ihaqh6t0ffcgh6r0hgpsr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.salticusteam.vifi",
+            "certificate_hash": "b76a1b5872547dbacfa03a3a46a80900ea0cd382"
+          }
+        },
+        {
           "client_id": "584934181191-o8fle4bvqgaej1cd6pu9gj1pg5j9sj65.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "584934181191-o8fle4bvqgaej1cd6pu9gj1pg5j9sj65.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

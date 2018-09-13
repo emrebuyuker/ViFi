@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         menuInflater.inflate(R.menu.add_lesson,menu);
 
         return super.onCreateOptionsMenu(menu);
-        
+
     }
 
     @Override
@@ -56,12 +56,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         if (item.getItemId() == R.id.add_lesson){
 
-            Intent intent = new Intent(getApplicationContext(),Main4Activity.class);
+            Intent intent = new Intent(getApplicationContext(),addLessonActivity.class);
             startActivity(intent);
 
         }
 
         return super.onOptionsItemSelected(item);
+
     }
 
     @Override
