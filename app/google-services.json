@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "584934181191",
+    "firebase_url": "https://vifi-1f3cc.firebaseio.com",
+    "project_id": "vifi-1f3cc",
+    "storage_bucket": "vifi-1f3cc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:584934181191:android:44ac92bbd108f62e",
+        "android_client_info": {
+          "package_name": "com.salticusteam.vifi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "584934181191-o8fle4bvqgaej1cd6pu9gj1pg5j9sj65.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-mdHb5iG3n-vRWkUg7GPwtQKv1iWLegY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

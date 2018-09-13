@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         menuInflater.inflate(R.menu.add_lesson,menu);
 
         return super.onCreateOptionsMenu(menu);
+        
     }
 
     @Override
@@ -257,7 +258,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
     }
-
 
     private void parseDataDowland () {
 

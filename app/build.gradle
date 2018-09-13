@@ -31,5 +31,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation "com.parse:parse-android:$parseVersion"
     implementation "com.parse:parse-fcm-android:$parseVersion"
+    implementation 'com.google.firebase:firebase-core:15.0.0'
 
 }
+apply plugin: 'com.google.gms.google-services'
