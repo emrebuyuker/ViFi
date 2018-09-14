@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         if (item.getItemId() == R.id.add_lesson){
 
-            Intent intent = new Intent(getApplicationContext(),addLessonActivity.class);
+            Intent intent = new Intent(getApplicationContext(),AddLessonActivity.class);
             startActivity(intent);
 
         }

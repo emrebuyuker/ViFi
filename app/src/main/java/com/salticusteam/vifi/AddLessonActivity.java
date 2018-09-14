@@ -15,9 +15,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import java.io.IOException;
 
-public class addLessonActivity extends AppCompatActivity {
+public class AddLessonActivity extends AppCompatActivity {
 
     ImageView imageView;
     EditText addTextUniName;
@@ -26,6 +31,8 @@ public class addLessonActivity extends AppCompatActivity {
     EditText addTextLessonName;
 
     Uri selected;
+
+    private StorageReference mStorageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +46,10 @@ public class addLessonActivity extends AppCompatActivity {
         addTextBolName = findViewById(R.id.addEditTextBolName);
         addTextLessonName = findViewById(R.id.addEditTextLessonName);
 
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("message");
     }
 
     public void addLessonImagesSelect(View view) {
@@ -94,7 +105,8 @@ public class addLessonActivity extends AppCompatActivity {
     }
 
     public void addLessonSave (View view) {
-
+        StorageReference storageReference = mStorageRef.child("images/image.jpg");
+        storageReference.putFile(selected);
     }
 
     public void onActivityMainactivity(View view) {
