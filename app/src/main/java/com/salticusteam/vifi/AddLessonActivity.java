@@ -105,8 +105,10 @@ public class AddLessonActivity extends AppCompatActivity {
     }
 
     public void addLessonSave (View view) {
+
         StorageReference storageReference = mStorageRef.child("images/image.jpg");
         storageReference.putFile(selected);
+
     }
 
     public void onActivityMainactivity(View view) {

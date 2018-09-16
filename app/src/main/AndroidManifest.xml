@@ -24,7 +24,8 @@
         <activity android:name=".Main2Activity" />
         <activity android:name=".Main3Activity" />
         <activity android:name=".Main4Activity" />
-        <activity android:name=".AddLessonActivity"></activity>
+        <activity android:name=".AddLessonActivity" />
+        <activity android:name=".LoginActivity"></activity>
     </application>
 
 </manifest>
