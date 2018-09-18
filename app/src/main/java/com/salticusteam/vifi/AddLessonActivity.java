@@ -14,13 +14,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class AddLessonActivity extends AppCompatActivity {
 
@@ -29,13 +34,18 @@ public class AddLessonActivity extends AppCompatActivity {
     EditText addTextFakName;
     EditText addTextBolName;
     EditText addTextLessonName;
+    EditText addTextImageName;
 
     Uri selected;
 
     private StorageReference mStorageRef;
 
+    FirebaseDatabase database;
+    DatabaseReference myRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main5);
 
@@ -45,11 +55,13 @@ public class AddLessonActivity extends AppCompatActivity {
         addTextFakName = findViewById(R.id.addEditTextFakName);
         addTextBolName = findViewById(R.id.addEditTextBolName);
         addTextLessonName = findViewById(R.id.addEditTextLessonName);
+        addTextImageName = findViewById(R.id.addEditTextImageName);
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference();
+
     }
 
     public void addLessonImagesSelect(View view) {
@@ -106,8 +118,61 @@ public class AddLessonActivity extends AppCompatActivity {
 
     public void addLessonSave (View view) {
 
-        StorageReference storageReference = mStorageRef.child("images/image.jpg");
-        storageReference.putFile(selected);
+        final UUID uuidImage = UUID.randomUUID();
+
+        String imageName = "images/"+uuidImage+".jpg";
+
+        StorageReference storageReference = mStorageRef.child(imageName);
+
+        storageReference.putFile(selected).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
+            @SuppressWarnings("VisibleForTests")
+
+            @Override
+
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                StorageReference newImageRef = FirebaseStorage.getInstance().getReference("images/"+uuidImage+".jpg");
+
+                newImageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+                    @Override
+
+                    public void onSuccess(Uri uri) {
+
+                        String downloadURL = uri.toString();
+
+                        String userUniName = addTextUniName.getText().toString();
+                        String userFakName = addTextFakName.getText().toString();
+                        String userBolName = addTextBolName.getText().toString();
+                        String userLessonName = addTextLessonName.getText().toString();
+                        String userImageName = addTextImageName.getText().toString();
+
+                        myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("downloadURL").setValue(downloadURL);
+
+                        //myRef.child("Posts").child(uuidString).child("comment").setValue(userComment);
+                        //myRef.child("Posts").child(uuidString).child("downloadurl").setValue(downloadURL);
+
+                        Toast.makeText(getApplicationContext(),"Lesson Saved",Toast.LENGTH_LONG).show();
+
+                        Intent intent = new Intent(getApplicationContext(), AddLessonActivity.class);
+                        startActivity(intent);
+                    }
+
+                });
+
+            }
+
+        }).addOnFailureListener(new OnFailureListener() {
+
+            @Override
+
+            public void onFailure(@NonNull Exception e) {
+
+                Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+
+            }
+        });
 
     }
 
