@@ -3,16 +3,22 @@ package com.salticusteam.vifi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -20,6 +26,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +45,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     Context context = this;
 
     FirebaseDatabase firebaseDatabase;
+
+    ArrayList<String> uniNamesFB;
+    ArrayList<String> fakNamesFB;
+    ArrayList<String> bolNamesFB;
+    ArrayList<String> lessonNamesFB;
+    ArrayList<String> imageNamesFB;
+    ArrayList<String> imagesFB;
 
 
     @Override
@@ -69,17 +83,25 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        firebaseDatabase = FirebaseDatabase.getInstance();
+
+        uniNamesFB = new ArrayList<String>();
+        fakNamesFB = new ArrayList<String>();
+        bolNamesFB = new ArrayList<String>();
+        lessonNamesFB = new ArrayList<String>();
+        imageNamesFB = new ArrayList<String>();
+        imagesFB = new ArrayList<String>();
+
+
+        getDataFirebase();
+
         spinnerUni = (Spinner) findViewById(R.id.spinnerUni);
         spinnerFak = (Spinner) findViewById(R.id.spinnerFak);
         spinnerBol = (Spinner) findViewById(R.id.spinnerBol);
 
         spinnerUni.setOnItemSelectedListener(this);
 
-        firebaseDatabase = FirebaseDatabase.getInstance();
-
-
         spinnerPrivate();
-        getDataFirebase();
         //parseDataLoading();
         //parseDataDowland();
         //parseDataFullDowland();
@@ -87,6 +109,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void spinnerPrivate() {
+
+        System.out.println("üninamefb " + uniNamesFB);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, uniNamesFB);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerUni.setAdapter(dataAdapter);
+
 
 
         /*ParseQuery<ParseObject> query = ParseQuery.getQuery("Universities");
@@ -221,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //intent.putExtra("fakName",fakItem);
         //intent.putExtra("uniName",uniItem);
 
-        Intent intent = new Intent(getApplicationContext(),Main3Activity.class);
+        Intent intent = new Intent(getApplicationContext(),Main2Activity.class);
         startActivity(intent);
 
     }
@@ -319,26 +347,61 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private void getDataFirebase() {
 
-       /* DatabaseReference newRefence = firebaseDatabase.getReference("Universities");
-
-        newRefence.addValueEventListener(new ValueEventListener() {
+        DatabaseReference newReference = firebaseDatabase.getReference("Universities");
+        newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                    HashMap<String, String> hashMap = (HashMap<String, String>) ds.getValue();
-                    uniNameFB.add(hashMap.get("uniname"));
+                    HashMap<String, Object> hashMap = (HashMap<String, Object>) ds.getValue();
 
+                    uniNamesFB.add((String) hashMap.get("uniname"));
+
+                    for (String key: hashMap.keySet()) {
+                        if (!key.equals("uniname")) {
+                            HashMap<String, Object>  facultyMap = (HashMap<String, Object>) hashMap.get(key);
+                            fakNamesFB.add((String) facultyMap.get("fakname"));
+
+                            for (String facultyKey: facultyMap.keySet()) {
+                                if (!facultyKey.equals("fakname")) {
+                                    HashMap<String, Object>  departmentMap = (HashMap<String, Object>) facultyMap.get(facultyKey);
+                                    bolNamesFB.add((String) departmentMap.get("bolname"));
+
+                                    for (String departmanKey: departmentMap.keySet()){
+                                        if (!departmanKey.equals("bolname")) {
+                                            HashMap<String, Object>  lessonMap = (HashMap<String, Object>) departmentMap.get(departmanKey);
+                                            lessonNamesFB.add((String) lessonMap.get("lessonname"));
+
+                                            for (String lessonKey:lessonMap.keySet()) {
+                                                if (!lessonKey.equals("lessonname")){
+                                                    HashMap<String, Object> imageNameMap = (HashMap<String, Object>) lessonMap.get(lessonKey);
+                                                    imageNamesFB.add((String) imageNameMap.get("imagename"));
+                                                    imagesFB.add((String) imageNameMap.get("downloadURL"));
+                                                }
+                                            }
+                                        }
+
+
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-
+                System.out.println("uniname "+uniNamesFB);
+                System.out.println("fakname "+fakNamesFB);
+                System.out.println("bolname "+bolNamesFB);
+                System.out.println("lessoname "+lessonNamesFB);
+                System.out.println("imagename "+imageNamesFB);
+                System.out.println("image "+imagesFB);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });*/
+        });
 
     }
 }
