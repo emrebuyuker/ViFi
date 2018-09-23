@@ -38,10 +38,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     String fakItem;
     String bolItem;
 
-    Spinner spinnerUni;
-    Spinner spinnerFak;
-    Spinner spinnerBol;
-
     Context context = this;
 
     FirebaseDatabase firebaseDatabase;
@@ -52,6 +48,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     ArrayList<String> lessonNamesFB;
     ArrayList<String> imageNamesFB;
     ArrayList<String> imagesFB;
+
+    Spinner spinnerUni;
+    Spinner spinnerFak;
+    Spinner spinnerBol;
 
 
     @Override
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         spinnerUni.setOnItemSelectedListener(this);
 
-        spinnerPrivate();
+        //spinnerPrivate();
         //parseDataLoading();
         //parseDataDowland();
         //parseDataFullDowland();
@@ -183,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         uniItem = spinnerUni.getSelectedItem().toString();
+        System.out.println("unitem "+uniItem);
 
 
         /*if (adapterView.getId() == R.id.spinnerUni) {
@@ -355,7 +356,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
                     HashMap<String, Object> hashMap = (HashMap<String, Object>) ds.getValue();
-
                     uniNamesFB.add((String) hashMap.get("uniname"));
 
                     for (String key: hashMap.keySet()) {
@@ -389,6 +389,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         }
                     }
                 }
+
+
+                //spinner uni
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, uniNamesFB);
+                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerUni.setAdapter(dataAdapter);
+
                 System.out.println("uniname "+uniNamesFB);
                 System.out.println("fakname "+fakNamesFB);
                 System.out.println("bolname "+bolNamesFB);
