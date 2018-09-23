@@ -9,10 +9,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.firebase.database.FirebaseDatabase;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -20,13 +20,10 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -39,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     Spinner spinnerBol;
 
     Context context = this;
+
+    FirebaseDatabase firebaseDatabase;
 
 
     @Override
@@ -76,7 +75,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         spinnerUni.setOnItemSelectedListener(this);
 
+        firebaseDatabase = FirebaseDatabase.getInstance();
+
+
         spinnerPrivate();
+        getDataFirebase();
         //parseDataLoading();
         //parseDataDowland();
         //parseDataFullDowland();
@@ -85,7 +88,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private void spinnerPrivate() {
 
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Universities");
+
+        /*ParseQuery<ParseObject> query = ParseQuery.getQuery("Universities");
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
@@ -113,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
 
             }
-        });
+        });*/
 
 
 
@@ -152,7 +156,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         uniItem = spinnerUni.getSelectedItem().toString();
 
-       /* if (adapterView.getId() == R.id.spinnerUni) {
+
+        /*if (adapterView.getId() == R.id.spinnerUni) {
             for (University uni: Universities.getUniversities()) {
                 if (uni.getName().equals(uniItem)) {
                     ArrayList<String> fakName = new ArrayList<String>();
@@ -210,12 +215,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // change Main2Activity
 
-        Intent intent = new Intent(getApplicationContext(),Main2Activity.class);
+        //Intent intent = new Intent(getApplicationContext(),Main2Activity.class);
 
-        intent.putExtra("bolName",bolItem);
-        intent.putExtra("fakName",fakItem);
-        intent.putExtra("uniName",uniItem);
+        //intent.putExtra("bolName",bolItem);
+        //intent.putExtra("fakName",fakItem);
+        //intent.putExtra("uniName",uniItem);
 
+        Intent intent = new Intent(getApplicationContext(),Main3Activity.class);
         startActivity(intent);
 
     }
@@ -308,6 +314,31 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             }
         });
+
+    }
+
+    private void getDataFirebase() {
+
+       /* DatabaseReference newRefence = firebaseDatabase.getReference("Universities");
+
+        newRefence.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                    HashMap<String, String> hashMap = (HashMap<String, String>) ds.getValue();
+                    uniNameFB.add(hashMap.get("uniname"));
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });*/
 
     }
 }

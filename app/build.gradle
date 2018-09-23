@@ -35,6 +35,8 @@ dependencies {
     implementation "com.parse:parse-android:$parseVersion"
     implementation "com.parse:parse-fcm-android:$parseVersion"
     implementation 'com.google.firebase:firebase-core:15.0.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
 
 }
 apply plugin: 'com.google.gms.google-services'

@@ -148,7 +148,15 @@ public class AddLessonActivity extends AppCompatActivity {
                         String userLessonName = addTextLessonName.getText().toString();
                         String userImageName = addTextImageName.getText().toString();
 
+                        //myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("downloadURL").setValue(downloadURL);
+
+                        myRef.child("Universities").child(userUniName).child("uniname").setValue(userUniName);
+                        myRef.child("Universities").child(userUniName).child(userFakName).child("fakname").setValue(userFakName);
+                        myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child("bolname").setValue(userBolName);
+                        myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child("lessonname").setValue(userLessonName);
+                        myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("imagename").setValue(userImageName);
                         myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("downloadURL").setValue(downloadURL);
+
 
                         //myRef.child("Posts").child(uuidString).child("comment").setValue(userComment);
                         //myRef.child("Posts").child(uuidString).child("downloadurl").setValue(downloadURL);
