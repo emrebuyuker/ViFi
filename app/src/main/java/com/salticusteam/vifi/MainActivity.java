@@ -100,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spinnerBol = (Spinner) findViewById(R.id.spinnerBol);
 
         spinnerUni.setOnItemSelectedListener(this);
+        spinnerFak.setOnItemSelectedListener(this);
+        spinnerBol.setOnItemSelectedListener(this);
 
         //spinnerPrivate();
         //parseDataLoading();
@@ -183,10 +185,22 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         uniItem = spinnerUni.getSelectedItem().toString();
-        System.out.println("unitem "+uniItem);
+        System.out.println("unitem= "+uniItem);
 
-        getDataSpinnerFak();
-        fakNamesFB.clear();
+        if (adapterView.getId() == R.id.spinnerUni) {
+
+            getDataSpinnerFak();
+            fakNamesFB.clear();
+
+        } else if (adapterView.getId() ==R.id.spinnerFak) {
+
+            fakItem = spinnerFak.getSelectedItem().toString();
+            System.out.println("fakıtem= "+fakItem);
+        }
+
+
+
+
 
         /*if (adapterView.getId() == R.id.spinnerUni) {
             for (University uni: Universities.getUniversities()) {
@@ -238,8 +252,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-
-
     }
 
     public void onLoginButtonClick(View view){
@@ -361,15 +373,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     uniNamesFB.add((String) hashMap.get("uniname"));
                 }
 
-
-
-
                 //spinner uni
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, uniNamesFB);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerUni.setAdapter(dataAdapter);
-
-                System.out.println("uniname "+uniNamesFB);
             }
 
             @Override
@@ -467,7 +474,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     if (!ds.getKey().equals("uniname")){
 
                         HashMap<String, Object> facultyMap = (HashMap<String, Object>) ds.getValue();
-                        System.out.println("facultyMap "+facultyMap);
                         fakNamesFB.add((String) facultyMap.get("fakname"));
 
                     }
@@ -476,8 +482,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, fakNamesFB);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerFak.setAdapter(dataAdapter);
-                System.out.println("fakNamesFB "+fakNamesFB);
-
             }
 
             @Override
@@ -487,4 +491,5 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
 
     }
+
 }
