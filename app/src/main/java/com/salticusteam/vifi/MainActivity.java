@@ -45,9 +45,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     ArrayList<String> uniNamesFB;
     ArrayList<String> fakNamesFB;
     ArrayList<String> bolNamesFB;
-    ArrayList<String> lessonNamesFB;
-    ArrayList<String> imageNamesFB;
-    ArrayList<String> imagesFB;
+
 
     Spinner spinnerUni;
     Spinner spinnerFak;
@@ -88,9 +86,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         uniNamesFB = new ArrayList<String>();
         fakNamesFB = new ArrayList<String>();
         bolNamesFB = new ArrayList<String>();
-        lessonNamesFB = new ArrayList<String>();
-        imageNamesFB = new ArrayList<String>();
-        imagesFB = new ArrayList<String>();
+
 
 
         getDataFirebase();
@@ -192,11 +188,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             getDataSpinnerFak();
             fakNamesFB.clear();
 
-        } else if (adapterView.getId() ==R.id.spinnerFak) {
+        } else if (adapterView.getId() == R.id.spinnerFak) {
 
             fakItem = spinnerFak.getSelectedItem().toString();
             getDataSpinnerBol();
             bolNamesFB.clear();
+
+        }else if (adapterView.getId() == R.id.spinnerBol){
+
+            bolItem = spinnerBol.getSelectedItem().toString();
+            System.out.println("bolıtem= "+bolItem);
+
         }
 
 
@@ -250,19 +252,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
+
     }
 
     public void onLoginButtonClick(View view){
 
         // change Main2Activity
 
-        //Intent intent = new Intent(getApplicationContext(),Main2Activity.class);
-
-        //intent.putExtra("bolName",bolItem);
-        //intent.putExtra("fakName",fakItem);
-        //intent.putExtra("uniName",uniItem);
-
         Intent intent = new Intent(getApplicationContext(),Main2Activity.class);
+
+        intent.putExtra("bolName",bolItem);
+        intent.putExtra("fakName",fakItem);
+        intent.putExtra("uniName",uniItem);
+
         startActivity(intent);
 
     }

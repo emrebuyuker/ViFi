@@ -11,10 +11,7 @@ import java.util.ArrayList;
 
 public class Main3Activity extends AppCompatActivity {
 
-    ArrayList<String> uniNamesFB;
-    ArrayList<String> fakNamesFB;
-    ArrayList<String> bolNamesFB;
-    ArrayList<String> lessonNamesFB;
+
     ArrayList<String> imageNamesFB;
     ArrayList<String> imagesFB;
 
@@ -29,19 +26,22 @@ public class Main3Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
 
-        uniNamesFB = new ArrayList<String>();
-        fakNamesFB = new ArrayList<String>();
-        bolNamesFB = new ArrayList<String>();
-        lessonNamesFB = new ArrayList<String>();
+        /*Intent intent = getIntent();
+
+        final String uniName = intent.getStringExtra("uniName");
+        final String fakName = intent.getStringExtra("fakName");
+        final String bolName = intent.getStringExtra("bolName");
+        final String lessonName = intent.getStringExtra("lessonName");
+
+        startActivity(intent);*/
+
+
         imageNamesFB = new ArrayList<String>();
         imagesFB = new ArrayList<String>();
 
         firebaseDatabase = FirebaseDatabase.getInstance();
-        myRef = firebaseDatabase.getReference();
 
         listView = findViewById(R.id.listView);
-
-        adapter = new PostClass(uniNamesFB,fakNamesFB,bolNamesFB,lessonNamesFB,imageNamesFB,imagesFB,this);
 
         listView.setAdapter(adapter);
 
