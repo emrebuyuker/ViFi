@@ -195,11 +195,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (adapterView.getId() ==R.id.spinnerFak) {
 
             fakItem = spinnerFak.getSelectedItem().toString();
-            System.out.println("fakıtem= "+fakItem);
+            getDataSpinnerBol();
+            bolNamesFB.clear();
         }
-
-
-
 
 
         /*if (adapterView.getId() == R.id.spinnerUni) {
@@ -473,6 +471,36 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, fakNamesFB);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerFak.setAdapter(dataAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void getDataSpinnerBol(){
+
+        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem).child(fakItem);
+        newReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                    if (!ds.getKey().equals("fakname")){
+
+                        HashMap<String, Object> facultyMap = (HashMap<String, Object>) ds.getValue();
+                        bolNamesFB.add((String) facultyMap.get("bolname"));
+
+                    }
+                }
+                //spinner uni
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, bolNamesFB);
+                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerBol.setAdapter(dataAdapter);
             }
 
             @Override
