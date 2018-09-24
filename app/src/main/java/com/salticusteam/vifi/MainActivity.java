@@ -385,15 +385,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-
-
-
-
-
-
-
-
-
 /*        DatabaseReference newReference = firebaseDatabase.getReference("Universities");
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
