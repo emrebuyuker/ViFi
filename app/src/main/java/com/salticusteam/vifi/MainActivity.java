@@ -185,6 +185,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         uniItem = spinnerUni.getSelectedItem().toString();
         System.out.println("unitem "+uniItem);
 
+        getDataSpinnerFak();
+        fakNamesFB.clear();
 
         /*if (adapterView.getId() == R.id.spinnerUni) {
             for (University uni: Universities.getUniversities()) {
@@ -357,10 +359,49 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
                     HashMap<String, Object> hashMap = (HashMap<String, Object>) ds.getValue();
                     uniNamesFB.add((String) hashMap.get("uniname"));
+                }
+
+
+
+
+                //spinner uni
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, uniNamesFB);
+                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerUni.setAdapter(dataAdapter);
+
+                System.out.println("uniname "+uniNamesFB);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+/*        DatabaseReference newReference = firebaseDatabase.getReference("Universities");
+        newReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                    HashMap<String, Object> hashMap = (HashMap<String, Object>) ds.getValue();
+                    uniNamesFB.add((String) hashMap.get("uniname"));
 
                     for (String key: hashMap.keySet()) {
+                        System.out.println("hashMap.keySet() " + hashMap.keySet());
                         if (!key.equals("uniname")) {
                             HashMap<String, Object>  facultyMap = (HashMap<String, Object>) hashMap.get(key);
+                            System.out.println("facultyMap "+facultyMap);
                             fakNamesFB.add((String) facultyMap.get("fakname"));
 
                             for (String facultyKey: facultyMap.keySet()) {
@@ -391,6 +432,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
 
 
+
+
                 //spinner uni
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, uniNamesFB);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -402,6 +445,39 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 System.out.println("lessoname "+lessonNamesFB);
                 System.out.println("imagename "+imageNamesFB);
                 System.out.println("image "+imagesFB);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });*/
+
+    }
+
+    private void getDataSpinnerFak(){
+
+        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem);
+        newReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                    if (!ds.getKey().equals("uniname")){
+
+                        HashMap<String, Object> facultyMap = (HashMap<String, Object>) ds.getValue();
+                        System.out.println("facultyMap "+facultyMap);
+                        fakNamesFB.add((String) facultyMap.get("fakname"));
+
+                    }
+                }
+                //spinner uni
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, fakNamesFB);
+                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerFak.setAdapter(dataAdapter);
+                System.out.println("fakNamesFB "+fakNamesFB);
+
             }
 
             @Override
