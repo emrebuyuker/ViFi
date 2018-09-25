@@ -16,21 +16,14 @@ import java.util.ArrayList;
 
 public class PostClass extends ArrayAdapter<String> {
 
-    private final ArrayList<String> postClassUniNameArrayList;
-    private final ArrayList<String> postClassFakNameArrayList;
-    private final ArrayList<String> postClassBolNameArrayList;
-    private final ArrayList<String> postClassLessonNameArrayList;
+
     private final ArrayList<String> postClassImageNameArrayList;
     private final ArrayList<String> postClassImageArrayList;
     private final Activity context;
 
-    public PostClass(ArrayList<String> postClassUniNameArrayList, ArrayList<String> postClassFakNameArrayList, ArrayList<String> postClassBolNameArrayList, ArrayList<String> postClassLessonNameArrayList, ArrayList<String> postClassImageNameArrayList, ArrayList<String> postClassImageArrayList, Activity context) {
+    public PostClass(ArrayList<String> postClassImageNameArrayList, ArrayList<String> postClassImageArrayList, Activity context) {
 
         super(context,R.layout.custom_view,postClassImageNameArrayList);
-        this.postClassUniNameArrayList = postClassUniNameArrayList;
-        this.postClassFakNameArrayList = postClassFakNameArrayList;
-        this.postClassBolNameArrayList = postClassBolNameArrayList;
-        this.postClassLessonNameArrayList = postClassLessonNameArrayList;
         this.postClassImageNameArrayList = postClassImageNameArrayList;
         this.postClassImageArrayList = postClassImageArrayList;
         this.context = context;

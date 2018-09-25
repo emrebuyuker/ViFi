@@ -30,8 +30,6 @@ public class Main2Activity extends AppCompatActivity {
     FirebaseDatabase firebaseDatabase;
 
     ArrayList<String> lessonNamesFB;
-    ArrayList<String> imageNamesFB;
-    ArrayList<String> imagesFB;
 
     Context context = this;
 
@@ -47,8 +45,6 @@ public class Main2Activity extends AppCompatActivity {
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
 
         lessonNamesFB = new ArrayList<String>();
-        imageNamesFB = new ArrayList<String>();
-        imagesFB = new ArrayList<String>();
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
