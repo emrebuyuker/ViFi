@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,6 +31,8 @@ public class Main3Activity extends AppCompatActivity implements AdapterView.OnIt
     DatabaseReference myRef;
     ListView listView;
 
+    TextView textViewTitle;
+
     String seleckImageName;
 
     PostClass adapter;
@@ -46,6 +49,7 @@ public class Main3Activity extends AppCompatActivity implements AdapterView.OnIt
         imagesFB = new ArrayList<String>();
 
         listView = findViewById(R.id.listView);
+        textViewTitle = (TextView) findViewById(R.id.textViewTitle);
 
         //listViewOnClick();
 
@@ -55,7 +59,7 @@ public class Main3Activity extends AppCompatActivity implements AdapterView.OnIt
 
         listView.setOnItemSelectedListener(this);
 
-        adapter = new PostClass(imageNamesFB,imagesFB, this);
+        adapter = new PostClass(imagesFB, this);
 
         listView.setAdapter(adapter);
 
@@ -80,28 +84,29 @@ public class Main3Activity extends AppCompatActivity implements AdapterView.OnIt
         final String lessonName = intent.getStringExtra("lesson");
         final String imagesName = intent.getStringExtra("imagename");
 
+        textViewTitle.setText(imagesName);
+
         DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                //for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                    //System.out.println("dataSnapshot= "+dataSnapshot);
+                    System.out.println("dataSnapshot= "+dataSnapshot);
 
-                    //if (!ds.getKey().equals("downloadURL")){
+                    if (!ds.getKey().equals("imagename")){
 
-                        HashMap<String, Object> imageNameMap = (HashMap<String, Object>) dataSnapshot.getValue();
-                        imageNamesFB.add((String) imageNameMap.get("imagename"));
+                        HashMap<String, Object> imageNameMap = (HashMap<String, Object>) ds.getValue();
                         imagesFB.add((String) imageNameMap.get("downloadURL"));
 
-                    //}
-                //}
+                    }
+                }
                 ArrayAdapter<String> veriAdaptoru=new ArrayAdapter<String> (context, android.R.layout.simple_list_item_1, android.R.id.text1,imageNamesFB);
                 listView.setAdapter(veriAdaptoru);
-                System.out.println("lessonNamesFB= "+imageNamesFB);
+                System.out.println("images= "+imagesFB);
 
-                adapter = new PostClass(imageNamesFB,imagesFB, (Activity) context);
+                adapter = new PostClass(imagesFB, (Activity) context);
 
                 listView.setAdapter(adapter);
             }
