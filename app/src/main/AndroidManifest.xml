@@ -21,12 +21,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Main2Activity" />
-        <activity android:name=".Main3Activity" />
+        <activity android:name=".DepartmentCoursesActivity" />
+        <activity android:name=".ExamDetailActivity" />
         <activity android:name=".Main4Activity" />
         <activity android:name=".AddLessonActivity" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".Main6Activity"></activity>
+        <activity android:name=".CourseExamListActivity"></activity>
     </application>
 
 </manifest>

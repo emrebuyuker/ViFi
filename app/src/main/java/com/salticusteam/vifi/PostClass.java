@@ -13,22 +13,30 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+
+
 public class PostClass extends ArrayAdapter<String> {
+
 
 
     private final ArrayList<String> postClassImageArrayList;
     private final Activity context;
+
 
     public PostClass(ArrayList<String> postClassImageArrayList, Activity context) {
 
         super(context,R.layout.custom_view,postClassImageArrayList);
         this.postClassImageArrayList = postClassImageArrayList;
         this.context = context;
+
     }
+
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+
 
         LayoutInflater layoutInflater = context.getLayoutInflater();
         View customView = layoutInflater.inflate(R.layout.custom_view,null,true);
@@ -39,4 +47,9 @@ public class PostClass extends ArrayAdapter<String> {
 
         return customView;
     }
+
 }
+
+
+
+

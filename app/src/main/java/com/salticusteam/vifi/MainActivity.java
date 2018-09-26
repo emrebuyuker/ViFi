@@ -257,9 +257,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void onLoginButtonClick(View view){
 
-        // change Main2Activity
+        // change DepartmentCoursesActivity
 
-        Intent intent = new Intent(getApplicationContext(),Main2Activity.class);
+        Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
 
         intent.putExtra("bolName",bolItem);
         intent.putExtra("fakName",fakItem);

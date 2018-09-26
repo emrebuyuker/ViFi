@@ -21,7 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Main6Activity extends AppCompatActivity {
+public class CourseExamListActivity extends AppCompatActivity {
 
     ListView listView ;
     TextView textViewTitle;
@@ -38,7 +38,7 @@ public class Main6Activity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main6);
+        setContentView(R.layout.activity_course_exam_list);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -118,7 +118,7 @@ public class Main6Activity extends AppCompatActivity {
                 final String bolName = intent.getStringExtra("bolName");
                 final String lessonName = intent.getStringExtra("lesson");
 
-                Intent intent2 = new Intent(getApplicationContext(),Main3Activity.class);
+                Intent intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
 
                 intent2.putExtra("uniName",uniName);
                 intent2.putExtra("fakName",fakName);
@@ -143,7 +143,7 @@ public class Main6Activity extends AppCompatActivity {
         final String lessonName = intent.getStringExtra("lesson");
 
 
-        Intent intent2 = new Intent(getApplicationContext(),Main3Activity.class);
+        Intent intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
 
         intent2.putExtra("uniName",uniName);
         intent2.putExtra("fakName",fakName);

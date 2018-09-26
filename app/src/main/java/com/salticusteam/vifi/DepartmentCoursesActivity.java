@@ -20,7 +20,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Main2Activity extends AppCompatActivity {
+public class DepartmentCoursesActivity extends AppCompatActivity {
 
     ListView listView ;
     TextView textViewTitle;
@@ -39,7 +39,7 @@ public class Main2Activity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.activity_department_courses);
 
         listView = (ListView) findViewById(R.id.listView);
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
@@ -70,9 +70,9 @@ public class Main2Activity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                //Main3Activity Start and Send Out Data
+                //ExamDetailActivity Start and Send Out Data
 
-                Intent intent = new Intent(getApplicationContext(),Main3Activity.class);
+                Intent intent = new Intent(getApplicationContext(),ExamDetailActivity.class);
 
                 lessonName = listView.getItemAtPosition(position).toString();
 
@@ -179,7 +179,7 @@ public class Main2Activity extends AppCompatActivity {
                 final String fakName = intent.getStringExtra("fakName");
                 final String bolName = intent.getStringExtra("bolName");
 
-                Intent intent2 = new Intent(getApplicationContext(),Main6Activity.class);
+                Intent intent2 = new Intent(getApplicationContext(),CourseExamListActivity.class);
 
                 intent2.putExtra("uniName",uniName);
                 intent2.putExtra("fakName",fakName);

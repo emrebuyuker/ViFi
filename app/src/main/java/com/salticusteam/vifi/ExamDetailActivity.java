@@ -21,7 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Main3Activity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class ExamDetailActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
 
     ArrayList<String> imageNamesFB;
@@ -42,7 +42,7 @@ public class Main3Activity extends AppCompatActivity implements AdapterView.OnIt
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main3);
+        setContentView(R.layout.activity_exam_detail);
 
 
         imageNamesFB = new ArrayList<String>();
@@ -204,7 +204,7 @@ public class Main3Activity extends AppCompatActivity implements AdapterView.OnIt
                 listView.setAdapter(veriAdaptoru);
                 System.out.println("lessonNamesFB= "+imageNamesFB);
 
-               // Intent intent2 = new Intent(getApplicationContext(),Main3Activity.class);
+               // Intent intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
                // startActivity(intent2);
             }
 
