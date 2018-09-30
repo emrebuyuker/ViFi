@@ -33,7 +33,7 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
 
     TextView textViewTitle;
 
-    String seleckImageName;
+    String seleckImageURL;
 
     PostClass adapter;
 
@@ -51,8 +51,6 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
         listView = findViewById(R.id.listView);
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
 
-        //listViewOnClick();
-
         firebaseDatabase = FirebaseDatabase.getInstance();
 
         myRef = firebaseDatabase.getReference();
@@ -65,6 +63,7 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
 
 
         getDataFirebase();
+        listViewOnClick();
 
 
         //TextView textView = (TextView) findViewById(R.id.textView4);
@@ -120,6 +119,24 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
     }
 
     private void listViewOnClick() {
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                seleckImageURL = imagesFB.get(position);
+                System.out.println("seleckImageURL= "+seleckImageURL);
+
+                Intent intent = new Intent(getApplicationContext(),ImageZoomActivity.class);
+
+                intent.putExtra("seleckImageURL",seleckImageURL);
+
+                startActivity(intent);
+
+            }
+        });
+
+
 
         /*listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -204,6 +221,8 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
                 listView.setAdapter(veriAdaptoru);
                 System.out.println("lessonNamesFB= "+imageNamesFB);
 
+
+
                // Intent intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
                // startActivity(intent2);
             }
@@ -220,4 +239,5 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
 }
