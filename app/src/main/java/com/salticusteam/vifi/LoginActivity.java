@@ -61,27 +61,37 @@ public class LoginActivity extends AppCompatActivity {
 
     public void signIn (View view) {
 
-        mAuth.signInWithEmailAndPassword(emailText.getText().toString(), passwordText.getText().toString())
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+        try {
 
-                            FirebaseUser user = mAuth.getCurrentUser();
+            mAuth.signInWithEmailAndPassword(emailText.getText().toString(), passwordText.getText().toString())
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
 
-                            Intent intent = new Intent(getApplicationContext(),AddLessonActivity.class);
-                            startActivity(intent);
+                                FirebaseUser user = mAuth.getCurrentUser();
 
+                                Intent intent = new Intent(getApplicationContext(),AddLessonActivity.class);
+                                startActivity(intent);
+
+                            }
                         }
-                    }
-                }).addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
+                    }).addOnFailureListener(this, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
 
-                Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
 
-            }
-        });
+                }
+            });
+
+        }catch (Exception e){
+
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+
+        }
+
+
 
     }
 
