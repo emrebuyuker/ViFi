@@ -66,11 +66,6 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
         listViewOnClick();
 
 
-        //TextView textView = (TextView) findViewById(R.id.textView4);
-        //Intent intent = getIntent();
-        //final String lessonName = intent.getStringExtra("lessonName");
-        //textView.setText(lessonName);
-
     }
 
     private void getDataFirebase() {
@@ -135,59 +130,6 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
 
             }
         });
-
-
-
-        /*listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                seleckImageName = imageNamesFB.get(position);
-                System.out.println("seleckImageName= "+seleckImageName);
-
-                Intent intent = getIntent();
-
-                final String uniName = intent.getStringExtra("uniName");
-                final String fakName = intent.getStringExtra("fakName");
-                final String bolName = intent.getStringExtra("bolName");
-                final String lessonName = intent.getStringExtra("lesson");
-
-                DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(seleckImageName);
-                newReference.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-
-                            System.out.println("dataSnapshot= "+dataSnapshot);
-
-                            if (!ds.getKey().equals("lessonname")){
-
-                                HashMap<String, Object> imageNameMap = (HashMap<String, Object>) ds.getValue();
-                                imageNamesFB.add((String) imageNameMap.get("imagename"));
-                                imagesFB.add((String) imageNameMap.get("downloadURL"));
-
-                            }
-                        }
-                        ArrayAdapter<String> veriAdaptoru=new ArrayAdapter<String> (context, android.R.layout.simple_list_item_1, android.R.id.text1,imageNamesFB);
-                        listView.setAdapter(veriAdaptoru);
-                        System.out.println("lessonNamesFB3= "+imageNamesFB);
-
-                        adapter = new PostClass(imageNamesFB,imagesFB, (Activity) context);
-
-                        listView.setAdapter(adapter);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-
-            }
-        });*/
-
     }
 
     @Override
@@ -221,10 +163,6 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
                 listView.setAdapter(veriAdaptoru);
                 System.out.println("lessonNamesFB= "+imageNamesFB);
 
-
-
-               // Intent intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
-               // startActivity(intent2);
             }
 
             @Override
@@ -232,7 +170,6 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
 
             }
         });
-
     }
 
     @Override

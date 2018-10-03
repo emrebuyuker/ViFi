@@ -131,31 +131,4 @@ public class CourseExamListActivity extends AppCompatActivity {
             }
         });
     };
-
-   /* @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-        Intent intent = getIntent();
-
-        final String uniName = intent.getStringExtra("uniName");
-        final String fakName = intent.getStringExtra("fakName");
-        final String bolName = intent.getStringExtra("bolName");
-        final String lessonName = intent.getStringExtra("lesson");
-
-
-        Intent intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
-
-        intent2.putExtra("uniName",uniName);
-        intent2.putExtra("fakName",fakName);
-        intent2.putExtra("bolName",bolName);
-        intent2.putExtra("lesson",lessonName);
-
-        startActivity(intent2);
-
-        }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }*/
 }

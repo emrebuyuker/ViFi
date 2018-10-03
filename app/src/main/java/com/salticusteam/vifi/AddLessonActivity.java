@@ -151,7 +151,6 @@ public class AddLessonActivity extends AppCompatActivity {
                         UUID uuid = UUID.randomUUID();
                         String uuidString = uuid.toString();
 
-                        //myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("downloadURL").setValue(downloadURL);
 
                         myRef.child("Universities").child(userUniName).child("uniname").setValue(userUniName);
                         myRef.child("Universities").child(userUniName).child(userFakName).child("fakname").setValue(userFakName);
@@ -160,9 +159,6 @@ public class AddLessonActivity extends AppCompatActivity {
                         myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("imagename").setValue(userImageName);
                         myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(uuidString).child("downloadURL").setValue(downloadURL);
 
-
-                        //myRef.child("Posts").child(uuidString).child("comment").setValue(userComment);
-                        //myRef.child("Posts").child(uuidString).child("downloadurl").setValue(downloadURL);
 
                         Toast.makeText(getApplicationContext(),"Lesson Saved",Toast.LENGTH_LONG).show();
 
