@@ -26,6 +26,11 @@
         <activity android:name=".LoginActivity" />
         <activity android:name=".CourseExamListActivity" />
         <activity android:name=".ImageZoomActivity"></activity>
+
+        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.ca-app-pub-9037305793844471~3408176754"
+            android:value="[ca-app-pub-9037305793844471/5324318686]"/>
     </application>
 
 </manifest>

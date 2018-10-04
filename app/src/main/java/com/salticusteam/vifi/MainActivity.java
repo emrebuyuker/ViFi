@@ -13,6 +13,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+
+    InterstitialAd mInterstitialAd;
 
     String uniItem;
     String fakItem;
@@ -71,6 +76,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+
+        mInterstitialAd.setAdListener(new AdListener() { //reklamımıza listener ekledik ve kapatıldığında haberimiz olacak
+            @Override
+            public void onAdClosed() { //reklam kapatıldığı zaman tekrardan reklamın yüklenmesi için
+                requestNewInterstitial();
+            }
+        });
+
+
+        requestNewInterstitial(); //reklamı direk uygulama açıldığında yüklemek için onCreate içinde yapıyoruz reklam yükleme işini
+
+
         firebaseDatabase = FirebaseDatabase.getInstance();
 
         uniNamesFB = new ArrayList<String>();
@@ -89,6 +109,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spinnerFak.setOnItemSelectedListener(this);
         spinnerBol.setOnItemSelectedListener(this);
 
+    }
+
+    private void requestNewInterstitial() { //Test cihazı ekliyoruz Admob dan ban yememek için
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("B9C840C4E9AD8EC5D1497C9A62C56374")
+                .build();
+
+        mInterstitialAd.loadAd(adRequest);
     }
 
     @Override
@@ -124,15 +152,23 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void onLoginButtonClick(View view){
 
-        // change DepartmentCoursesActivity
+        if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
 
-        Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
 
-        intent.putExtra("bolName",bolItem);
-        intent.putExtra("fakName",fakItem);
-        intent.putExtra("uniName",uniItem);
+            Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
 
-        startActivity(intent);
+            intent.putExtra("bolName",bolItem);
+            intent.putExtra("fakName",fakItem);
+            intent.putExtra("uniName",uniItem);
+
+            startActivity(intent);
+
+            mInterstitialAd.show(); //reklam gösteriliyor
+
+
+        }else{
+            //Reklam yüklenmediyse yapılacak işlemler
+        }
 
     }
 

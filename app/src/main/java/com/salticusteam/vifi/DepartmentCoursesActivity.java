@@ -22,6 +22,8 @@ import java.util.HashMap;
 
 public class DepartmentCoursesActivity extends AppCompatActivity {
 
+    //private InterstitialAd mInterstitialAd;
+
     ListView listView ;
     TextView textViewTitle;
 
@@ -38,6 +40,12 @@ public class DepartmentCoursesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_department_courses);
+
+        /*mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+        mInterstitialAd.show();*/
 
         listView = (ListView) findViewById(R.id.listView);
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
