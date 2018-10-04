@@ -11,6 +11,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,7 +24,6 @@ import java.util.HashMap;
 
 public class DepartmentCoursesActivity extends AppCompatActivity {
 
-    //private InterstitialAd mInterstitialAd;
 
     ListView listView ;
     TextView textViewTitle;
@@ -41,11 +42,9 @@ public class DepartmentCoursesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_department_courses);
 
-        /*mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-
-        mInterstitialAd.show();*/
+        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         listView = (ListView) findViewById(R.id.listView);
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
