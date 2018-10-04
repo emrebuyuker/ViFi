@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             intent.putExtra("uniName",uniItem);
 
             startActivity(intent);
-            
+
         }
 
     }
