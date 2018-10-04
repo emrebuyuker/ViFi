@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId("ca-app-pub-9037305793844471/7062860046");
 
         mInterstitialAd.setAdListener(new AdListener() { //reklamımıza listener ekledik ve kapatıldığında haberimiz olacak
             @Override
@@ -168,6 +168,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         }else{
             //Reklam yüklenmediyse yapılacak işlemler
+
+            Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
+
+            intent.putExtra("bolName",bolItem);
+            intent.putExtra("fakName",fakItem);
+            intent.putExtra("uniName",uniItem);
+
+            startActivity(intent);
+            
         }
 
     }
