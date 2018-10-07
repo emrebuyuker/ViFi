@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -152,33 +153,41 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void onLoginButtonClick(View view){
 
-        if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
+        if(uniItem == null) {
 
-
-            Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
-
-            intent.putExtra("bolName",bolItem);
-            intent.putExtra("fakName",fakItem);
-            intent.putExtra("uniName",uniItem);
-
-            startActivity(intent);
-
-            mInterstitialAd.show(); //reklam gösteriliyor
-
+            Toast.makeText(context, "Lütfen internetinizi açınız.", Toast.LENGTH_LONG).show();
 
         }else{
-            //Reklam yüklenmediyse yapılacak işlemler
 
-            Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
+            if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
 
-            intent.putExtra("bolName",bolItem);
-            intent.putExtra("fakName",fakItem);
-            intent.putExtra("uniName",uniItem);
 
-            startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
+
+                intent.putExtra("bolName",bolItem);
+                intent.putExtra("fakName",fakItem);
+                intent.putExtra("uniName",uniItem);
+
+                startActivity(intent);
+
+                mInterstitialAd.show(); //reklam gösteriliyor
+
+
+            }else{
+                //Reklam yüklenmediyse yapılacak işlemler
+
+                Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
+
+                intent.putExtra("bolName",bolItem);
+                intent.putExtra("fakName",fakItem);
+                intent.putExtra("uniName",uniItem);
+
+                startActivity(intent);
+
+            }
+
 
         }
-
     }
 
     private void getDataFirebase() {
