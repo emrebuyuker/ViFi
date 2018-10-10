@@ -41,6 +41,7 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
 
     Context context = this;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
