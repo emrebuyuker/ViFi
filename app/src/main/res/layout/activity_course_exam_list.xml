@@ -53,17 +53,9 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         ads:adSize="BANNER"
-        ads:adUnitId="cca-app-pub-9037305793844471/8386430447"
+        ads:adUnitId="ca-app-pub-9037305793844471/8386430447"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"></com.google.android.gms.ads.AdView>
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="8dp" />
 
 </android.support.constraint.ConstraintLayout>
