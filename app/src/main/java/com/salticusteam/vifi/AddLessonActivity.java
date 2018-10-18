@@ -120,7 +120,7 @@ public class AddLessonActivity extends AppCompatActivity {
 
         final UUID uuidImage = UUID.randomUUID();
 
-        String imageName = "images/"+uuidImage+".jpg";
+        String imageName = "imagess/"+uuidImage+".jpg";
 
         StorageReference storageReference = mStorageRef.child(imageName);
 
@@ -132,7 +132,7 @@ public class AddLessonActivity extends AppCompatActivity {
 
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                StorageReference newImageRef = FirebaseStorage.getInstance().getReference("images/"+uuidImage+".jpg");
+                StorageReference newImageRef = FirebaseStorage.getInstance().getReference("imagess/"+uuidImage+".jpg");
 
                 newImageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
 

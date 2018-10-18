@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -91,6 +92,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         requestNewInterstitial(); //reklamı direk uygulama açıldığında yüklemek için onCreate içinde yapıyoruz reklam yükleme işini
 
+        Button btnShare = (Button) findViewById(R.id.btnShare);
+
+        btnShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String message = "https://play.google.com/store/apps/details?id=com.salticusteam.vifi";
+
+                shareMyMessage(message);
+            }
+        });
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -144,6 +156,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             System.out.println("bolıtem= "+bolItem);
 
         }
+    }
+
+    protected void shareMyMessage(String _message) {
+
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("text/plain");
+        share.putExtra(Intent.EXTRA_TEXT, _message);
+        startActivity(Intent.createChooser(share, "Uygulama linkini paylaş !! "));
     }
 
     @Override
