@@ -189,4 +189,11 @@ public class AddLessonActivity extends AppCompatActivity {
         startActivity(intent);
 
     }
+
+    public void onActivityPDF(View view) {
+
+        Intent intent = new Intent(getApplicationContext(),AddPdfLessonActivity.class);
+        startActivity(intent);
+
+    }
 }

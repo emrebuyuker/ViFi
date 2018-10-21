@@ -7,45 +7,45 @@
     tools:context=".LoginActivity">
 
     <EditText
-        android:id="@+id/emailText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:ems="10"
-        android:hint="e-mail"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+android:id="@+id/emailText"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginTop="32dp"
+android:ems="10"
+android:hint="e-mail"
+android:inputType="textPersonName"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/passwordText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:ems="10"
-        android:hint="password"
-        android:inputType="textPersonName"
-        app:layout_constraintStart_toStartOf="@+id/emailText"
-        app:layout_constraintTop_toBottomOf="@+id/emailText" />
+<EditText
+android:id="@+id/passwordText"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginTop="32dp"
+android:ems="10"
+android:hint="password"
+android:inputType="textPersonName"
+app:layout_constraintStart_toStartOf="@+id/emailText"
+app:layout_constraintTop_toBottomOf="@+id/emailText" />
 
-    <Button
-        android:id="@+id/button4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:onClick="signUp"
-        android:text="SIGN UP"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="@+id/passwordText"
-        app:layout_constraintTop_toBottomOf="@+id/passwordText" />
+<Button
+android:id="@+id/button4"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginTop="32dp"
+android:onClick="signUp"
+android:text="SIGN UP"
+android:visibility="invisible"
+app:layout_constraintEnd_toEndOf="@+id/passwordText"
+app:layout_constraintTop_toBottomOf="@+id/passwordText" />
 
-    <Button
-        android:id="@+id/button5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="signIn"
-        android:text="SIGN IN"
-        app:layout_constraintBaseline_toBaselineOf="@+id/button4"
-        app:layout_constraintStart_toStartOf="@+id/passwordText" />
-</android.support.constraint.ConstraintLayout>
+<Button
+android:id="@+id/button5"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:onClick="signIn"
+android:text="SIGN IN"
+app:layout_constraintBaseline_toBaselineOf="@+id/button4"
+app:layout_constraintStart_toStartOf="@+id/passwordText" />
+    </android.support.constraint.ConstraintLayout>
