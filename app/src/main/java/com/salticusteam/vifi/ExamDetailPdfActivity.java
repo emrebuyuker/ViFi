@@ -49,17 +49,6 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
 
     }
     private void getDataFirebase() {
-        /*DatabaseReference newReference = firebaseDatabase.getReference("Universities");
-        newReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-
-                    HashMap<String, Object> hashMap = (HashMap<String, Object>) ds.getValue();
-                    pdfNamesFB.add((String) hashMap.get("uniname"));
-                }*/
 
         Intent intent = getIntent();
 
@@ -71,6 +60,8 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
 
 
         DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName);
+
+
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
