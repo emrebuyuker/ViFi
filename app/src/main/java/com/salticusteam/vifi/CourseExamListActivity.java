@@ -37,6 +37,8 @@ public class CourseExamListActivity extends AppCompatActivity {
 
     Context context = this;
 
+    Intent intent2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,7 +126,11 @@ public class CourseExamListActivity extends AppCompatActivity {
                 final String bolName = intent.getStringExtra("bolName");
                 final String lessonName = intent.getStringExtra("lesson");
 
-                Intent intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
+                if (imagesName.equals("2014 FINAL")){
+                    intent2 = new Intent(getApplicationContext(),ExamDetailPdfActivity.class);
+                }else{
+                    intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
+                }
 
                 intent2.putExtra("uniName",uniName);
                 intent2.putExtra("fakName",fakName);

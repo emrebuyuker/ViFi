@@ -32,7 +32,8 @@
             android:name="com.google.android.gms.ads.ca-app-pub-9037305793844471~3408176754"
             android:value="[ca-app-pub-9037305793844471/5324318686]" />
 
-        <activity android:name=".AddPdfLessonActivity"></activity>
+        <activity android:name=".AddPdfLessonActivity" />
+        <activity android:name=".ExamDetailPdfActivity"></activity>
     </application>
 
 </manifest>
