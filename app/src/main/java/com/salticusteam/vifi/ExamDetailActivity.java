@@ -84,10 +84,11 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
         final String bolName = intent.getStringExtra("bolName");
         final String lessonName = intent.getStringExtra("lesson");
         final String imagesName = intent.getStringExtra("imagename");
+        final String type = intent.getStringExtra("type");
 
         textViewTitle.setText(imagesName);
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName);
+        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName).child(type);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -96,7 +97,7 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
 
                     System.out.println("dataSnapshot= "+dataSnapshot);
 
-                    if (!ds.getKey().equals("imagename")){
+                    if (!ds.getKey().equals("type")){
 
                         HashMap<String, Object> imageNameMap = (HashMap<String, Object>) ds.getValue();
                         imagesFB.add((String) imageNameMap.get("downloadURL"));
@@ -142,14 +143,15 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        final Intent intent = getIntent();
+        /*final Intent intent = getIntent();
 
         final String uniName = intent.getStringExtra("uniName");
         final String fakName = intent.getStringExtra("fakName");
         final String bolName = intent.getStringExtra("bolName");
         final String lessonName = intent.getStringExtra("lesson");
+        final String type = intent.getStringExtra("type");
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName);
+        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(type);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -158,7 +160,7 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
 
                     System.out.println("dataSnapshot= "+dataSnapshot);
 
-                    if (!ds.getKey().equals("lessonname")){
+                    if (!ds.getKey().equals("type")){
 
                         HashMap<String, Object> imageNameMap = (HashMap<String, Object>) ds.getValue();
                         imageNamesFB.add((String) imageNameMap.get("imagename"));
@@ -176,7 +178,7 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        });*/
     }
 
     @Override

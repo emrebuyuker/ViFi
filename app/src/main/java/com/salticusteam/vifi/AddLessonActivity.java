@@ -34,6 +34,7 @@ public class AddLessonActivity extends AppCompatActivity {
     EditText addTextFakName;
     EditText addTextBolName;
     EditText addTextLessonName;
+    EditText addTextType;
     EditText addTextImageName;
 
     Uri selected;
@@ -55,6 +56,7 @@ public class AddLessonActivity extends AppCompatActivity {
         addTextFakName = findViewById(R.id.addEditTextFakName);
         addTextBolName = findViewById(R.id.addEditTextBolName);
         addTextLessonName = findViewById(R.id.addEditTextLessonName);
+        addTextType = findViewById(R.id.editTextPdfJpg);
         addTextImageName = findViewById(R.id.addEditTextImageName);
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -147,6 +149,7 @@ public class AddLessonActivity extends AppCompatActivity {
                         String userBolName = addTextBolName.getText().toString();
                         String userLessonName = addTextLessonName.getText().toString();
                         String userImageName = addTextImageName.getText().toString();
+                        String userType =addTextType.getText().toString();
 
                         UUID uuid = UUID.randomUUID();
                         String uuidString = uuid.toString();
@@ -157,8 +160,8 @@ public class AddLessonActivity extends AppCompatActivity {
                         myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child("bolname").setValue(userBolName);
                         myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child("lessonname").setValue(userLessonName);
                         myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("imagename").setValue(userImageName);
-                        myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(uuidString).child("downloadURL").setValue(downloadURL);
-
+                        myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(userType).child("type").setValue(userType);
+                        myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(userType).child(uuidString).child("downloadURL").setValue(downloadURL);
 
                         Toast.makeText(getApplicationContext(),"Lesson Saved",Toast.LENGTH_LONG).show();
 

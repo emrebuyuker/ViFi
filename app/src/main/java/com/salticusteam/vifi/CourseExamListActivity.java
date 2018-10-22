@@ -29,10 +29,12 @@ public class CourseExamListActivity extends AppCompatActivity {
     TextView textViewTitle;
 
     String imagesName;
+    String type;
 
     FirebaseDatabase firebaseDatabase;
 
     ArrayList<String> imageNamesFB;
+    ArrayList<String> typeFB;
     ArrayList<String> imagesFB;
 
     Context context = this;
@@ -51,6 +53,7 @@ public class CourseExamListActivity extends AppCompatActivity {
         firebaseDatabase = FirebaseDatabase.getInstance();
 
         imageNamesFB = new ArrayList<String>();
+        typeFB = new ArrayList<String>();
         imagesFB = new ArrayList<String>();
 
         listView = (ListView) findViewById(R.id.listView);
@@ -95,6 +98,9 @@ public class CourseExamListActivity extends AppCompatActivity {
 
                     }
                 }
+
+
+
                 ArrayAdapter<String> veriAdaptoru=new ArrayAdapter<String> (context, android.R.layout.simple_list_item_1, android.R.id.text1,imageNamesFB);
                 listView.setAdapter(veriAdaptoru);
                 System.out.println("lessonNamesFB6= "+imageNamesFB);
@@ -111,25 +117,31 @@ public class CourseExamListActivity extends AppCompatActivity {
 
     private void listViewOnClick() {
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+  /*1*/      listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-                imagesName = imageNamesFB.get(position);
-                System.out.println("imageName= "+imagesName);
 
-                Intent intent = getIntent();
+  /*2*/              imagesName = imageNamesFB.get(position);
+/*3*/                System.out.println("imageName= "+imagesName);
 
-                final String uniName = intent.getStringExtra("uniName");
-                final String fakName = intent.getStringExtra("fakName");
-                final String bolName = intent.getStringExtra("bolName");
-                final String lessonName = intent.getStringExtra("lesson");
+/*4*/                lessonType();
 
-                if (imagesName.equals("2014 FINAL")){
+/*12*/                Intent intent = getIntent();
+
+/*13*/                final String uniName = intent.getStringExtra("uniName");
+/*14*/                final String fakName = intent.getStringExtra("fakName");
+/*15*/                final String bolName = intent.getStringExtra("bolName");
+/*16*/                final String lessonName = intent.getStringExtra("lesson");
+
+                System.out.println("ttt "+type);
+
+  /*17*/            /*  if (type == "PDF"){
                     intent2 = new Intent(getApplicationContext(),ExamDetailPdfActivity.class);
                 }else{
-                    intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
+/*18*/                   /* intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
                 }
 
                 intent2.putExtra("uniName",uniName);
@@ -137,10 +149,69 @@ public class CourseExamListActivity extends AppCompatActivity {
                 intent2.putExtra("bolName",bolName);
                 intent2.putExtra("lesson",lessonName);
                 intent2.putExtra("imagename",imagesName);
+                intent2.putExtra("type",type);
 
-                startActivity(intent2);
+/*19*/                /*startActivity(intent2);*/
 
             }
         });
     };
+
+
+    private void lessonType(){
+
+
+/*5*/        Intent intent = getIntent();
+
+/*6*/        final String uniName = intent.getStringExtra("uniName");
+/*7*/        final String fakName = intent.getStringExtra("fakName");
+/*8*/        final String bolName = intent.getStringExtra("bolName");
+/*9*/        final String lessonName = intent.getStringExtra("lesson");
+
+/*10*/        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName);
+/*11*/        newReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+/*20*/                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+/*21*/                    System.out.println("dataSnapshot= "+dataSnapshot);
+
+/*22*/                    if (!ds.getKey().equals("imagename")){
+
+                        HashMap<String, Object> imageNameMap2 = (HashMap<String, Object>) ds.getValue();
+/*23*/                        typeFB.add((String) imageNameMap2.get("type"));
+
+                    }
+                }
+/*24*/                type = typeFB.get(0);
+
+                System.out.println(type);
+
+                if (type == "PDF"){
+                    intent2 = new Intent(getApplicationContext(),ExamDetailPdfActivity.class);
+                }else{
+                    /*18*/                    intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
+                }
+
+                intent2.putExtra("uniName",uniName);
+                intent2.putExtra("fakName",fakName);
+                intent2.putExtra("bolName",bolName);
+                intent2.putExtra("lesson",lessonName);
+                intent2.putExtra("imagename",imagesName);
+                intent2.putExtra("type",type);
+
+                /*19*/                startActivity(intent2);
+
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
 }
