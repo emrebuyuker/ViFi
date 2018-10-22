@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.TextView;
 
 import com.github.barteksc.pdfviewer.PDFView;
 import com.google.firebase.database.DataSnapshot;
@@ -26,11 +27,13 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
     String selectPdfName;
     ArrayList<String> pdfNamesFB;
 
+    TextView textViewTitle;
 
     PDFView pdfView;
 
     FirebaseDatabase firebaseDatabase;
     DatabaseReference myRef;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,8 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
         pdfNamesFB = new ArrayList<String>();
 
         pdfView = (PDFView) findViewById(R.id.pdfView);
+
+        textViewTitle = (TextView) findViewById(R.id.textViewTitle);
 
         getDataFirebase();
 
@@ -57,11 +62,12 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
         final String bolName = intent.getStringExtra("bolName");
         final String lessonName = intent.getStringExtra("lesson");
         final String imagesName = intent.getStringExtra("imagename");
+        final String type = intent.getStringExtra("type");
+
+        textViewTitle.setText(imagesName);
 
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName);
-
-
+        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName).child(type);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -70,7 +76,7 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
 
                     System.out.println("dataSnapshot= "+dataSnapshot);
 
-                    if (!ds.getKey().equals("imagename")){
+                    if (!ds.getKey().equals("type")){
 
                         HashMap<String, Object> imageNameMap = (HashMap<String, Object>) ds.getValue();
                         pdfNamesFB.add((String) imageNameMap.get("downloadURL"));
@@ -78,10 +84,9 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
                     }
                 }
 
-
                 selectPdfName = pdfNamesFB.get(0);
 
-                new RetrievePDFStream().execute(selectPdfName);
+                new RetrievePDFStream().execute(selectPdfName );
 
 
             }

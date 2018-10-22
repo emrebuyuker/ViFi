@@ -46,6 +46,9 @@ public class CourseExamListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_exam_list);
 
+
+
+
         AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
@@ -173,6 +176,9 @@ public class CourseExamListActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
+
+                typeFB.clear();
+
 /*20*/                for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
 /*21*/                    System.out.println("dataSnapshot= "+dataSnapshot);
@@ -188,7 +194,7 @@ public class CourseExamListActivity extends AppCompatActivity {
 
                 System.out.println(type);
 
-                if (type == "PDF"){
+                if (type.equals("PDF")){
                     intent2 = new Intent(getApplicationContext(),ExamDetailPdfActivity.class);
                 }else{
                     /*18*/                    intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);

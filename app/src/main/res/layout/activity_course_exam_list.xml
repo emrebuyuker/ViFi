@@ -33,7 +33,7 @@
         android:layout_marginRight="8dp"
         android:gravity="center_horizontal"
         android:text="Merhaba"
-        android:textColor="@android:color/holo_red_dark"
+        android:textColor="#fb910d"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/_dynamic"
