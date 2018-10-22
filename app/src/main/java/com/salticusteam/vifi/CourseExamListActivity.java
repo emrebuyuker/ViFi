@@ -12,8 +12,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class CourseExamListActivity extends AppCompatActivity {
+
+    InterstitialAd mInterstitialAd;
 
     ListView listView ;
     TextView textViewTitle;
@@ -46,6 +50,18 @@ public class CourseExamListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_exam_list);
 
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-9037305793844471/2006989814");
+
+        mInterstitialAd.setAdListener(new AdListener() { //reklamımıza listener ekledik ve kapatıldığında haberimiz olacak
+            @Override
+            public void onAdClosed() { //reklam kapatıldığı zaman tekrardan reklamın yüklenmesi için
+                requestNewInterstitial();
+            }
+        });
+
+
+        requestNewInterstitial(); //reklamı direk uygulama açıldığında yüklemek için onCreate içinde yapıyoruz reklam yükleme işini
 
 
 
@@ -62,11 +78,18 @@ public class CourseExamListActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.listView);
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
 
-        //listView.setOnItemSelectedListener(this);
 
         getDataFirebaseMain6Activity();
         listViewOnClick();
 
+    }
+
+    private void requestNewInterstitial() { //Test cihazı ekliyoruz Admob dan ban yememek için
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("B9C840C4E9AD8EC5D1497C9A62C56374")
+                .build();
+
+        mInterstitialAd.loadAd(adRequest);
     }
 
     @Override
@@ -121,40 +144,15 @@ public class CourseExamListActivity extends AppCompatActivity {
     private void listViewOnClick() {
 
 
-  /*1*/      listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
 
-  /*2*/              imagesName = imageNamesFB.get(position);
-/*3*/                System.out.println("imageName= "+imagesName);
+                imagesName = imageNamesFB.get(position);
 
-/*4*/                lessonType();
-
-/*12*/                Intent intent = getIntent();
-
-/*13*/                final String uniName = intent.getStringExtra("uniName");
-/*14*/                final String fakName = intent.getStringExtra("fakName");
-/*15*/                final String bolName = intent.getStringExtra("bolName");
-/*16*/                final String lessonName = intent.getStringExtra("lesson");
-
-                System.out.println("ttt "+type);
-
-  /*17*/            /*  if (type == "PDF"){
-                    intent2 = new Intent(getApplicationContext(),ExamDetailPdfActivity.class);
-                }else{
-/*18*/                   /* intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
-                }
-
-                intent2.putExtra("uniName",uniName);
-                intent2.putExtra("fakName",fakName);
-                intent2.putExtra("bolName",bolName);
-                intent2.putExtra("lesson",lessonName);
-                intent2.putExtra("imagename",imagesName);
-                intent2.putExtra("type",type);
-
-/*19*/                /*startActivity(intent2);*/
+                lessonType();
 
             }
         });
@@ -164,40 +162,40 @@ public class CourseExamListActivity extends AppCompatActivity {
     private void lessonType(){
 
 
-/*5*/        Intent intent = getIntent();
+        Intent intent = getIntent();
 
-/*6*/        final String uniName = intent.getStringExtra("uniName");
-/*7*/        final String fakName = intent.getStringExtra("fakName");
-/*8*/        final String bolName = intent.getStringExtra("bolName");
-/*9*/        final String lessonName = intent.getStringExtra("lesson");
+        final String uniName = intent.getStringExtra("uniName");
+        final String fakName = intent.getStringExtra("fakName");
+        final String bolName = intent.getStringExtra("bolName");
+        final String lessonName = intent.getStringExtra("lesson");
 
-/*10*/        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName);
-/*11*/        newReference.addValueEventListener(new ValueEventListener() {
+        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName);
+        newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
 
                 typeFB.clear();
 
-/*20*/                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-/*21*/                    System.out.println("dataSnapshot= "+dataSnapshot);
+                    System.out.println("dataSnapshot= "+dataSnapshot);
 
-/*22*/                    if (!ds.getKey().equals("imagename")){
+                    if (!ds.getKey().equals("imagename")){
 
                         HashMap<String, Object> imageNameMap2 = (HashMap<String, Object>) ds.getValue();
-/*23*/                        typeFB.add((String) imageNameMap2.get("type"));
+                        typeFB.add((String) imageNameMap2.get("type"));
 
                     }
                 }
-/*24*/                type = typeFB.get(0);
+                type = typeFB.get(0);
 
                 System.out.println(type);
 
                 if (type.equals("PDF")){
                     intent2 = new Intent(getApplicationContext(),ExamDetailPdfActivity.class);
                 }else{
-                    /*18*/                    intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
+                    intent2 = new Intent(getApplicationContext(),ExamDetailActivity.class);
                 }
 
                 intent2.putExtra("uniName",uniName);
@@ -207,7 +205,18 @@ public class CourseExamListActivity extends AppCompatActivity {
                 intent2.putExtra("imagename",imagesName);
                 intent2.putExtra("type",type);
 
-                /*19*/                startActivity(intent2);
+                if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
+
+                    startActivity(intent2);
+
+                    mInterstitialAd.show(); //reklam gösteriliyor
+
+
+                }else{
+                    //Reklam yüklenmediyse yapılacak işlemler
+                    startActivity(intent2);
+
+                }
 
 
 

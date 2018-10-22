@@ -1,5 +1,4 @@
 package com.salticusteam.vifi;
-
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
