@@ -41,7 +41,7 @@
 
         <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
-            android:name="com.google.android.gms.ads.ca-app-pub-9037305793844471~3408176754"
+            android:name="com.google.android.gms.ads.ca-app-pub-9037305793844471~3834061477"
             android:value="[ca-app-pub-9037305793844471/5324318686]" />
 
         <activity android:name=".AddPdfLessonActivity" />
