@@ -55,7 +55,7 @@ public class AddLessonActivity extends AppCompatActivity {
         addTextUniName = findViewById(R.id.addEditTextUniName);
         addTextFakName = findViewById(R.id.addEditTextFakName);
         addTextBolName = findViewById(R.id.addEditTextBolName);
-        addTextLessonName = findViewById(R.id.addEditTextLessonName);
+        addTextLessonName = findViewById(R.id.addEditTextBookName);
         addTextType = findViewById(R.id.editTextPdfJpg);
         addTextImageName = findViewById(R.id.addEditTextImageName);
 

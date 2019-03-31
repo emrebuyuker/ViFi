@@ -36,7 +36,7 @@ public class AddPdfLessonActivity extends AppCompatActivity {
     EditText addTextType;
     EditText addTextImageName;
 
-    Button selectFile,upload;
+    Button selectFile,upload,btnaddAnnouncements;
     TextView notification;
 
     FirebaseStorage storage;
@@ -60,12 +60,14 @@ public class AddPdfLessonActivity extends AppCompatActivity {
 
         selectFile = findViewById(R.id.selectFile);
         upload = findViewById(R.id.upload);
+        btnaddAnnouncements = findViewById(R.id.buttonAddAnnouncements);
+
         notification = findViewById(R.id.notification);
 
         addTextUniName = findViewById(R.id.addEditTextUniName);
         addTextFakName = findViewById(R.id.addEditTextFakName);
         addTextBolName = findViewById(R.id.addEditTextBolName);
-        addTextLessonName = findViewById(R.id.addEditTextLessonName);
+        addTextLessonName = findViewById(R.id.addEditTextBookName);
         addTextType = findViewById(R.id.editTextPdfJpg);
         addTextImageName = findViewById(R.id.addEditTextImageName);
 
@@ -227,5 +229,12 @@ public class AddPdfLessonActivity extends AppCompatActivity {
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void addAnnouncementsBtnClick(View view) {
+
+        Intent intent = new Intent(getApplicationContext(), AddAnnouncements.class);
+        startActivity(intent);
+
     }
 }

@@ -7,28 +7,29 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-
-
         android:allowBackup="true"
         android:icon="@mipmap/icon"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/roundicon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <activity android:name=".AddAnnouncements" />
+        <activity android:name=".AnnouncementsActivity" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-9037305793844471~3834061477" />
+
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Base.Theme.AppCompat.Light">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service android:name=".MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -39,6 +40,7 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+
         <activity android:name=".DepartmentCoursesActivity" />
         <activity android:name=".ExamDetailActivity" />
         <activity android:name=".AddLessonActivity" />
@@ -46,8 +48,7 @@
         <activity android:name=".CourseExamListActivity" />
         <activity android:name=".ImageZoomActivity" />
         <activity android:name=".AddPdfLessonActivity" />
-        <activity android:name=".ExamDetailPdfActivity"></activity>
-
+        <activity android:name=".ExamDetailPdfActivity" />
     </application>
 
 </manifest>

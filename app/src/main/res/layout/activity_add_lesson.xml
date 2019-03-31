@@ -52,7 +52,7 @@
         app:layout_constraintTop_toBottomOf="@+id/addEditTextFakName" />
 
     <EditText
-        android:id="@+id/addEditTextLessonName"
+        android:id="@+id/addEditTextBookName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -144,9 +144,9 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text="JPG"
-        app:layout_constraintEnd_toEndOf="@+id/addEditTextLessonName"
+        app:layout_constraintEnd_toEndOf="@+id/addEditTextBookName"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addEditTextLessonName" />
+        app:layout_constraintTop_toBottomOf="@+id/addEditTextBookName" />
 
 </android.support.constraint.ConstraintLayout>

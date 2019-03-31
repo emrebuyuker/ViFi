@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.add_lesson,menu);
+        menuInflater.inflate(R.menu.add_lesson, menu);
 
         return super.onCreateOptionsMenu(menu);
 
@@ -63,9 +63,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.add_lesson){
+        if (item.getItemId() == R.id.add_lesson) {
 
-            Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
 
         }
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MobileAds.initialize(this,"ca-app-pub-9037305793844471~3834061477");
+        MobileAds.initialize(this, "ca-app-pub-9037305793844471~3834061477");
 
 
         mInterstitialAd = new InterstitialAd(this);
@@ -114,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         bolNamesFB = new ArrayList<String>();
 
 
-
         getDataFirebase();
 
         spinnerUni = (Spinner) findViewById(R.id.spinnerUni);
@@ -140,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         uniItem = spinnerUni.getSelectedItem().toString();
-        System.out.println("unitem= "+uniItem);
+        System.out.println("unitem= " + uniItem);
 
         if (adapterView.getId() == R.id.spinnerUni) {
 
@@ -153,10 +152,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             getDataSpinnerBol();
             bolNamesFB.clear();
 
-        }else if (adapterView.getId() == R.id.spinnerBol){
+        } else if (adapterView.getId() == R.id.spinnerBol) {
 
             bolItem = spinnerBol.getSelectedItem().toString();
-            System.out.println("bolıtem= "+bolItem);
+            System.out.println("bolıtem= " + bolItem);
 
         }
     }
@@ -174,36 +173,36 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    public void onLoginButtonClick(View view){
+    public void onLoginButtonClick(View view) {
 
-        if(uniItem == null) {
+        if (uniItem == null) {
 
             Toast.makeText(context, "Lütfen internetinizi açınız.", Toast.LENGTH_LONG).show();
 
-        }else{
+        } else {
 
             if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
 
 
-                Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
+                Intent intent = new Intent(getApplicationContext(), DepartmentCoursesActivity.class);
 
-                intent.putExtra("bolName",bolItem);
-                intent.putExtra("fakName",fakItem);
-                intent.putExtra("uniName",uniItem);
+                intent.putExtra("bolName", bolItem);
+                intent.putExtra("fakName", fakItem);
+                intent.putExtra("uniName", uniItem);
 
                 startActivity(intent);
 
                 mInterstitialAd.show(); //reklam gösteriliyor
 
 
-            }else{
+            } else {
                 //Reklam yüklenmediyse yapılacak işlemler
 
-                Intent intent = new Intent(getApplicationContext(),DepartmentCoursesActivity.class);
+                Intent intent = new Intent(getApplicationContext(), DepartmentCoursesActivity.class);
 
-                intent.putExtra("bolName",bolItem);
-                intent.putExtra("fakName",fakItem);
-                intent.putExtra("uniName",uniItem);
+                intent.putExtra("bolName", bolItem);
+                intent.putExtra("fakName", fakItem);
+                intent.putExtra("uniName", uniItem);
 
                 startActivity(intent);
 
@@ -227,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
 
                 //spinner uni
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, uniNamesFB);
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, uniNamesFB);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerUni.setAdapter(dataAdapter);
             }
@@ -239,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
     }
 
-    private void getDataSpinnerFak(){
+    private void getDataSpinnerFak() {
 
         DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem);
         newReference.addValueEventListener(new ValueEventListener() {
@@ -248,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                    if (!ds.getKey().equals("uniname")){
+                    if (!ds.getKey().equals("uniname")) {
 
                         HashMap<String, Object> facultyMap = (HashMap<String, Object>) ds.getValue();
                         fakNamesFB.add((String) facultyMap.get("fakname"));
@@ -256,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     }
                 }
                 //spinner uni
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, fakNamesFB);
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, fakNamesFB);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerFak.setAdapter(dataAdapter);
             }
@@ -269,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    private void getDataSpinnerBol(){
+    private void getDataSpinnerBol() {
 
         DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem).child(fakItem);
         newReference.addValueEventListener(new ValueEventListener() {
@@ -278,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                    if (!ds.getKey().equals("fakname")){
+                    if (!ds.getKey().equals("fakname")) {
 
                         HashMap<String, Object> facultyMap = (HashMap<String, Object>) ds.getValue();
                         bolNamesFB.add((String) facultyMap.get("bolname"));
@@ -286,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     }
                 }
                 //spinner uni
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context  , android.R.layout.simple_spinner_dropdown_item, bolNamesFB);
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, bolNamesFB);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerBol.setAdapter(dataAdapter);
             }
@@ -298,5 +297,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
 
     }
+
+    public void announcementsButtonClick(View view) {
+
+        Intent intent = new Intent(getApplicationContext(), AnnouncementsActivity.class);
+
+        startActivity(intent);
+
+    }
+
 
 }

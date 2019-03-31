@@ -52,7 +52,7 @@
         app:layout_constraintTop_toBottomOf="@+id/addEditTextFakName" />
 
     <EditText
-        android:id="@+id/addEditTextLessonName"
+        android:id="@+id/addEditTextBookName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
@@ -126,9 +126,23 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text="PDF"
-        app:layout_constraintEnd_toEndOf="@+id/addEditTextLessonName"
+        app:layout_constraintEnd_toEndOf="@+id/addEditTextBookName"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addEditTextLessonName" />
+        app:layout_constraintTop_toBottomOf="@+id/addEditTextBookName" />
+
+    <Button
+        android:id="@+id/buttonAddAnnouncements"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:onClick="addAnnouncementsBtnClick"
+        android:text="Announcements"
+        app:layout_constraintEnd_toStartOf="@+id/upload"
+        app:layout_constraintStart_toEndOf="@+id/selectFile"
+        app:layout_constraintTop_toTopOf="@+id/selectFile" />
 
 </android.support.constraint.ConstraintLayout>
