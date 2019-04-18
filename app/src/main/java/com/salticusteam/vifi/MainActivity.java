@@ -300,7 +300,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void announcementsButtonClick(View view) {
 
-        Intent intent = new Intent(getApplicationContext(), AnnouncementsActivity.class);
+        //Intent intent = new Intent(getApplicationContext(), AnnouncementsActivity.class);
+        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+
 
         startActivity(intent);
 
