@@ -64,14 +64,10 @@ public class AnnouncementsActivity extends AppCompatActivity {
 
     private void getDataFirebaseAnnouncements() {
 
-        System.out.println("dataSnapshotAnnouncements Start");
-
         DatabaseReference newReference = firebaseDatabase.getReference("Announcements");
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                System.out.println("dataSnapshotAnnouncements= " + dataSnapshot);
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
