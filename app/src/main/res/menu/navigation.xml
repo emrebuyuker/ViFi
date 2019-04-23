@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+    <item
+        android:id="@+id/university"
+        android:title="ÜNİVERSİTE" />
+
+    <item
+        android:id="@+id/faculty"
+        android:title="FAKÜLTE" />
+
+    <item
+        android:id="@+id/chapter"
+        android:title="BÖLÜM" />
+
+</menu>
