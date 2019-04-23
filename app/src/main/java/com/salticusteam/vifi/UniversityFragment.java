@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -25,12 +26,12 @@ public class UniversityFragment extends Fragment {
 
     ArrayList<String> uniNamesFB;
 
+
     ListView listView;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //return inflater.inflate(R.layout.fragment_university, container,false);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         uniNamesFB = new ArrayList<String>();
@@ -41,6 +42,7 @@ public class UniversityFragment extends Fragment {
         listView = customView.findViewById(R.id.listView);
 
         getDataFirebase();
+        listViewOnClick();
 
         return customView;
     }
@@ -69,5 +71,25 @@ public class UniversityFragment extends Fragment {
             }
         });
     }
+
+    private void listViewOnClick() {
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                String uniName = uniNamesFB.get(position);
+                System.out.println("uniName= "+uniName);
+
+                Fragment selectedFragment = new FacultiesFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("uniName",uniName);
+                selectedFragment.setArguments(bundle);
+
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
+
+            }
+        });
+    };
 }
 

@@ -93,6 +93,7 @@ public class HomeActivity extends AppCompatActivity
         bottomNav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         //getDataFirebase();
+
     }
 
     @Override

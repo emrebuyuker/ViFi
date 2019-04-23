@@ -12,6 +12,11 @@ public class FacultiesFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        Bundle bundle = this.getArguments();
+        String myuniName = bundle.getString("uniName");
+        System.out.println("uniName faclties = "+myuniName);
+
         return inflater.inflate(R.layout.fragment_faculties, container,false);
 
     }
