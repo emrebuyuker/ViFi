@@ -43,17 +43,19 @@ public class HomeActivity extends AppCompatActivity
 
             switch (item.getItemId()) {
                 case R.id.university:
+                    System.out.println("emre= "+item);
+
                     selectedFragment = new UniversityFragment();
                     break;
                 case R.id.faculty:
-                    selectedFragment = new FacultiesFragment();
+                    selectedFragment = new DepartmentsFragment();
                     break;
                 case R.id.chapter:
                     selectedFragment = new DepartmentsFragment();
                     break;
             }
 
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
+            //getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
 
             return true;
         }

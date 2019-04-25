@@ -26,7 +26,6 @@ public class UniversityFragment extends Fragment {
 
     ArrayList<String> uniNamesFB;
 
-
     ListView listView;
 
     @Nullable

@@ -15,7 +15,6 @@ public class FacultiesFragment extends Fragment {
 
         Bundle bundle = this.getArguments();
         String myuniName = bundle.getString("uniName");
-        System.out.println("uniName faclties = "+myuniName);
 
         return inflater.inflate(R.layout.fragment_faculties, container,false);
 
