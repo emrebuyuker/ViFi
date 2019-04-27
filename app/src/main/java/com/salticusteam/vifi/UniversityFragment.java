@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,6 +29,8 @@ public class UniversityFragment extends Fragment {
 
     ListView listView;
 
+    ProgressBar spinner;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -39,6 +42,8 @@ public class UniversityFragment extends Fragment {
         View customView = layoutInflater.inflate(R.layout.fragment_university, container,false);
 
         listView = customView.findViewById(R.id.listView);
+
+        spinner = (ProgressBar)customView.findViewById(R.id.progressBarUniversity);
 
         getDataFirebase();
         listViewOnClick();
@@ -61,8 +66,9 @@ public class UniversityFragment extends Fragment {
 
                 ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, uniNamesFB);
                 listView.setAdapter(veriAdaptoru);
-
+                spinner.setVisibility(View.INVISIBLE);
             }
+
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {

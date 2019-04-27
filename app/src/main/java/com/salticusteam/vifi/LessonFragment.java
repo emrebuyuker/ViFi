@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -20,31 +19,35 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class FacultiesFragment extends Fragment {
+public class LessonFragment extends Fragment {
 
     FirebaseDatabase firebaseDatabase;
 
     ListView listView;
 
+    String facItem ;
     String uniItem ;
+    String depItem;
 
-    ArrayList<String> fakNamesFB;
+    ArrayList<String> lessonNamesFB;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View customView = inflater.inflate(R.layout.fragment_faculties, container,false);
-
         Bundle bundle = this.getArguments();
 
         uniItem = bundle.getString("uniName");
+        facItem = bundle.getString("facName");
+        depItem = bundle.getString("depName");
+
+        View customView = inflater.inflate(R.layout.fragment_departments, container,false);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
         listView = customView.findViewById(R.id.listView);
 
-        fakNamesFB = new ArrayList<String>();
+        lessonNamesFB = new ArrayList<String>();
 
         getDataFirebase();
         listViewOnClick();
@@ -52,25 +55,28 @@ public class FacultiesFragment extends Fragment {
         return customView;
 
     }
-
     private void getDataFirebase() {
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem);
+        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem).child(facItem).child(depItem);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                    if (!ds.getKey().equals("uniname")) {
+                    System.out.println("dataSnapshot= "+dataSnapshot);
+
+                    if (!ds.getKey().equals("bolname")){
 
                         HashMap<String, Object> facultyMap = (HashMap<String, Object>) ds.getValue();
-                        fakNamesFB.add((String) facultyMap.get("fakname"));
+                        lessonNamesFB.add((String) facultyMap.get("lessonname"));
 
                     }
                 }
-                ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, fakNamesFB);
+
+                ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, lessonNamesFB);
                 listView.setAdapter(veriAdaptoru);
+
             }
 
             @Override
@@ -82,25 +88,22 @@ public class FacultiesFragment extends Fragment {
 
     private void listViewOnClick() {
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        /*listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                String facName = fakNamesFB.get(position);
-                System.out.println("facName= "+facName);
+                String depName = depNamesFB.get(position);
 
-                Fragment selectedFragment = new DepartmentsFragment();
+                Fragment selectedFragment = new LessonFragment();
                 Bundle bundle = new Bundle();
                 bundle.putString("uniName",uniItem);
-                bundle.putString("facName",facName);
+                bundle.putString("facName",facItem);
+                bundle.putString("depName",depName);
                 selectedFragment.setArguments(bundle);
 
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
 
             }
-        });
+        });*/
     };
-
-
 }
-

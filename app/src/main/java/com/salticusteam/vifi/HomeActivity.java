@@ -2,6 +2,7 @@ package com.salticusteam.vifi;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -15,6 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -27,9 +30,13 @@ public class HomeActivity extends AppCompatActivity
 
     Context context = this;
 
+    RelativeLayout relativeLayoutUniversity;
+
     FirebaseDatabase firebaseDatabase;
 
     ArrayList<String> uniNamesFB;
+
+    TextView textViewUniversity;
 
     //ListView listView;
 
@@ -66,9 +73,16 @@ public class HomeActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
+
+        relativeLayoutUniversity = findViewById(R.id.layoutUniversity);
+        textViewUniversity = findViewById(R.id.textViewUniversity);
+
+        relativeLayoutUniversity.setBackgroundColor(Color.WHITE);
+        textViewUniversity.setTextColor(Color.parseColor("#FFFF5722"));
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -78,8 +92,6 @@ public class HomeActivity extends AppCompatActivity
 
         /*mTextMessage = (TextView) findViewById(R.id.message);
         mTextMessage.setCursorVisible(false);*/
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new UniversityFragment()).commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -91,8 +103,6 @@ public class HomeActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        BottomNavigationView bottomNav = findViewById(R.id.navigation);
-        bottomNav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         //getDataFirebase();
 
