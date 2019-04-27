@@ -39,11 +39,11 @@ public class UniversityFragment extends Fragment {
         uniNamesFB = new ArrayList<String>();
 
         LayoutInflater layoutInflater = getActivity().getLayoutInflater();
-        View customView = layoutInflater.inflate(R.layout.fragment_university, container,false);
+        View customView = layoutInflater.inflate(R.layout.fragment_university, container, false);
 
         listView = customView.findViewById(R.id.listView);
 
-        spinner = (ProgressBar)customView.findViewById(R.id.progressBarUniversity);
+        spinner = (ProgressBar) customView.findViewById(R.id.progressBarUniversity);
 
         getDataFirebase();
         listViewOnClick();
@@ -84,17 +84,19 @@ public class UniversityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 String uniName = uniNamesFB.get(position);
-                System.out.println("uniName= "+uniName);
+                System.out.println("uniName= " + uniName);
 
                 Fragment selectedFragment = new FacultiesFragment();
                 Bundle bundle = new Bundle();
-                bundle.putString("uniName",uniName);
+                bundle.putString("uniName", uniName);
                 selectedFragment.setArguments(bundle);
 
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
 
             }
         });
-    };
+    }
+
+    ;
 }
 

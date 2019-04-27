@@ -50,7 +50,7 @@ public class HomeActivity extends AppCompatActivity
 
             switch (item.getItemId()) {
                 case R.id.university:
-                    System.out.println("emre= "+item);
+                    System.out.println("emre= " + item);
 
                     selectedFragment = new UniversityFragment();
                     break;
@@ -92,7 +92,7 @@ public class HomeActivity extends AppCompatActivity
 
         /*mTextMessage = (TextView) findViewById(R.id.message);
         mTextMessage.setCursorVisible(false);*/
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new UniversityFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new UniversityFragment()).commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

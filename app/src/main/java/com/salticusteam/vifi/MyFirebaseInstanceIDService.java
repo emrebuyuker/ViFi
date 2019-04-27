@@ -14,6 +14,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         Log.d("TOKEN Verildi", token);
     }
 
-    private void registerToken(String token){
+    private void registerToken(String token) {
 
-    }}
+    }
+}

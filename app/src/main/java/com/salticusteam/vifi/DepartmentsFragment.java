@@ -26,8 +26,8 @@ public class DepartmentsFragment extends Fragment {
 
     ListView listView;
 
-    String facItem ;
-    String uniItem ;
+    String facItem;
+    String uniItem;
 
     ArrayList<String> depNamesFB;
 
@@ -40,7 +40,7 @@ public class DepartmentsFragment extends Fragment {
         uniItem = bundle.getString("uniName");
         facItem = bundle.getString("facName");
 
-        View customView = inflater.inflate(R.layout.fragment_departments, container,false);
+        View customView = inflater.inflate(R.layout.fragment_departments, container, false);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -54,6 +54,7 @@ public class DepartmentsFragment extends Fragment {
         return customView;
 
     }
+
     private void getDataFirebase() {
 
         DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem).child(facItem);
@@ -92,15 +93,17 @@ public class DepartmentsFragment extends Fragment {
 
                 Fragment selectedFragment = new LessonFragment();
                 Bundle bundle = new Bundle();
-                bundle.putString("uniName",uniItem);
-                bundle.putString("facName",facItem);
-                bundle.putString("depName",depName);
+                bundle.putString("uniName", uniItem);
+                bundle.putString("facName", facItem);
+                bundle.putString("depName", depName);
                 selectedFragment.setArguments(bundle);
 
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
 
             }
         });
-    };
+    }
+
+    ;
 }
 

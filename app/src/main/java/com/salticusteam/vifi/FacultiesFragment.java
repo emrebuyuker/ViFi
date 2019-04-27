@@ -26,7 +26,7 @@ public class FacultiesFragment extends Fragment {
 
     ListView listView;
 
-    String uniItem ;
+    String uniItem;
 
     ArrayList<String> fakNamesFB;
 
@@ -34,7 +34,7 @@ public class FacultiesFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View customView = inflater.inflate(R.layout.fragment_faculties, container,false);
+        View customView = inflater.inflate(R.layout.fragment_faculties, container, false);
 
         Bundle bundle = this.getArguments();
 
@@ -87,19 +87,21 @@ public class FacultiesFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 String facName = fakNamesFB.get(position);
-                System.out.println("facName= "+facName);
+                System.out.println("facName= " + facName);
 
                 Fragment selectedFragment = new DepartmentsFragment();
                 Bundle bundle = new Bundle();
-                bundle.putString("uniName",uniItem);
-                bundle.putString("facName",facName);
+                bundle.putString("uniName", uniItem);
+                bundle.putString("facName", facName);
                 selectedFragment.setArguments(bundle);
 
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
 
             }
         });
-    };
+    }
+
+    ;
 
 
 }

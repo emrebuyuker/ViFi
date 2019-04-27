@@ -25,8 +25,8 @@ public class LessonFragment extends Fragment {
 
     ListView listView;
 
-    String facItem ;
-    String uniItem ;
+    String facItem;
+    String uniItem;
     String depItem;
 
     ArrayList<String> lessonNamesFB;
@@ -41,7 +41,7 @@ public class LessonFragment extends Fragment {
         facItem = bundle.getString("facName");
         depItem = bundle.getString("depName");
 
-        View customView = inflater.inflate(R.layout.fragment_departments, container,false);
+        View customView = inflater.inflate(R.layout.fragment_departments, container, false);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -55,6 +55,7 @@ public class LessonFragment extends Fragment {
         return customView;
 
     }
+
     private void getDataFirebase() {
 
         DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem).child(facItem).child(depItem);
@@ -64,9 +65,9 @@ public class LessonFragment extends Fragment {
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                    System.out.println("dataSnapshot= "+dataSnapshot);
+                    System.out.println("dataSnapshot= " + dataSnapshot);
 
-                    if (!ds.getKey().equals("bolname")){
+                    if (!ds.getKey().equals("bolname")) {
 
                         HashMap<String, Object> facultyMap = (HashMap<String, Object>) ds.getValue();
                         lessonNamesFB.add((String) facultyMap.get("lessonname"));
@@ -105,5 +106,7 @@ public class LessonFragment extends Fragment {
 
             }
         });*/
-    };
+    }
+
+    ;
 }

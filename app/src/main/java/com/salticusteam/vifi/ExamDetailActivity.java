@@ -133,7 +133,7 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
 
                 seleckImageURL = imagesFB.get(position);
 
-                Intent intent = new Intent(getApplicationContext(),ImageZoomActivity.class);
+                Intent intent = new Intent(getApplicationContext(), ImageZoomActivity.class);
 
                 intent.putExtra("seleckImageURL",seleckImageURL);
 

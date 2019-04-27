@@ -15,10 +15,10 @@ public class MyFirebaseMessagingService extends com.google.firebase.messaging.Fi
 
     private void showNotification(String message) {
 
-        Intent i = new Intent(this,MainActivity.class); // Bildirime basıldığında hangi aktiviteye gidilecekse
+        Intent i = new Intent(this, MainActivity.class); // Bildirime basıldığında hangi aktiviteye gidilecekse
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,i,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                 .setAutoCancel(true) // Kullanıcı bildirime girdiğinde otomatik olarak silinsin. False derseniz bildirim kalıcı olur.
@@ -29,6 +29,6 @@ public class MyFirebaseMessagingService extends com.google.firebase.messaging.Fi
 
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        manager.notify(0,builder.build());
+        manager.notify(0, builder.build());
     }
 }

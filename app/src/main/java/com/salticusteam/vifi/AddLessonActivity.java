@@ -51,7 +51,7 @@ public class AddLessonActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_lesson);
 
 
-        imageView =(ImageView) findViewById(R.id.imageView);
+        imageView = (ImageView) findViewById(R.id.imageView);
         addTextUniName = findViewById(R.id.addEditTextUniName);
         addTextFakName = findViewById(R.id.addEditTextFakName);
         addTextBolName = findViewById(R.id.addEditTextBolName);
@@ -68,14 +68,14 @@ public class AddLessonActivity extends AppCompatActivity {
 
     public void addLessonImagesSelect(View view) {
 
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.READ_EXTERNAL_STORAGE},2);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
 
-        }else{
+        } else {
 
-            Intent intent = new Intent(Intent.ACTION_PICK , MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent,1);
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, 1);
 
         }
 
@@ -83,12 +83,12 @@ public class AddLessonActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == 2){
+        if (requestCode == 2) {
 
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                Intent intent = new Intent(Intent.ACTION_PICK , MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent,1);
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intent, 1);
 
             }
         }
@@ -98,7 +98,7 @@ public class AddLessonActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1 && resultCode == RESULT_OK && data != null){
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
 
             selected = data.getData();
 
@@ -118,11 +118,11 @@ public class AddLessonActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void addLessonSave (View view) {
+    public void addLessonSave(View view) {
 
         final UUID uuidImage = UUID.randomUUID();
 
-        String imageName = "imagess/"+uuidImage+".jpg";
+        String imageName = "imagess/" + uuidImage + ".jpg";
 
         StorageReference storageReference = mStorageRef.child(imageName);
 
@@ -134,7 +134,7 @@ public class AddLessonActivity extends AppCompatActivity {
 
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                StorageReference newImageRef = FirebaseStorage.getInstance().getReference("imagess/"+uuidImage+".jpg");
+                StorageReference newImageRef = FirebaseStorage.getInstance().getReference("imagess/" + uuidImage + ".jpg");
 
                 newImageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
 
@@ -149,7 +149,7 @@ public class AddLessonActivity extends AppCompatActivity {
                         String userBolName = addTextBolName.getText().toString();
                         String userLessonName = addTextLessonName.getText().toString();
                         String userImageName = addTextImageName.getText().toString();
-                        String userType =addTextType.getText().toString();
+                        String userType = addTextType.getText().toString();
 
                         UUID uuid = UUID.randomUUID();
                         String uuidString = uuid.toString();
@@ -163,7 +163,7 @@ public class AddLessonActivity extends AppCompatActivity {
                         myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(userType).child("type").setValue(userType);
                         myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(userType).child(uuidString).child("downloadURL").setValue(downloadURL);
 
-                        Toast.makeText(getApplicationContext(),"Lesson Saved",Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Lesson Saved", Toast.LENGTH_LONG).show();
 
                         Intent intent = new Intent(getApplicationContext(), AddLessonActivity.class);
                         startActivity(intent);
@@ -179,7 +179,7 @@ public class AddLessonActivity extends AppCompatActivity {
 
             public void onFailure(@NonNull Exception e) {
 
-                Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), e.getLocalizedMessage().toString(), Toast.LENGTH_LONG).show();
 
             }
         });
@@ -188,14 +188,14 @@ public class AddLessonActivity extends AppCompatActivity {
 
     public void onActivityMainactivity(View view) {
 
-        Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
 
     }
 
     public void onActivityPDF(View view) {
 
-        Intent intent = new Intent(getApplicationContext(),AddPdfLessonActivity.class);
+        Intent intent = new Intent(getApplicationContext(), AddPdfLessonActivity.class);
         startActivity(intent);
 
     }

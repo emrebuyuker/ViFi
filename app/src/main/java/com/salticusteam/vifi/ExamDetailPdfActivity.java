@@ -63,6 +63,7 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
 
 
     }
+
     private void getDataFirebase() {
 
         Intent intent = getIntent();
@@ -84,9 +85,9 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                    System.out.println("dataSnapshot= "+dataSnapshot);
+                    System.out.println("dataSnapshot= " + dataSnapshot);
 
-                    if (!ds.getKey().equals("type")){
+                    if (!ds.getKey().equals("type")) {
 
                         HashMap<String, Object> imageNameMap = (HashMap<String, Object>) ds.getValue();
                         pdfNamesFB.add((String) imageNameMap.get("downloadURL"));
@@ -96,7 +97,7 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
 
                 selectPdfName = pdfNamesFB.get(0);
 
-                new RetrievePDFStream().execute(selectPdfName );
+                new RetrievePDFStream().execute(selectPdfName);
 
 
             }
@@ -110,7 +111,8 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
         });
 
     }
-    class RetrievePDFStream extends AsyncTask<String,Void,InputStream> {
+
+    class RetrievePDFStream extends AsyncTask<String, Void, InputStream> {
 
         @Override
         protected InputStream doInBackground(String... strings) {
@@ -118,12 +120,10 @@ public class ExamDetailPdfActivity extends AppCompatActivity {
             try {
                 URL url = new URL(strings[0]);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                if (urlConnection.getResponseCode() == 200 )
-                {
+                if (urlConnection.getResponseCode() == 200) {
                     inpuInputStream = new BufferedInputStream(urlConnection.getInputStream());
                 }
-            }
-            catch (IOException e){
+            } catch (IOException e) {
                 return null;
             }
             return inpuInputStream;

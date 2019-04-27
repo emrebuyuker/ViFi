@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    public void signUp (View view) {
+    public void signUp(View view) {
 
         mAuth.createUserWithEmailAndPassword(emailText.getText().toString(), passwordText.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -42,9 +42,9 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
 
-                            Toast.makeText(getApplicationContext(),"User Created",Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "User Created", Toast.LENGTH_LONG).show();
 
-                            Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
+                            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                             startActivity(intent);
 
                         }
@@ -53,13 +53,13 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
 
-                Toast.makeText(LoginActivity.this,e.getLocalizedMessage().toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, e.getLocalizedMessage().toString(), Toast.LENGTH_LONG).show();
 
             }
         });
     }
 
-    public void signIn (View view) {
+    public void signIn(View view) {
 
         try {
 
@@ -71,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
 
                                 FirebaseUser user = mAuth.getCurrentUser();
 
-                                Intent intent = new Intent(getApplicationContext(),AddLessonActivity.class);
+                                Intent intent = new Intent(getApplicationContext(), AddLessonActivity.class);
                                 startActivity(intent);
 
                             }
@@ -80,17 +80,16 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception e) {
 
-                    Toast.makeText(getApplicationContext(),e.getLocalizedMessage().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage().toString(), Toast.LENGTH_LONG).show();
 
                 }
             });
 
-        }catch (Exception e){
+        } catch (Exception e) {
 
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 
         }
-
 
 
     }

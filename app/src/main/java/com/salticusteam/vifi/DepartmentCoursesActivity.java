@@ -26,7 +26,7 @@ import java.util.HashMap;
 public class DepartmentCoursesActivity extends AppCompatActivity {
 
 
-    ListView listView ;
+    ListView listView;
     TextView textViewTitle;
 
     String lessonName;
@@ -79,18 +79,18 @@ public class DepartmentCoursesActivity extends AppCompatActivity {
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                    System.out.println("dataSnapshot= "+dataSnapshot);
+                    System.out.println("dataSnapshot= " + dataSnapshot);
 
-                    if (!ds.getKey().equals("bolname")){
+                    if (!ds.getKey().equals("bolname")) {
 
                         HashMap<String, Object> facultyMap = (HashMap<String, Object>) ds.getValue();
                         lessonNamesFB.add((String) facultyMap.get("lessonname"));
 
                     }
                 }
-                ArrayAdapter<String> veriAdaptoru=new ArrayAdapter<String> (context, android.R.layout.simple_list_item_1, android.R.id.text1,lessonNamesFB);
+                ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, android.R.id.text1, lessonNamesFB);
                 listView.setAdapter(veriAdaptoru);
-                System.out.println("lessonNamesFB= "+lessonNamesFB);
+                System.out.println("lessonNamesFB= " + lessonNamesFB);
 
             }
 
@@ -108,7 +108,7 @@ public class DepartmentCoursesActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 lessonName = lessonNamesFB.get(position);
-                System.out.println("parent= "+ lessonName);
+                System.out.println("parent= " + lessonName);
 
                 Intent intent = getIntent();
 
@@ -116,17 +116,19 @@ public class DepartmentCoursesActivity extends AppCompatActivity {
                 final String fakName = intent.getStringExtra("fakName");
                 final String bolName = intent.getStringExtra("bolName");
 
-                Intent intent2 = new Intent(getApplicationContext(),CourseExamListActivity.class);
+                Intent intent2 = new Intent(getApplicationContext(), CourseExamListActivity.class);
 
-                intent2.putExtra("uniName",uniName);
-                intent2.putExtra("fakName",fakName);
-                intent2.putExtra("bolName",bolName);
-                intent2.putExtra("lesson",lessonName);
+                intent2.putExtra("uniName", uniName);
+                intent2.putExtra("fakName", fakName);
+                intent2.putExtra("bolName", bolName);
+                intent2.putExtra("lesson", lessonName);
 
                 startActivity(intent2);
 
             }
         });
-    };
+    }
+
+    ;
 
 }

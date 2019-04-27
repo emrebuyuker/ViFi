@@ -1,4 +1,5 @@
 package com.salticusteam.vifi;
+
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -36,7 +37,7 @@ public class AddPdfLessonActivity extends AppCompatActivity {
     EditText addTextType;
     EditText addTextImageName;
 
-    Button selectFile,upload,btnaddAnnouncements;
+    Button selectFile, upload, btnaddAnnouncements;
     TextView notification;
 
     FirebaseStorage storage;
@@ -80,12 +81,12 @@ public class AddPdfLessonActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if (ContextCompat.checkSelfPermission(AddPdfLessonActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                if (ContextCompat.checkSelfPermission(AddPdfLessonActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 
                     selectPdf();
 
-                }else{
-                    ActivityCompat.requestPermissions(AddPdfLessonActivity.this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},9);
+                } else {
+                    ActivityCompat.requestPermissions(AddPdfLessonActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 9);
                 }
 
             }
@@ -95,9 +96,9 @@ public class AddPdfLessonActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if (selected!=null){
+                if (selected != null) {
                     uploadFile(selected);
-                }else{
+                } else {
                     Toast.makeText(AddPdfLessonActivity.this, "Select a file", Toast.LENGTH_SHORT).show();
                 }
 
@@ -111,7 +112,7 @@ public class AddPdfLessonActivity extends AppCompatActivity {
 
         final UUID uuidImage = UUID.randomUUID();
 
-        String pdfName = "pdfs/"+uuidImage+".pdf";
+        String pdfName = "pdfs/" + uuidImage + ".pdf";
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -127,7 +128,7 @@ public class AddPdfLessonActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                        StorageReference reference = FirebaseStorage.getInstance().getReference("pdfs/"+uuidImage+".pdf");
+                        StorageReference reference = FirebaseStorage.getInstance().getReference("pdfs/" + uuidImage + ".pdf");
                         reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
@@ -138,7 +139,7 @@ public class AddPdfLessonActivity extends AppCompatActivity {
                                 String userBolName = addTextBolName.getText().toString();
                                 String userLessonName = addTextLessonName.getText().toString();
                                 String userImageName = addTextImageName.getText().toString();
-                                String userType =addTextType.getText().toString();
+                                String userType = addTextType.getText().toString();
 
                                 UUID uuid = UUID.randomUUID();
                                 String uuidString = uuid.toString();
@@ -159,7 +160,7 @@ public class AddPdfLessonActivity extends AppCompatActivity {
                                 myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(userType).child(uuidString).child("downloadURL").setValue(downloadURL);
 
 
-                                Toast.makeText(getApplicationContext(),"Lesson Saved",Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), "Lesson Saved", Toast.LENGTH_LONG).show();
 
                                 Intent intent = new Intent(getApplicationContext(), AddLessonActivity.class);
                                 startActivity(intent);
@@ -179,7 +180,7 @@ public class AddPdfLessonActivity extends AppCompatActivity {
             @Override
             public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
 
-                int currentProgress = (int) (100*taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                int currentProgress = (int) (100 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
                 progressDialog.setProgress(currentProgress);
 
 
@@ -193,38 +194,38 @@ public class AddPdfLessonActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("application/pdf");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent,86);
+        startActivityForResult(intent, 86);
 
     }
 
     public void addLessonImagesSelect(View view) {
 
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.READ_EXTERNAL_STORAGE},2);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
 
-        }else{
-            Intent intent = new Intent(Intent.ACTION_PICK , MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent,1);
+        } else {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, 1);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == 9 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == 9 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             selectPdf();
-        }else{
+        } else {
             Toast.makeText(AddPdfLessonActivity.this, "please provide permission", Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 86 && resultCode == RESULT_OK && data != null){
+        if (requestCode == 86 && resultCode == RESULT_OK && data != null) {
             selected = data.getData();
-            notification.setText("A file is selected : "+data.getData().getLastPathSegment());
+            notification.setText("A file is selected : " + data.getData().getLastPathSegment());
 
-        }else{
+        } else {
             Toast.makeText(AddPdfLessonActivity.this, "Please select a file", Toast.LENGTH_SHORT).show();
         }
 
