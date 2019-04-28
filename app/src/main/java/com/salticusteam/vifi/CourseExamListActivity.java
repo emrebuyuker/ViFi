@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,6 +22,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class CourseExamListActivity extends AppCompatActivity {
 
@@ -104,10 +104,19 @@ public class CourseExamListActivity extends AppCompatActivity {
                     }
                 }
 
+                final List<ListViewItemHomeActivity> imageNames = new ArrayList<>();
 
-                ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, android.R.id.text1, imageNamesFB);
-                listView.setAdapter(veriAdaptoru);
-                System.out.println("lessonNamesFB6= " + imageNamesFB);
+                for (int i=0 ; i<imageNamesFB.size(); i++){
+
+                    imageNames.add(new ListViewItemHomeActivity(imageNamesFB.get(i)) );
+
+                }
+
+                ListViewAdapter adapter = new ListViewAdapter(CourseExamListActivity.this, imageNames);
+                listView.setAdapter(adapter);
+
+                /*ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, android.R.id.text1, imageNamesFB);
+                listView.setAdapter(veriAdaptoru);*/
 
             }
 

@@ -127,8 +127,6 @@ public class DepartmentCoursesActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    ;
+    };
 
 }

@@ -73,6 +73,11 @@ public class HomeActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        Intent intent = getIntent();
+
+        final String uniName = intent.getStringExtra("uniName");
+        System.out.println("uniNameadfasd= "+uniName);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -81,8 +86,8 @@ public class HomeActivity extends AppCompatActivity
         relativeLayoutUniversity = findViewById(R.id.layoutUniversity);
         textViewUniversity = findViewById(R.id.textViewUniversity);
 
-        relativeLayoutUniversity.setBackgroundColor(Color.WHITE);
-        textViewUniversity.setTextColor(Color.parseColor("#FFFF5722"));
+        //relativeLayoutUniversity.setBackgroundColor(Color.WHITE);
+        textViewUniversity.setTextColor(Color.parseColor("#FB920F"));
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -102,7 +107,6 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
 
         //getDataFirebase();
 
@@ -170,29 +174,4 @@ public class HomeActivity extends AppCompatActivity
         //drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-    /*private void getDataFirebase() {
-
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities");
-        newReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-
-                    HashMap<String, Object> hashMap = (HashMap<String, Object>) ds.getValue();
-                    uniNamesFB.add((String) hashMap.get("uniname"));
-                }
-
-                ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, android.R.id.text1, uniNamesFB);
-                listView.setAdapter(veriAdaptoru);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }*/
 }

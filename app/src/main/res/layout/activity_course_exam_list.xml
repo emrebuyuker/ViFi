@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CourseExamListActivity">
+    tools:context=".CourseExamListActivity"
+    android:background="#ffff">
 
     <ListView
         android:id="@+id/listView"
@@ -20,7 +21,9 @@
         app:layout_constraintBottom_toTopOf="@+id/adView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewTitle"
+        android:dividerHeight="10.0sp"
+        android:divider="#ffff" />
 
     <TextView
         android:id="@+id/textViewTitle"

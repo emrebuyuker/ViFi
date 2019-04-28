@@ -1,5 +1,6 @@
 package com.salticusteam.vifi;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -7,7 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -18,6 +19,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class LessonFragment extends Fragment {
 
@@ -28,6 +30,7 @@ public class LessonFragment extends Fragment {
     String facItem;
     String uniItem;
     String depItem;
+    String lessonName;
 
     ArrayList<String> lessonNamesFB;
 
@@ -41,7 +44,7 @@ public class LessonFragment extends Fragment {
         facItem = bundle.getString("facName");
         depItem = bundle.getString("depName");
 
-        View customView = inflater.inflate(R.layout.fragment_departments, container, false);
+        View customView = inflater.inflate(R.layout.fragment_lesson, container, false);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -75,8 +78,19 @@ public class LessonFragment extends Fragment {
                     }
                 }
 
-                ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, lessonNamesFB);
-                listView.setAdapter(veriAdaptoru);
+                final List<ListViewItemHomeActivity> lessonNames = new ArrayList<>();
+
+                for (int i=0 ; i<lessonNamesFB.size(); i++){
+
+                    lessonNames.add(new ListViewItemHomeActivity(lessonNamesFB.get(i)) );
+
+                }
+
+                ListViewAdapter adapter = new ListViewAdapter(getActivity(), lessonNames);
+                listView.setAdapter(adapter);
+
+                /*ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, lessonNamesFB);
+                listView.setAdapter(veriAdaptoru);*/
 
             }
 
@@ -89,24 +103,24 @@ public class LessonFragment extends Fragment {
 
     private void listViewOnClick() {
 
-        /*listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                String depName = depNamesFB.get(position);
+                lessonName = lessonNamesFB.get(position);
+                System.out.println("parent= " + lessonName);
 
-                Fragment selectedFragment = new LessonFragment();
-                Bundle bundle = new Bundle();
-                bundle.putString("uniName",uniItem);
-                bundle.putString("facName",facItem);
-                bundle.putString("depName",depName);
-                selectedFragment.setArguments(bundle);
+                Intent intent2 = new Intent(getActivity(), CourseExamListActivity.class);
 
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
+                intent2.putExtra("uniName", uniItem);
+                intent2.putExtra("fakName", facItem);
+                intent2.putExtra("bolName", depItem);
+                intent2.putExtra("lesson", lessonName);
+
+                startActivity(intent2);
 
             }
-        });*/
-    }
+        });
 
-    ;
+    };
 }

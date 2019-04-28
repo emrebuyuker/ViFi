@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -19,6 +18,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class DepartmentsFragment extends Fragment {
 
@@ -72,8 +72,19 @@ public class DepartmentsFragment extends Fragment {
                     }
                 }
 
-                ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, depNamesFB);
-                listView.setAdapter(veriAdaptoru);
+                final List<ListViewItemHomeActivity> depNames = new ArrayList<>();
+
+                for (int i=0 ; i<depNamesFB.size(); i++){
+
+                    depNames.add(new ListViewItemHomeActivity(depNamesFB.get(i)) );
+
+                }
+
+                ListViewAdapter adapter = new ListViewAdapter(getActivity(), depNames);
+                listView.setAdapter(adapter);
+
+                /*ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, depNamesFB);
+                listView.setAdapter(veriAdaptoru);*/
             }
 
             @Override

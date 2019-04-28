@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -20,6 +19,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class UniversityFragment extends Fragment {
 
@@ -64,8 +64,19 @@ public class UniversityFragment extends Fragment {
                     uniNamesFB.add((String) hashMap.get("uniname"));
                 }
 
-                ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, uniNamesFB);
-                listView.setAdapter(veriAdaptoru);
+                final List<ListViewItemHomeActivity> uniNames = new ArrayList<>();
+
+                for (int i=0 ; i<uniNamesFB.size(); i++){
+
+                    uniNames.add(new ListViewItemHomeActivity(uniNamesFB.get(i)) );
+
+                }
+
+                ListViewAdapter adapter = new ListViewAdapter(getActivity(), uniNames);
+                listView.setAdapter(adapter);
+
+                /*ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, uniNamesFB);
+                listView.setAdapter(veriAdaptoru);*/
                 spinner.setVisibility(View.INVISIBLE);
             }
 
