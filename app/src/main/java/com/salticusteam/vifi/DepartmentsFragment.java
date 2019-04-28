@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -37,9 +38,6 @@ public class DepartmentsFragment extends Fragment {
 
         Bundle bundle = this.getArguments();
 
-        uniItem = bundle.getString("uniName");
-        facItem = bundle.getString("facName");
-
         View customView = inflater.inflate(R.layout.fragment_departments, container, false);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -48,8 +46,16 @@ public class DepartmentsFragment extends Fragment {
 
         depNamesFB = new ArrayList<String>();
 
-        getDataFirebase();
-        listViewOnClick();
+        uniItem = bundle.getString("uniName");
+
+        if(uniItem == "HomeActivity"){
+            Toast.makeText(getContext(), "Lütfen Fakültenizi Seçiniz !!!", Toast.LENGTH_LONG).show();
+
+        }else{
+            facItem = bundle.getString("facName");
+            getDataFirebase();
+            listViewOnClick();
+        }
 
         return customView;
 

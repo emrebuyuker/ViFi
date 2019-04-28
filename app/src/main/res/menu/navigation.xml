@@ -22,7 +22,7 @@
         tools:ignore="HardcodedText" />
 
     <item
-        android:id="@+id/navigation_home"
+        android:id="@+id/lesson"
         android:icon="@drawable/lesson_24dp"
         android:title="DERS"
         tools:ignore="HardcodedText" />

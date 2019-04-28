@@ -39,25 +39,37 @@ public class HomeActivity extends AppCompatActivity
 
     //ListView listView;
 
-    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
             Fragment selectedFragment = null;
+            String uniName = "HomeActivity";
 
             switch (item.getItemId()) {
                 case R.id.university:
-                    System.out.println("emre= " + R.id.university);
-
                     selectedFragment = new UniversityFragment();
                     break;
                 case R.id.faculty:
-                    selectedFragment = new DepartmentsFragment();
+                    selectedFragment = new FacultiesFragment();
+                    Bundle bundle2 = new Bundle();
+                    bundle2.putString("uniName", uniName);
+                    selectedFragment.setArguments(bundle2);
                     break;
                 case R.id.chapter:
                     selectedFragment = new DepartmentsFragment();
+                    Bundle bundle3 = new Bundle();
+                    bundle3.putString("uniName", uniName);
+                    selectedFragment.setArguments(bundle3);
+                    break;
+
+                case R.id.lesson:
+                    selectedFragment = new LessonFragment();
+                    Bundle bundle4 = new Bundle();
+                    bundle4.putString("uniName", uniName);
+                    selectedFragment.setArguments(bundle4);
                     break;
             }
 
@@ -77,6 +89,9 @@ public class HomeActivity extends AppCompatActivity
         final String uniName = intent.getStringExtra("uniName");
         System.out.println("uniNameadfasd= "+uniName);
 
+
+        BottomNavigationView navigation = findViewById(R.id.navigation);                    //.xml dosyamızda tanımladığımız id'si navigasyon olan BottomNavigationView'in nesnesini oluşturduk.
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

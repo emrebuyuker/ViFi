@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -40,10 +41,6 @@ public class LessonFragment extends Fragment {
 
         Bundle bundle = this.getArguments();
 
-        uniItem = bundle.getString("uniName");
-        facItem = bundle.getString("facName");
-        depItem = bundle.getString("depName");
-
         View customView = inflater.inflate(R.layout.fragment_lesson, container, false);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -52,8 +49,17 @@ public class LessonFragment extends Fragment {
 
         lessonNamesFB = new ArrayList<String>();
 
-        getDataFirebase();
-        listViewOnClick();
+        uniItem = bundle.getString("uniName");
+
+        if(uniItem == "HomeActivity"){
+            Toast.makeText(getContext(), "Lütfen Üniversetiniz Seçiniz !!!", Toast.LENGTH_LONG).show();
+
+        }else{
+            facItem = bundle.getString("facName");
+            depItem = bundle.getString("depName");
+            getDataFirebase();
+            listViewOnClick();
+        }
 
         return customView;
 
