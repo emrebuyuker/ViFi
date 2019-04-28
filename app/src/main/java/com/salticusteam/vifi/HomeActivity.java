@@ -2,7 +2,6 @@ package com.salticusteam.vifi;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -40,7 +39,7 @@ public class HomeActivity extends AppCompatActivity
 
     //ListView listView;
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
@@ -50,7 +49,7 @@ public class HomeActivity extends AppCompatActivity
 
             switch (item.getItemId()) {
                 case R.id.university:
-                    System.out.println("emre= " + item);
+                    System.out.println("emre= " + R.id.university);
 
                     selectedFragment = new UniversityFragment();
                     break;
@@ -62,7 +61,7 @@ public class HomeActivity extends AppCompatActivity
                     break;
             }
 
-            //getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
 
             return true;
         }
@@ -83,11 +82,11 @@ public class HomeActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
 
-        relativeLayoutUniversity = findViewById(R.id.layoutUniversity);
-        textViewUniversity = findViewById(R.id.textViewUniversity);
+        //relativeLayoutUniversity = findViewById(R.id.layoutUniversity);
+        //textViewUniversity = findViewById(R.id.textViewUniversity);
 
         //relativeLayoutUniversity.setBackgroundColor(Color.WHITE);
-        textViewUniversity.setTextColor(Color.parseColor("#FB920F"));
+        //textViewUniversity.setTextColor(Color.parseColor("#FB920F"));
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 

@@ -1,20 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/university"
+        android:icon="@drawable/university_24dp"
         android:title="ÜNİVERSİTE"
         tools:ignore="HardcodedText" />
 
     <item
         android:id="@+id/faculty"
         android:title="FAKÜLTE"
+        android:icon="@drawable/faculty_24dp"
         tools:ignore="HardcodedText" />
 
     <item
         android:id="@+id/chapter"
         android:title="BÖLÜM"
+        android:icon="@drawable/deparment_24dp"
+        tools:ignore="HardcodedText" />
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/lesson_24dp"
+        android:title="DERS"
         tools:ignore="HardcodedText" />
 
 </menu>

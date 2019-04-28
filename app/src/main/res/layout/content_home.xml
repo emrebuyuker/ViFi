@@ -9,92 +9,6 @@
     tools:layout_editor_absoluteY="56dp"
     tools:showIn="@layout/app_bar_home">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:baselineAligned="false"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="UselessLeaf">
-
-        <RelativeLayout
-            android:id="@+id/layoutUniversity"
-            android:layout_width="0dip"
-            android:layout_height="match_parent"
-            android:layout_weight="1.3"
-            android:background="@color/colorPrimary">
-
-            <TextView
-                android:id="@+id/textViewUniversity"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="ÜNİVERSİTE"
-                android:textColor="#ffff"
-                android:textSize="18sp"
-                tools:ignore="HardcodedText" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/layoutFaculty"
-            android:layout_width="0dip"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary">
-
-            <TextView
-                android:id="@+id/textViewFaculty"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="FAKÜLTE"
-                android:textColor="#ffff"
-                android:textSize="18sp"
-                tools:ignore="HardcodedText" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/layoutDepartment"
-            android:layout_width="0dip"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary">
-
-            <TextView
-                android:id="@+id/textViewDepartment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="BÖLÜM"
-                android:textColor="#ffff"
-                android:textSize="18sp"
-                tools:ignore="HardcodedText" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/layoutLesson"
-            android:layout_width="0dip"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary">
-
-            <TextView
-                android:id="@+id/textViewLesson"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="DERS"
-                android:textColor="#ffff"
-                android:textSize="18sp"
-                tools:ignore="HardcodedText" />
-        </RelativeLayout>
-
-
-    </LinearLayout>
-
 
     <FrameLayout
         android:id="@+id/fragment_container"
@@ -103,10 +17,23 @@
         android:background="#ffff"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+        app:layout_constraintStart_toStartOf="parent">
 
     </FrameLayout>
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/navigation"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:background="?android:attr/windowBackground"
+        android:backgroundTint="@color/colorPrimary"
+        app:itemIconTint="#ffff"
+        app:itemTextColor="#ffff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/navigation"
+        tools:ignore="UnusedAttribute" />
 
 
 </android.support.constraint.ConstraintLayout>
