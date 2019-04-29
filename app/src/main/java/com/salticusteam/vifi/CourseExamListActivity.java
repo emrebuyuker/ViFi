@@ -11,8 +11,10 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -40,14 +42,34 @@ public class CourseExamListActivity extends AppCompatActivity {
 
     Context context = this;
 
+    Integer advertisement = 0;
+
     Intent intent2;
 
     private AdView mAdView;
+
+    InterstitialAd mInterstitialAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_exam_list);
+
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
+
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/8691691433");
+
+        mInterstitialAd.setAdListener(new AdListener() { //reklamımıza listener ekledik ve kapatıldığında haberimiz olacak
+            @Override
+            public void onAdClosed() { //reklam kapatıldığı zaman tekrardan reklamın yüklenmesi için
+                requestNewInterstitial();
+            }
+        });
+
+
+        requestNewInterstitial(); //reklamı direk uygulama açıldığında yüklemek için onCreate içinde yapıyoruz reklam yükleme işini
 
         MobileAds.initialize(this,
                 "ca-app-pub-9037305793844471~3834061477");
@@ -55,6 +77,8 @@ public class CourseExamListActivity extends AppCompatActivity {
         mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+
+        advertisement = 1;
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -69,6 +93,14 @@ public class CourseExamListActivity extends AppCompatActivity {
         getDataFirebaseMain6Activity();
         listViewOnClick();
 
+    }
+
+    private void requestNewInterstitial() { //Test cihazı ekliyoruz Admob dan ban yememek için
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("B9C840C4E9AD8EC5D1497C9A62C56374")
+                .build();
+
+        mInterstitialAd.loadAd(adRequest);
     }
 
     @Override
@@ -130,22 +162,22 @@ public class CourseExamListActivity extends AppCompatActivity {
 
     private void listViewOnClick() {
 
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        System.out.println("emre");
 
 
-                imagesName = imageNamesFB.get(position);
+        if (advertisement == 1) {
 
-                lessonType();
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            }
-        });
-    }
+                    imagesName = imageNamesFB.get(position);
+                    lessonType();
 
-    ;
-
+                }
+            });
+        }
+    };
 
     private void lessonType() {
 
@@ -193,10 +225,18 @@ public class CourseExamListActivity extends AppCompatActivity {
                 intent2.putExtra("imagename", imagesName);
                 intent2.putExtra("type", type);
 
+                if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
 
-                startActivity(intent2);
 
+                    startActivity(intent2);
+                    mInterstitialAd.show(); //reklam gösteriliyor
+                }
 
+                else {
+                    //Reklam yüklenmediyse yapılacak işlemler
+
+                    startActivity(intent2);
+                }
             }
 
             @Override

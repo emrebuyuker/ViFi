@@ -133,6 +133,5 @@ public class LessonFragment extends Fragment {
 
             }
         });
-
     };
 }
