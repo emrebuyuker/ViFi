@@ -3,6 +3,7 @@ package com.salticusteam.vifi;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,9 +38,15 @@ public class FacultiesFragment extends Fragment {
 
         View customView = inflater.inflate(R.layout.fragment_faculties, container, false);
 
+        BottomNavigationView mBottomNavigationView=(BottomNavigationView)customView.findViewById(R.id.navigation);
+
+        View view = mBottomNavigationView.findViewById(R.id.faculty);
+        view.performClick();
+
         firebaseDatabase = FirebaseDatabase.getInstance();
 
         listView = customView.findViewById(R.id.listView);
+
 
         fakNamesFB = new ArrayList<String>();
 

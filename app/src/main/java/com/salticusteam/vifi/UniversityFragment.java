@@ -3,6 +3,7 @@ package com.salticusteam.vifi;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +41,11 @@ public class UniversityFragment extends Fragment {
 
         LayoutInflater layoutInflater = getActivity().getLayoutInflater();
         View customView = layoutInflater.inflate(R.layout.fragment_university, container, false);
+
+        BottomNavigationView mBottomNavigationView=(BottomNavigationView)customView.findViewById(R.id.navigation);
+
+        View view = mBottomNavigationView.findViewById(R.id.university);
+        view.performClick();
 
         listView = customView.findViewById(R.id.listView);
 

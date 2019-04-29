@@ -1,12 +1,8 @@
 package com.salticusteam.vifi;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -15,102 +11,28 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
 import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.ArrayList;
 
-public class HomeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-
-    //private TextView mTextMessage;
-
-    Context context = this;
-
-    RelativeLayout relativeLayoutUniversity;
+public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     FirebaseDatabase firebaseDatabase;
 
     ArrayList<String> uniNamesFB;
-
-    TextView textViewUniversity;
-
-    //ListView listView;
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-            Fragment selectedFragment = null;
-            String uniName = "HomeActivity";
-
-            switch (item.getItemId()) {
-                case R.id.university:
-                    selectedFragment = new UniversityFragment();
-                    break;
-                case R.id.faculty:
-                    selectedFragment = new FacultiesFragment();
-                    Bundle bundle2 = new Bundle();
-                    bundle2.putString("uniName", uniName);
-                    selectedFragment.setArguments(bundle2);
-                    break;
-                case R.id.chapter:
-                    selectedFragment = new DepartmentsFragment();
-                    Bundle bundle3 = new Bundle();
-                    bundle3.putString("uniName", uniName);
-                    selectedFragment.setArguments(bundle3);
-                    break;
-
-                case R.id.lesson:
-                    selectedFragment = new LessonFragment();
-                    Bundle bundle4 = new Bundle();
-                    bundle4.putString("uniName", uniName);
-                    selectedFragment.setArguments(bundle4);
-                    break;
-            }
-
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectedFragment).commit();
-
-            return true;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        Intent intent = getIntent();
-
-        final String uniName = intent.getStringExtra("uniName");
-        System.out.println("uniNameadfasd= "+uniName);
-
-
-        BottomNavigationView navigation = findViewById(R.id.navigation);                    //.xml dosyamızda tanımladığımız id'si navigasyon olan BottomNavigationView'in nesnesini oluşturduk.
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
 
-        //relativeLayoutUniversity = findViewById(R.id.layoutUniversity);
-        //textViewUniversity = findViewById(R.id.textViewUniversity);
-
-        //relativeLayoutUniversity.setBackgroundColor(Color.WHITE);
-        //textViewUniversity.setTextColor(Color.parseColor("#FB920F"));
-
         firebaseDatabase = FirebaseDatabase.getInstance();
-
-        //listView = findViewById(R.id.list);
 
         uniNamesFB = new ArrayList<String>();
 
-        /*mTextMessage = (TextView) findViewById(R.id.message);
-        mTextMessage.setCursorVisible(false);*/
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new UniversityFragment()).commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -121,8 +43,6 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        //getDataFirebase();
 
     }
 
@@ -183,9 +103,6 @@ public class HomeActivity extends AppCompatActivity
             shareMyMessage(message);
 
         }
-
-        //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        //drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 }
