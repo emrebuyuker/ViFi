@@ -146,42 +146,7 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        /*final Intent intent = getIntent();
 
-        final String uniName = intent.getStringExtra("uniName");
-        final String fakName = intent.getStringExtra("fakName");
-        final String bolName = intent.getStringExtra("bolName");
-        final String lessonName = intent.getStringExtra("lesson");
-        final String type = intent.getStringExtra("type");
-
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(type);
-        newReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-
-                    System.out.println("dataSnapshot= "+dataSnapshot);
-
-                    if (!ds.getKey().equals("type")){
-
-                        HashMap<String, Object> imageNameMap = (HashMap<String, Object>) ds.getValue();
-                        imageNamesFB.add((String) imageNameMap.get("imagename"));
-                        imagesFB.add((String) imageNameMap.get("downloadURL"));
-
-                    }
-                }
-                ArrayAdapter<String> veriAdaptoru=new ArrayAdapter<String> (context, android.R.layout.simple_list_item_1, android.R.id.text1,imageNamesFB);
-                listView.setAdapter(veriAdaptoru);
-                System.out.println("lessonNamesFB= "+imageNamesFB);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
     }
 
     @Override

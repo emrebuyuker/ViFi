@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
 
 
-                Intent intent = new Intent(getApplicationContext(), DepartmentCoursesActivity.class);
+                /*Intent intent = new Intent(getApplicationContext(), DepartmentCoursesActivity.class);
 
                 intent.putExtra("bolName", bolItem);
                 intent.putExtra("fakName", fakItem);
@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 intent.putExtra("fakName", fakItem);
                 intent.putExtra("uniName", uniItem);
 
-                startActivity(intent);
+                startActivity(intent);*/
 
             }
 
