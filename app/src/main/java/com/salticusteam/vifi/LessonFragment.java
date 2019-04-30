@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,10 +43,9 @@ public class LessonFragment extends Fragment {
 
         View customView = inflater.inflate(R.layout.fragment_lesson, container, false);
 
-        BottomNavigationView mBottomNavigationView=(BottomNavigationView)customView.findViewById(R.id.navigation);
+        HomeActivity homeActivity = (HomeActivity) requireActivity();
 
-        View view = mBottomNavigationView.findViewById(R.id.lesson);
-        view.performClick();
+        homeActivity.setBottomMenuItem(R.id.lesson);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -57,10 +55,10 @@ public class LessonFragment extends Fragment {
 
         uniItem = bundle.getString("uniName");
 
-        if(uniItem == "HomeActivity"){
+        if (uniItem == "HomeActivity") {
             Toast.makeText(getContext(), "Lütfen Üniversetiniz Seçiniz !!!", Toast.LENGTH_LONG).show();
 
-        }else{
+        } else {
             facItem = bundle.getString("facName");
             depItem = bundle.getString("depName");
             getDataFirebase();
@@ -92,9 +90,9 @@ public class LessonFragment extends Fragment {
 
                 final List<ListViewItemHomeActivity> lessonNames = new ArrayList<>();
 
-                for (int i=0 ; i<lessonNamesFB.size(); i++){
+                for (int i = 0; i < lessonNamesFB.size(); i++) {
 
-                    lessonNames.add(new ListViewItemHomeActivity(lessonNamesFB.get(i)) );
+                    lessonNames.add(new ListViewItemHomeActivity(lessonNamesFB.get(i)));
 
                 }
 
@@ -133,5 +131,7 @@ public class LessonFragment extends Fragment {
 
             }
         });
-    };
+    }
+
+    ;
 }

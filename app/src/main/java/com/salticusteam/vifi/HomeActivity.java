@@ -2,6 +2,7 @@ package com.salticusteam.vifi;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -19,7 +20,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
-public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     FirebaseDatabase firebaseDatabase;
 
@@ -27,13 +28,17 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     private AdView mAdView;
 
+    BottomNavigationView navigation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        navigation = findViewById(R.id.navigation);
+
         MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544~3347511713");
+                "ca-app-pub-9037305793844471~3834061477");
 
         mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -58,6 +63,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+    }
+
+    public void setBottomMenuItem(int itemId) {
+        navigation.setSelectedItemId(itemId);
     }
 
     @Override

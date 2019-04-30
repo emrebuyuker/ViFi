@@ -3,7 +3,6 @@ package com.salticusteam.vifi;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,10 +37,9 @@ public class FacultiesFragment extends Fragment {
 
         View customView = inflater.inflate(R.layout.fragment_faculties, container, false);
 
-        BottomNavigationView mBottomNavigationView=(BottomNavigationView)customView.findViewById(R.id.navigation);
+        HomeActivity homeActivity = (HomeActivity) requireActivity();
 
-        View view = mBottomNavigationView.findViewById(R.id.faculty);
-        view.performClick();
+        homeActivity.setBottomMenuItem(R.id.faculty);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -54,17 +52,14 @@ public class FacultiesFragment extends Fragment {
 
         uniItem = bundle.getString("uniName");
 
-        if(uniItem == "HomeActivity"){
+        if (uniItem == "HomeActivity") {
             Toast.makeText(getContext(), "Lütfen Üniversetiniz Seçiniz !!!", Toast.LENGTH_LONG).show();
 
-        }else{
+        } else {
 
             getDataFirebase();
             listViewOnClick();
         }
-
-
-
         return customView;
 
     }
@@ -88,16 +83,14 @@ public class FacultiesFragment extends Fragment {
 
                 final List<ListViewItemHomeActivity> facNames = new ArrayList<>();
 
-                for (int i=0 ; i<fakNamesFB.size(); i++){
+                for (int i = 0; i < fakNamesFB.size(); i++) {
 
-                    facNames.add(new ListViewItemHomeActivity(fakNamesFB.get(i)) );
+                    facNames.add(new ListViewItemHomeActivity(fakNamesFB.get(i)));
 
                 }
 
                 ListViewAdapter adapter = new ListViewAdapter(getActivity(), facNames);
                 listView.setAdapter(adapter);
-                /*ArrayAdapter<String> veriAdaptoru = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, fakNamesFB);
-                listView.setAdapter(veriAdaptoru);*/
             }
 
             @Override
@@ -122,7 +115,7 @@ public class FacultiesFragment extends Fragment {
                 bundle.putString("facName", facName);
                 selectedFragment.setArguments(bundle);
 
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fragment_container, selectedFragment).commit();
 
             }
         });

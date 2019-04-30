@@ -3,7 +3,6 @@ package com.salticusteam.vifi;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,10 +41,9 @@ public class UniversityFragment extends Fragment {
         LayoutInflater layoutInflater = getActivity().getLayoutInflater();
         View customView = layoutInflater.inflate(R.layout.fragment_university, container, false);
 
-        BottomNavigationView mBottomNavigationView=(BottomNavigationView)customView.findViewById(R.id.navigation);
+        HomeActivity homeActivity = (HomeActivity) requireActivity();
 
-        View view = mBottomNavigationView.findViewById(R.id.university);
-        view.performClick();
+        homeActivity.setBottomMenuItem(R.id.university);
 
         listView = customView.findViewById(R.id.listView);
 
@@ -72,9 +70,9 @@ public class UniversityFragment extends Fragment {
 
                 final List<ListViewItemHomeActivity> uniNames = new ArrayList<>();
 
-                for (int i=0 ; i<uniNamesFB.size(); i++){
+                for (int i = 0; i < uniNamesFB.size(); i++) {
 
-                    uniNames.add(new ListViewItemHomeActivity(uniNamesFB.get(i)) );
+                    uniNames.add(new ListViewItemHomeActivity(uniNamesFB.get(i)));
 
                 }
 
@@ -108,7 +106,7 @@ public class UniversityFragment extends Fragment {
                 bundle.putString("uniName", uniName);
                 selectedFragment.setArguments(bundle);
 
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fragment_container, selectedFragment).commit();
 
             }
         });
