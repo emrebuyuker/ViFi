@@ -7,8 +7,10 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,6 +36,19 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        new GooglePlayAppVersion(getPackageName(), new GooglePlayAppVersion.Listener() {
+            @Override
+            public void result(String version) {
+                if (version != null && !version.equals(BuildConfig.VERSION_NAME)) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+                    builder.setTitle("Error");
+                    builder.setMessage("Uygulama en güncel sürüme sahip değil lütfen uygulamayı güncelleyiniz");
+                    builder.setCancelable(false);
+                    builder.show();
+                }
+            }
+        }).execute();
 
         navigation = findViewById(R.id.navigation);
 

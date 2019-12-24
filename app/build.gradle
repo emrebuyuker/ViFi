@@ -5,7 +5,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.salticusteam.vifi"
-        minSdkVersion 14
+        minSdkVersion 19
         targetSdkVersion 28
         multiDexEnabled true
         versionCode 15
