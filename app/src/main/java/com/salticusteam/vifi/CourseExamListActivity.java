@@ -10,12 +10,16 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,7 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CourseExamListActivity extends AppCompatActivity {
+public class CourseExamListActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
     ListView listView;
     TextView textViewTitle;
@@ -43,6 +47,7 @@ public class CourseExamListActivity extends AppCompatActivity {
     Context context = this;
 
     Integer advertisement = 0;
+    Integer newPosition = 0;
 
     Intent intent2;
 
@@ -50,10 +55,19 @@ public class CourseExamListActivity extends AppCompatActivity {
 
     InterstitialAd mInterstitialAd;
 
+    private static final String AD_UNIT_ID = "ca-app-pub-9037305793844471/9446264895";
+    private static final String APP_ID = "ca-app-pub-9037305793844471~3834061477";
+    private RewardedVideoAd mRewardedVideoAd;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_exam_list);
+
+        MobileAds.initialize(this, APP_ID);
+        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        mRewardedVideoAd.setRewardedVideoAdListener(this);
+        loadRewardedVideoAd();
 
         MobileAds.initialize(this, "ca-app-pub-9037305793844471~3834061477");
 
@@ -144,6 +158,17 @@ public class CourseExamListActivity extends AppCompatActivity {
 
                 }
 
+                if (imageNamesFB.size() <= 3) {
+                    for (int i=0 ; i<imageNamesFB.size(); i++){
+                        imageNames.set(i, new ListViewItemHomeActivity("Görmek için lütfen reklamı izleyiniz."));
+                    }
+                } else {
+                    for (int i=0 ; i<3 ; i++){
+                        imageNames.set(i, new ListViewItemHomeActivity("Görmek için lütfen reklamı izleyiniz."));
+                    }
+                }
+
+
                 ListViewAdapter adapter = new ListViewAdapter(CourseExamListActivity.this, imageNames);
                 listView.setAdapter(adapter);
 
@@ -162,15 +187,13 @@ public class CourseExamListActivity extends AppCompatActivity {
 
     private void listViewOnClick() {
 
-        System.out.println("emre");
-
-
         if (advertisement == 1) {
 
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                    newPosition = position;
                     imagesName = imageNamesFB.get(position);
                     lessonType();
 
@@ -225,18 +248,7 @@ public class CourseExamListActivity extends AppCompatActivity {
                 intent2.putExtra("imagename", imagesName);
                 intent2.putExtra("type", type);
 
-                if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
-
-
-                    startActivity(intent2);
-                    mInterstitialAd.show(); //reklam gösteriliyor
-                }
-
-                else {
-                    //Reklam yüklenmediyse yapılacak işlemler
-
-                    startActivity(intent2);
-                }
+                rewardedAdMethod();
             }
 
             @Override
@@ -247,5 +259,65 @@ public class CourseExamListActivity extends AppCompatActivity {
 
     }
 
+    private void rewardedAdMethod() {
+        if (newPosition < 3) {
+            if (mRewardedVideoAd.isLoaded()) {
+                mRewardedVideoAd.show();
+            } else {
+                loadRewardedVideoAd();
+            }
+        } else {
+            if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
+                startActivity(intent2);
+                mInterstitialAd.show(); //reklam gösteriliyor
+            }
 
+            else {
+                //Reklam yüklenmediyse yapılacak işlemler
+
+                startActivity(intent2);
+            }
+        }
+    }
+
+    private void loadRewardedVideoAd() {
+        if (!mRewardedVideoAd.isLoaded()) {
+            mRewardedVideoAd.loadAd(AD_UNIT_ID, new AdRequest.Builder().build());
+        }
+    }
+
+    @Override
+    public void onRewardedVideoAdLoaded() {
+    }
+
+    @Override
+    public void onRewardedVideoAdOpened() {
+    }
+
+    @Override
+    public void onRewardedVideoStarted() {
+    }
+
+    @Override
+    public void onRewardedVideoAdClosed() {
+        loadRewardedVideoAd();
+    }
+
+    @Override
+    public void onRewarded(RewardItem rewardItem) {
+        startActivity(intent2);
+    }
+
+    @Override
+    public void onRewardedVideoAdLeftApplication() {
+    }
+
+    @Override
+    public void onRewardedVideoAdFailedToLoad(int i) {
+        loadRewardedVideoAd();
+    }
+
+    @Override
+    public void onRewardedVideoCompleted() {
+    }
 }
