@@ -92,7 +92,7 @@ public class ExamDetailActivity extends AppCompatActivity implements AdapterView
 
         textViewTitle.setText(imagesName);
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName).child(type);
+        DatabaseReference newReference = firebaseDatabase.getReference("Universitiess").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName).child(type);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

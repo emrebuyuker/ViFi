@@ -133,7 +133,7 @@ public class CourseExamListActivity extends AppCompatActivity implements Rewarde
 
         textViewTitle.setText(lessonName);
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName);
+        DatabaseReference newReference = firebaseDatabase.getReference("Universitiess").child(uniName).child(fakName).child(bolName).child(lessonName);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -212,7 +212,7 @@ public class CourseExamListActivity extends AppCompatActivity implements Rewarde
         final String bolName = intent.getStringExtra("bolName");
         final String lessonName = intent.getStringExtra("lesson");
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName);
+        DatabaseReference newReference = firebaseDatabase.getReference("Universitiess").child(uniName).child(fakName).child(bolName).child(lessonName).child(imagesName);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

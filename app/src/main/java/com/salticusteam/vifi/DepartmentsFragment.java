@@ -67,7 +67,7 @@ public class DepartmentsFragment extends Fragment {
 
     private void getDataFirebase() {
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem).child(facItem);
+        DatabaseReference newReference = firebaseDatabase.getReference("Universitiess").child(uniItem).child(facItem);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

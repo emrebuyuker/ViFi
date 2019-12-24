@@ -144,20 +144,20 @@ public class AddPdfLessonActivity extends AppCompatActivity {
                                 UUID uuid = UUID.randomUUID();
                                 String uuidString = uuid.toString();
 
-                                /*myRef.child("Universities").child(userUniName).child("uniname").setValue(userUniName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child("fakname").setValue(userFakName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child("bolname").setValue(userBolName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child("lessonname").setValue(userLessonName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("imagename").setValue(userImageName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(uuidString).child("downloadURL").setValue(downloadURL);*/
+                                /*myRef.child("Universitiess").child(userUniName).child("uniname").setValue(userUniName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child("fakname").setValue(userFakName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child(userBolName).child("bolname").setValue(userBolName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child("lessonname").setValue(userLessonName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("imagename").setValue(userImageName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(uuidString).child("downloadURL").setValue(downloadURL);*/
 
-                                myRef.child("Universities").child(userUniName).child("uniname").setValue(userUniName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child("fakname").setValue(userFakName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child("bolname").setValue(userBolName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child("lessonname").setValue(userLessonName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("imagename").setValue(userImageName);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(userType).child("type").setValue(userType);
-                                myRef.child("Universities").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(userType).child(uuidString).child("downloadURL").setValue(downloadURL);
+                                myRef.child("Universitiess").child(userUniName).child("uniname").setValue(userUniName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child("fakname").setValue(userFakName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child(userBolName).child("bolname").setValue(userBolName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child("lessonname").setValue(userLessonName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child("imagename").setValue(userImageName);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(userType).child("type").setValue(userType);
+                                myRef.child("Universitiess").child(userUniName).child(userFakName).child(userBolName).child(userLessonName).child(userImageName).child(userType).child(uuidString).child("downloadURL").setValue(downloadURL);
 
 
                                 Toast.makeText(getApplicationContext(), "Lesson Saved", Toast.LENGTH_LONG).show();

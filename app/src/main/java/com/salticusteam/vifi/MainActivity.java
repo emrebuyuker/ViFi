@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private void getDataFirebase() {
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities");
+        DatabaseReference newReference = firebaseDatabase.getReference("Universitiess");
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private void getDataSpinnerFak() {
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem);
+        DatabaseReference newReference = firebaseDatabase.getReference("Universitiess").child(uniItem);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private void getDataSpinnerBol() {
 
-        DatabaseReference newReference = firebaseDatabase.getReference("Universities").child(uniItem).child(fakItem);
+        DatabaseReference newReference = firebaseDatabase.getReference("Universitiess").child(uniItem).child(fakItem);
         newReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
