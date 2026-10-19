@@ -269,3 +269,12 @@ cmake-build-*/
 
 
 # End of https://www.gitignore.io/api/java,android,intellij,androidstudio
+
+### Claude Code ###
+# Linked git worktrees created by Claude Code (full checkouts — never commit)
+.claude/worktrees/
+# Per-machine local settings (keep shared settings.json tracked)
+.claude/settings.local.json
+
+### IDE (untracked project-system file) ###
+.idea/AndroidProjectSystem.xml
