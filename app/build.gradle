@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
 }
 
@@ -24,6 +25,7 @@ android {
 
     buildFeatures {
         buildConfig true
+        compose true
     }
 
     lint {
@@ -52,6 +54,17 @@ dependencies {
 
     implementation libs.kotlinx.coroutines.android
     implementation libs.kotlinx.coroutines.play.services
+
+    implementation platform(libs.compose.bom)
+    implementation libs.compose.ui
+    implementation libs.compose.ui.graphics
+    implementation libs.compose.ui.tooling.preview
+    implementation libs.compose.material3
+    implementation libs.compose.material.icons.extended
+    implementation libs.androidx.activity.compose
+    // Preview rendering + test host activity: debug only, never shipped in release.
+    debugImplementation libs.compose.ui.tooling
+    debugImplementation libs.compose.ui.test.manifest
 
     implementation libs.androidx.appcompat
     implementation libs.androidx.constraintlayout
@@ -82,4 +95,8 @@ dependencies {
     testImplementation libs.mockk
     androidTestImplementation libs.androidx.test.ext.junit
     androidTestImplementation libs.androidx.test.runner
+    // compose ui-test pulls Espresso 3.5.x, which crashes on API 36+ (InputManager.getInstance removed).
+    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation platform(libs.compose.bom)
+    androidTestImplementation libs.compose.ui.test.junit4
 }
