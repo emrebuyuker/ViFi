@@ -58,6 +58,18 @@ class LoginViewModel @Inject constructor(
     private var lastFailureInfo: LoginFailureInfo? = null
 
     // Intents
+    init {
+        // The login screen lives outside the NavHost, so this model outlives a session and stays busy after a
+        // successful sign-in. Start over on sign-out, like iOS presenting a fresh LoginView.
+        viewModelScope.launch {
+            var wasSignedIn = false
+            authService.userChanges().collect { user ->
+                if (user == null && wasSignedIn) reset()
+                wasSignedIn = user != null
+            }
+        }
+    }
+
     /** Takes an edit of the number field, formatted so pasted `+90 5…` or `05…` numbers become `5XX XXX XX XX`. */
     fun onPhoneTextChange(input: String) {
         if (_uiState.value.isWorking) return
@@ -150,6 +162,14 @@ class LoginViewModel @Inject constructor(
     }
 
     // Helpers
+    /** Back to an empty number step, forgetting the finished session's code and failure. */
+    private fun reset() {
+        verificationId = null
+        lastSentCode = null
+        lastFailureInfo = null
+        _uiState.value = LoginUiState()
+    }
+
     private fun requestCode(phoneNumber: PhoneNumber) {
         _uiState.update { it.copy(isWorking = true, error = null) }
         viewModelScope.launch {

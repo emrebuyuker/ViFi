@@ -244,4 +244,23 @@ class LoginViewModelTest {
         assertEquals("532 123 45 67", sut.uiState.value.phoneText)
         advanceUntilIdle()
     }
+
+    // --- session ---
+
+    @Test
+    fun `sign out after a successful sign-in starts over on an empty number step`() = runTest {
+        sendCodeTo()
+        sut.onCodeChange(FakeAuthService.VALID_CODE)
+        advanceUntilIdle()
+        assertTrue(auth.currentUser != null)
+        // Stays busy while signed in: the session gate replaces the login screen.
+        assertTrue(sut.uiState.value.isWorking)
+
+        auth.signOut()
+        advanceUntilIdle()
+
+        assertEquals(LoginUiState(), sut.uiState.value)
+        assertEquals(0, sut.resendCooldownRemaining())
+        assertNull(sut.supportContext())
+    }
 }
