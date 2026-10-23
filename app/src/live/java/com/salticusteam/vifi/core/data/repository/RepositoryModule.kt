@@ -2,7 +2,9 @@ package com.salticusteam.vifi.core.data.repository
 
 import com.salticusteam.vifi.BuildConfig
 import com.salticusteam.vifi.core.data.firebase.FirebaseAnalyticsTracker
+import com.salticusteam.vifi.core.data.firebase.FirebaseAuthService
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
+import com.salticusteam.vifi.core.data.firebase.FirebaseLoginDiagnosticsReporter
 import com.salticusteam.vifi.core.data.firebase.FirebaseProfileService
 import com.salticusteam.vifi.core.data.firebase.FirestoreArchiveRepository
 import com.salticusteam.vifi.core.data.firebase.RtdbAppConfigReader
@@ -56,6 +58,14 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindProfileService(impl: FirebaseProfileService): ProfileService
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthService(impl: FirebaseAuthService): AuthService
+
+    @Binds
+    @Singleton
+    abstract fun bindLoginDiagnosticsReporter(impl: FirebaseLoginDiagnosticsReporter): LoginDiagnosticsReporter
 
     companion object {
         @Provides

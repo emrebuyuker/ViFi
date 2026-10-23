@@ -3,6 +3,7 @@ package com.salticusteam.vifi.core.data.firebase
 import android.content.Context
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
@@ -46,6 +47,11 @@ object FirebaseModule {
     @Provides
     @Singleton
     fun provideStorage(): FirebaseStorage = FirebaseStorage.getInstance()
+
+    /** The provider factory is installed by BackendStartup before any backend call. */
+    @Provides
+    @Singleton
+    fun provideAppCheck(): FirebaseAppCheck = FirebaseAppCheck.getInstance()
 
     @Provides
     @Singleton

@@ -44,4 +44,26 @@
     <string name="optional_update_title">Yeni sürüm mevcut</string>
     <string name="optional_update_default_message">ViFi %1$s Google Play\'de. En iyi deneyim için uygulamayı güncelle.</string>
     <string name="optional_update_later">Daha Sonra</string>
+
+    <!-- Added in 2.5 — phone sign-in (iOS LoginView copy, verbatim) -->
+    <string name="auth_phone_title">Giriş Yap</string>
+    <string name="auth_phone_description">Sınav arşivine ulaşmak için cep telefonu numaranı doğrula.</string>
+    <string name="auth_phone_send_code_button">Kod Gönder</string>
+    <string name="auth_phone_sms_notice">Numarana tek kullanımlık bir doğrulama kodu SMS ile gönderilir. Standart SMS ücretleri uygulanabilir.</string>
+    <string name="auth_phone_placeholder">5XX XXX XX XX</string>
+    <string name="cd_auth_phone_field">Telefon numarası, %1$s</string>
+    <string name="auth_contact_support_button">Giriş yapamıyor musun? Bize Ulaş</string>
+    <string name="auth_code_title">Kodu Gir</string>
+    <string name="auth_code_description">%1$s numarasına gönderilen 6 haneli kodu gir.</string>
+    <string name="auth_code_label">Doğrulama kodu</string>
+    <string name="auth_code_placeholder">000000</string>
+    <string name="auth_code_verify_button">Doğrula</string>
+    <string name="auth_code_resend_button">Kodu tekrar gönder</string>
+    <string name="auth_code_resend_countdown">Kodu tekrar gönder (%1$d sn)</string>
+    <string name="auth_code_change_number_button">Numarayı değiştir</string>
+    <string name="cd_auth_working">Lütfen bekle</string>
+    <string name="contact_support_no_mail_title">Mail uygulaması bulunamadı</string>
+    <string name="contact_support_no_mail_message">%1$s adresine e-posta gönderebilirsiniz.</string>
+    <string name="contact_support_copy_address_button">Adresi Kopyala</string>
+    <string name="common_ok">Tamam</string>
 </resources>
