@@ -13,6 +13,7 @@ activityCompose = "1.9.3"
 navigation = "2.8.3"
 hiltNavigationCompose = "1.2.0"
 kotlinxSerialization = "1.7.3"
+desugarJdkLibs = "2.1.2"
 
 appcompat = "1.7.0"
 constraintlayout = "2.2.0"
@@ -53,6 +54,8 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+# java.time (Instant, Duration, ...) on API 24-25; minSdk is 24.
+desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }

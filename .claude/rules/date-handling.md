@@ -4,7 +4,7 @@
 > **Globs:** `["**/*.kt"]`
 
 Backend zaman damgaları **ISO 8601 + offset** biçimindedir: `"2026-05-28T12:36:26+00:00"`.
-Android tarafında tarih tipi `java.time` (JDK 17, desugaring'e gerek yok): parse/aritmetik için
+Android tarafında tarih tipi `java.time` (minSdk 24 olduğu için core library desugaring açık — `app/build.gradle` `coreLibraryDesugaringEnabled`): parse/aritmetik için
 `OffsetDateTime` / `Instant`, yalnız-gün değerleri için `LocalDate`. `java.util.Date` ve `Calendar`
 yeni kodda KULLANILMAZ.
 
