@@ -79,8 +79,11 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
 | **Uygulama** | `com.salticusteam.vifi`, `versionName 2.5`, `versionCode 16`, `compileSdk/targetSdk 35`, `minSdk 24` |
 | **Flavor** | `live` (canlı vifi-831a8) · `mock` (örnek veri, Firebase başlamaz, yalnız debug) |
 | **Veri (arşiv)** | Live `FirestoreArchiveRepository` → named `vifi` Firestore `catalogNodes`/`exams` (`BE-15`); mock örnek veri |
+| **Sınav dosyaları** | `RemoteFileLoader` (OkHttp + ID token/App Check) → `cacheDir/ExamFiles` (Files + Coil Images); görsel pager + platform `PdfRenderer`; `FLAG_SECURE` ekran koruması; hesap silmede `purge()` |
+| **Coin** | `wallets/<uid>` + `users/<uid>/unlocks` canlı okuma, `ExamLock` (en eski 2 sınav ücretsiz, 100 coin), `unlockExam` callable (europe-west1), `config/rewards` android→ios fallback |
+| **Bildirim** | Native FCM (`all` topic, kanal, `FLAG_IMMUTABLE` dokunma yönlendirmesi), `POST_NOTIFICATIONS` izin akışı, `announcements` → Inbox |
 | **Giriş** | Phone Auth `+90` (`BE-04`) → `SessionStore` → `ProfileGate` (`ProfileStore`, RTDB `users/<uid>/profile`) → arşiv |
-| **Senaryo bayrakları** | Debug intent extra'ları (`core/util/LaunchArgs.kt`); bağlı olanlar: mock'ta `vifi_signed_out`, `vifi_profile_incomplete`, `vifi_force_update`, `vifi_delete_requires_reauth`; live debug'da `vifi_phone_auth_testing` (yalnız Console test numaralarıyla) |
+| **Senaryo bayrakları** | Debug intent extra'ları (`core/util/LaunchArgs.kt`); bağlı olanlar: mock'ta `vifi_signed_out`, `vifi_profile_incomplete`, `vifi_force_update`, `vifi_delete_requires_reauth`, `vifi_no_coins`, `vifi_show_onboarding`, `vifi_notifications_prompt` (`vifi_admin` tanımlı, moderasyonla bağlanacak); live debug'da `vifi_phone_auth_testing` (yalnız Console test numaralarıyla) |
 | **Kütüphane** | AndroidX, AGP 8.7.2 + Gradle 8.9, `libs.versions.toml`, Kotlin 2.0.21 + Coroutines, Hilt 2.52, Compose BoM 2024.10.01, Navigation 2.8.3, Firebase BoM 33.5.1, Timber |
 | **Build** | Gradle Groovy DSL (plugins DSL), `google-services` 4.4.2, Java 17 hedefi + desugaring; Gradle'ı JDK 17–21 ile çalıştır (Android Studio JBR 25 desteklenmez); release R8 küçültmeli |
 | **❌ Yeni kodda yapma** | `com.android.support`/`jcenter`, AdMob, XML ekran (Compose kullan), sır/keystore commit'i, mock'a canlı Firebase binding'i |
@@ -105,7 +108,8 @@ ViFi-Android/
 │   └── src/main/
 │       ├── AndroidManifest.xml
 │       ├── java/com/salticusteam/vifi/   # app/ (MainActivity, AppRoot) · core/ (model, data, designsystem,
-│       │   # navigation, util, notifications) · feature/<ad>/ (Screen, ViewModel, UiState)
+│       │   # navigation, util, notifications) · feature/<ad>/ (browse, examviewer, login, profile, account,
+│       │   # about, onboarding, inbox, notifications, update — Screen, ViewModel, UiState)
 │       └── res/                  # layout/, drawable/, mipmap/, values/, menu/
 └── gradle/ + gradlew             # Gradle wrapper
 ```
@@ -178,7 +182,7 @@ Android ve iOS **aynı** `vifi-831a8` projesini paylaşır (ayrıntı: `.claude/
 | **Arşiv** | named `vifi` Firestore `catalogNodes`/`exams` (`BE-05`, `BE-15`); RTDB `Universitiess` artık okunmuyor |
 | **Giriş** | Phone Auth `+90` (`BE-04`); canlı test için Console'daki test numarası + `111111` |
 | **App Check** | Storage/RTDB/Auth enforce **AÇIK** → Play Integrity kurulmadan **403**; Firestore enforce en son açılır (`BE-02/03`) |
-| **Bildirim** | FCM; Parse SDK kaldırılıp native FCM'e tam geçiş (`BE-11`), `POST_NOTIFICATIONS` |
+| **Bildirim** | Native FCM (Parse kaldırıldı, `BE-11`), topic `all`, `POST_NOTIFICATIONS`, `announcements` (isimli `vifi`) → Inbox |
 | **Cloud Functions (ortak, europe-west1)** | `unlockExam`, `recordLoginDiagnostic` — Android **çağırır** (`BE-08/09`), yeni function yazmaz |
 
 ---

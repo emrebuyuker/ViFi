@@ -23,7 +23,7 @@ Android 7.0 (API 24) ve sonrası; hedef API 35.
 | Flavor | Ne | Not |
 |---|---|---|
 | `live` | Ortak `vifi-831a8` backend'i | Debug'da App Check **debug token**'ı ve geliştirme makinesinin debug SHA-1/SHA-256'sı Firebase Console'a eklenmeli; telefonla giriş Console'daki test numarası + `111111` ile denenir |
-| `mock` | Paket içi örnek veri, Firebase hiç başlamaz | Yalnız debug; UI testleri ve demo için. Örnek kullanıcı girişli açılır. Senaryo bayrakları: `--ez vifi_signed_out true`, `vifi_profile_incomplete`, `vifi_force_update` (`core/util/LaunchArgs.kt`) |
+| `mock` | Paket içi örnek veri, Firebase hiç başlamaz | Yalnız debug; UI testleri ve demo için. Örnek kullanıcı girişli açılır. Senaryo bayrakları: `--ez vifi_signed_out true`, `vifi_profile_incomplete`, `vifi_force_update`, `vifi_delete_requires_reauth`, `vifi_no_coins`, `vifi_show_onboarding`, `vifi_notifications_prompt` (`core/util/LaunchArgs.kt`) |
 
 ## Komutlar
 
