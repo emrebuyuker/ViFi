@@ -24,6 +24,7 @@ fun ViFiNavHost(
     about: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     inbox: @Composable () -> Unit = {},
+    addExam: @Composable () -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -51,6 +52,9 @@ fun ViFiNavHost(
         }
         composable<ViFiRoute.About> {
             about()
+        }
+        composable<ViFiRoute.AddExam> {
+            addExam()
         }
     }
 }

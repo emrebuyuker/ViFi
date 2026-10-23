@@ -11,6 +11,7 @@ val Throwable.userMessage: String
         is AuthError -> userMessage
         is ProfileError -> userMessage
         is ExamSubmissionError -> userMessage
+        is SubmissionFileError -> userMessage
         is ModerationError -> userMessage
         is ExamUnlockError -> userMessage
         is ExamFileError -> userMessage

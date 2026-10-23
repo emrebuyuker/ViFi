@@ -14,6 +14,7 @@ import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationService
 import com.salticusteam.vifi.core.data.repository.fake.FakeAppUpdateChecker
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
+import com.salticusteam.vifi.core.data.repository.fake.FakeExamSubmissionService
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamUnlockService
 import com.salticusteam.vifi.core.data.repository.fake.FakeProfileService
 import com.salticusteam.vifi.core.data.repository.fake.FakeRewardsConfigReader
@@ -46,6 +47,11 @@ object RepositoryModule {
     fun provideExamUnlockService(): ExamUnlockService = FakeExamUnlockService()
 
     /** 120 coins (one unlock) unless launched with `vifi_no_coins`, which shows the earn-coins branch. */
+    /** Submissions stay on the device; nothing is written to Firebase. */
+    @Provides
+    @Singleton
+    fun provideExamSubmissionService(): ExamSubmissionService = FakeExamSubmissionService()
+
     @Provides
     @Singleton
     fun provideWalletReader(): WalletReader =

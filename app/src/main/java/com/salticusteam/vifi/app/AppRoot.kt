@@ -24,6 +24,7 @@ import com.salticusteam.vifi.core.navigation.rememberViFiRouter
 import com.salticusteam.vifi.core.notifications.InboxDeepLink
 import com.salticusteam.vifi.feature.about.AboutScreen
 import com.salticusteam.vifi.feature.account.AccountScreen
+import com.salticusteam.vifi.feature.addexam.AddExamScreen
 import com.salticusteam.vifi.feature.browse.BrowseScreen
 import com.salticusteam.vifi.feature.examviewer.ExamViewerScreen
 import com.salticusteam.vifi.feature.inbox.InboxScreen
@@ -92,7 +93,12 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
             )
         },
         browse = { _ ->
-            BrowseScreen(onItemClick = { router.open(it) }, onBack = { router.pop() })
+            BrowseScreen(
+                onItemClick = { router.open(it) },
+                onBack = { router.pop() },
+                // The unlock sheet's "Sınav Ekle": earn coins by contributing an exam.
+                onEarnCoins = { router.push(ViFiRoute.AddExam) },
+            )
         },
         exam = { path, kind ->
             ExamViewerScreen(path = path, routeKind = kind, onBack = { router.pop() })
@@ -112,6 +118,9 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         },
         about = {
             AboutScreen(onBack = { router.pop() })
+        },
+        addExam = {
+            AddExamScreen(ownerId = user.id, profile = profile, onClose = { router.pop() })
         },
     )
 }
