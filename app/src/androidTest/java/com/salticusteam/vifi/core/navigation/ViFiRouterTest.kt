@@ -39,7 +39,7 @@ class ViFiRouterTest {
             navController = TestNavHostController(InstrumentationRegistry.getInstrumentation().targetContext).apply {
                 navigatorProvider.addNavigator(ComposeNavigator())
             }
-            ViFiNavHost(navController = navController, home = {}, browse = {}, exam = { _, _ -> }, account = {}, editProfile = {})
+            ViFiNavHost(navController = navController, home = {}, browse = {}, exam = { _, _ -> }, account = {}, editProfile = {}, about = {})
         }
         router = ViFiRouter(navController)
     }

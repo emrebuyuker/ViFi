@@ -22,12 +22,15 @@ import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
 import com.salticusteam.vifi.core.notifications.InboxDeepLink
+        },
+import com.salticusteam.vifi.feature.about.AboutScreen
 import com.salticusteam.vifi.feature.account.AccountScreen
 import com.salticusteam.vifi.feature.browse.BrowseScreen
 import com.salticusteam.vifi.feature.examviewer.ExamViewerScreen
 import com.salticusteam.vifi.feature.inbox.InboxScreen
 import com.salticusteam.vifi.feature.notifications.NotificationPrompt
 import com.salticusteam.vifi.feature.login.LoginScreen
+import com.salticusteam.vifi.feature.onboarding.OnboardingGate
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
 import com.salticusteam.vifi.feature.update.AppUpdateGate
 
@@ -53,7 +56,10 @@ private fun SessionRoot(sessionViewModel: SessionViewModel = hiltViewModel()) {
         SessionState.SignedOut -> LoginScreen()
         // Keyed by user: after a sign-out the next user starts on the home screen with a fresh stack (iOS popToRoot).
         is SessionState.SignedIn -> key(state.user.id) {
-            ProfileGate(user = state.user) { profile -> ArchiveHost(user = state.user, profile = profile) }
+            ProfileGate(user = state.user) { profile ->
+                // The first-launch tour sits over the archive, after sign-in and the profile gate (iOS RootView).
+                OnboardingGate { ArchiveHost(user = state.user, profile = profile) }
+            }
         }
     }
 }
@@ -95,6 +101,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         account = {
             AccountScreen(
                 onEditProfile = { router.push(ViFiRoute.EditProfile) },
+                onAbout = { router.push(ViFiRoute.About) },
                 onBack = { router.pop() },
             )
         },
@@ -103,6 +110,9 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         },
         inbox = {
             InboxScreen(onBack = { router.pop() })
+        },
+        about = {
+            AboutScreen(onBack = { router.pop() })
         },
     )
 }

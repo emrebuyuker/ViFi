@@ -144,4 +144,35 @@
     <string name="account_reauth_footer">Güvenliğin için %1$s numarasına gönderilen 6 haneli kodu gir.</string>
     <string name="account_reauth_verify_button">Doğrula ve Hesabı Sil</string>
     <string name="account_delete_cancel">Vazgeç</string>
+
+    <!-- Added in 2.5 — onboarding tour (iOS OnboardingView copy, verbatim) -->
+    <string name="onboarding_p1_title">ViFi\'ye hoş geldin</string>
+    <string name="onboarding_p1_message">Üniversitelerin geçmiş sınavları tek bir yerde. Uygulamanın nasıl çalıştığına hızlıca bakalım.</string>
+    <string name="onboarding_p2_title">Sınavları bul</string>
+    <string name="onboarding_p2_message">Üniversite, fakülte, bölüm ve ders seç; sınavları görsel ya da PDF olarak uygulama içinde görüntüle.</string>
+    <string name="onboarding_p3_title">Kilitli sınavları aç</string>
+    <string name="onboarding_p3_message">Her derste en eski iki sınav ücretsizdir. Diğerleri kilitlidir ve 100 coin ile kalıcı olarak açılır.</string>
+    <string name="onboarding_p4_title">Soru ekle, coin kazan</string>
+    <string name="onboarding_p4_message">Kendi sınavlarını ekle; gönderdiğin sınavlar onaylandığında coin\'lerin hesabına yüklenir.</string>
+    <string name="onboarding_skip">Atla</string>
+    <string name="onboarding_next">İleri</string>
+    <string name="onboarding_start">Başla</string>
+    <string name="onboarding_page_indicator">Sayfa %1$d / %2$d</string>
+
+    <!-- Added in 2.5 — about (iOS AboutView copy, verbatim) -->
+    <string name="about_title">Hakkında</string>
+    <string name="account_about_row">Hakkında</string>
+    <string name="about_app_subtitle">Sınav Arşivi</string>
+    <string name="about_version">Sürüm %1$s (%2$s)</string>
+    <string name="about_description">ViFi, üniversitelerin geçmiş sınavlarını tek bir arşivde toplar. Üniversiteni, fakülteni, bölümünü ve dersini seç; sınavları görsel ya da PDF olarak incele.</string>
+    <string name="about_highlights_header">Öne Çıkanlar</string>
+    <string name="about_highlight_formats">Görsel ve PDF sınavlar tek yerde</string>
+    <string name="about_highlight_zoom">Yakınlaştırarak ayrıntılı inceleme</string>
+    <string name="about_highlight_recents">Son görüntülenen sınavlara hızlı erişim</string>
+    <string name="about_replay_tour">Tanıtım turunu tekrar izle</string>
+    <string name="about_data_source_header">Veri Kaynağı</string>
+    <string name="about_data_source_message">Sınav belgeleri ViFi\'nin çevrim içi arşivinden yüklenir; görüntülemek için internet bağlantısı gerekir. Açtığın sınavlar daha hızlı açılması için cihazında önbelleğe alınır.</string>
+    <string name="about_contact_header">İletişim</string>
+    <string name="about_contact_button">Bize Ulaş</string>
+    <string name="about_contact_footer">Görüş, öneri ve sorularını bize e-posta ile iletebilirsin.</string>
 </resources>

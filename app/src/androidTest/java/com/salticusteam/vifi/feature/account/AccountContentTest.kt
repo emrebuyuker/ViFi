@@ -23,6 +23,7 @@ class AccountContentTest {
     private var deleteCalls = 0
     private var cancelReverificationCalls = 0
     private val typedCodes = mutableListOf<String>()
+    private var aboutClicks = 0
 
     private fun setContent(state: AccountUiState = AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67")) {
         composeRule.setContent {
@@ -38,6 +39,7 @@ class AccountContentTest {
                     onResendCode = {},
                     onCancelReverification = { cancelReverificationCalls++ },
                     onBack = {},
+                    onAbout = { aboutClicks++ },
                 )
             }
         }
@@ -50,6 +52,15 @@ class AccountContentTest {
         composeRule.onNodeWithTag("account.editProfile").assert(hasText("Ayşe Yılmaz")).assertIsDisplayed()
         composeRule.onNodeWithTag("account.phone").assert(hasText("+90 532 123 45 67")).assertIsDisplayed()
         composeRule.onNodeWithTag("topBar.backButton").assertIsDisplayed()
+    }
+
+    @Test
+    fun account_whenAboutRowTapped_opensAbout() {
+        setContent()
+
+        composeRule.onNodeWithTag("account.about").performClick()
+
+        assertEquals(1, aboutClicks)
     }
 
     @Test

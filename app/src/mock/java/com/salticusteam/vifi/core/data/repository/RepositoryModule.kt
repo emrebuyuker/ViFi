@@ -71,7 +71,8 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideOnboardingPreferences(): OnboardingPreferences = FakeOnboardingPreferences()
+    fun provideOnboardingPreferences(): OnboardingPreferences = // Mock launches skip the tour (other scenarios start on the archive) unless `vifi_show_onboarding` is set.
+        FakeOnboardingPreferences(seen = !LaunchArgs.isSet(LaunchArg.SHOW_ONBOARDING))
 
     @Provides
     @Singleton

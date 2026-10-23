@@ -19,6 +19,14 @@
     <!-- Android 14+: lets the exam viewers show "Sınav içeriği korumalıdır" when a screenshot is taken (VIEW-12). -->
     <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />
 
+    <!-- Android 11+ package visibility: lets the app see whether any mail app can take the "Bize Ulaş" e-mail. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
+    </queries>
+
     <application
         android:name=".VifiApplication"
         android:allowBackup="true"

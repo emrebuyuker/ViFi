@@ -1,9 +1,5 @@
 package com.salticusteam.vifi.feature.login
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -21,42 +17,36 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.salticusteam.vifi.BuildConfig
 import com.salticusteam.vifi.R
+import com.salticusteam.vifi.core.designsystem.component.ContactSupportDialog
+import com.salticusteam.vifi.core.designsystem.component.rememberContactSupportLauncher
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.model.AuthError
 import com.salticusteam.vifi.core.model.PhoneNumber
@@ -70,8 +60,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    var showNoMailDialog by rememberSaveable { mutableStateOf(false) }
+    val contactSupport = rememberContactSupportLauncher()
 
     // Counts the resend cooldown down once a second (iOS TimelineView); stops at zero.
     var resendSecondsRemaining by remember { mutableIntStateOf(viewModel.resendCooldownRemaining()) }
@@ -86,14 +75,7 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is LoginEvent.ContactSupport -> {
-                    val uri = ContactSupport.mailtoUri(BuildConfig.VERSION_NAME, Build.VERSION.RELEASE, event.context)
-                    try {
-                        context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse(uri)))
-                    } catch (e: ActivityNotFoundException) {
-                        showNoMailDialog = true
-                    }
-                }
+                is LoginEvent.ContactSupport -> contactSupport.open(event.context)
             }
         }
     }
@@ -110,9 +92,7 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
         onContactSupport = viewModel::onContactSupport,
     )
 
-    if (showNoMailDialog) {
-        NoMailAppDialog(onDismiss = { showNoMailDialog = false })
-    }
+    ContactSupportDialog(contactSupport)
 }
 
 /** Stateless login content: the header and the current step. Previews and UI tests drive this. */
@@ -269,30 +249,6 @@ internal fun LoginErrorMessage(message: String?) {
             color = MaterialTheme.colorScheme.error,
         )
     }
-}
-
-/** Shown when no app can open the support e-mail: the address to write to, with a copy action. */
-@Composable
-private fun NoMailAppDialog(onDismiss: () -> Unit) {
-    val clipboard = LocalClipboardManager.current
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.contact_support_no_mail_title)) },
-        text = { Text(stringResource(R.string.contact_support_no_mail_message, ContactSupport.EMAIL)) },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    clipboard.setText(AnnotatedString(ContactSupport.EMAIL))
-                    onDismiss()
-                },
-            ) {
-                Text(stringResource(R.string.contact_support_copy_address_button))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_ok)) }
-        },
-    )
 }
 
 @Preview(showBackground = true)
