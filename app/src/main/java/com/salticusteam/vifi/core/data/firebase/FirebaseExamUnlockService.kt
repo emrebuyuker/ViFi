@@ -1,12 +1,12 @@
 package com.salticusteam.vifi.core.data.firebase
 
-import android.util.Log
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.FirebaseFunctionsException
 import com.salticusteam.vifi.core.data.repository.ExamUnlockService
 import com.salticusteam.vifi.core.model.ExamUnlockError
 import com.salticusteam.vifi.core.model.ExamUnlockResult
 import com.salticusteam.vifi.core.model.GENERIC_ERROR_MESSAGE
+import com.salticusteam.vifi.core.util.LogCategory
 import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -33,7 +33,6 @@ class FirebaseExamUnlockService @Inject constructor(
 
     internal companion object {
         private const val FUNCTION_NAME = "unlockExam"
-        private const val TAG = "ExamUnlock"
 
         /** `{ balance: number, alreadyUnlocked: boolean }`; missing fields fall back like iOS. */
         fun parseResult(data: Any?): ExamUnlockResult {
@@ -52,7 +51,7 @@ class FirebaseExamUnlockService @Inject constructor(
                 else -> null
             }
             if (mapped != null) return mapped
-            Log.e(TAG, "Exam unlock failed", error)
+            LogCategory.APP.log.e(error, "Exam unlock failed")
             // iOS shows localizedDescription here; Android never surfaces a raw exception message.
             return ExamUnlockError.Unknown(GENERIC_ERROR_MESSAGE)
         }

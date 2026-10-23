@@ -9,6 +9,7 @@ import com.salticusteam.vifi.core.model.ArchiveItem
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.userMessage
 import com.salticusteam.vifi.core.navigation.ViFiRoute
+import com.salticusteam.vifi.core.util.LogCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -76,6 +77,7 @@ class BrowseViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e // the ViewModel is going away; nothing to show
             } catch (e: Exception) {
+                logFailure(e)
                 _uiState.update { state ->
                     // A failed refresh keeps the entries already shown; only an empty screen shows the error.
                     if (state.items != null && !showLoading) state.copy(isLoading = false)
@@ -95,6 +97,12 @@ class BrowseViewModel @Inject constructor(
                 if (!_uiState.value.isLoading) refresh()
             }
         }
+    }
+
+    private fun logFailure(error: Exception) {
+        val path = _uiState.value.path
+        val location = if (path.isRoot) "root" else path.components.joinToString(" › ")
+        LogCategory.ARCHIVE.log.e(error, "Loading %s failed", location)
     }
 
     private companion object {

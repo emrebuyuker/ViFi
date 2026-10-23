@@ -1,6 +1,7 @@
 package com.salticusteam.vifi
 
 import android.app.Application
+import com.salticusteam.vifi.core.util.Logging
 import dagger.hilt.android.HiltAndroidApp
 
 /**
@@ -12,6 +13,7 @@ class VifiApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Logging.install(debug = BuildConfig.DEBUG)
         BackendStartup.start(this)
     }
 }
