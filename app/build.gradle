@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
 }
 
@@ -40,8 +41,17 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.kotlinx.coroutines.play.services
 
     implementation libs.androidx.appcompat
     implementation libs.androidx.constraintlayout
@@ -59,6 +69,9 @@ dependencies {
     implementation libs.commons.io
 
     testImplementation libs.junit
+    testImplementation libs.kotlinx.coroutines.test
+    testImplementation libs.turbine
+    testImplementation libs.mockk
     androidTestImplementation libs.androidx.test.ext.junit
     androidTestImplementation libs.androidx.test.runner
 }
