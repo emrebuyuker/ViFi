@@ -68,7 +68,9 @@ class ContentResolverSubmissionFileSource @Inject constructor(
     // Helpers
     private fun encode(source: Uri, maxBytes: Int): ByteArray? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        resolver.openInputStream(source)?.use { BitmapFactory.decodeStream(it, null, bounds) } ?: return null
+        // A bounds-only decode always returns null; only a missing stream means the URI is unreadable.
+        val stream = resolver.openInputStream(source) ?: return null
+        stream.use { BitmapFactory.decodeStream(it, null, bounds) }
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
 
         val options = BitmapFactory.Options().apply {
