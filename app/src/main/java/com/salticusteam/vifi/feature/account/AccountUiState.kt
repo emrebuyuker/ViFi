@@ -22,6 +22,8 @@ data class AccountUiState(
     val codeText: String = "",
     /** When the cooldown after the last re-verification code ends; `null` when another may be sent now. */
     val resendAvailableAt: Instant? = null,
+    /** The user carries the `admin` claim: the Moderasyon entry is shown. */
+    val isAdmin: Boolean = false,
 ) {
     /** "Doğrula ve Hesabı Sil" is enabled: all six digits are there and nothing is running. */
     val canConfirmReverification: Boolean

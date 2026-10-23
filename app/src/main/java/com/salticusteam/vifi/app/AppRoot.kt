@@ -31,6 +31,9 @@ import com.salticusteam.vifi.feature.home.HomeScreen
 import com.salticusteam.vifi.feature.inbox.InboxScreen
 import com.salticusteam.vifi.feature.notifications.NotificationPrompt
 import com.salticusteam.vifi.feature.login.LoginScreen
+import com.salticusteam.vifi.feature.moderation.ModerationDetailScreen
+import com.salticusteam.vifi.feature.moderation.ModerationScreen
+import com.salticusteam.vifi.feature.moderation.SubmissionPreviewScreen
 import com.salticusteam.vifi.feature.onboarding.OnboardingGate
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
 import com.salticusteam.vifi.feature.update.AppUpdateGate
@@ -110,6 +113,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
             AccountScreen(
                 onEditProfile = { router.push(ViFiRoute.EditProfile) },
                 onAbout = { router.push(ViFiRoute.About) },
+                onModeration = { router.push(ViFiRoute.Moderation) },
                 onBack = { router.pop() },
             )
         },
@@ -124,6 +128,23 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         },
         addExam = {
             AddExamScreen(ownerId = user.id, profile = profile, onClose = { router.pop() })
+        },
+        moderation = {
+            ModerationScreen(
+                onRecordClick = { router.push(ViFiRoute.ModerationDetail(it)) },
+                onBack = { router.pop() },
+            )
+        },
+        moderationDetail = { submissionId ->
+            ModerationDetailScreen(
+                submissionId = submissionId,
+                onPreviewFiles = { router.push(ViFiRoute.SubmissionPreview(submissionId)) },
+                onFinished = { router.pop() },
+                onBack = { router.pop() },
+            )
+        },
+        submissionPreview = { submissionId ->
+            SubmissionPreviewScreen(submissionId = submissionId, onBack = { router.pop() })
         },
     )
 }

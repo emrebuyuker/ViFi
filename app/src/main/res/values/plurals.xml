@@ -23,4 +23,26 @@
         <item quantity="one">%1$d sayfa</item>
         <item quantity="other">%1$d sayfa</item>
     </plurals>
+
+    <!-- Added in 2.5 — moderation queue (iOS ModerationView) -->
+    <plurals name="moderation_queue_footer">
+        <item quantity="one">%1$d gönderim onay bekliyor.</item>
+        <item quantity="other">%1$d gönderim onay bekliyor.</item>
+    </plurals>
+    <plurals name="moderation_file_count_images">
+        <item quantity="one">%1$d görsel</item>
+        <item quantity="other">%1$d görsel</item>
+    </plurals>
+    <plurals name="moderation_file_count_pdf">
+        <item quantity="one">%1$d PDF</item>
+        <item quantity="other">%1$d PDF</item>
+    </plurals>
+    <plurals name="moderation_detail_preview_images">
+        <item quantity="one">Dosyaları incele (%1$d görsel)</item>
+        <item quantity="other">Dosyaları incele (%1$d görsel)</item>
+    </plurals>
+    <plurals name="moderation_detail_preview_pdf">
+        <item quantity="one">Dosyaları incele (%1$d PDF)</item>
+        <item quantity="other">Dosyaları incele (%1$d PDF)</item>
+    </plurals>
 </resources>

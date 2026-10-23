@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Added in 2.5 — admin moderation: queue, detail, file preview (iOS ModerationView / ModerationDetailView) -->
+    <string name="moderation_title">Moderasyon</string>
+    <string name="moderation_loading">Gönderimler yükleniyor…</string>
+    <string name="moderation_empty_title">Bekleyen gönderim yok</string>
+    <string name="moderation_empty_message">Yeni gönderimler onay için burada görünür.</string>
+    <string name="moderation_row_location">%1$s · %2$s</string>
+
+    <string name="moderation_detail_title">Gönderim</string>
+    <string name="moderation_detail_university">Üniversite</string>
+    <string name="moderation_detail_faculty">Fakülte</string>
+    <string name="moderation_detail_department">Bölüm</string>
+    <string name="moderation_detail_lesson">Ders</string>
+    <string name="moderation_detail_exam">Sınav</string>
+    <string name="moderation_detail_kind">Tür</string>
+    <string name="moderation_detail_date">Tarih</string>
+    <string name="moderation_kind_images">Görsel</string>
+    <string name="moderation_kind_pdf">PDF</string>
+    <string name="moderation_approve_button">Onayla ve Yayınla</string>
+    <string name="moderation_reject_button">Reddet</string>
+    <string name="moderation_actions_footer">Onaylarsan sınav arşive eklenir ve gönderene yenilik kademesine göre coin verilir.</string>
+    <string name="moderation_detail_missing_title">Gönderim bulunamadı</string>
+    <string name="moderation_detail_missing_message">Kuyruk yenilenmiş olabilir; listeye dönüp tekrar dene.</string>
+
+    <string name="moderation_reject_dialog_title">Reddedilsin mi?</string>
+    <string name="moderation_reject_dialog_message">Bu gönderim arşive eklenmez ve coin verilmez.</string>
+    <string name="moderation_reject_reason_label">Sebep (isteğe bağlı)</string>
+    <string name="moderation_dialog_cancel">Vazgeç</string>
+
+    <string name="moderation_approved_title">Onaylandı</string>
+    <string name="moderation_approved_with_coins">%1$s: gönderene %2$d coin verildi.</string>
+    <string name="moderation_approved_plain">Gönderim onaylandı.</string>
+
+    <string name="moderation_preview_title">Dosyalar</string>
+    <string name="moderation_preview_empty">Dosya yok</string>
+
+    <!-- Account entry, visible to admins only -->
+    <string name="moderation_account_row_title">Moderasyon</string>
+    <string name="moderation_account_row_subtitle">Bekleyen gönderimleri incele ve onayla</string>
+
+    <!-- Admin exam deletion from an archive list (iOS BrowseView swipe action) -->
+    <string name="moderation_delete_exam_action">Sil</string>
+    <string name="moderation_delete_exam_dialog_title">Sınav silinsin mi?</string>
+    <string name="moderation_delete_exam_dialog_message">"\"%1$s\" arşivden kalıcı olarak silinir; bu işlem geri alınamaz."</string>
+    <string name="moderation_delete_exam_failed_title">Silinemedi</string>
+</resources>

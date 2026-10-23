@@ -63,6 +63,20 @@ class AccountViewModelTest {
     // --- Profile and phone ---
 
     @Test
+    fun `onScreenShown reveals moderation to an admin only`() = runTest {
+        val adminAuth = FakeAuthService(isSignedIn = true, latency = KotlinDuration.ZERO, isAdmin = true)
+        val admin = makeSut(authService = adminAuth)
+        val user = makeSut()
+
+        admin.onScreenShown()
+        user.onScreenShown()
+        advanceUntilIdle()
+
+        assertTrue(admin.uiState.value.isAdmin)
+        assertFalse(user.uiState.value.isAdmin)
+    }
+
+    @Test
     fun `uiState shows the profile name and the formatted phone number`() = runTest {
         val profileStore = ProfileStore(FakeProfileService(mapOf(uid to FakeProfileService.SAMPLE_PROFILE)))
         profileStore.load(uid)
