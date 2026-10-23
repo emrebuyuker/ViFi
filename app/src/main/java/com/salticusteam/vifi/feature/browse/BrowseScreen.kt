@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
@@ -82,7 +83,7 @@ import com.salticusteam.vifi.feature.inbox.InboxBadgeViewModel
 
 /**
  * An archive list: universities on the home screen (root path) and every drill-down level (iOS HomeView /
- * BrowseView, simplified — breadcrumbs, recents and the unlock sheet arrive with their roadmap items).
+ * BrowseView). Below the root it shows the breadcrumb trail and the toolbar's "Ana Sayfa" action.
  */
 @Composable
 fun BrowseScreen(
@@ -98,6 +99,10 @@ fun BrowseScreen(
     onAboutClick: (() -> Unit)? = null,
     /** Content shown above the list while it is not being searched; only the home screen passes it. */
     listHeader: (@Composable () -> Unit)? = null,
+    /** Returns to an ancestor level from the breadcrumb trail; `null` hides the trail (the home screen). */
+    onBreadcrumbSelect: ((ArchivePath) -> Unit)? = null,
+    /** Returns to the home screen (toolbar "Ana Sayfa"); `null` hides the action (the home screen itself). */
+    onHomeClick: (() -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel(),
     unlockViewModel: ExamUnlockViewModel = hiltViewModel(),
     deletionViewModel: ExamDeletionViewModel = hiltViewModel(),
@@ -140,6 +145,8 @@ fun BrowseScreen(
         onInboxClick = onInboxClick,
         onAboutClick = onAboutClick,
         listHeader = listHeader,
+        onBreadcrumbSelect = onBreadcrumbSelect,
+        onHomeClick = onHomeClick,
         // Admins may delete the exams listed under a course (iOS `canDeleteExams`).
         onDeleteExam = deletionViewModel::onDeleteRequested.takeIf {
             deletionState.isAdmin && state.path.childLevel == ArchiveLevel.EXAM
@@ -185,6 +192,8 @@ internal fun BrowseContent(
     listHeader: (@Composable () -> Unit)? = null,
     /** Offers the swipe-to-delete action on each row; `null` hides it (non-admins, levels above exams). */
     onDeleteExam: ((ArchiveItem) -> Unit)? = null,
+    onBreadcrumbSelect: ((ArchivePath) -> Unit)? = null,
+    onHomeClick: (() -> Unit)? = null,
 ) {
     val listedLevel = state.path.childLevel ?: ArchiveLevel.EXAM
     val title = state.path.displayName ?: stringResource(R.string.archive_home_title)
@@ -197,6 +206,14 @@ internal fun BrowseContent(
                 onBack = onBack,
                 actions = {
                     CoinBalanceBadge(balance = lockState.balance, modifier = Modifier.padding(end = 4.dp))
+                    if (onHomeClick != null) {
+                        IconButton(onClick = onHomeClick, modifier = Modifier.testTag("toolbar.home")) {
+                            Icon(
+                                imageVector = Icons.Filled.Home,
+                                contentDescription = stringResource(R.string.archive_home_action),
+                            )
+                        }
+                    }
                     if (onInboxClick != null) InboxBell(onClick = onInboxClick)
                     if (onAboutClick != null) {
                         IconButton(onClick = onAboutClick, modifier = Modifier.testTag("toolbar.about")) {
@@ -219,6 +236,10 @@ internal fun BrowseContent(
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
+            // Shown in every state, so the user can step back up even when this level fails to load.
+            if (onBreadcrumbSelect != null && !state.path.isRoot) {
+                BreadcrumbBar(path = state.path, onSelect = onBreadcrumbSelect)
+            }
             val items = state.items
             when {
                 state.isLoading && items == null -> LoadingView()
@@ -511,6 +532,7 @@ private fun BrowseContentLoadedPreview() {
                 ),
             ),
             onSearchTextChange = {}, onItemClick = {}, onRetry = {}, onRefresh = {}, onBack = {},
+            onBreadcrumbSelect = {}, onHomeClick = {},
         )
     }
 }

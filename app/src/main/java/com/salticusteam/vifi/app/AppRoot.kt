@@ -84,6 +84,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         }
     }
     NotificationPrompt()
+    ArchivePrefetch()
 
     ViFiNavHost(
         navController = navController,
@@ -91,7 +92,8 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         home = {
             HomeScreen(
                 onItemClick = { router.open(it) },
-                onRecentClick = { router.push(ViFiRoute.Exam(it.path, it.kind)) },
+                // The exam's whole hierarchy goes on the stack, so Back walks up the archive (iOS openExam).
+                onRecentClick = { router.openExam(it.path, it.kind) },
                 onAddExamClick = { router.push(ViFiRoute.AddExam) },
                 onAccountClick = { router.push(ViFiRoute.Account) },
                 onInboxClick = { router.push(ViFiRoute.Inbox) },
@@ -102,6 +104,8 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
             BrowseScreen(
                 onItemClick = { router.open(it) },
                 onBack = { router.pop() },
+                onBreadcrumbSelect = { router.popTo(it) },
+                onHomeClick = { router.popToRoot() },
                 // The unlock sheet's "Sınav Ekle": earn coins by contributing an exam.
                 onEarnCoins = { router.push(ViFiRoute.AddExam) },
             )
@@ -156,6 +160,12 @@ private fun ViFiRouter.open(item: ArchiveItem) {
         item.level != ArchiveLevel.EXAM -> push(ViFiRoute.Browse(item.path))
         exam != null -> push(ViFiRoute.Exam(item.path, exam.kind))
     }
+}
+
+/** Warms the archive's offline cache once the signed-in user reaches it; cancelled on sign-out (ARCH-09). */
+@Composable
+private fun ArchivePrefetch(viewModel: ArchivePrefetchViewModel = hiltViewModel()) {
+    LaunchedEffect(viewModel) { viewModel.onArchiveShown() }
 }
 
 /** The process-wide [InboxDeepLink]; reached through a ViewModel so the composable needs no entry-point plumbing. */
