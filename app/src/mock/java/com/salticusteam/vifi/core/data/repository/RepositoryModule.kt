@@ -69,10 +69,16 @@ object RepositoryModule {
             FakeProfileService(profiles = mapOf(FakeProfileService.SAMPLE_UID to FakeProfileService.SAMPLE_PROFILE))
         }
 
-    /** Signed in as the sample user unless launched with `vifi_signed_out` (read after MainActivity parsed it). */
+    /**
+     * Signed in as the sample user unless launched with `vifi_signed_out` (read after MainActivity parsed it);
+     * `vifi_delete_requires_reauth` makes account deletion ask for the number's code first (code 111111).
+     */
     @Provides
     @Singleton
-    fun provideAuthService(): AuthService = FakeAuthService(isSignedIn = !LaunchArgs.isSet(LaunchArg.SIGNED_OUT))
+    fun provideAuthService(): AuthService = FakeAuthService(
+        isSignedIn = !LaunchArgs.isSet(LaunchArg.SIGNED_OUT),
+        requiresRecentLoginForDeletion = LaunchArgs.isSet(LaunchArg.DELETE_REQUIRES_REAUTH),
+    )
 
     @Provides
     @Singleton

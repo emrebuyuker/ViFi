@@ -104,4 +104,12 @@
     <string name="account_sign_out_dialog_title">Çıkış yapılsın mı?</string>
     <string name="account_sign_out_dialog_message">Arşive tekrar ulaşmak için numaranı yeniden doğrulaman gerekir.</string>
     <string name="account_sign_out_dialog_cancel">Vazgeç</string>
+    <string name="account_delete_button">Hesabı Sil</string>
+    <string name="account_delete_footer">Hesabını sildiğinde oturumun kapanır ve hesabın kalıcı olarak silinir.</string>
+    <string name="account_delete_dialog_title">Hesabın kalıcı olarak silinsin mi?</string>
+    <string name="account_delete_dialog_message">Hesabın ve telefon numaran ViFi\'den kalıcı olarak silinir; bu işlem geri alınamaz. Uygulamayı yeniden kullanmak istersen numaranı baştan doğrulaman gerekir.</string>
+    <string name="account_reauth_title">Numaranı Doğrula</string>
+    <string name="account_reauth_footer">Güvenliğin için %1$s numarasına gönderilen 6 haneli kodu gir.</string>
+    <string name="account_reauth_verify_button">Doğrula ve Hesabı Sil</string>
+    <string name="account_delete_cancel">Vazgeç</string>
 </resources>

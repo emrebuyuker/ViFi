@@ -34,6 +34,9 @@ class FakeAuthService(
     /** Thrown by [signIn] instead of checking the code, to exercise the failure paths. */
     var signInFailure: AuthError? = null
 
+    /** When set, [sendVerificationCode] reports an on-device verification (no code to type), as Play services can. */
+    var verifiesInstantly = false
+
     /** Every number a code was requested for, in order (for tests). */
     val sentCodeNumbers = mutableListOf<String>()
 
@@ -48,6 +51,10 @@ class FakeAuthService(
         sendFailure?.let { throw it }
         if (PhoneNumber.fromE164(phoneNumber) == null) throw AuthError.InvalidPhoneNumber
         sentCodeNumbers += phoneNumber
+        if (verifiesInstantly) {
+            isRecentlyAuthenticated = true
+            return AuthService.INSTANT_VERIFICATION_ID
+        }
         val verificationId = "mock-verification-${UUID.randomUUID()}"
         pendingNumbers[verificationId] = phoneNumber
         return verificationId
@@ -63,7 +70,7 @@ class FakeAuthService(
 
     override suspend fun reauthenticate(verificationId: String, code: String) {
         if (user.value == null) throw AuthError.NotSignedIn
-        verify(verificationId, code)
+        if (verificationId != AuthService.INSTANT_VERIFICATION_ID) verify(verificationId, code)
         isRecentlyAuthenticated = true
     }
 

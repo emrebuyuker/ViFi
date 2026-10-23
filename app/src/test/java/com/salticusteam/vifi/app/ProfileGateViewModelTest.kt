@@ -4,7 +4,6 @@ import com.salticusteam.vifi.core.data.profile.ProfileState
 import com.salticusteam.vifi.core.data.profile.ProfileStore
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.data.repository.fake.FakeProfileService
-import com.salticusteam.vifi.core.data.session.SessionStore
 import com.salticusteam.vifi.core.model.ProfileError
 import com.salticusteam.vifi.testing.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +24,7 @@ class ProfileGateViewModelTest {
     @Test
     fun `load when a profile is stored opens the gate`() = runTest {
         val store = ProfileStore(FakeProfileService(mapOf(uid to FakeProfileService.SAMPLE_PROFILE)))
-        val sut = ProfileGateViewModel(store, SessionStore(FakeAuthService(), backgroundScope))
+        val sut = ProfileGateViewModel(store)
 
         sut.load(uid)
 
@@ -34,7 +33,7 @@ class ProfileGateViewModelTest {
 
     @Test
     fun `load when no profile is stored asks for completion`() = runTest {
-        val sut = ProfileGateViewModel(ProfileStore(FakeProfileService()), SessionStore(FakeAuthService(), backgroundScope))
+        val sut = ProfileGateViewModel(ProfileStore(FakeProfileService()))
 
         sut.load(uid)
 
@@ -44,7 +43,7 @@ class ProfileGateViewModelTest {
     @Test
     fun `retry after a failed read loads the profile`() = runTest {
         val service = FakeProfileService(mapOf(uid to FakeProfileService.SAMPLE_PROFILE), failure = ProfileError.Offline)
-        val sut = ProfileGateViewModel(ProfileStore(service), SessionStore(FakeAuthService(), backgroundScope))
+        val sut = ProfileGateViewModel(ProfileStore(service))
 
         sut.load(uid)
         assertEquals(ProfileState.Failed(ProfileError.Offline.userMessage), sut.profile.value)
@@ -53,18 +52,5 @@ class ProfileGateViewModelTest {
         advanceUntilIdle()
 
         assertEquals(ProfileState.Present(FakeProfileService.SAMPLE_PROFILE), sut.profile.value)
-    }
-
-    @Test
-    fun `sign out clears the loaded profile`() = runTest {
-        val auth = FakeAuthService()
-        val store = ProfileStore(FakeProfileService(mapOf(uid to FakeProfileService.SAMPLE_PROFILE)))
-        val sut = ProfileGateViewModel(store, SessionStore(auth, backgroundScope))
-        sut.load(uid)
-
-        auth.signOut()
-        advanceUntilIdle()
-
-        assertEquals(ProfileState.Loading, sut.profile.value)
     }
 }
