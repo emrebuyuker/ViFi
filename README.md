@@ -22,8 +22,8 @@ Android 7.0 (API 24) ve sonrası; hedef API 35.
 
 | Flavor | Ne | Not |
 |---|---|---|
-| `live` | Ortak `vifi-831a8` backend'i | Debug'da App Check **debug token**'ı Firebase Console'a eklenmeli (Logcat: `DebugAppCheckProvider`) |
-| `mock` | Paket içi örnek veri, Firebase hiç başlamaz | Yalnız debug; UI testleri ve demo için. Senaryo bayrakları: `--ez vifi_no_coins true` vb. (`core/util/LaunchArgs.kt`) |
+| `live` | Ortak `vifi-831a8` backend'i | Debug'da App Check **debug token**'ı ve geliştirme makinesinin debug SHA-1/SHA-256'sı Firebase Console'a eklenmeli; telefonla giriş Console'daki test numarası + `111111` ile denenir |
+| `mock` | Paket içi örnek veri, Firebase hiç başlamaz | Yalnız debug; UI testleri ve demo için. Örnek kullanıcı girişli açılır. Senaryo bayrakları: `--ez vifi_signed_out true`, `vifi_profile_incomplete`, `vifi_force_update` (`core/util/LaunchArgs.kt`) |
 
 ## Komutlar
 
@@ -38,3 +38,14 @@ Android 7.0 (API 24) ve sonrası; hedef API 35.
 
 > Cihaz testleri bittikten sonra uygulama cihazda bırakılır (`gradle.properties`): kaldırılırsa App Check debug
 > token'ı silinir ve Console'a yenisinin eklenmesi gerekir.
+
+```bash
+# Mock'ta bir senaryoyla aç (ör. profil tamamlama ekranı)
+adb shell am start -n com.salticusteam.vifi/.app.MainActivity --ez vifi_profile_incomplete true
+```
+
+## Durum
+
+Telefonla giriş (+90), canlı arşiv, profil tamamlama/düzenleme ve Hesap ekranı hazır; ayrıntı ve kalan işler yol
+haritasında. Google Play geliştirici hesabı Kasım 2024'ten beri kaldırılmış durumda: release imzası ve mağaza yayını
+yol haritasının sonundaki `REL-01` kalemindedir.

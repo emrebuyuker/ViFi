@@ -14,15 +14,15 @@
 > Phone Auth + oturum kapısı, canlı Firestore arşiv okuması, force update, analytics, profil (veri + ekranlar + kapı) ve Hesap ekranı (profil, telefon, çıkış) hazır.
 > Canlı giriş + arşiv emülatörde doğrulandı (24 Ekim). Sıradaki: hesap silme (ACC-03) ve Home/coin alanları. Release imzası ve mağaza işleri en sondaki **REL-01**'de (Play hesabı Kasım 2024'ten beri kaldırılmış durumda).
 
-| | iOS (hedef) | Android (23 Ekim 2026) | Android (başlangıç, v2.5) |
+| | iOS (hedef) | Android (24 Ekim 2026) | Android (başlangıç, v2.5) |
 |---|---|---|---|
 | Sürüm | **3.1.0** | 2.5 (versionCode 16) — versionName kararı açık | 2.5 |
 | UI | SwiftUI + MVVM(@Observable) | **Compose + Material3 + MVVM (Hilt, StateFlow)**, tek `MainActivity`, Navigation-Compose | Java + Activity/Fragment |
 | Kütüphane tabanı | Firebase 12, SwiftPM | AndroidX, AGP 8.7.2, Kotlin 2.0.21, Firebase BoM 33.5.1, `libs.versions.toml`, R8 | `com.android.support`, AGP 3.4.2, jcenter, Firebase 16.x, Parse |
-| Arşiv verisi | **Cloud Firestore** (isimli `vifi` DB) | `FirestoreArchiveRepository` (isimli `vifi`, offline önbellek) bağlı; okuma +90 giriş bekliyor | RTDB `Universitiess` |
-| Giriş | **Firebase Phone Auth (+90)** + App Check | App Check (Debug/Play Integrity) kurulu; giriş ekranı yok | e-posta/şifre |
+| Arşiv verisi | **Cloud Firestore** (isimli `vifi` DB) | `FirestoreArchiveRepository` (isimli `vifi`, offline önbellek) — canlıda doğrulandı; dosya görüntüleyiciler yok | RTDB `Universitiess` |
+| Giriş | **Firebase Phone Auth (+90)** + App Check | **Phone Auth (+90)** + oturum ve profil kapısı — canlıda doğrulandı (debug imza); App Check Debug/Play Integrity | e-posta/şifre |
 | Monetizasyon | Coin ekonomisi (reklamsız) | Reklam yok; `unlockExam` servisi hazır, UI yok | AdMob |
-| Özellikler | profil kapısı, coin kilidi, gönderim+moderasyon, bildirim merkezi, onboarding, ekran koruması, force update, analytics, Türkçe-only | Tasarım sistemi, arşiv gezinme (örnek veri), `live`/`mock` flavor | yok |
+| Özellikler | profil kapısı, coin kilidi, gönderim+moderasyon, bildirim merkezi, onboarding, ekran koruması, force update, analytics, Türkçe-only | Tasarım sistemi, arşiv gezinme (canlı), profil tamamlama/düzenleme, Hesap (profil, telefon, çıkış), force update kapısı, analytics, DataStore tercihleri, `live`/`mock` flavor | yok |
 
 ## 1. Kapsam Kararları (sabit)
 

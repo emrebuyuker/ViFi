@@ -2,9 +2,11 @@
 
 Üniversitelerin geçmiş sınavlarını tek yerde toplayan sınav arşivi uygulamasının Android istemcisi.
 
-> **Durum (23 Ekim 2026):** Faz 1 (Temel & Modernizasyon) büyük ölçüde tamam — uygulama artık **Kotlin + Jetpack
-> Compose + MVVM + Hilt** üzerinde, eski Java/Activity kodu silindi (FM-23). Giriş (Phone Auth) ve canlı arşiv henüz yok;
-> live arşiv geçici olarak örnek veri gösterir. **iOS v3.1.0 paritesi** hedefinde ilerleme ve kalan işler
+> **Durum (24 Ekim 2026):** Uygulama **Kotlin + Jetpack Compose + MVVM + Hilt** üzerinde (eski Java/Activity kodu
+> silindi, FM-23). **Phone Auth (+90)**, oturum + profil kapısı, **canlı arşiv** (isimli `vifi` Firestore), profil
+> tamamlama/düzenleme, Hesap ekranı, force update kapısı ve analytics hazır; giriş ve arşiv canlıda emülatörde doğrulandı.
+> Google Play geliştirici hesabı Kasım 2024'ten beri kaldırılmış durumda — release/mağaza işleri `REL-01`'de.
+> **iOS v3.1.0 paritesi** hedefinde ilerleme ve kalan işler
 > [`ANDROID-PARITY-ROADMAP.md`](ANDROID-PARITY-ROADMAP.md) (özet) ve [`ANDROID-PARITY-DETAIL.md`](ANDROID-PARITY-DETAIL.md)
 > (ayrıntı) dosyalarındadır.
 
@@ -75,8 +77,9 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
 | **Dil/UI** | Kotlin + Compose (eski Java/XML ekranlar FM-23'te silindi); tek `app/MainActivity` + `AppRoot` + `ViFiNavHost` |
 | **Uygulama** | `com.salticusteam.vifi`, `versionName 2.5`, `versionCode 16`, `compileSdk/targetSdk 35`, `minSdk 24` |
 | **Flavor** | `live` (canlı vifi-831a8) · `mock` (örnek veri, Firebase başlamaz, yalnız debug) |
-| **Veri (arşiv)** | Live `ArchiveRepository` henüz GEÇİCİ olarak örnek veriye bağlı; hedef named `vifi` Firestore (`BE-15`) |
-| **Giriş** | Henüz yok — hedef Phone Auth `+90` (`BE-04`); e-posta/şifre girişi kaldırıldı |
+| **Veri (arşiv)** | Live `FirestoreArchiveRepository` → named `vifi` Firestore `catalogNodes`/`exams` (`BE-15`); mock örnek veri |
+| **Giriş** | Phone Auth `+90` (`BE-04`) → `SessionStore` → `ProfileGate` (`ProfileStore`, RTDB `users/<uid>/profile`) → arşiv |
+| **Senaryo bayrakları** | Debug intent extra'ları (`core/util/LaunchArgs.kt`); bağlı olanlar: mock'ta `vifi_signed_out`, `vifi_profile_incomplete`, `vifi_force_update`; live debug'da `vifi_phone_auth_testing` (yalnız Console test numaralarıyla) |
 | **Kütüphane** | AndroidX, AGP 8.7.2 + Gradle 8.9, `libs.versions.toml`, Kotlin 2.0.21 + Coroutines, Hilt 2.52, Compose BoM 2024.10.01, Navigation 2.8.3, Firebase BoM 33.5.1, Timber |
 | **Build** | Gradle Groovy DSL (plugins DSL), `google-services` 4.4.2, Java 17 hedefi + desugaring; Gradle'ı JDK 17–21 ile çalıştır (Android Studio JBR 25 desteklenmez); release R8 küçültmeli |
 | **❌ Yeni kodda yapma** | `com.android.support`/`jcenter`, AdMob, XML ekran (Compose kullan), sır/keystore commit'i, mock'a canlı Firebase binding'i |
@@ -170,9 +173,9 @@ Android ve iOS **aynı** `vifi-831a8` projesini paylaşır (ayrıntı: `.claude/
 | Konu | Değer |
 |---|---|
 | **Proje** | `vifi-831a8` (proje no `441043948320`, Blaze; bucket `vifi-831a8.appspot.com`) |
-| **Android kaydı** | `com.salticusteam.vifi` — Phone Auth / App Check için henüz yapılandırılmamış (yol haritası `BE-01`) |
-| **Arşiv (mevcut→hedef)** | RTDB `Universitiess` → named `vifi` Firestore `catalogNodes`/`exams` (`BE-05`, `BE-15`) |
-| **Giriş (mevcut→hedef)** | e-posta/şifre → Phone Auth `+90` (`BE-04`) |
+| **Android kaydı** | `com.salticusteam.vifi` — bu geliştirme Mac'inin debug SHA-1/SHA-256'sı kayıtlı (`BE-01`); release izleri + `google-services.json` yenileme `REL-01`'de |
+| **Arşiv** | named `vifi` Firestore `catalogNodes`/`exams` (`BE-05`, `BE-15`); RTDB `Universitiess` artık okunmuyor |
+| **Giriş** | Phone Auth `+90` (`BE-04`); canlı test için Console'daki test numarası + `111111` |
 | **App Check** | Storage/RTDB/Auth enforce **AÇIK** → Play Integrity kurulmadan **403**; Firestore enforce en son açılır (`BE-02/03`) |
 | **Bildirim** | FCM; Parse SDK kaldırılıp native FCM'e tam geçiş (`BE-11`), `POST_NOTIFICATIONS` |
 | **Cloud Functions (ortak, europe-west1)** | `unlockExam`, `recordLoginDiagnostic` — Android **çağırır** (`BE-08/09`), yeni function yazmaz |
@@ -205,5 +208,5 @@ Projeyi modernize et / Firestore'a taşı.
 
 ---
 
-**Son güncelleme:** Ekim 2026
-**Proje:** ViFi Android (`com.salticusteam.vifi`, v2.5 → iOS 3.1.0 parite hedefinde; Faz 1 büyük ölçüde tamam)
+**Son güncelleme:** 24 Ekim 2026
+**Proje:** ViFi Android (`com.salticusteam.vifi`, v2.5 → iOS 3.1.0 parite hedefinde; giriş, arşiv, profil ve Hesap hazır)
