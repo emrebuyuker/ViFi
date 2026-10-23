@@ -1,5 +1,11 @@
 package com.salticusteam.vifi.core.data.repository
 
+import com.salticusteam.vifi.core.data.preferences.OnboardingPreferences
+import com.salticusteam.vifi.core.data.preferences.RecentExamsRepository
+import com.salticusteam.vifi.core.data.preferences.UserPreferencesRepository
+import com.salticusteam.vifi.core.data.preferences.fake.FakeOnboardingPreferences
+import com.salticusteam.vifi.core.data.preferences.fake.FakeRecentExamsRepository
+import com.salticusteam.vifi.core.data.preferences.fake.FakeUserPreferencesRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamUnlockService
 import dagger.Module
@@ -23,4 +29,16 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideExamUnlockService(): ExamUnlockService = FakeExamUnlockService()
+
+    @Provides
+    @Singleton
+    fun provideUserPreferences(): UserPreferencesRepository = FakeUserPreferencesRepository()
+
+    @Provides
+    @Singleton
+    fun provideRecentExams(): RecentExamsRepository = FakeRecentExamsRepository()
+
+    @Provides
+    @Singleton
+    fun provideOnboardingPreferences(): OnboardingPreferences = FakeOnboardingPreferences()
 }
