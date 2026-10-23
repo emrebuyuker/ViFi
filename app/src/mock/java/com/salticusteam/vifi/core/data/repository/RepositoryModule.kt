@@ -16,6 +16,7 @@ import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamSubmissionService
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamUnlockService
+import com.salticusteam.vifi.core.data.repository.fake.FakeModerationService
 import com.salticusteam.vifi.core.data.repository.fake.FakeProfileService
 import com.salticusteam.vifi.core.data.repository.fake.FakeRewardsConfigReader
 import com.salticusteam.vifi.core.data.repository.fake.FakeUnlocksReader
@@ -51,6 +52,11 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideExamSubmissionService(): ExamSubmissionService = FakeExamSubmissionService()
+
+    /** An in-memory queue; approvals and rejections never leave the device. */
+    @Provides
+    @Singleton
+    fun provideModerationService(): ModerationService = FakeModerationService()
 
     @Provides
     @Singleton
@@ -122,13 +128,15 @@ object RepositoryModule {
 
     /**
      * Signed in as the sample user unless launched with `vifi_signed_out` (read after MainActivity parsed it);
-     * `vifi_delete_requires_reauth` makes account deletion ask for the number's code first (code 111111).
+     * `vifi_delete_requires_reauth` makes account deletion ask for the number's code first (code 111111);
+     * `vifi_admin` reports the user as an admin, revealing Moderasyon and the exam delete action.
      */
     @Provides
     @Singleton
     fun provideAuthService(): AuthService = FakeAuthService(
         isSignedIn = !LaunchArgs.isSet(LaunchArg.SIGNED_OUT),
         requiresRecentLoginForDeletion = LaunchArgs.isSet(LaunchArg.DELETE_REQUIRES_REAUTH),
+        isAdmin = LaunchArgs.isSet(LaunchArg.ADMIN),
     )
 
     @Provides
