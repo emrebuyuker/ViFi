@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
@@ -83,6 +84,10 @@ fun BrowseScreen(
     onEarnCoins: (() -> Unit)? = null,
     /** Opens the inbox; only the home screen passes it (the toolbar's bell). */
     onInboxClick: (() -> Unit)? = null,
+    /** Opens the about screen; only the home screen passes it (the toolbar's info button). */
+    onAboutClick: (() -> Unit)? = null,
+    /** Content shown above the list while it is not being searched; only the home screen passes it. */
+    listHeader: (@Composable () -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel(),
     unlockViewModel: ExamUnlockViewModel = hiltViewModel(),
 ) {
@@ -112,6 +117,8 @@ fun BrowseScreen(
         lockState = lockState,
         onLockedExamTap = unlockViewModel::onLockedExamTap,
         onInboxClick = onInboxClick,
+        onAboutClick = onAboutClick,
+        listHeader = listHeader,
     )
 
     lockState.examToUnlock?.let { exam ->
@@ -138,6 +145,8 @@ internal fun BrowseContent(
     lockState: ExamUnlockUiState = ExamUnlockUiState(),
     onLockedExamTap: (ArchiveItem) -> Unit = {},
     onInboxClick: (() -> Unit)? = null,
+    onAboutClick: (() -> Unit)? = null,
+    listHeader: (@Composable () -> Unit)? = null,
 ) {
     val listedLevel = state.path.childLevel ?: ArchiveLevel.EXAM
     val title = state.path.displayName ?: stringResource(R.string.archive_home_title)
@@ -151,6 +160,14 @@ internal fun BrowseContent(
                 actions = {
                     CoinBalanceBadge(balance = lockState.balance, modifier = Modifier.padding(end = 4.dp))
                     if (onInboxClick != null) InboxBell(onClick = onInboxClick)
+                    if (onAboutClick != null) {
+                        IconButton(onClick = onAboutClick, modifier = Modifier.testTag("toolbar.about")) {
+                            Icon(
+                                imageVector = Icons.Filled.Info,
+                                contentDescription = stringResource(R.string.home_about_open),
+                            )
+                        }
+                    }
                     if (onAccountClick != null) {
                         IconButton(onClick = onAccountClick, modifier = Modifier.testTag("toolbar.account")) {
                             Icon(
@@ -198,6 +215,7 @@ internal fun BrowseContent(
                                 lockedPaths = lockState.lockedPaths(items),
                                 onItemClick = onItemClick,
                                 onLockedExamTap = onLockedExamTap,
+                                header = listHeader.takeUnless { state.isFiltering },
                             )
                         }
                     }
@@ -252,11 +270,13 @@ private fun ArchiveList(
     lockedPaths: Set<ArchivePath>,
     onItemClick: (ArchiveItem) -> Unit,
     onLockedExamTap: (ArchiveItem) -> Unit,
+    header: (@Composable () -> Unit)? = null,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag("browse.list"),
         contentPadding = PaddingValues(bottom = 16.dp),
     ) {
+        if (header != null) item(key = "homeHeader") { header() }
         item(key = "sectionHeader") {
             SectionHeader(title = title, count = items.size)
         }
