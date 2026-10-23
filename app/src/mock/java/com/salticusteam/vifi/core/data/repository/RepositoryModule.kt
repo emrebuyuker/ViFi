@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.core.data.repository
 
+import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamUnlockService
 import dagger.Module
@@ -23,4 +24,8 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideExamUnlockService(): ExamUnlockService = FakeExamUnlockService()
+
+    @Provides
+    @Singleton
+    fun provideAnalyticsTracker(): AnalyticsTracker = FakeAnalyticsTracker()
 }

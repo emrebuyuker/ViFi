@@ -2,6 +2,7 @@ package com.salticusteam.vifi.feature.browse
 
 import androidx.lifecycle.SavedStateHandle
 import com.salticusteam.vifi.core.data.repository.ArchiveRepository
+import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.model.ArchiveError
 import com.salticusteam.vifi.core.model.ArchiveItem
 import com.salticusteam.vifi.core.model.ArchiveLevel
@@ -36,7 +37,7 @@ class BrowseViewModelTest {
     fun `init when repository succeeds exposes items and clears loading`() = runTest {
         val repo = ControllableArchiveRepository().apply { result = { listOf(itu, kocaeli) } }
 
-        val sut = BrowseViewModel(SavedStateHandle(), repo)
+        val sut = BrowseViewModel(SavedStateHandle(), repo, FakeAnalyticsTracker())
         assertTrue(sut.uiState.value.isLoading)
         advanceUntilIdle()
 
@@ -51,7 +52,7 @@ class BrowseViewModelTest {
     fun `init when repository throws domain error shows its userMessage`() = runTest {
         val repo = ControllableArchiveRepository().apply { result = { throw ArchiveError.Offline } }
 
-        val sut = BrowseViewModel(SavedStateHandle(), repo)
+        val sut = BrowseViewModel(SavedStateHandle(), repo, FakeAnalyticsTracker())
         advanceUntilIdle()
 
         val state = sut.uiState.value
@@ -64,7 +65,7 @@ class BrowseViewModelTest {
     fun `init when repository throws unexpected error shows generic message`() = runTest {
         val repo = ControllableArchiveRepository().apply { result = { throw IllegalStateException("boom") } }
 
-        val sut = BrowseViewModel(SavedStateHandle(), repo)
+        val sut = BrowseViewModel(SavedStateHandle(), repo, FakeAnalyticsTracker())
         advanceUntilIdle()
 
         assertEquals(GENERIC_ERROR_MESSAGE, sut.uiState.value.error)
@@ -73,7 +74,7 @@ class BrowseViewModelTest {
     @Test
     fun `load after failure retries and recovers`() = runTest {
         val repo = ControllableArchiveRepository().apply { result = { throw ArchiveError.Offline } }
-        val sut = BrowseViewModel(SavedStateHandle(), repo)
+        val sut = BrowseViewModel(SavedStateHandle(), repo, FakeAnalyticsTracker())
         advanceUntilIdle()
 
         repo.result = { listOf(itu) }
@@ -91,7 +92,7 @@ class BrowseViewModelTest {
     fun `load while a request is in flight does not start a second one`() = runTest {
         val gate = CompletableDeferred<List<ArchiveItem>>()
         val repo = ControllableArchiveRepository().apply { result = { gate.await() } }
-        val sut = BrowseViewModel(SavedStateHandle(), repo)
+        val sut = BrowseViewModel(SavedStateHandle(), repo, FakeAnalyticsTracker())
         advanceUntilIdle()
 
         sut.load()
@@ -108,7 +109,7 @@ class BrowseViewModelTest {
     @Test
     fun `refresh when it fails keeps the items already shown`() = runTest {
         val repo = ControllableArchiveRepository().apply { result = { listOf(itu) } }
-        val sut = BrowseViewModel(SavedStateHandle(), repo)
+        val sut = BrowseViewModel(SavedStateHandle(), repo, FakeAnalyticsTracker())
         advanceUntilIdle()
 
         repo.result = { throw ArchiveError.Offline }
@@ -123,7 +124,7 @@ class BrowseViewModelTest {
     @Test
     fun `archive change after load triggers a refresh`() = runTest {
         val repo = ControllableArchiveRepository().apply { result = { listOf(itu) } }
-        val sut = BrowseViewModel(SavedStateHandle(), repo)
+        val sut = BrowseViewModel(SavedStateHandle(), repo, FakeAnalyticsTracker())
         advanceUntilIdle()
 
         repo.result = { listOf(itu, kocaeli) }
@@ -139,7 +140,7 @@ class BrowseViewModelTest {
     @Test
     fun `search folds Turkish case and diacritics`() = runTest {
         val repo = ControllableArchiveRepository().apply { result = { listOf(itu, kocaeli, dumlupinar) } }
-        val sut = BrowseViewModel(SavedStateHandle(), repo)
+        val sut = BrowseViewModel(SavedStateHandle(), repo, FakeAnalyticsTracker())
         advanceUntilIdle()
 
         sut.onSearchTextChange("  kocaeli ")
@@ -160,7 +161,7 @@ class BrowseViewModelTest {
     @Test
     fun `remove drops the item from the loaded list`() = runTest {
         val repo = ControllableArchiveRepository().apply { result = { listOf(itu, kocaeli) } }
-        val sut = BrowseViewModel(SavedStateHandle(), repo)
+        val sut = BrowseViewModel(SavedStateHandle(), repo, FakeAnalyticsTracker())
         advanceUntilIdle()
 
         sut.remove(itu)

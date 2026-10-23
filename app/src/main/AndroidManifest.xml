@@ -30,6 +30,10 @@
         <meta-data
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
+        <!-- Screens are reported by hand (AnalyticsScreen names, iOS parity), not by Activity class. -->
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
 
         <!-- The single Compose host (FM-22). -->
         <activity

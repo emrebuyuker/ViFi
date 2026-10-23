@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.core.data.repository
 
+import com.salticusteam.vifi.core.data.firebase.FirebaseAnalyticsTracker
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import dagger.Binds
@@ -23,6 +24,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindExamUnlockService(impl: FirebaseExamUnlockService): ExamUnlockService
+
+    @Binds
+    @Singleton
+    abstract fun bindAnalyticsTracker(impl: FirebaseAnalyticsTracker): AnalyticsTracker
 
     companion object {
         @Provides
