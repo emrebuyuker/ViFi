@@ -3838,3 +3838,22 @@
 - **Bağımlılık:** ACC-01, ABT-01, DS-02, DS-03, HOME-01, HOME-02
 - **Tuzaklar:** testTag'ler release'te de kalmalı (UI testleri için) ya da ayrı kimlik stratejisi. Türkçe etiketler TalkBack'te doğru okunmalı. Büyük yazı boyutunda recents kartı iOS gibi tüm metni göstermeli.
 - **Kabul kriteri:** TalkBack ile Hesap/Hakkında/Home gezilebilir; tüm aksiyon ögeleri etiketli ve ≥48dp; UI testleri iOS kimlik paritesindeki testTag'lerle ögeleri bulabiliyor.
+
+---
+
+## Google Play hesabı ve yayın  ·  `release`
+
+#### `REL-01` — Play Store sorunlarını çöz ve uygulamayı Play Store'da yayınla  _(P0 · efor: L)_
+- **Durum (2026-10-24):** `buyukeryazilim` geliştirici hesabı ve ViFi dahil tüm uygulamalar 19 Kasım 2024'te Google Play'den kaldırıldı (hesap doğrulaması son tarihe kadar tamamlanmadı; Play Console "İşlem gerekli"). ViFi üretimde etkin değil, yeni sürüm yayınlanamıyor.
+- **Neden ayrı kalem:** Release imzası, Play App Signing ve Play Integrity mağaza dağıtımına bağlı. Bu işler hesap durumu çözülmeden yapılamaz; geliştirme ve testler debug imzayla (BE-01 debug izleri kayıtlı) sürer.
+- **Adımlar:**
+  - Play Console'da hesap doğrulamasını tamamla ve kaldırılan uygulamaların geri alınması için başvur. Olmazsa yeni hesap / paket adı kararını ver (`com.salticusteam.vifi` eski hesaba bağlı kalabilir; Firebase kaydı ve iOS ile paylaşılan proje bu karardan etkilenir).
+  - Play App Signing'in kullanılıp kullanılmadığını App integrity sayfasından netleştir; App signing key ve upload key SHA-1/SHA-256'larını Firebase Android uygulamasına ekle (BE-01'in release kısmı). Eski `b7:6a:1b:58…` SHA-1'in hangi anahtar olduğunu doğrula.
+  - Güncel `google-services.json`'ı indir, `app/google-services.json` ile değiştir, build + testlerle doğrula.
+  - App Check: Play Integrity sağlayıcısını kaydet (App signing SHA-256), Play Integrity API'nin açık olduğunu doğrula; enforce sırasını BE-03'e göre yönet (Firestore en son).
+  - Release imza yapılandırması: `keystore.properties` (git-ignored) veya CI sırları; anahtar repoya girmez.
+  - `versionName` hizalama kararı (2.5 → 3.x) ve `config/appUpdate/android` başlangıç değerleri (BE-06 / UPD-01).
+  - Data Safety formu (FM-20 envanteri), mağaza girişi, kapalı test → üretim yayını.
+- **Bağımlılık:** BE-01, BE-03, FM-20
+- **Tuzaklar:** Upload key yerine yalnız app signing key (veya tersi) eklenirse mağazadan inen sürümde telefonla giriş çalışmaz. Firestore App Check enforce, Firestore okuyan Android sürümü dağıtılmadan açılmamalı.
+- **Kabul kriteri:** Play hesabı aktif; ViFi kapalı testte ve ardından üretimde yayında; mağazadan indirilen sürümde telefonla giriş, arşiv ve App Check sorunsuz.

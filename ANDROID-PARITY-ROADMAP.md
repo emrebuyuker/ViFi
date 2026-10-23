@@ -3,16 +3,17 @@
 > **Amaç:** `ViFi-iOS` **master** dalındaki (v3.1.0, SwiftUI) tüm geliştirmeleri `ViFi-Android`'de (şu an v2.5) birebir hayata geçirmek.
 > Bu dosya **özet/scannable** master listedir. Her kalemin tam adım/kabul-kriteri/gotcha detayı için bkz. **[ANDROID-PARITY-DETAIL.md](ANDROID-PARITY-DETAIL.md)**.
 
-> **Kapsam:** 14 özellik alanı · **217 iş kalemi** · + 25 tamlık-denetimi bulgusu (9 iOS-parite boşluğu, 16 Android-platform gereksinimi).
+> **Kapsam:** 14 özellik alanı · **218 iş kalemi** · + 25 tamlık-denetimi bulgusu (9 iOS-parite boşluğu, 16 Android-platform gereksinimi).
 > Üretim: 16 ajanlık karşılaştırmalı denetim workflow'u (14 alan analisti + 2 tamlık denetçisi). Model: Opus 4.8 (bu ortamdaki en güncel Opus).
 
 ---
 
 ## 0. Durum Özeti
 
-> **İlerleme (24 Ekim 2026):** Toplam 217 kalemin **60'ı tamam, 16'sı yarım, 141'i başlanmadı.** Faz 1'de yalnız FM-11/12/13/17/22 yarım;
+> **İlerleme (24 Ekim 2026):** Toplam 218 kalemin **60'ı tamam, 17'si yarım, 141'i başlanmadı.** Faz 1'de yalnız FM-11/12/13/17/22 yarım;
 > Phone Auth + oturum kapısı, canlı Firestore arşiv okuması, force update, analytics, profil (veri + ekranlar + kapı) ve Hesap ekranı (profil, telefon, çıkış) hazır. Sıradaki:
-> Console işleri (**BE-01** SHA, BE-03 Play Integrity) — canlı giriş ve arşiv listesi bunlara bağlı; ardından hesap silme (ACC-03) ve Home/coin alanları.
+> canlı giriş denemesi (BE-01 debug izleri eklendi; test numarası + Play Integrity API kontrolü), ardından hesap silme (ACC-03) ve Home/coin
+> alanları. Release imzası ve mağaza işleri en sondaki **REL-01**'de (Play hesabı Kasım 2024'ten beri kaldırılmış durumda).
 
 | | iOS (hedef) | Android (23 Ekim 2026) | Android (başlangıç, v2.5) |
 |---|---|---|---|
@@ -64,7 +65,7 @@
 <sub>⚠️ Bu alan **çapraz-kesit**: bazı kalemleri (unlockExam çağrısı, FCM, profil yazımı, submissions, arşiv göçü) ilgili fazlarla birlikte yürür; aşağıda tümü tek yerde listelendi.</sub>
 
 - [ ] **`BE-00`** Firebase/Gradle yığınını modernize et (BoM, AndroidX, mavenCentral) — tüm backend işlerinin ön koşulu _(P0·L)_ — Firebase Android BoM (com.google.firebase:firebase-bom), AndroidX (androidx.appcompat vb.), mavenCentral(), google-services plugin 4.4.x, AGP güncel,… ⟶ bağımlı: `Build/Altyapı alanı (AndroidX + targetSdk geçişi)`
-- [ ] **`BE-01`** Android'i Console'da App Check + Phone Auth için kaydet: SHA-256/SHA-1 parmak izleri + google-services.json yenileme _(P0·S)_ — Firebase Console > Project Settings > Android app; gradle signingReport; google-services.json. ⟶ bağımlı: `Auth/Giriş alanı (Phone Auth)`
+- [ ] **`BE-01`** Android'i Console'da App Check + Phone Auth için kaydet: SHA-256/SHA-1 parmak izleri + google-services.json yenileme _(P0·S)_ — Firebase Console > Project Settings > Android app; gradle signingReport; google-services.json. ⟶ bağımlı: `Auth/Giriş alanı (Phone Auth)` 🟡 _Debug izleri eklendi (2026-10-24): bu Mac'in debug SHA-1 + SHA-256'sı Firebase'de kayıtlı; eski `b7:6a:1b:58…` SHA-1 (2019 release anahtarı olması muhtemel) korunuyor. Release izleri ve `google-services.json` yenileme REL-01'e taşındı (Play hesabı kaldırılmış)._
 - [ ] **`BE-02`** App Check — Play Integrity provider entegrasyonu (release) + Debug provider (debug) kodu _(P0·M)_ — FirebaseAppCheck.getInstance().installAppCheckProviderFactory(...), PlayIntegrityAppCheckProviderFactory.getInstance(), DebugAppCheckProviderFactory.… ⟶ bağımlı: `BE-00`, `BE-01` 🟡 _Kod tamam (2026-10-23): `VifiApplication` + debug/release source set'lerinde provider (Debug / Play Integrity); debug token Console'a kaydedildi, emülatörde App Check doğrulandı (RTDB isteği artık kurallara ulaşıyor). Kalan (release): SHA-256 + Play Integrity API + provider kaydı (BE-01, BE-03)._
 - [ ] **`BE-03`** App Check Console: Play Integrity etkinleştir + enforce sırasını yönet (Firestore en son) _(P0·S)_ — Firebase Console > App Check (Play Integrity provider, enforcement toggles). ⟶ bağımlı: `BE-02`, `Browse/Arşiv alanı (Firestore cutover)`
 - [ ] **`BE-04`** Phone Auth (+90) client akışı — ortak kuralların beklediği auth.token.phone_number'ı üret _(P0·M)_ — PhoneAuthProvider.verifyPhoneNumber(PhoneAuthOptions), PhoneAuthProvider.OnVerificationStateChangedCallbacks, PhoneAuthCredential, FirebaseAuth.signI… ⟶ bağımlı: `BE-01`, `BE-02`, `Auth/Giriş alanı (UI)` 🟡 _Kod tamam (2026-10-23): Phone Auth akışı AUTH-02..08 ile bağlandı. Kalan: canlı SMS/test numarasıyla emülatör doğrulaması — Console'da SHA kaydı (BE-01) gerekli._
@@ -344,6 +345,13 @@
 - [ ] **`HOME-03`** Home hero header + 'Sınav Ekle' çağrı kartı _(P2·S)_ — Compose Material3 Row/Card/ListItem, IconBadge (DS-03) ⟶ bağımlı: `HOME-01`, `DS-03`, `AddExam alanı`
 - [ ] **`ADS-01`** AdMob'u bu alanın kesiştiği yerlerden kaldır (iOS'ta reklam yok — parite) _(P1·M)_ — play-services-ads kaldırma; manifest/layout/kod temizliği ⟶ bağımlı: `HOME-01`
 - [ ] **`A11Y-01`** Erişilebilirlik — contentDescription, testTag kimlikleri, dokunma hedefleri, TalkBack _(P2·M)_ — Compose Modifier.semantics/contentDescription/heading/mergeDescendants, testTag, minimumInteractiveComponentSize, TalkBack ⟶ bağımlı: `ACC-01`, `ABT-01`, `DS-02`, `DS-03`, `HOME-01`, `HOME-02`
+
+### Faz 7 — Yayın  (Play Store)
+
+#### Google Play hesabı ve yayın  ·  `release`  (1 kalem)
+<sub>`buyukeryazilim` geliştirici hesabı ve ViFi dahil tüm uygulamalar, hesap doğrulaması tamamlanmadığı için 19 Kasım 2024'te Google Play'den kaldırıldı (Play Console'da "İşlem gerekli"). Release imzası, Play Integrity ve mağaza dağıtımına bağlı tüm işler bu kaleme toplandı; geliştirme ve test debug imzayla sürer.</sub>
+
+- [ ] **`REL-01`** Play Store sorunlarını çöz ve uygulamayı Play Store'da yayınla _(P0·L)_ — Play Console hesap doğrulaması + kaldırılan uygulamanın geri alınması (ya da yeni hesap/paket kararı); Play App Signing durumu; App signing + upload key SHA-1/SHA-256'nın Firebase'e eklenmesi (BE-01'in release kısmı); App Check Play Integrity kaydı ve enforce sırası (BE-03); güncel `google-services.json`; release imza yapılandırması (`keystore.properties`, repoya girmez); `versionName` hizalama kararı; Data Safety formu; kapalı test → üretim yayını. ⟶ bağımlı: `BE-01`, `BE-03`, `FM-20`
 
 ---
 
