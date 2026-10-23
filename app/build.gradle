@@ -74,6 +74,8 @@ dependencies {
     implementation libs.hilt.android
     ksp libs.hilt.compiler
     implementation libs.androidx.hilt.navigation.compose
+    implementation libs.androidx.lifecycle.viewmodel.compose
+    implementation libs.androidx.lifecycle.runtime.compose
     // Preview rendering + test host activity: debug only, never shipped in release.
     debugImplementation libs.compose.ui.tooling
     debugImplementation libs.compose.ui.test.manifest
