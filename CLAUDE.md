@@ -148,10 +148,13 @@ ViFi-Android/
 ## Komutlar (shell)
 
 ```bash
-./gradlew assembleDebug            # Debug APK derle
-./gradlew lint                     # Lint (rapor: app/build/reports/lint-results*.html)
-./gradlew test                     # Birim testler
-./gradlew connectedAndroidTest     # Enstrümanlı testler (emülatör/cihaz bağlı)
+# Flavor'lar: live (canlı vifi-831a8) · mock (örnek veri, Firebase hiç başlamaz; yalnız debug — iOS -ViFiMockData)
+# Gradle'ı JDK 17–21 ile çalıştır: export JAVA_HOME="$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home"
+./gradlew assembleLiveDebug        # Canlı debug APK (assembleDebug her iki flavor'ı derler)
+./gradlew assembleMockDebug        # Mock debug APK
+./gradlew lintLiveDebug            # Lint (rapor: app/build/reports/lint-results-liveDebug.html)
+./gradlew test                     # Birim testler (tüm variant'lar)
+./gradlew connectedLiveDebugAndroidTest connectedMockDebugAndroidTest   # Enstrümanlı testler
 ./gradlew signingReport            # SHA-1/SHA-256 (App Check / Phone Auth kaydı için)
 
 # Kural yayını — YALNIZCA onayla; ORTAK backend, ViFi-iOS/firebase/ içinde:

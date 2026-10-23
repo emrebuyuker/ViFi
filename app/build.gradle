@@ -40,11 +40,30 @@ android {
         abortOnError = false
     }
 
+    // live: the shared vifi-831a8 Firebase backend. mock: bundled sample data, Firebase never
+    // initialised (iOS -ViFiMockData) — debug only, see androidComponents below.
+    flavorDimensions = ["backend"]
+    productFlavors {
+        live {
+            dimension "backend"
+        }
+        mock {
+            dimension "backend"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+}
+
+androidComponents {
+    // Sample data must never ship: there is no mockRelease variant.
+    beforeVariants(selector().withFlavor(new kotlin.Pair("backend", "mock")).withBuildType("release")) { variant ->
+        variant.enable = false
     }
 }
 
