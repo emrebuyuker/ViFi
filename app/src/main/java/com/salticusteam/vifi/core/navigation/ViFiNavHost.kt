@@ -21,6 +21,7 @@ fun ViFiNavHost(
     exam: @Composable (path: ArchivePath, kind: ExamKind) -> Unit,
     account: @Composable () -> Unit,
     editProfile: @Composable () -> Unit,
+    about: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -43,6 +44,9 @@ fun ViFiNavHost(
         }
         composable<ViFiRoute.EditProfile> {
             editProfile()
+        }
+        composable<ViFiRoute.About> {
+            about()
         }
     }
 }

@@ -109,6 +109,9 @@ object AnalyticsValues {
     /** `onboarding_complete.source`. */
     const val ONBOARDING_SOURCE_FIRST_LAUNCH = "first_launch"
 
+    // Added in 2.5 — the tour replayed from About; it never marks the tour as seen.
+    const val ONBOARDING_SOURCE_REPLAY = "replay"
+
     /** `update_action.action`. */
     const val UPDATE_ACTION_UPDATE = "update"
     const val UPDATE_ACTION_SKIP = "skip"

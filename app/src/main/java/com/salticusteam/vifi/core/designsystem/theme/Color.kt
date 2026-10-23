@@ -8,6 +8,9 @@ import androidx.compose.ui.graphics.Color
 val VifiOrange = Color(0xFFFB910D)
 val VifiOrangeOnDark = Color(0xFFFFA62B)
 
+// iOS system orange: the tint of the "locked" and "contribute" tour pages, distinct from the brand accent.
+val VifiSystemOrange = Color(0xFFFF9500)
+
 // Colors that must not change with dark mode (iOS constant colors).
 val VifiAlwaysBlack = Color(0xFF000000)
 val VifiAlwaysWhite = Color(0xFFFFFFFF)

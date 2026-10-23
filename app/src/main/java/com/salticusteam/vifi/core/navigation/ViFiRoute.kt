@@ -41,6 +41,10 @@ sealed interface ViFiRoute {
     @Serializable
     data object Account : ViFiRoute
 
+    /** App information: version, highlights, tour replay, "Bize Ulaş" (opened from the account screen). */
+    @Serializable
+    data object About : ViFiRoute
+
     /** Edits the signed-in user's profile (opened from the account screen). */
     @Serializable
     data object EditProfile : ViFiRoute

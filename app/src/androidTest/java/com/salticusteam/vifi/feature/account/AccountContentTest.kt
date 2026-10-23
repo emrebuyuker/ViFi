@@ -18,6 +18,7 @@ class AccountContentTest {
 
     private var editProfileClicks = 0
     private var signOutCalls = 0
+    private var aboutClicks = 0
 
     private fun setContent(state: AccountUiState = AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67")) {
         composeRule.setContent {
@@ -27,6 +28,7 @@ class AccountContentTest {
                     onEditProfile = { editProfileClicks++ },
                     onSignOut = { signOutCalls++ },
                     onBack = {},
+                    onAbout = { aboutClicks++ },
                 )
             }
         }
@@ -39,6 +41,15 @@ class AccountContentTest {
         composeRule.onNodeWithTag("account.editProfile").assert(hasText("Ayşe Yılmaz")).assertIsDisplayed()
         composeRule.onNodeWithTag("account.phone").assert(hasText("+90 532 123 45 67")).assertIsDisplayed()
         composeRule.onNodeWithTag("topBar.backButton").assertIsDisplayed()
+    }
+
+    @Test
+    fun account_whenAboutRowTapped_opensAbout() {
+        setContent()
+
+        composeRule.onNodeWithTag("account.about").performClick()
+
+        assertEquals(1, aboutClicks)
     }
 
     @Test

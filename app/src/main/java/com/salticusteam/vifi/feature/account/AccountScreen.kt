@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -48,6 +49,7 @@ import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 @Composable
 fun AccountScreen(
     onEditProfile: () -> Unit,
+    onAbout: () -> Unit,
     onBack: () -> Unit,
     viewModel: AccountViewModel = hiltViewModel(),
 ) {
@@ -62,6 +64,7 @@ fun AccountScreen(
         onEditProfile = onEditProfile,
         onSignOut = viewModel::signOut,
         onBack = onBack,
+        onAbout = onAbout,
     )
 }
 
@@ -73,6 +76,7 @@ fun AccountContent(
     onSignOut: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onAbout: () -> Unit = {},
 ) {
     var isConfirmingSignOut by rememberSaveable { mutableStateOf(false) }
 
@@ -93,6 +97,18 @@ fun AccountContent(
             }
             item(key = "phone") {
                 PhoneRow(formattedPhoneNumber = state.formattedPhoneNumber)
+                HorizontalDivider()
+            }
+            item(key = "about") {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.account_about_row)) },
+                    leadingContent = { IconBadge(icon = Icons.Filled.Info) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+                    modifier = Modifier
+                        .clickable(role = Role.Button, onClick = onAbout)
+                        .testTag("account.about"),
+                )
                 HorizontalDivider()
             }
             item(key = "signOut") {
