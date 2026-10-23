@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Added in 2.5 — "Sınav Ekle" (user exam submission) flow, iOS AddExamView parity -->
+    <string name="add_exam_title">Sınav Ekle</string>
+    <string name="add_exam_cancel">Vazgeç</string>
+    <string name="add_exam_submit">Gönder</string>
+    <string name="add_exam_select">Seç</string>
+
+    <string name="add_exam_section_school">Okul</string>
+    <string name="add_exam_section_lesson">Ders</string>
+    <string name="add_exam_section_exam">Sınav</string>
+    <string name="add_exam_section_files">Dosyalar</string>
+
+    <string name="add_exam_university">Üniversite</string>
+    <string name="add_exam_faculty">Fakülte</string>
+    <string name="add_exam_department">Bölüm</string>
+    <string name="add_exam_lesson">Ders</string>
+    <string name="add_exam_exam_name">Sınav adı</string>
+    <string name="add_exam_year">Yıl</string>
+    <string name="add_exam_kind">Tür</string>
+    <string name="add_exam_kind_images">Görsel</string>
+    <string name="add_exam_kind_pdf">PDF</string>
+
+    <string name="add_exam_pick_images">Görsel sayfa ekle</string>
+    <string name="add_exam_pick_pdf">PDF seç</string>
+    <string name="add_exam_replace_pdf">PDF\'i değiştir</string>
+    <string name="add_exam_preparing_files">Dosyalar hazırlanıyor…</string>
+    <string name="add_exam_pdf_selected">PDF seçildi</string>
+    <string name="add_exam_clear_files">Temizle</string>
+    <string name="add_exam_files_footer_images">Sınavın sayfalarını sırayla ekle. En fazla %1$d görsel.</string>
+    <string name="add_exam_files_footer_pdf">Sınavı tek bir PDF olarak ekle.</string>
+    <plurals name="add_exam_pages_selected">
+        <item quantity="one">%1$d sayfa seçildi</item>
+        <item quantity="other">%1$d sayfa seçildi</item>
+    </plurals>
+
+    <!-- Coin note: "yaklaşık" because the authoritative amount is set at approval -->
+    <string name="add_exam_coin_note_tier">Onaylanırsa yaklaşık %1$s coin kazanırsın (%2$s); coinlerin hesabına yüklenir.</string>
+    <string name="add_exam_coin_note_flat">Onaylanırsa %1$s coin kazanırsın; coinlerin hesabına yüklenir.</string>
+    <string name="add_exam_coin_note_generic">Eklediğin sınav incelenip onaylandığında coin kazanırsın; coinlerin hesabına yüklenir.</string>
+
+    <!-- Lesson picker -->
+    <string name="add_exam_lesson_search">Ders ara</string>
+    <string name="add_exam_lesson_existing">Mevcut Dersler</string>
+    <string name="add_exam_lesson_loading">Dersler yükleniyor…</string>
+    <string name="add_exam_lesson_empty">Bu bölüm için arşivde kayıtlı ders yok. Aşağıdan ekleyebilirsin.</string>
+    <string name="add_exam_lesson_no_match">Aramanla eşleşen ders yok.</string>
+    <string name="add_exam_lesson_add_custom">Farklı ders ekle</string>
+    <string name="add_exam_lesson_custom_footer">Dersin listede yoksa, adını yazarak ekleyebilirsin.</string>
+    <string name="add_exam_lesson_dialog_title">Ders Ekle</string>
+    <string name="add_exam_lesson_dialog_message">Eklemek istediğin dersin adını yaz.</string>
+    <string name="add_exam_lesson_dialog_field">Ders adı</string>
+    <string name="add_exam_lesson_dialog_confirm">Ekle</string>
+
+    <!-- Submission tiers (shared with moderation) -->
+    <string name="submission_tier_new_university">Yeni üniversite</string>
+    <string name="submission_tier_new_faculty">Yeni fakülte</string>
+    <string name="submission_tier_new_department">Yeni bölüm</string>
+    <string name="submission_tier_new_course">Yeni ders</string>
+    <string name="submission_tier_new_exam">Yeni sınav</string>
+    <string name="submission_tier_duplicate">Mevcut sınav</string>
+</resources>
