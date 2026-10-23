@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.core.data.repository
 
+import com.salticusteam.vifi.core.data.firebase.FirebaseAnalyticsTracker
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
 import com.salticusteam.vifi.core.data.preferences.DataStoreOnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.DataStoreRecentExamsRepository
@@ -41,6 +42,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindOnboardingPreferences(impl: DataStoreOnboardingPreferences): OnboardingPreferences
+
+    @Binds
+    @Singleton
+    abstract fun bindAnalyticsTracker(impl: FirebaseAnalyticsTracker): AnalyticsTracker
 
     companion object {
         @Provides

@@ -4,15 +4,22 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.ArchiveRepository
+import com.salticusteam.vifi.core.model.AnalyticsEvent
+import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.ArchiveItem
+import com.salticusteam.vifi.core.model.ArchiveLevel
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.userMessage
 import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.util.LogCategory
+import com.salticusteam.vifi.core.util.trackScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +34,7 @@ import kotlinx.coroutines.launch
 class BrowseViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val archiveRepository: ArchiveRepository,
+    private val analytics: AnalyticsTracker,
 ) : ViewModel() {
 
     // State
@@ -36,6 +44,10 @@ class BrowseViewModel @Inject constructor(
     // Internal state
     /** Set while a request is in flight, so a pull-to-refresh or retry can't overlap the initial load. */
     private var isFetching = false
+
+    private var hasTrackedLevel = false
+
+    private var searchReportJob: Job? = null
 
     // Intents
     init {
@@ -55,6 +67,16 @@ class BrowseViewModel @Inject constructor(
 
     fun onSearchTextChange(text: String) {
         _uiState.update { it.copy(searchText = text) }
+        reportSearchAfterPause()
+    }
+
+    /** Logged on every appearance; the level browse event once per screen (iOS `BrowseView.trackScreen`). */
+    fun onScreenShown() {
+        val path = _uiState.value.path
+        analytics.trackScreen(if (path.isRoot) AnalyticsScreen.HOME else AnalyticsScreen.BROWSE)
+        if (path.isRoot || hasTrackedLevel) return
+        hasTrackedLevel = true
+        analytics.track(AnalyticsEvent.Browse(listedLevel()))
     }
 
     /** Drops [item] after an admin deleted it, so the list updates at once (a refetch could hit the cache). */
@@ -99,6 +121,19 @@ class BrowseViewModel @Inject constructor(
         }
     }
 
+    private fun listedLevel(): ArchiveLevel = _uiState.value.path.childLevel ?: ArchiveLevel.EXAM
+
+    /** Reports a search once the user pauses typing; a new keystroke cancels the pending report. */
+    private fun reportSearchAfterPause() {
+        searchReportJob?.cancel()
+        if (_uiState.value.searchQuery.isEmpty()) return
+        searchReportJob = viewModelScope.launch {
+            delay(SEARCH_REPORT_DELAY_MS)
+            val state = _uiState.value
+            analytics.track(AnalyticsEvent.SearchUsed(listedLevel(), zeroResults = state.visibleItems.isEmpty()))
+        }
+    }
+
     private fun logFailure(error: Exception) {
         val path = _uiState.value.path
         val location = if (path.isRoot) "root" else path.components.joinToString(" › ")
@@ -106,6 +141,8 @@ class BrowseViewModel @Inject constructor(
     }
 
     private companion object {
+        const val SEARCH_REPORT_DELAY_MS = 700L
+
         /** Home has no route arguments (root); a Browse destination carries its path. */
         fun SavedStateHandle.archivePath(): ArchivePath =
             if (contains("ids")) toRoute<ViFiRoute.Browse>().path else ArchivePath.ROOT
