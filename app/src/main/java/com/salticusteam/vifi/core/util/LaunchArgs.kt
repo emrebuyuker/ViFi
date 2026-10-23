@@ -17,6 +17,7 @@ enum class LaunchArg(val extraKey: String) {
     NO_COINS("vifi_no_coins"),
     SHOW_ONBOARDING("vifi_show_onboarding"),
     NOTIFICATIONS_PROMPT("vifi_notifications_prompt"),
+    DELETE_REQUIRES_REAUTH("vifi_delete_requires_reauth"),
 }
 
 /** Process-wide holder of the active launch arguments; empty unless set from a launching intent. */

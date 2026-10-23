@@ -1,5 +1,14 @@
 package com.salticusteam.vifi.feature.account
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,7 +52,8 @@ import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 
 /**
  * The signed-in account (iOS AccountView), opened from the home screen: the profile (opens the editor), the
- * verified phone number and signing out. Account deletion (ACC-03), the coin balance and moderation join later.
+ * verified phone number, signing out and deleting the account (with a re-verification of the number when
+ * Firebase asks for a recent sign-in). The coin balance and moderation join later.
  */
 @Composable
 fun AccountScreen(
@@ -57,10 +67,26 @@ fun AccountScreen(
         viewModel.onScreenShown()
     }
 
+    // Counts the resend cooldown down once a second (iOS TimelineView); stops at zero.
+    var resendSecondsRemaining by remember { mutableIntStateOf(viewModel.resendCooldownRemaining()) }
+    LaunchedEffect(state.resendAvailableAt) {
+        resendSecondsRemaining = viewModel.resendCooldownRemaining()
+        while (resendSecondsRemaining > 0) {
+            delay(1_000)
+            resendSecondsRemaining = viewModel.resendCooldownRemaining()
+        }
+    }
+
     AccountContent(
         state = state,
+        resendSecondsRemaining = resendSecondsRemaining,
         onEditProfile = onEditProfile,
         onSignOut = viewModel::signOut,
+        onDeleteAccount = viewModel::deleteAccount,
+        onCodeChange = viewModel::onCodeChange,
+        onConfirmReverification = viewModel::confirmReverification,
+        onResendCode = viewModel::resendCode,
+        onCancelReverification = viewModel::cancelReverification,
         onBack = onBack,
     )
 }
@@ -69,17 +95,32 @@ fun AccountScreen(
 @Composable
 fun AccountContent(
     state: AccountUiState,
+    resendSecondsRemaining: Int,
     onEditProfile: () -> Unit,
     onSignOut: () -> Unit,
+    onDeleteAccount: () -> Unit,
+    onCodeChange: (String) -> Unit,
+    onConfirmReverification: () -> Unit,
+    onResendCode: () -> Unit,
+    onCancelReverification: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isConfirmingSignOut by rememberSaveable { mutableStateOf(false) }
+    var isConfirmingDeletion by rememberSaveable { mutableStateOf(false) }
+
+    // Leaving mid-deletion would strand a re-verification code with no screen to enter it (iOS disables "Bitti").
+    BackHandler(enabled = state.isWorking) {}
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.imePadding(),
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { ViFiTopAppBar(title = stringResource(R.string.account_title), onBack = onBack) },
+        topBar = {
+            ViFiTopAppBar(
+                title = stringResource(R.string.account_title),
+                onBack = { if (!state.isWorking) onBack() },
+            )
+        },
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -88,7 +129,7 @@ fun AccountContent(
                 .testTag("account.list"),
         ) {
             item(key = "profile") {
-                ProfileRow(profileName = state.profileName, onClick = onEditProfile)
+                ProfileRow(profileName = state.profileName, enabled = !state.isWorking, onClick = onEditProfile)
                 HorizontalDivider()
             }
             item(key = "phone") {
@@ -105,9 +146,35 @@ fun AccountContent(
                         leadingIconColor = MaterialTheme.colorScheme.error,
                     ),
                     modifier = Modifier
-                        .clickable(role = Role.Button) { isConfirmingSignOut = true }
+                        .clickable(enabled = !state.isWorking, role = Role.Button) { isConfirmingSignOut = true }
                         .testTag("account.signOut"),
                 )
+                HorizontalDivider()
+            }
+            item(key = "delete") {
+                DeleteAccountRow(
+                    isWorking = state.isWorking && !state.isReverifying,
+                    enabled = !state.isWorking && !state.isReverifying,
+                    onClick = { isConfirmingDeletion = true },
+                )
+            }
+            if (state.isReverifying) {
+                item(key = "reverification") {
+                    HorizontalDivider()
+                    ReverificationSection(
+                        state = state,
+                        resendSecondsRemaining = resendSecondsRemaining,
+                        onCodeChange = onCodeChange,
+                        onConfirm = onConfirmReverification,
+                        onResend = onResendCode,
+                        onCancel = onCancelReverification,
+                    )
+                }
+            }
+            state.error?.let { message ->
+                item(key = "error") {
+                    AccountErrorRow(message)
+                }
             }
         }
     }
@@ -121,11 +188,21 @@ fun AccountContent(
             onDismiss = { isConfirmingSignOut = false },
         )
     }
+
+    if (isConfirmingDeletion) {
+        DeleteAccountDialog(
+            onConfirm = {
+                isConfirmingDeletion = false
+                onDeleteAccount()
+            },
+            onDismiss = { isConfirmingDeletion = false },
+        )
+    }
 }
 
 /** "Profil" with the user's name; opens the profile editor. */
 @Composable
-private fun ProfileRow(profileName: String?, onClick: () -> Unit) {
+private fun ProfileRow(profileName: String?, enabled: Boolean, onClick: () -> Unit) {
     ListItem(
         overlineContent = { Text(stringResource(R.string.account_profile_label)) },
         headlineContent = {
@@ -138,7 +215,7 @@ private fun ProfileRow(profileName: String?, onClick: () -> Unit) {
         trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
         colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
         modifier = Modifier
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .testTag("account.editProfile"),
     )
 }
@@ -190,14 +267,108 @@ private fun SignOutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     )
 }
 
+/** "Hesabı Sil" in the error colour, with a spinner while the deletion runs, and its footer. */
+@Composable
+private fun DeleteAccountRow(isWorking: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.account_delete_button)) },
+        supportingContent = { Text(stringResource(R.string.account_delete_footer)) },
+        leadingContent = { Icon(Icons.Filled.Delete, contentDescription = null) },
+        trailingContent = {
+            if (isWorking) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .testTag("account.delete.progress"),
+                    strokeWidth = 2.dp,
+                )
+            }
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.background,
+            headlineColor = MaterialTheme.colorScheme.error,
+            leadingIconColor = MaterialTheme.colorScheme.error,
+        ),
+        modifier = Modifier
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .testTag("account.delete"),
+    )
+}
+
+@Composable
+private fun AccountErrorRow(message: String) {
+    ListItem(
+        headlineContent = { Text(message) },
+        leadingContent = { Icon(Icons.Filled.Error, contentDescription = null) },
+        colors = ListItemDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.background,
+            headlineColor = MaterialTheme.colorScheme.error,
+            leadingIconColor = MaterialTheme.colorScheme.error,
+        ),
+        modifier = Modifier
+            .semantics(mergeDescendants = true) {}
+            .testTag("account.error"),
+    )
+}
+
+@Composable
+private fun DeleteAccountDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.account_delete_dialog_title)) },
+        text = { Text(stringResource(R.string.account_delete_dialog_message)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm, modifier = Modifier.testTag("account.delete.confirm")) {
+                Text(stringResource(R.string.account_delete_button), color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, modifier = Modifier.testTag("account.delete.cancel")) {
+                Text(stringResource(R.string.account_delete_cancel))
+            }
+        },
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun AccountContentPreview() {
     ViFiTheme {
         AccountContent(
             state = AccountUiState(profileName = "Ayşe Yılmaz", formattedPhoneNumber = "+90 532 123 45 67"),
+            resendSecondsRemaining = 0,
             onEditProfile = {},
             onSignOut = {},
+            onDeleteAccount = {},
+            onCodeChange = {},
+            onConfirmReverification = {},
+            onResendCode = {},
+            onCancelReverification = {},
+            onBack = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AccountReverificationPreview() {
+    ViFiTheme {
+        AccountContent(
+            state = AccountUiState(
+                profileName = "Ayşe Yılmaz",
+                formattedPhoneNumber = "+90 532 123 45 67",
+                isReverifying = true,
+                codeText = "123",
+                error = "Kod hatalı. SMS ile gelen 6 haneli kodu kontrol edip tekrar dene.",
+            ),
+            resendSecondsRemaining = 42,
+            onEditProfile = {},
+            onSignOut = {},
+            onDeleteAccount = {},
+            onCodeChange = {},
+            onConfirmReverification = {},
+            onResendCode = {},
+            onCancelReverification = {},
             onBack = {},
         )
     }

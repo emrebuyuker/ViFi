@@ -31,14 +31,18 @@ interface AuthService {
 
     /**
      * Sends a verification code by SMS to [phoneNumber] (E.164) and returns the verification id that the code
-     * must be combined with.
+     * must be combined with, or [INSTANT_VERIFICATION_ID] when the number was verified on the device without a
+     * code (the user is then already signed in again, which also counts as a recent sign-in).
      */
     suspend fun sendVerificationCode(phoneNumber: String): String
 
     /** Signs in with a code sent by [sendVerificationCode]. */
     suspend fun signIn(verificationId: String, code: String): AuthUser
 
-    /** Confirms the signed-in user's identity again with a fresh code, before a sensitive operation. */
+    /**
+     * Confirms the signed-in user's identity again with a fresh code, before a sensitive operation. With
+     * [INSTANT_VERIFICATION_ID] there is nothing left to confirm and this returns right away.
+     */
     suspend fun reauthenticate(verificationId: String, code: String)
 
     /** Signs the user out. */
@@ -51,4 +55,9 @@ interface AuthService {
      * old; reauthenticate and try again.
      */
     suspend fun deleteAccount()
+
+    companion object {
+        /** Returned by [sendVerificationCode] when the number was verified without a code to type. */
+        const val INSTANT_VERIFICATION_ID = "instant-verification"
+    }
 }

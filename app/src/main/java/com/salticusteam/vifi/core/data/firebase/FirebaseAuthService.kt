@@ -104,6 +104,8 @@ class FirebaseAuthService @Inject constructor(
 
     override suspend fun reauthenticate(verificationId: String, code: String) {
         val user = auth.currentUser ?: throw AuthError.NotSignedIn
+        // Play services verified the number and signed the same user in again moments ago: already recent.
+        if (verificationId == INSTANT_VERIFICATION_ID) return
         try {
             user.reauthenticate(PhoneAuthProvider.getCredential(verificationId, code)).await()
         } catch (e: CancellationException) {
@@ -219,7 +221,7 @@ class FirebaseAuthService @Inject constructor(
 
     internal companion object {
         /** Returned when the number was verified without a code; [signIn] then just reports the user. */
-        const val INSTANT_VERIFICATION_ID = "instant-verification"
+        const val INSTANT_VERIFICATION_ID = AuthService.INSTANT_VERIFICATION_ID
 
         /** How long Play services waits for the SMS to auto-retrieve (Firebase's maximum is 120). */
         private const val AUTO_RETRIEVAL_TIMEOUT_SECONDS = 60L
