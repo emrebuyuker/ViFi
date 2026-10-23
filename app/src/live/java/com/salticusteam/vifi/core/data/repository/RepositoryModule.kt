@@ -3,6 +3,7 @@ package com.salticusteam.vifi.core.data.repository
 import com.salticusteam.vifi.BuildConfig
 import com.salticusteam.vifi.core.data.firebase.FirebaseAnalyticsTracker
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
+import com.salticusteam.vifi.core.data.firebase.FirebaseProfileService
 import com.salticusteam.vifi.core.data.firebase.RtdbAppConfigReader
 import com.salticusteam.vifi.core.data.preferences.DataStoreOnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.DataStoreRecentExamsRepository
@@ -52,6 +53,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAppConfigReader(impl: RtdbAppConfigReader): AppConfigReader
+
+    @Binds
+    @Singleton
+    abstract fun bindProfileService(impl: FirebaseProfileService): ProfileService
 
     companion object {
         @Provides
