@@ -92,4 +92,16 @@
     <string name="profile_picker_search">Ara</string>
     <string name="profile_picker_use_custom">"“%1$s” kullan"</string>
     <string name="profile_picker_custom_footer">Aradığın listede yoksa, yazdığın metni olduğu gibi kullanabilirsin.</string>
+
+    <!-- Added in 2.5 — account (iOS AccountView copy, verbatim) -->
+    <string name="account_title">Hesap</string>
+    <string name="cd_account_open">Hesap</string>
+    <string name="account_profile_label">Profil</string>
+    <string name="account_edit_profile">Profili Düzenle</string>
+    <string name="account_phone_label">Telefon numarası</string>
+    <string name="account_phone_missing">Telefon numarası yok</string>
+    <string name="account_sign_out_button">Çıkış Yap</string>
+    <string name="account_sign_out_dialog_title">Çıkış yapılsın mı?</string>
+    <string name="account_sign_out_dialog_message">Arşive tekrar ulaşmak için numaranı yeniden doğrulaman gerekir.</string>
+    <string name="account_sign_out_dialog_cancel">Vazgeç</string>
 </resources>

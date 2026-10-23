@@ -27,6 +27,7 @@ import com.salticusteam.vifi.core.navigation.ViFiNavHost
 import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
+import com.salticusteam.vifi.feature.account.AccountScreen
 import com.salticusteam.vifi.feature.browse.BrowseScreen
 import com.salticusteam.vifi.feature.login.LoginScreen
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
@@ -69,7 +70,11 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         navController = navController,
         modifier = Modifier.fillMaxSize(),
         home = {
-            BrowseScreen(onItemClick = { router.open(it) }, onBack = null)
+            BrowseScreen(
+                onItemClick = { router.open(it) },
+                onBack = null,
+                onAccountClick = { router.push(ViFiRoute.Account) },
+            )
         },
         browse = { _ ->
             BrowseScreen(onItemClick = { router.open(it) }, onBack = { router.pop() })
@@ -87,6 +92,12 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
                     modifier = Modifier.padding(padding),
                 )
             }
+        },
+        account = {
+            AccountScreen(
+                onEditProfile = { router.push(ViFiRoute.EditProfile) },
+                onBack = { router.pop() },
+            )
         },
         editProfile = {
             EditProfileScreen(user = user, existing = profile, onBack = { router.pop() })

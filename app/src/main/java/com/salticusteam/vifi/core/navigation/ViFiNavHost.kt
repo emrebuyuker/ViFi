@@ -19,6 +19,7 @@ fun ViFiNavHost(
     home: @Composable () -> Unit,
     browse: @Composable (path: ArchivePath) -> Unit,
     exam: @Composable (path: ArchivePath, kind: ExamKind) -> Unit,
+    account: @Composable () -> Unit,
     editProfile: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -36,6 +37,9 @@ fun ViFiNavHost(
         composable<ViFiRoute.Exam> { entry ->
             val route = entry.toRoute<ViFiRoute.Exam>()
             exam(route.path, route.kind)
+        }
+        composable<ViFiRoute.Account> {
+            account()
         }
         composable<ViFiRoute.EditProfile> {
             editProfile()

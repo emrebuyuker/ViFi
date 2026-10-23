@@ -1,0 +1,85 @@
+package com.salticusteam.vifi.feature.account
+
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+
+class AccountContentTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    private var editProfileClicks = 0
+    private var signOutCalls = 0
+
+    private fun setContent(state: AccountUiState = AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67")) {
+        composeRule.setContent {
+            ViFiTheme {
+                AccountContent(
+                    state = state,
+                    onEditProfile = { editProfileClicks++ },
+                    onSignOut = { signOutCalls++ },
+                    onBack = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun account_showsProfileNameAndPhone() {
+        setContent()
+
+        composeRule.onNodeWithTag("account.editProfile").assert(hasText("Ayşe Yılmaz")).assertIsDisplayed()
+        composeRule.onNodeWithTag("account.phone").assert(hasText("+90 532 123 45 67")).assertIsDisplayed()
+        composeRule.onNodeWithTag("topBar.backButton").assertIsDisplayed()
+    }
+
+    @Test
+    fun account_whenProfileRowTapped_opensTheEditor() {
+        setContent()
+
+        composeRule.onNodeWithTag("account.editProfile").performClick()
+
+        assertEquals(1, editProfileClicks)
+    }
+
+    @Test
+    fun account_signOutAsksForConfirmationFirst() {
+        setContent()
+
+        composeRule.onNodeWithTag("account.signOut").performClick()
+        composeRule.onNodeWithTag("account.signOut.confirm").assertIsDisplayed()
+        assertEquals(0, signOutCalls)
+
+        composeRule.onNodeWithTag("account.signOut.confirm").performClick()
+
+        assertEquals(1, signOutCalls)
+        composeRule.onNodeWithTag("account.signOut.confirm").assertDoesNotExist()
+    }
+
+    @Test
+    fun account_cancellingSignOutKeepsTheUserSignedIn() {
+        setContent()
+
+        composeRule.onNodeWithTag("account.signOut").performClick()
+        composeRule.onNodeWithTag("account.signOut.cancel").performClick()
+
+        assertEquals(0, signOutCalls)
+        composeRule.onNodeWithTag("account.signOut.confirm").assertDoesNotExist()
+    }
+
+    @Test
+    fun account_withoutProfileOrPhone_showsPlaceholders() {
+        setContent(AccountUiState())
+
+        composeRule.onNodeWithTag("account.editProfile").assert(hasText("Profili Düzenle"))
+        composeRule.onNodeWithTag("account.phone").assert(hasText("Telefon numarası yok"))
+    }
+}

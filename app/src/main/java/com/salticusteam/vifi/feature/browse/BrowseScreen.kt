@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
@@ -66,6 +67,8 @@ import com.salticusteam.vifi.core.model.ExamSummary
 fun BrowseScreen(
     onItemClick: (ArchiveItem) -> Unit,
     onBack: (() -> Unit)?,
+    /** Opens the account screen; only the home screen passes it (the toolbar's account button). */
+    onAccountClick: (() -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -79,6 +82,7 @@ fun BrowseScreen(
         onRetry = viewModel::load,
         onRefresh = viewModel::refresh,
         onBack = onBack,
+        onAccountClick = onAccountClick,
     )
 }
 
@@ -91,13 +95,29 @@ internal fun BrowseContent(
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
     onBack: (() -> Unit)?,
+    onAccountClick: (() -> Unit)? = null,
 ) {
     val listedLevel = state.path.childLevel ?: ArchiveLevel.EXAM
     val title = state.path.displayName ?: stringResource(R.string.archive_home_title)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { ViFiTopAppBar(title = title, onBack = onBack) },
+        topBar = {
+            ViFiTopAppBar(
+                title = title,
+                onBack = onBack,
+                actions = {
+                    if (onAccountClick != null) {
+                        IconButton(onClick = onAccountClick, modifier = Modifier.testTag("toolbar.account")) {
+                            Icon(
+                                imageVector = Icons.Filled.AccountCircle,
+                                contentDescription = stringResource(R.string.cd_account_open),
+                            )
+                        }
+                    }
+                },
+            )
+        },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             val items = state.items
