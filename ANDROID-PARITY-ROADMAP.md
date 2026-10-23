@@ -10,9 +10,9 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (23 Ekim 2026):** Toplam 217 kalemin **19'u tamam, 7'si yarım, 191'i başlanmadı.** Faz 1 (Temel) 24 kalemin
-> FM-24 (DataStore) tamam; Faz 0'dan BE-02/BE-08/BE-12 kod tarafı yapıldı. Sıradaki: **FM-24** (DataStore), ardından Faz 0
-> Console işleri (BE-01 SHA, BE-03 Play Integrity) ve Faz 2 **Phone Auth** (BE-04 / AUTH) + canlı arşiv (**BE-15**).
+> **İlerleme (23 Ekim 2026):** Toplam 217 kalemin **52'si tamam, 14'ü yarım, 151'i başlanmadı.** Faz 1'de yalnız FM-11/12/13/17/22 yarım;
+> Phone Auth + oturum kapısı, canlı Firestore arşiv okuması, force update, analytics ve profil veri katmanı birleştirildi. Sıradaki:
+> Console işleri (**BE-01** SHA, BE-03 Play Integrity) — canlı giriş ve arşiv listesi bunlara bağlı; ardından profil ekranları + kapı (P9–P14).
 
 | | iOS (hedef) | Android (23 Ekim 2026) | Android (başlangıç, v2.5) |
 |---|---|---|---|
