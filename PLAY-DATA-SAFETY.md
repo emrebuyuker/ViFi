@@ -21,10 +21,9 @@
 
 ## Android'e özgü notlar
 
-- **Reklam kimliği (AD_ID):** Reklam SDK'sı kaldırıldı (FM-08), fakat `firebase-analytics`
-  `play-services-ads-identifier`'ı getiriyor; release APK'da `AD_ID`, `ACCESS_ADSERVICES_AD_ID` ve `ACCESS_ADSERVICES_ATTRIBUTION` izinleri var (aapt2 ile doğrulandı).
-  Reklam yapılmıyor; Play beyanında "reklam kimliği kullanılmıyor" denecekse izin manifest'ten
-  `tools:node="remove"` ile kaldırılmalı ve Analytics'te reklam kimliği toplama kapatılmalı. **Karar gerekli.**
+- **Reklam kimliği (AD_ID):** Kullanılmıyor. Reklam SDK'sı kaldırıldı (FM-08); Analytics'in eklediği `AD_ID`,
+  `ACCESS_ADSERVICES_AD_ID`, `ACCESS_ADSERVICES_ATTRIBUTION` izinleri manifest'ten `tools:node="remove"` ile
+  çıkarıldı ve `google_analytics_adid_collection_enabled=false`. Play beyanı: "reklam kimliği kullanılmıyor".
 - **Paylaşım:** Veri üçüncü taraflarla paylaşılmıyor; Google (Firebase) hizmet sağlayıcı olarak işler (Play'de "paylaşım" sayılmaz).
 - **Aktarımda şifreleme:** Evet (Firebase, HTTPS/TLS).
 - **Silme talebi:** Uygulama içi hesap silme (iOS'ta var; Android'de Hesap alanı) — Play hesap silme URL'si de gerekli.
