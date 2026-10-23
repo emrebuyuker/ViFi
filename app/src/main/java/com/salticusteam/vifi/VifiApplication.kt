@@ -4,12 +4,14 @@ import android.app.Application
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.salticusteam.vifi.core.appcheck.appCheckProviderFactory
+import dagger.hilt.android.HiltAndroidApp
 
 /**
  * App entry point. Installs the App Check provider before any Firebase call is made:
  * Storage/RTDB/Auth enforce App Check on the shared vifi-831a8 project, so requests
  * without a valid token are rejected (403 / "invalid AppCheck token").
  */
+@HiltAndroidApp
 class VifiApplication : Application() {
 
     override fun onCreate() {
