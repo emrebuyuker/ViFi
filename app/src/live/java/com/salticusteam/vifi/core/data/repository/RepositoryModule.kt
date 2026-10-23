@@ -7,7 +7,10 @@ import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
 import com.salticusteam.vifi.core.data.firebase.FirebaseLoginDiagnosticsReporter
 import com.salticusteam.vifi.core.data.firebase.FirebaseProfileService
 import com.salticusteam.vifi.core.data.firebase.FirestoreArchiveRepository
+import com.salticusteam.vifi.core.data.firebase.FirestoreUnlocksReader
+import com.salticusteam.vifi.core.data.firebase.FirestoreWalletReader
 import com.salticusteam.vifi.core.data.firebase.RtdbAppConfigReader
+import com.salticusteam.vifi.core.data.firebase.RtdbRewardsConfigReader
 import com.salticusteam.vifi.core.data.preferences.DataStoreOnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.DataStoreRecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.DataStoreUserPreferencesRepository
@@ -29,6 +32,19 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindExamUnlockService(impl: FirebaseExamUnlockService): ExamUnlockService
+
+    @Binds
+    @Singleton
+    abstract fun bindWalletReader(impl: FirestoreWalletReader): WalletReader
+
+    @Binds
+    @Singleton
+    abstract fun bindUnlocksReader(impl: FirestoreUnlocksReader): UnlocksReader
+
+    /** `config/rewards/android`, falling back to the iOS node (BE-07). */
+    @Binds
+    @Singleton
+    abstract fun bindRewardsConfigReader(impl: RtdbRewardsConfigReader): RewardsConfigReader
 
     /** The archive reads the named 'vifi' Firestore database (BE-15); the RTDB `Universitiess` tree is unused. */
     @Binds

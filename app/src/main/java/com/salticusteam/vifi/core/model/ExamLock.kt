@@ -26,4 +26,11 @@ object ExamLock {
         if (exam.level != ArchiveLevel.EXAM || id == null) return true
         return id in freeIds || id in unlockedIds
     }
+
+    /**
+     * Whether [exam] is shown locked: an exam with files that is neither free nor unlocked (iOS `BrowseView.isLocked`).
+     * An exam node without files is never locked — it cannot be opened at all.
+     */
+    fun isLocked(exam: ArchiveItem, freeIds: Set<String>, unlockedIds: Set<String>): Boolean =
+        exam.level == ArchiveLevel.EXAM && exam.exam != null && !isAccessible(exam, freeIds, unlockedIds)
 }

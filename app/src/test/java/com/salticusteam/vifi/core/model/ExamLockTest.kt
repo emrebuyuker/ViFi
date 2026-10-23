@@ -45,4 +45,23 @@ class ExamLockTest {
     fun `unlock cost matches the cloud function`() {
         assertEquals(100, ExamLock.UNLOCK_COST)
     }
+
+    @Test
+    fun `isLocked when exam has no files returns false`() {
+        val free = ExamLock.freeExamIds(ordered)
+        val noFiles = ArchiveItem(lesson.appending("e9"), ArchiveLevel.EXAM, null, null)
+
+        assertFalse(ExamLock.isLocked(noFiles, free, emptySet()))
+        assertTrue(ExamLock.isLocked(exam("e4"), free, emptySet()))
+        assertFalse(ExamLock.isLocked(exam("e4"), free, setOf("e4")))
+        assertFalse(ExamLock.isLocked(exam("e2"), free, emptySet()))
+    }
+
+    @Test
+    fun `freeExamIds with three exams locks only the newest`() {
+        val three = listOf("e3", "e2", "e1").map(::exam)
+        val free = ExamLock.freeExamIds(three)
+
+        assertEquals(listOf(true, false, false), three.map { ExamLock.isLocked(it, free, emptySet()) })
+    }
 }

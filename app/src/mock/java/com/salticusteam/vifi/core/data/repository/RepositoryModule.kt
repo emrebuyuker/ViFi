@@ -12,6 +12,10 @@ import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamUnlockService
 import com.salticusteam.vifi.core.data.repository.fake.FakeProfileService
+import com.salticusteam.vifi.core.data.repository.fake.FakeRewardsConfigReader
+import com.salticusteam.vifi.core.data.repository.fake.FakeUnlocksReader
+import com.salticusteam.vifi.core.data.repository.fake.FakeWalletReader
+import com.salticusteam.vifi.core.model.RewardsConfig
 import com.salticusteam.vifi.core.util.LaunchArg
 import com.salticusteam.vifi.core.util.LaunchArgs
 import dagger.Module
@@ -35,6 +39,22 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideExamUnlockService(): ExamUnlockService = FakeExamUnlockService()
+
+    /** 120 coins (one unlock) unless launched with `vifi_no_coins`, which shows the earn-coins branch. */
+    @Provides
+    @Singleton
+    fun provideWalletReader(): WalletReader =
+        FakeWalletReader(balance = if (LaunchArgs.isSet(LaunchArg.NO_COINS)) 0 else FakeWalletReader.SAMPLE_BALANCE)
+
+    @Provides
+    @Singleton
+    fun provideUnlocksReader(): UnlocksReader = FakeUnlocksReader()
+
+    @Provides
+    @Singleton
+    fun provideRewardsConfigReader(): RewardsConfigReader = FakeRewardsConfigReader(
+        RewardsConfig(examUploadCoins = 10, tiers = FakeRewardsConfigReader.SAMPLE_TIERS),
+    )
 
     @Provides
     @Singleton
