@@ -17,13 +17,13 @@ import kotlinx.coroutines.withContext
 @Singleton
 class BundledUniversityCatalog @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : CatalogSource {
 
     // Internal state
     private val mutex = Mutex()
     private var cached: UniversityCatalog? = null
 
-    suspend fun catalog(): UniversityCatalog = mutex.withLock {
+    override suspend fun catalog(): UniversityCatalog = mutex.withLock {
         cached ?: withContext(Dispatchers.IO) {
             UniversityCatalog.load(
                 open = context.assets::open,

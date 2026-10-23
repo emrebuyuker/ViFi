@@ -21,12 +21,15 @@ import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.component.icon
 import com.salticusteam.vifi.core.model.ArchiveItem
 import com.salticusteam.vifi.core.model.ArchiveLevel
+import com.salticusteam.vifi.core.model.AuthUser
+import com.salticusteam.vifi.core.model.UserProfile
 import com.salticusteam.vifi.core.navigation.ViFiNavHost
 import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
 import com.salticusteam.vifi.feature.browse.BrowseScreen
 import com.salticusteam.vifi.feature.login.LoginScreen
+import com.salticusteam.vifi.feature.profile.EditProfileScreen
 import com.salticusteam.vifi.feature.update.AppUpdateGate
 
 /**
@@ -51,14 +54,14 @@ private fun SessionRoot(sessionViewModel: SessionViewModel = hiltViewModel()) {
         SessionState.SignedOut -> LoginScreen()
         // Keyed by user: after a sign-out the next user starts on the home screen with a fresh stack (iOS popToRoot).
         is SessionState.SignedIn -> key(state.user.id) {
-            ProfileGate(user = state.user) { ArchiveHost() }
+            ProfileGate(user = state.user) { profile -> ArchiveHost(user = state.user, profile = profile) }
         }
     }
 }
 
-/** The archive navigation stack, shown once the user is signed in. */
+/** The archive navigation stack, shown once the user is signed in and has a profile. */
 @Composable
-private fun ArchiveHost() {
+private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
     val navController = rememberNavController()
     val router = rememberViFiRouter(navController)
 
@@ -84,6 +87,9 @@ private fun ArchiveHost() {
                     modifier = Modifier.padding(padding),
                 )
             }
+        },
+        editProfile = {
+            EditProfileScreen(user = user, existing = profile, onBack = { router.pop() })
         },
     )
 }

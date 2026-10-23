@@ -56,11 +56,18 @@ object RepositoryModule {
     @Singleton
     fun provideAppUpdateChecker(): AppUpdateChecker = FakeAppUpdateChecker()
 
-    /** Seeded with a sample profile for the mock user, so the gate opens straight into the archive. */
+    /**
+     * Seeded with a sample profile for the mock user, so the gate opens straight into the archive; empty when
+     * launched with `vifi_profile_incomplete`, which shows the completion screen.
+     */
     @Provides
     @Singleton
     fun provideProfileService(): ProfileService =
-        FakeProfileService(profiles = mapOf(FakeProfileService.SAMPLE_UID to FakeProfileService.SAMPLE_PROFILE))
+        if (LaunchArgs.isSet(LaunchArg.PROFILE_INCOMPLETE)) {
+            FakeProfileService()
+        } else {
+            FakeProfileService(profiles = mapOf(FakeProfileService.SAMPLE_UID to FakeProfileService.SAMPLE_PROFILE))
+        }
 
     /** Signed in as the sample user unless launched with `vifi_signed_out` (read after MainActivity parsed it). */
     @Provides

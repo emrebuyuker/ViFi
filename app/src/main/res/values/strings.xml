@@ -66,4 +66,30 @@
     <string name="contact_support_no_mail_message">%1$s adresine e-posta gönderebilirsiniz.</string>
     <string name="contact_support_copy_address_button">Adresi Kopyala</string>
     <string name="common_ok">Tamam</string>
+
+    <!-- Added in 2.5 — profile completion / edit (iOS ProfileFormView, CatalogPickerView copy, verbatim) -->
+    <string name="profile_completion_title">Profilini Tamamla</string>
+    <string name="profile_completion_headline">Son bir adım</string>
+    <string name="profile_completion_message">Arşive ulaşmak için birkaç bilgini tamamla. Bu bilgiler profilinde saklanır.</string>
+    <string name="profile_edit_title">Profili Düzenle</string>
+    <string name="profile_section_personal">Kişisel Bilgiler</string>
+    <string name="profile_name_label">Ad</string>
+    <string name="profile_surname_label">Soyad</string>
+    <string name="profile_section_education">Eğitim</string>
+    <string name="profile_university_label">Üniversite</string>
+    <string name="profile_faculty_label">Fakülte</string>
+    <string name="profile_department_label">Bölüm</string>
+    <string name="profile_select_placeholder">Seç</string>
+    <string name="profile_section_gender">Cinsiyet</string>
+    <string name="profile_gender_female">Kadın</string>
+    <string name="profile_gender_male">Erkek</string>
+    <string name="profile_phone_label">Telefon</string>
+    <string name="profile_phone_missing">Telefon numarası yok</string>
+    <string name="profile_phone_footer">Numaran giriş sırasında doğrulandı ve değiştirilemez.</string>
+    <string name="profile_save_button">Kaydet</string>
+    <string name="profile_sign_out_button">Çıkış Yap</string>
+    <string name="cd_profile_saving">Kaydediliyor</string>
+    <string name="profile_picker_search">Ara</string>
+    <string name="profile_picker_use_custom">"“%1$s” kullan"</string>
+    <string name="profile_picker_custom_footer">Aradığın listede yoksa, yazdığın metni olduğu gibi kullanabilirsin.</string>
 </resources>

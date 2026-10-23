@@ -36,4 +36,8 @@ sealed interface ViFiRoute {
 
         val path: ArchivePath get() = ArchivePath(ids, names)
     }
+
+    /** Edits the signed-in user's profile (opened from the account screen). */
+    @Serializable
+    data object EditProfile : ViFiRoute
 }
