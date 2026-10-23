@@ -22,6 +22,7 @@ fun ViFiNavHost(
     account: @Composable () -> Unit,
     editProfile: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    inbox: @Composable () -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -43,6 +44,9 @@ fun ViFiNavHost(
         }
         composable<ViFiRoute.EditProfile> {
             editProfile()
+        }
+        composable<ViFiRoute.Inbox> {
+            inbox()
         }
     }
 }

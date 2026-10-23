@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_channel_general_description">Duyurular ve yeni sınav bildirimleri</string>
+
+    <!-- Inbox -->
+    <string name="inbox_title">Bildirimler</string>
+    <string name="inbox_empty_title">Henüz bildirim yok</string>
+    <string name="inbox_empty_message">Yeni duyurular burada görünür.</string>
+    <string name="inbox_unread_badge">Yeni</string>
+    <string name="cd_inbox_open">Bildirimler</string>
+    <plurals name="cd_inbox_open_unread">
+        <item quantity="one">Bildirimler, %1$d okunmamış</item>
+        <item quantity="other">Bildirimler, %1$d okunmamış</item>
+    </plurals>
+
+    <!-- Notifications are switched off (system settings) -->
+    <string name="inbox_permission_off_message">Bildirimler kapalı. Yeni duyuruları kaçırmamak için aç.</string>
+    <string name="inbox_permission_open_settings">Ayarlar</string>
+
+    <!-- One-time permission prompt -->
+    <string name="notification_prompt_title">Bildirimleri aç</string>
+    <string name="notification_prompt_message">Yeni sınavlar ve duyurulardan ilk sen haberdar ol. İstediğin zaman kapatabilirsin.</string>
+    <string name="notification_prompt_allow">İzin Ver</string>
+    <string name="notification_prompt_later">Şimdi Değil</string>
+</resources>

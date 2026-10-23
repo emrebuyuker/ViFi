@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Accent of the status-bar notification (brand orange, same as VifiOrange). -->
+    <color name="notification_accent">#FB910D</color>
+</resources>

@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.core.data.preferences.fake
 
+import com.salticusteam.vifi.core.data.preferences.AnnouncementReadPreferences
 import com.salticusteam.vifi.core.data.preferences.OnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.RecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.UserPreferencesRepository
@@ -53,4 +54,13 @@ class FakeRecentExamsRepository(initial: List<RecentExam> = emptyList()) : Recen
     }
 
     override suspend fun clear() { list.value = emptyList() }
+}
+
+/** In-memory read state of the announcements. */
+class FakeAnnouncementReadPreferences(initial: Set<String> = emptySet()) : AnnouncementReadPreferences {
+    private val ids = MutableStateFlow(initial)
+
+    override val readIds: Flow<Set<String>> = ids
+
+    override suspend fun markRead(ids: Collection<String>) { this.ids.update { it + ids } }
 }

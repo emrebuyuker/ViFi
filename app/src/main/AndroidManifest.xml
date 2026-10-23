@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Runtime request is owned by the notifications area (BE-11). -->
+    <!-- Asked at runtime by the one-time prompt (NotificationPrompt) on Android 13+. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- No ads: drop the advertising-ID permissions Firebase Analytics merges in (Play Data Safety). -->
     <uses-permission
@@ -36,6 +36,17 @@
         <meta-data
             android:name="google_analytics_automatic_screen_reporting_enabled"
             android:value="false" />
+
+        <!-- FCM: what the system tray shows while the app is in the background (channel, icon, colour). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="announcements" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notifications_black_24dp" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_accent" />
 
         <!-- The single Compose host (FM-22). -->
         <activity

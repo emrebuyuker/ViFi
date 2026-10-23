@@ -14,8 +14,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,6 +67,7 @@ import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamLock
 import com.salticusteam.vifi.core.model.ExamSummary
+import com.salticusteam.vifi.feature.inbox.InboxBadgeViewModel
 
 /**
  * An archive list: universities on the home screen (root path) and every drill-down level (iOS HomeView /
@@ -76,6 +81,8 @@ fun BrowseScreen(
     onAccountClick: (() -> Unit)? = null,
     /** Opens the add-exam flow from the unlock sheet's earn branch; `null` until that flow exists. */
     onEarnCoins: (() -> Unit)? = null,
+    /** Opens the inbox; only the home screen passes it (the toolbar's bell). */
+    onInboxClick: (() -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel(),
     unlockViewModel: ExamUnlockViewModel = hiltViewModel(),
 ) {
@@ -104,6 +111,7 @@ fun BrowseScreen(
         onAccountClick = onAccountClick,
         lockState = lockState,
         onLockedExamTap = unlockViewModel::onLockedExamTap,
+        onInboxClick = onInboxClick,
     )
 
     lockState.examToUnlock?.let { exam ->
@@ -129,6 +137,7 @@ internal fun BrowseContent(
     onAccountClick: (() -> Unit)? = null,
     lockState: ExamUnlockUiState = ExamUnlockUiState(),
     onLockedExamTap: (ArchiveItem) -> Unit = {},
+    onInboxClick: (() -> Unit)? = null,
 ) {
     val listedLevel = state.path.childLevel ?: ArchiveLevel.EXAM
     val title = state.path.displayName ?: stringResource(R.string.archive_home_title)
@@ -141,6 +150,7 @@ internal fun BrowseContent(
                 onBack = onBack,
                 actions = {
                     CoinBalanceBadge(balance = lockState.balance, modifier = Modifier.padding(end = 4.dp))
+                    if (onInboxClick != null) InboxBell(onClick = onInboxClick)
                     if (onAccountClick != null) {
                         IconButton(onClick = onAccountClick, modifier = Modifier.testTag("toolbar.account")) {
                             Icon(
@@ -193,6 +203,22 @@ internal fun BrowseContent(
                     }
                 }
             }
+        }
+    }
+}
+
+/** The toolbar bell: opens the inbox and shows how many announcements are unread (iOS bell + badge). */
+@Composable
+private fun InboxBell(onClick: () -> Unit, viewModel: InboxBadgeViewModel = hiltViewModel()) {
+    val unread by viewModel.unreadCount.collectAsStateWithLifecycle()
+    val description = if (unread > 0) {
+        pluralStringResource(R.plurals.cd_inbox_open_unread, unread, unread)
+    } else {
+        stringResource(R.string.cd_inbox_open)
+    }
+    IconButton(onClick = onClick, modifier = Modifier.testTag("toolbar.inbox")) {
+        BadgedBox(badge = { if (unread > 0) Badge { Text(unread.coerceAtMost(99).toString()) } }) {
+            Icon(imageVector = Icons.Filled.Notifications, contentDescription = description)
         }
     }
 }

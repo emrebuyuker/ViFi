@@ -2,8 +2,10 @@ package com.salticusteam.vifi.app
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,9 +21,12 @@ import com.salticusteam.vifi.core.navigation.ViFiNavHost
 import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
+import com.salticusteam.vifi.core.notifications.InboxDeepLink
 import com.salticusteam.vifi.feature.account.AccountScreen
 import com.salticusteam.vifi.feature.browse.BrowseScreen
 import com.salticusteam.vifi.feature.examviewer.ExamViewerScreen
+import com.salticusteam.vifi.feature.inbox.InboxScreen
+import com.salticusteam.vifi.feature.notifications.NotificationPrompt
 import com.salticusteam.vifi.feature.login.LoginScreen
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
 import com.salticusteam.vifi.feature.update.AppUpdateGate
@@ -59,6 +64,17 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
     val navController = rememberNavController()
     val router = rememberViFiRouter(navController)
 
+    // A notification tap opens the inbox; a cold-start tap waits here until the signed-in host exists.
+    val inboxDeepLink = rememberInboxDeepLink()
+    val inboxRequested by inboxDeepLink.pending.collectAsStateWithLifecycle()
+    LaunchedEffect(inboxRequested) {
+        if (inboxRequested) {
+            router.push(ViFiRoute.Inbox)
+            inboxDeepLink.consume()
+        }
+    }
+    NotificationPrompt()
+
     ViFiNavHost(
         navController = navController,
         modifier = Modifier.fillMaxSize(),
@@ -67,6 +83,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
                 onItemClick = { router.open(it) },
                 onBack = null,
                 onAccountClick = { router.push(ViFiRoute.Account) },
+                onInboxClick = { router.push(ViFiRoute.Inbox) },
             )
         },
         browse = { _ ->
@@ -84,6 +101,9 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         editProfile = {
             EditProfileScreen(user = user, existing = profile, onBack = { router.pop() })
         },
+        inbox = {
+            InboxScreen(onBack = { router.pop() })
+        },
     )
 }
 
@@ -95,3 +115,8 @@ private fun ViFiRouter.open(item: ArchiveItem) {
         exam != null -> push(ViFiRoute.Exam(item.path, exam.kind))
     }
 }
+
+/** The process-wide [InboxDeepLink]; reached through a ViewModel so the composable needs no entry-point plumbing. */
+@Composable
+private fun rememberInboxDeepLink(viewModel: DeepLinkViewModel = hiltViewModel()): InboxDeepLink =
+    remember(viewModel) { viewModel.inboxDeepLink }
