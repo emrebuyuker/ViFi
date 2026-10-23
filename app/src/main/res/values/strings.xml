@@ -189,4 +189,5 @@
     <string name="home_recents_clear_confirm">Tümünü Temizle</string>
     <string name="home_recents_clear_cancel">Vazgeç</string>
     <string name="home_about_open">Hakkında</string>
+    <string name="common_relative_just_now">Az önce</string>
 </resources>

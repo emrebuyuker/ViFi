@@ -1,6 +1,5 @@
 package com.salticusteam.vifi.feature.home
 
-import android.text.format.DateUtils
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -53,6 +53,7 @@ import com.salticusteam.vifi.core.model.ArchiveItem
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.RecentExam
+import com.salticusteam.vifi.core.util.RelativeTime
 import com.salticusteam.vifi.feature.browse.BrowseScreen
 
 /**
@@ -216,9 +217,7 @@ private fun RecentExamsSection(
 private fun RecentExamCard(exam: RecentExam, onClick: () -> Unit, onRemove: () -> Unit) {
     var menuShown by remember { mutableStateOf(false) }
     val removeLabel = stringResource(R.string.home_recents_remove)
-    val opened = remember(exam.openedAt) {
-        DateUtils.getRelativeTimeSpanString(exam.openedAt, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString()
-    }
+    val opened = relativeTimeLabel(remember(exam.openedAt) { RelativeTime.between(exam.openedAt, System.currentTimeMillis()) })
 
     Card(
         modifier = Modifier
@@ -300,4 +299,16 @@ private fun HomeHeaderPreview() {
             onAddExamClick = {}, onRecentClick = {}, onRecentRemove = {}, onClearClick = {},
         )
     }
+}
+
+/** Turkish "… önce" label for [time]. */
+@Composable
+private fun relativeTimeLabel(time: RelativeTime): String = when (time) {
+    RelativeTime.JustNow -> stringResource(R.string.common_relative_just_now)
+    is RelativeTime.Minutes -> pluralStringResource(R.plurals.common_relative_minutes_ago, time.count, time.count)
+    is RelativeTime.Hours -> pluralStringResource(R.plurals.common_relative_hours_ago, time.count, time.count)
+    is RelativeTime.Days -> pluralStringResource(R.plurals.common_relative_days_ago, time.count, time.count)
+    is RelativeTime.Weeks -> pluralStringResource(R.plurals.common_relative_weeks_ago, time.count, time.count)
+    is RelativeTime.Months -> pluralStringResource(R.plurals.common_relative_months_ago, time.count, time.count)
+    is RelativeTime.Years -> pluralStringResource(R.plurals.common_relative_years_ago, time.count, time.count)
 }
