@@ -3,8 +3,8 @@ package com.salticusteam.vifi;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.github.barteksc.pdfviewer.PDFView;

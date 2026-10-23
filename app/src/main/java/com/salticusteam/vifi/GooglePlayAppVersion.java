@@ -2,8 +2,8 @@ package com.salticusteam.vifi;
 
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import java.io.BufferedReader;
 import java.io.IOException;
