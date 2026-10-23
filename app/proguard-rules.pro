@@ -5,11 +5,6 @@
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
 
-# pdfium-android (PDF viewer) ships no consumer rules; its native code looks up these
-# classes and fields by name over JNI.
--keep class com.shockwave.pdfium.** { *; }
--keep class com.github.barteksc.pdfviewer.** { *; }
-
 # Domain models are mapped by hand today (no reflection). When a Firestore DTO is read with
 # toObject()/getValue(Class), keep its no-arg constructor and properties, e.g.:
 # -keepclassmembers class com.salticusteam.vifi.core.data.**.dto.** { <init>(); *; }

@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 50 MB cache, so the archive and config stay readable offline.
  *
  * Must run before ANY RTDB use in the process — `setPersistenceEnabled` throws once the database has been
- * touched. `VifiApplication` calls it first thing in `onCreate`, ahead of the legacy screens that still call
- * `FirebaseDatabase.getInstance()` directly. Safe to call again: later calls are no-ops.
+ * touched. The live BackendStartup calls it first thing in `VifiApplication.onCreate`. Safe to call again:
+ * later calls are no-ops.
  */
 object FirebaseDatabaseSetup {
 

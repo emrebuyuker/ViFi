@@ -67,17 +67,18 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
 | **Tema** | `MaterialTheme.colorScheme` / `typography` (hardcoded renk/font yok) |
 | **Test** | JUnit + `coroutines-test` + Turbine (birim), Compose UI test (arayüz), Fake tercih |
 
-### Mevcut durum (eski kod — göç edilecek)
+### Mevcut durum
 
 | Konu | Değer |
 |---|---|
-| **Dil/UI** | Java, Activity/Fragment + XML + elle adapter (`CustomAdapter`, `ListViewAdapter`); MVVM/ViewModel yok |
+| **Dil/UI** | Kotlin + Compose (eski Java/XML ekranlar FM-23'te silindi); tek `app/MainActivity` + `AppRoot` + `ViFiNavHost` |
 | **Uygulama** | `com.salticusteam.vifi`, `versionName 2.5`, `versionCode 16`, `compileSdk/targetSdk 35`, `minSdk 24` |
-| **Veri (arşiv)** | RTDB `Universitiess` ağacı + `Announcements` (alanlar Türkçe: `uniname`, `fakname`, `bolname`, `lessonname`, `downloadURL`, `imagename`, `bookName`, `type`, `acıklama`) |
-| **Giriş** | Firebase Auth **e-posta/şifre** (`LoginActivity`) — ortak kurallar `+90` telefon ister, göç gerekli |
-| **Kütüphane** | AndroidX, AGP 8.7.2 + Gradle 8.9, `google()`+`mavenCentral()` + `libs.versions.toml`, Kotlin 2.0.21 + Coroutines, Firebase BoM 33.5.1, Picasso, android-pdf-viewer (mhiew fork) |
-| **Build** | Gradle Groovy DSL (plugins DSL), `google-services` 4.4.2, Java 17 hedefi; Gradle'ı JDK 17–21 ile çalıştır (Android Studio JBR 25 desteklenmez) |
-| **❌ Yeni kodda yapma** | `com.android.support`/`jcenter`'a yeni bağımlılık, yeni AdMob yüzeyi, yeni XML ekran (Compose kullan), sır/keystore commit'i |
+| **Flavor** | `live` (canlı vifi-831a8) · `mock` (örnek veri, Firebase başlamaz, yalnız debug) |
+| **Veri (arşiv)** | Live `ArchiveRepository` henüz GEÇİCİ olarak örnek veriye bağlı; hedef named `vifi` Firestore (`BE-15`) |
+| **Giriş** | Henüz yok — hedef Phone Auth `+90` (`BE-04`); e-posta/şifre girişi kaldırıldı |
+| **Kütüphane** | AndroidX, AGP 8.7.2 + Gradle 8.9, `libs.versions.toml`, Kotlin 2.0.21 + Coroutines, Hilt 2.52, Compose BoM 2024.10.01, Navigation 2.8.3, Firebase BoM 33.5.1, Timber |
+| **Build** | Gradle Groovy DSL (plugins DSL), `google-services` 4.4.2, Java 17 hedefi + desugaring; Gradle'ı JDK 17–21 ile çalıştır (Android Studio JBR 25 desteklenmez); release R8 küçültmeli |
+| **❌ Yeni kodda yapma** | `com.android.support`/`jcenter`, AdMob, XML ekran (Compose kullan), sır/keystore commit'i, mock'a canlı Firebase binding'i |
 
 ---
 
@@ -98,10 +99,8 @@ ViFi-Android/
 │   ├── google-services.json      # Firebase yapılandırması (vifi-831a8)
 │   └── src/main/
 │       ├── AndroidManifest.xml
-│       ├── java/com/salticusteam/vifi/   # MEVCUT: Activity/Fragment/Adapter (Java)
-│       │   # Home/Main/Login Activity, University/Faculties/Departments/Lesson Fragment,
-│       │   # CourseExamList/ExamDetail(+Pdf)/ImageZoom/AddLesson(+Pdf)/Announcements Activity,
-│       │   # GooglePlayAppVersion, MyFirebase*Service (FCM), *Adapter, PostClass
+│       ├── java/com/salticusteam/vifi/   # app/ (MainActivity, AppRoot) · core/ (model, data, designsystem,
+│       │   # navigation, util, notifications) · feature/<ad>/ (Screen, ViewModel, UiState)
 │       └── res/                  # layout/, drawable/, mipmap/, values/, menu/
 └── gradle/ + gradlew             # Gradle wrapper
 ```

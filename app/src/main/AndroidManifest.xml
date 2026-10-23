@@ -2,10 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Picker intents (ACTION_PICK / ACTION_GET_CONTENT) need no permission; kept only for old OS versions. -->
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
     <!-- Runtime request is owned by the notifications area (BE-11). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- No ads: drop the advertising-ID permissions Firebase Analytics merges in (Play Data Safety). -->
@@ -28,56 +24,31 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/roundicon"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/Theme.ViFi"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <!-- Analytics must not collect the advertising ID (no ads in the app). -->
         <meta-data
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
+
+        <!-- The single Compose host (FM-22). -->
         <activity
-            android:name=".HomeActivity"
+            android:name=".app.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-        <activity android:name=".AddAnnouncements" />
-        <activity android:name=".AnnouncementsActivity" />
-
-        <activity
-            android:name=".MainActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/LegacyLightTheme" />
 
         <service
-            android:name=".MyFirebaseMessagingService"
-            android:exported="false"
-            tools:ignore="ExportedService">
+            android:name=".core.notifications.ViFiMessagingService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <activity android:name=".ExamDetailActivity" />
-        <activity android:name=".AddLessonActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".CourseExamListActivity" />
-        <activity android:name=".ImageZoomActivity" />
-        <activity android:name=".AddPdfLessonActivity" />
-        <activity android:name=".ExamDetailPdfActivity" />
-
-        <!-- Single Compose host (FM-22). Launcher only in the mock flavor (see src/mock manifest) until
-             sign-in and the live archive land; the legacy HomeActivity stays the live launcher till FM-23. -->
-        <activity
-            android:name=".app.MainActivity"
-            android:exported="false"
-            android:theme="@style/Theme.ViFi"
-            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

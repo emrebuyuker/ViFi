@@ -1,5 +1,4 @@
 # Single source of truth for dependency and plugin versions.
-# Legacy entries (Picasso, commons-io) are removed when their screens move to Compose.
 
 [versions]
 agp = "8.7.2"
@@ -17,16 +16,9 @@ kotlinxSerialization = "1.7.3"
 desugarJdkLibs = "2.1.2"
 timber = "5.0.1"
 
-appcompat = "1.7.0"
-constraintlayout = "2.2.0"
-recyclerview = "1.3.2"
-material = "1.12.0"
 
 firebaseBom = "33.5.1"
 
-pdfViewer = "3.2.0-beta.3"
-picasso = "2.71828"
-commonsIo = "1.3.2"
 
 junit = "4.13.2"
 turbine = "1.1.0"
@@ -63,10 +55,6 @@ desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref 
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
-androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
-androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
-material = { module = "com.google.android.material:material", version.ref = "material" }
 
 # Firebase artifacts are versionless; the BoM pins one compatible release train.
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -80,10 +68,6 @@ firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { module = "com.google.firebase:firebase-appcheck-debug" }
 
-# Maintained fork of barteksc/android-pdf-viewer (jcenter is gone); same com.github.barteksc.pdfviewer API.
-pdf-viewer = { module = "com.github.mhiew:android-pdf-viewer", version.ref = "pdfViewer" }
-picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
-commons-io = { module = "org.apache.commons:commons-io", version.ref = "commonsIo" }
 
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }

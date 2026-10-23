@@ -1,18 +1,6 @@
 <resources>
     <string name="app_name">ViFi</string>
     <string name="notification_channel_general_name">Genel bildirimler</string>
-    <string name="spinner_title" />
-    <string name="title_activity_main2">Main2Activity</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
-    <string name="title_activity_main3">Main3Activity</string>
 
     <!-- Added in 2.5 — design system (iOS DesignSystem copy, verbatim) -->
     <string name="common_loading">Yükleniyor…</string>

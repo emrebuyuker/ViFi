@@ -13,7 +13,8 @@ import javax.inject.Singleton
  * Repository bindings (iOS `AppEnvironment.live()` parity).
  *
  * TEMPORARY: ArchiveRepository is bound to the sample-data fake until the live Firestore implementation
- * lands in the archive area (BE-15 / ARCH). No legacy screen uses it, so nothing user-facing reads fake data.
+ * lands in the archive area (BE-15 / ARCH), so the live build shows sample data until then. The app has no
+ * users and is not released, which is why this is acceptable for now.
  */
 @Module
 @InstallIn(SingletonComponent::class)

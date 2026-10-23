@@ -120,11 +120,6 @@ dependencies {
     debugImplementation libs.compose.ui.tooling
     debugImplementation libs.compose.ui.test.manifest
 
-    implementation libs.androidx.appcompat
-    implementation libs.androidx.constraintlayout
-    implementation libs.androidx.recyclerview
-    implementation libs.material
-
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.analytics
     implementation libs.firebase.auth
@@ -135,13 +130,6 @@ dependencies {
     implementation libs.firebase.messaging
     implementation libs.firebase.appcheck.playintegrity
     debugImplementation libs.firebase.appcheck.debug
-
-    implementation libs.pdf.viewer
-    implementation(libs.picasso) {
-        // Only pre-AndroidX annotations (no runtime code); excluding them lets Jetifier stay off.
-        exclude group: 'com.android.support', module: 'support-annotations'
-    }
-    implementation libs.commons.io
 
     testImplementation libs.junit
     testImplementation libs.kotlinx.coroutines.test

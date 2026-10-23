@@ -18,7 +18,7 @@ internal object BackendStartup {
         // processes where it didn't run (e.g. instrumentation without the provider).
         FirebaseApp.initializeApp(app)
         FirebaseAppCheck.getInstance().installAppCheckProviderFactory(appCheckProviderFactory())
-        // Before any Activity runs: persistence can only be enabled ahead of the first RTDB use.
+        // Persistence can only be enabled ahead of the first RTDB use.
         FirebaseDatabaseSetup.configure()
     }
 }

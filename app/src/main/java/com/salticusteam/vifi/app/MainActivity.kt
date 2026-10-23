@@ -10,10 +10,8 @@ import com.salticusteam.vifi.core.util.LaunchArgs
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * The single Compose host (iOS ViFiApp WindowGroup). Edge-to-edge; screens handle insets through Scaffold.
- *
- * Launcher in the mock flavor today; the live flavor switches over once sign-in and the live archive land
- * and the legacy Activities retire (FM-23).
+ * The single Compose host and launcher (iOS ViFiApp WindowGroup). Edge-to-edge; screens handle insets
+ * through Scaffold.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
