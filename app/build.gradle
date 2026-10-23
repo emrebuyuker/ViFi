@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
 }
 
@@ -62,6 +63,8 @@ dependencies {
     implementation libs.compose.material3
     implementation libs.compose.material.icons.extended
     implementation libs.androidx.activity.compose
+    implementation libs.androidx.navigation.compose
+    implementation libs.kotlinx.serialization.json
     // Preview rendering + test host activity: debug only, never shipped in release.
     debugImplementation libs.compose.ui.tooling
     debugImplementation libs.compose.ui.test.manifest
@@ -99,4 +102,5 @@ dependencies {
     androidTestImplementation libs.androidx.espresso.core
     androidTestImplementation platform(libs.compose.bom)
     androidTestImplementation libs.compose.ui.test.junit4
+    androidTestImplementation libs.androidx.navigation.testing
 }
