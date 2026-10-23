@@ -1,6 +1,6 @@
 plugins {
-    id 'com.android.application'
-    id 'com.google.gms.google-services'
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -44,23 +44,25 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
-    implementation 'com.google.firebase:firebase-database:16.1.0'
-    implementation 'com.google.firebase:firebase-storage:16.1.0'
-    implementation 'com.google.firebase:firebase-auth:16.2.0'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test:runner:1.6.2'
-    // Maintained fork of barteksc/android-pdf-viewer (jcenter is gone); same com.github.barteksc.pdfviewer API.
-    implementation 'com.github.mhiew:android-pdf-viewer:3.2.0-beta.3'
-    implementation 'org.apache.commons:commons-io:1.3.2'
-    implementation 'com.google.firebase:firebase-core:16.0.8'
-    implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'com.google.android.gms:play-services-ads:17.2.0'
-    implementation 'com.google.firebase:firebase-messaging:17.4.0'
-    implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.multidex
+    implementation libs.material
+
+    implementation libs.firebase.core
+    implementation libs.firebase.auth
+    implementation libs.firebase.database
+    implementation libs.firebase.storage
+    implementation libs.firebase.messaging
+    implementation libs.play.services.ads
+
+    implementation libs.pdf.viewer
+    implementation libs.picasso
+    implementation libs.commons.io
+
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.runner
 }
