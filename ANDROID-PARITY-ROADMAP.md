@@ -10,9 +10,9 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (24 Ekim 2026):** Toplam 218 kalemin **61'i tamam, 16'sı yarım, 141'i başlanmadı.** Faz 1'de yalnız FM-11/12/13/17/22 yarım;
-> Phone Auth + oturum kapısı, canlı Firestore arşiv okuması, force update, analytics, profil (veri + ekranlar + kapı) ve Hesap ekranı (profil, telefon, çıkış) hazır.
-> Canlı giriş + arşiv emülatörde doğrulandı (24 Ekim). Hesap silme (ACC-03) mock'ta doğrulandı, canlı test hesabıyla doğrulama bekliyor. Sıradaki: Home/coin alanları. Release imzası ve mağaza işleri en sondaki **REL-01**'de (Play hesabı Kasım 2024'ten beri kaldırılmış durumda).
+> **İlerleme (24 Ekim 2026):** Toplam 218 kalemin **113'ü tamam, 16'sı yarım, 89'u başlanmadı.** Faz 1'de yalnız FM-11/12/13/17/22 yarım;
+> Phone Auth + oturum kapısı, canlı Firestore arşiv okuması, force update, analytics, profil, Hesap ekranı (çıkış + hesap silme), sınav görüntüleyicileri (görsel + PDF + disk önbelleği + ekran koruması), coin cüzdanı + sınav kilidi, bildirimler (native FCM + Inbox), onboarding ve Hakkında/Bize Ulaş hazır.
+> Canlıda emülatörde doğrulandı (24 Ekim): giriş, tanıtım turu, arşiv, cüzdan bakiyesi, kilit rozeti + açma sheet'i (onaylanmadan), görsel sınav indirme, Inbox, Hesap, Hakkında, silme diyaloğu (Vazgeç), çıkış → tekrar giriş. Canlıda denenmedi: `unlockExam` çağrısı, gerçek hesap silme, FCM push, PDF (ücretsiz örnekler görsel). Sıradaki: Home, Sınav Ekleme (AE-*), Moderasyon. Release imzası ve mağaza işleri en sondaki **REL-01**'de (Play hesabı Kasım 2024'ten beri kaldırılmış durumda).
 
 | | iOS (hedef) | Android (24 Ekim 2026) | Android (başlangıç, v2.5) |
 |---|---|---|---|

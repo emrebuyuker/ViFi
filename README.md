@@ -46,6 +46,6 @@ adb shell am start -n com.salticusteam.vifi/.app.MainActivity --ez vifi_profile_
 
 ## Durum
 
-Telefonla giriş (+90), canlı arşiv, profil tamamlama/düzenleme ve Hesap ekranı hazır; ayrıntı ve kalan işler yol
+Telefonla giriş (+90), canlı arşiv, sınav görüntüleyicileri, coin kilidi, bildirimler, onboarding, profil ve Hesap ekranı (hesap silme dahil) hazır; ayrıntı ve kalan işler yol
 haritasında. Google Play geliştirici hesabı Kasım 2024'ten beri kaldırılmış durumda: release imzası ve mağaza yayını
 yol haritasının sonundaki `REL-01` kalemindedir.

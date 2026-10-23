@@ -4,7 +4,8 @@
 
 > **Durum (24 Ekim 2026):** Uygulama **Kotlin + Jetpack Compose + MVVM + Hilt** üzerinde (eski Java/Activity kodu
 > silindi, FM-23). **Phone Auth (+90)**, oturum + profil kapısı, **canlı arşiv** (isimli `vifi` Firestore), profil
-> tamamlama/düzenleme, Hesap ekranı, force update kapısı ve analytics hazır; giriş ve arşiv canlıda emülatörde doğrulandı.
+> tamamlama/düzenleme, Hesap ekranı (çıkış + hesap silme), sınav görüntüleyicileri, coin cüzdanı + sınav kilidi, bildirimler
+> (FCM + Inbox), onboarding, Hakkında, force update kapısı ve analytics hazır; ana akışlar canlıda emülatörde doğrulandı.
 > Google Play geliştirici hesabı Kasım 2024'ten beri kaldırılmış durumda — release/mağaza işleri `REL-01`'de.
 > **iOS v3.1.0 paritesi** hedefinde ilerleme ve kalan işler
 > [`ANDROID-PARITY-ROADMAP.md`](ANDROID-PARITY-ROADMAP.md) (özet) ve [`ANDROID-PARITY-DETAIL.md`](ANDROID-PARITY-DETAIL.md)
@@ -209,4 +210,4 @@ Projeyi modernize et / Firestore'a taşı.
 ---
 
 **Son güncelleme:** 24 Ekim 2026
-**Proje:** ViFi Android (`com.salticusteam.vifi`, v2.5 → iOS 3.1.0 parite hedefinde; giriş, arşiv, profil ve Hesap hazır)
+**Proje:** ViFi Android (`com.salticusteam.vifi`, v2.5 → iOS 3.1.0 parite hedefinde; giriş, arşiv, görüntüleyiciler, coin, bildirim, profil ve Hesap hazır)
