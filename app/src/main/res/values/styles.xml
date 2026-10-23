@@ -7,6 +7,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- Compose host theme: no action bar, edge-to-edge (no opt-out). Compose's ViFiTheme draws everything. -->
+    <style name="Theme.ViFi" parent="android:Theme.Material.Light.NoActionBar" />
+
     <!-- MainActivity's former framework theme; wrapped so values-v35 can opt out of edge-to-edge. -->
     <style name="LegacyLightTheme" parent="Base.Theme.AppCompat.Light" />
 

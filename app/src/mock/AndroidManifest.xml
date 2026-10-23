@@ -3,6 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application>
+        <!-- Mock flavor launches the Compose host; the legacy launcher reads Firebase directly and would crash. -->
+        <activity
+            android:name="com.salticusteam.vifi.HomeActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:replace="android:exported">
+            <intent-filter tools:node="removeAll" />
+        </activity>
+        <activity
+            android:name="com.salticusteam.vifi.app.MainActivity"
+            android:exported="true"
+            tools:replace="android:exported">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <!-- Mock flavor runs on sample data: Firebase must never initialise (iOS -ViFiMockData rule). -->
         <provider
             android:name="com.google.firebase.provider.FirebaseInitProvider"

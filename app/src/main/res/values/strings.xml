@@ -30,4 +30,22 @@
     <string name="exam_kind_images_badge">Görsel</string>
     <string name="exam_kind_pdf_badge">PDF</string>
     <string name="exam_kind_pdf_content">PDF belge</string>
+
+    <!-- Added in 2.5 — archive browsing (iOS BrowseView / HomeView copy, verbatim) -->
+    <string name="archive_home_title">ViFi</string>
+    <string name="archive_level_university_search_prompt">Üniversite ara</string>
+    <string name="archive_level_faculty_search_prompt">Fakültelerde ara</string>
+    <string name="archive_level_department_search_prompt">Bölümlerde ara</string>
+    <string name="archive_level_lesson_search_prompt">Derslerde ara</string>
+    <string name="archive_level_exam_search_prompt">Sınavlarda ara</string>
+    <string name="archive_level_university_empty_title">Henüz üniversite yok</string>
+    <string name="archive_level_faculty_empty_title">Bu üniversitede henüz fakülte yok</string>
+    <string name="archive_level_department_empty_title">Bu fakültede henüz bölüm yok</string>
+    <string name="archive_level_lesson_empty_title">Bu bölümde henüz ders yok</string>
+    <string name="archive_level_exam_empty_title">Bu derste henüz sınav yok</string>
+    <string name="archive_empty_message">Yeni içerik eklendiğinde burada görünecek.</string>
+    <string name="archive_search_no_results">"%1$s" için sonuç yok</string>
+    <string name="cd_clear_search">Aramayı temizle</string>
+    <!-- Temporary until the exam viewer (VIEW-01/02) lands -->
+    <string name="exam_viewer_coming_soon">Sınav görüntüleyici yakında burada olacak.</string>
 </resources>

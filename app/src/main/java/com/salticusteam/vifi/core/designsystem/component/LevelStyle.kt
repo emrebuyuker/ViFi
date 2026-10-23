@@ -30,6 +30,28 @@ val ArchiveLevel.listTitleRes: Int
         ArchiveLevel.EXAM -> R.string.archive_level_exam_list_title
     }
 
+/** Prompt of the search field of a list of entries of this level. */
+@get:StringRes
+val ArchiveLevel.searchPromptRes: Int
+    get() = when (this) {
+        ArchiveLevel.UNIVERSITY -> R.string.archive_level_university_search_prompt
+        ArchiveLevel.FACULTY -> R.string.archive_level_faculty_search_prompt
+        ArchiveLevel.DEPARTMENT -> R.string.archive_level_department_search_prompt
+        ArchiveLevel.LESSON -> R.string.archive_level_lesson_search_prompt
+        ArchiveLevel.EXAM -> R.string.archive_level_exam_search_prompt
+    }
+
+/** Empty-state title of a list of entries of this level. */
+@get:StringRes
+val ArchiveLevel.emptyListTitleRes: Int
+    get() = when (this) {
+        ArchiveLevel.UNIVERSITY -> R.string.archive_level_university_empty_title
+        ArchiveLevel.FACULTY -> R.string.archive_level_faculty_empty_title
+        ArchiveLevel.DEPARTMENT -> R.string.archive_level_department_empty_title
+        ArchiveLevel.LESSON -> R.string.archive_level_lesson_empty_title
+        ArchiveLevel.EXAM -> R.string.archive_level_exam_empty_title
+    }
+
 val ArchiveLevel.icon: ImageVector
     get() = when (this) {
         ArchiveLevel.UNIVERSITY -> Icons.Filled.AccountBalance

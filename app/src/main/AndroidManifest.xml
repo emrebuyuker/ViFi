@@ -70,6 +70,14 @@
         <activity android:name=".ImageZoomActivity" />
         <activity android:name=".AddPdfLessonActivity" />
         <activity android:name=".ExamDetailPdfActivity" />
+
+        <!-- Single Compose host (FM-22). Launcher only in the mock flavor (see src/mock manifest) until
+             sign-in and the live archive land; the legacy HomeActivity stays the live launcher till FM-23. -->
+        <activity
+            android:name=".app.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ViFi"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
