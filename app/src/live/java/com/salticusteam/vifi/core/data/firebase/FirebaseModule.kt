@@ -10,6 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.persistentCacheSettings
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.salticusteam.vifi.core.util.FirebaseConstants
 import dagger.Module
@@ -57,6 +58,10 @@ object FirebaseModule {
     @Singleton
     fun provideFunctions(): FirebaseFunctions =
         FirebaseFunctions.getInstance(FirebaseApp.getInstance(), FirebaseConstants.FUNCTIONS_REGION)
+
+    @Provides
+    @Singleton
+    fun provideFirebaseMessaging(): FirebaseMessaging = FirebaseMessaging.getInstance()
 
     @Provides
     @Singleton

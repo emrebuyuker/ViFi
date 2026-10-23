@@ -14,8 +14,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,6 +62,7 @@ import com.salticusteam.vifi.core.model.ArchiveLevel
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamSummary
+import com.salticusteam.vifi.feature.inbox.InboxBadgeViewModel
 
 /**
  * An archive list: universities on the home screen (root path) and every drill-down level (iOS HomeView /
@@ -69,6 +74,8 @@ fun BrowseScreen(
     onBack: (() -> Unit)?,
     /** Opens the account screen; only the home screen passes it (the toolbar's account button). */
     onAccountClick: (() -> Unit)? = null,
+    /** Opens the inbox; only the home screen passes it (the toolbar's bell). */
+    onInboxClick: (() -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -83,6 +90,7 @@ fun BrowseScreen(
         onRefresh = viewModel::refresh,
         onBack = onBack,
         onAccountClick = onAccountClick,
+        onInboxClick = onInboxClick,
     )
 }
 
@@ -96,6 +104,7 @@ internal fun BrowseContent(
     onRefresh: () -> Unit,
     onBack: (() -> Unit)?,
     onAccountClick: (() -> Unit)? = null,
+    onInboxClick: (() -> Unit)? = null,
 ) {
     val listedLevel = state.path.childLevel ?: ArchiveLevel.EXAM
     val title = state.path.displayName ?: stringResource(R.string.archive_home_title)
@@ -107,6 +116,7 @@ internal fun BrowseContent(
                 title = title,
                 onBack = onBack,
                 actions = {
+                    if (onInboxClick != null) InboxBell(onClick = onInboxClick)
                     if (onAccountClick != null) {
                         IconButton(onClick = onAccountClick, modifier = Modifier.testTag("toolbar.account")) {
                             Icon(
@@ -156,6 +166,22 @@ internal fun BrowseContent(
                     }
                 }
             }
+        }
+    }
+}
+
+/** The toolbar bell: opens the inbox and shows how many announcements are unread (iOS bell + badge). */
+@Composable
+private fun InboxBell(onClick: () -> Unit, viewModel: InboxBadgeViewModel = hiltViewModel()) {
+    val unread by viewModel.unreadCount.collectAsStateWithLifecycle()
+    val description = if (unread > 0) {
+        pluralStringResource(R.plurals.cd_inbox_open_unread, unread, unread)
+    } else {
+        stringResource(R.string.cd_inbox_open)
+    }
+    IconButton(onClick = onClick, modifier = Modifier.testTag("toolbar.inbox")) {
+        BadgedBox(badge = { if (unread > 0) Badge { Text(unread.coerceAtMost(99).toString()) } }) {
+            Icon(imageVector = Icons.Filled.Notifications, contentDescription = description)
         }
     }
 }

@@ -41,6 +41,10 @@ sealed interface ViFiRoute {
     @Serializable
     data object Account : ViFiRoute
 
+    /** The announcements inbox (opened from the home toolbar's bell or a notification tap). */
+    @Serializable
+    data object Inbox : ViFiRoute
+
     /** Edits the signed-in user's profile (opened from the account screen). */
     @Serializable
     data object EditProfile : ViFiRoute
