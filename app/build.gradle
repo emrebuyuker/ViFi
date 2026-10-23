@@ -52,10 +52,30 @@ android {
         }
     }
 
+    // Release keys never live in the repo: keystore.properties (git-ignored) or CI secrets provide them.
+    // Without that file the release build is produced unsigned.
+    def keystorePropertiesFile = rootProject.file("keystore.properties")
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            def keystoreProperties = new Properties()
+            keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+            release {
+                storeFile rootProject.file(keystoreProperties["storeFile"])
+                storePassword keystoreProperties["storePassword"]
+                keyAlias keystoreProperties["keyAlias"]
+                keyPassword keystoreProperties["keyPassword"]
+            }
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

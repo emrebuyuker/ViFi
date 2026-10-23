@@ -1,21 +1,15 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ViFi release shrinking rules (R8). Libraries that ship consumer rules (Firebase, Hilt, Compose,
+# Navigation, kotlinx-serialization, coroutines) need nothing here.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Readable crash stack traces; the source file name itself is hidden.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# pdfium-android (PDF viewer) ships no consumer rules; its native code looks up these
+# classes and fields by name over JNI.
+-keep class com.shockwave.pdfium.** { *; }
+-keep class com.github.barteksc.pdfviewer.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Domain models are mapped by hand today (no reflection). When a Firestore DTO is read with
+# toObject()/getValue(Class), keep its no-arg constructor and properties, e.g.:
+# -keepclassmembers class com.salticusteam.vifi.core.data.**.dto.** { <init>(); *; }

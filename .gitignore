@@ -278,3 +278,7 @@ cmake-build-*/
 
 ### IDE (untracked project-system file) ###
 .idea/AndroidProjectSystem.xml
+### Release signing (never commit) ###
+keystore.properties
+*.jks
+*.keystore
