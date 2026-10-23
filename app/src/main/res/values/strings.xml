@@ -13,4 +13,21 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_activity_main3">Main3Activity</string>
+
+    <!-- Added in 2.5 — design system (iOS DesignSystem copy, verbatim) -->
+    <string name="common_loading">Yükleniyor…</string>
+    <string name="common_error_title">Bir sorun oluştu</string>
+    <string name="common_try_again">Tekrar Dene</string>
+    <string name="cd_navigate_back">Geri</string>
+    <string name="cd_coin_balance">Coin bakiyen: %1$s</string>
+
+    <string name="archive_level_university_list_title">Üniversiteler</string>
+    <string name="archive_level_faculty_list_title">Fakülteler</string>
+    <string name="archive_level_department_list_title">Bölümler</string>
+    <string name="archive_level_lesson_list_title">Dersler</string>
+    <string name="archive_level_exam_list_title">Sınavlar</string>
+
+    <string name="exam_kind_images_badge">Görsel</string>
+    <string name="exam_kind_pdf_badge">PDF</string>
+    <string name="exam_kind_pdf_content">PDF belge</string>
 </resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Added in 2.5 — child counts of archive entries (iOS LevelStyle.childCountText) -->
+    <plurals name="archive_university_child_count">
+        <item quantity="one">%1$d fakülte</item>
+        <item quantity="other">%1$d fakülte</item>
+    </plurals>
+    <plurals name="archive_faculty_child_count">
+        <item quantity="one">%1$d bölüm</item>
+        <item quantity="other">%1$d bölüm</item>
+    </plurals>
+    <plurals name="archive_department_child_count">
+        <item quantity="one">%1$d ders</item>
+        <item quantity="other">%1$d ders</item>
+    </plurals>
+    <plurals name="archive_lesson_child_count">
+        <item quantity="one">%1$d sınav</item>
+        <item quantity="other">%1$d sınav</item>
+    </plurals>
+
+    <!-- Added in 2.5 — page count of an image exam (iOS ExamKind.contentText) -->
+    <plurals name="exam_kind_images_page_count">
+        <item quantity="one">%1$d sayfa</item>
+        <item quantity="other">%1$d sayfa</item>
+    </plurals>
+</resources>
