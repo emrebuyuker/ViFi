@@ -1,8 +1,12 @@
-//noinspection GradleCompatible
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
 
 android {
-    compileSdkVersion 28
+    namespace 'com.salticusteam.vifi'
+    compileSdk 35
+
     defaultConfig {
         applicationId "com.salticusteam.vifi"
         minSdkVersion 19
@@ -14,11 +18,20 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
-    lintOptions {
-        checkReleaseBuilds false
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    lint {
+        checkReleaseBuilds = false
         // Or, if you prefer, you can continue to check for errors in release builds,
         // but continue the build even when errors are found:
-        abortOnError false
+        abortOnError = false
     }
 
     buildTypes {
@@ -61,4 +74,3 @@ dependencies {
     implementation 'com.android.support:support-vector-drawable:28.0.0'
     implementation 'com.android.support:recyclerview-v7:27.1.0'
 }
-apply plugin: 'com.google.gms.google-services'
