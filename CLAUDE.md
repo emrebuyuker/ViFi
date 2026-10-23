@@ -75,7 +75,7 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
 | **Uygulama** | `com.salticusteam.vifi`, `versionName 2.5`, `versionCode 16`, `compileSdk 35`, `targetSdk 28`, `minSdk 24` |
 | **Veri (arşiv)** | RTDB `Universitiess` ağacı + `Announcements` (alanlar Türkçe: `uniname`, `fakname`, `bolname`, `lessonname`, `downloadURL`, `imagename`, `bookName`, `type`, `acıklama`) |
 | **Giriş** | Firebase Auth **e-posta/şifre** (`LoginActivity`) — ortak kurallar `+90` telefon ister, göç gerekli |
-| **Kütüphane** | AndroidX (Jetifier geçici açık), AGP 8.7.2 + Gradle 8.9, `google()`+`mavenCentral()`, Firebase 16.x, **AdMob** (kaldırılacak), Picasso, android-pdf-viewer (mhiew fork) |
+| **Kütüphane** | AndroidX (Jetifier geçici açık), AGP 8.7.2 + Gradle 8.9, `google()`+`mavenCentral()`, Firebase 16.x, Picasso, android-pdf-viewer (mhiew fork) |
 | **Build** | Gradle Groovy DSL (plugins DSL), `google-services` 4.4.2, Java 17 hedefi; Gradle'ı JDK 17–21 ile çalıştır (Android Studio JBR 25 desteklenmez) |
 | **❌ Yeni kodda yapma** | `com.android.support`/`jcenter`'a yeni bağımlılık, yeni AdMob yüzeyi, yeni XML ekran (Compose kullan), sır/keystore commit'i |
 

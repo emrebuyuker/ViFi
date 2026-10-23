@@ -1,5 +1,5 @@
 # Single source of truth for dependency and plugin versions.
-# Legacy entries (Firebase 16.x, AdMob, Picasso, commons-io) are replaced/removed by FM-06, FM-08 and later items.
+# Legacy entries (Firebase 16.x, Picasso, commons-io) are replaced/removed by FM-06, FM-08 and later items.
 
 [versions]
 agp = "8.7.2"
@@ -18,7 +18,6 @@ firebaseAuth = "16.2.0"
 firebaseDatabase = "16.1.0"
 firebaseStorage = "16.1.0"
 firebaseMessaging = "17.4.0"
-playServicesAds = "17.2.0"
 
 pdfViewer = "3.2.0-beta.3"
 picasso = "2.71828"
@@ -39,7 +38,6 @@ firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "f
 firebase-database = { module = "com.google.firebase:firebase-database", version.ref = "firebaseDatabase" }
 firebase-storage = { module = "com.google.firebase:firebase-storage", version.ref = "firebaseStorage" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
-play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 
 # Maintained fork of barteksc/android-pdf-viewer (jcenter is gone); same com.github.barteksc.pdfviewer API.
 pdf-viewer = { module = "com.github.mhiew:android-pdf-viewer", version.ref = "pdfViewer" }

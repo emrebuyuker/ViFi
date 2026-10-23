@@ -10,9 +10,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 import com.squareup.picasso.Picasso;
 
 public class ImageZoomActivity extends AppCompatActivity implements View.OnTouchListener {
@@ -40,13 +37,6 @@ public class ImageZoomActivity extends AppCompatActivity implements View.OnTouch
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_zoom);
-
-        MobileAds.initialize(this,
-                "ca-app-pub-9037305793844471~3834061477");
-
-        AdView mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
 
         ImageView imageView = findViewById(R.id.imageViewZoom);
         imageView.setOnTouchListener(this);

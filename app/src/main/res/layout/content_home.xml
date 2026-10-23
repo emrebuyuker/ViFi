@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -16,9 +15,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="#ffff"
-        ads:layout_constraintBottom_toTopOf="@+id/navigation"
-        ads:layout_constraintHorizontal_bias="0.0"
-        ads:layout_constraintVertical_bias="1.0"
+        app:layout_constraintBottom_toTopOf="@+id/navigation"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintVertical_bias="1.0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -26,18 +25,6 @@
 
     </FrameLayout>
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-9037305793844471/9710695374"
-        android:background="@color/colorPrimary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation"
@@ -45,8 +32,7 @@
         android:layout_height="60dp"
         android:background="?android:attr/windowBackground"
         android:backgroundTint="@color/colorPrimary"
-        ads:layout_constraintBottom_toTopOf="@+id/adView"
-        ads:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:itemIconTint="#ffff"
         app:itemTextColor="#ffff"
         app:layout_constraintBottom_toBottomOf="parent"

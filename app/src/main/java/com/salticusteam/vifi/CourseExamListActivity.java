@@ -12,14 +12,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.reward.RewardItem;
-import com.google.android.gms.ads.reward.RewardedVideoAd;
-import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,7 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CourseExamListActivity extends AppCompatActivity implements RewardedVideoAdListener {
+public class CourseExamListActivity extends AppCompatActivity {
 
     ListView listView;
     TextView textViewTitle;
@@ -46,53 +38,15 @@ public class CourseExamListActivity extends AppCompatActivity implements Rewarde
 
     Context context = this;
 
-    Integer advertisement = 0;
-    Integer newPosition = 0;
 
     Intent intent2;
 
-    private AdView mAdView;
 
-    InterstitialAd mInterstitialAd;
-
-    private static final String AD_UNIT_ID = "ca-app-pub-9037305793844471/9446264895";
-    private static final String APP_ID = "ca-app-pub-9037305793844471~3834061477";
-    private RewardedVideoAd mRewardedVideoAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_exam_list);
-
-        MobileAds.initialize(this, APP_ID);
-        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
-        mRewardedVideoAd.setRewardedVideoAdListener(this);
-        loadRewardedVideoAd();
-
-        MobileAds.initialize(this, "ca-app-pub-9037305793844471~3834061477");
-
-
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-9037305793844471/9019406131");
-
-        mInterstitialAd.setAdListener(new AdListener() { //reklamımıza listener ekledik ve kapatıldığında haberimiz olacak
-            @Override
-            public void onAdClosed() { //reklam kapatıldığı zaman tekrardan reklamın yüklenmesi için
-                requestNewInterstitial();
-            }
-        });
-
-
-        requestNewInterstitial(); //reklamı direk uygulama açıldığında yüklemek için onCreate içinde yapıyoruz reklam yükleme işini
-
-        MobileAds.initialize(this,
-                "ca-app-pub-9037305793844471~3834061477");
-
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-
-        advertisement = 1;
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -107,14 +61,6 @@ public class CourseExamListActivity extends AppCompatActivity implements Rewarde
         getDataFirebaseMain6Activity();
         listViewOnClick();
 
-    }
-
-    private void requestNewInterstitial() { //Test cihazı ekliyoruz Admob dan ban yememek için
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("B9C840C4E9AD8EC5D1497C9A62C56374")
-                .build();
-
-        mInterstitialAd.loadAd(adRequest);
     }
 
     @Override
@@ -187,19 +133,15 @@ public class CourseExamListActivity extends AppCompatActivity implements Rewarde
 
     private void listViewOnClick() {
 
-        if (advertisement == 1) {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                imagesName = imageNamesFB.get(position);
+                lessonType();
 
-                    newPosition = position;
-                    imagesName = imageNamesFB.get(position);
-                    lessonType();
-
-                }
-            });
-        }
+            }
+        });
     };
 
     private void lessonType() {
@@ -248,7 +190,8 @@ public class CourseExamListActivity extends AppCompatActivity implements Rewarde
                 intent2.putExtra("imagename", imagesName);
                 intent2.putExtra("type", type);
 
-                rewardedAdMethod();
+                // Ads removed (FM-08): the exam opens directly. Locking returns with the coin economy (BE-08).
+                startActivity(intent2);
             }
 
             @Override
@@ -257,67 +200,5 @@ public class CourseExamListActivity extends AppCompatActivity implements Rewarde
             }
         });
 
-    }
-
-    private void rewardedAdMethod() {
-        if (newPosition < 3) {
-            if (mRewardedVideoAd.isLoaded()) {
-                mRewardedVideoAd.show();
-            } else {
-                loadRewardedVideoAd();
-            }
-        } else {
-            if (mInterstitialAd.isLoaded()) { //reklam yüklenmişse
-                startActivity(intent2);
-                mInterstitialAd.show(); //reklam gösteriliyor
-            }
-
-            else {
-                //Reklam yüklenmediyse yapılacak işlemler
-
-                startActivity(intent2);
-            }
-        }
-    }
-
-    private void loadRewardedVideoAd() {
-        if (!mRewardedVideoAd.isLoaded()) {
-            mRewardedVideoAd.loadAd(AD_UNIT_ID, new AdRequest.Builder().build());
-        }
-    }
-
-    @Override
-    public void onRewardedVideoAdLoaded() {
-    }
-
-    @Override
-    public void onRewardedVideoAdOpened() {
-    }
-
-    @Override
-    public void onRewardedVideoStarted() {
-    }
-
-    @Override
-    public void onRewardedVideoAdClosed() {
-        loadRewardedVideoAd();
-    }
-
-    @Override
-    public void onRewarded(RewardItem rewardItem) {
-        startActivity(intent2);
-    }
-
-    @Override
-    public void onRewardedVideoAdLeftApplication() {
-    }
-
-    @Override
-    public void onRewardedVideoAdFailedToLoad(int i) {
-        loadRewardedVideoAd();
-    }
-
-    @Override
-    public void onRewardedVideoCompleted() {
     }
 }
