@@ -16,6 +16,8 @@
         tools:node="remove" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Android 14+: lets the exam viewers show "Sınav içeriği korumalıdır" when a screenshot is taken (VIEW-12). -->
+    <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />
 
     <application
         android:name=".VifiApplication"

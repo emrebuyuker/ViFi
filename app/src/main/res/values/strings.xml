@@ -34,8 +34,6 @@
     <string name="archive_empty_message">Yeni içerik eklendiğinde burada görünecek.</string>
     <string name="archive_search_no_results">"%1$s" için sonuç yok</string>
     <string name="cd_clear_search">Aramayı temizle</string>
-    <!-- Temporary until the exam viewer (VIEW-01/02) lands -->
-    <string name="exam_viewer_coming_soon">Sınav görüntüleyici yakında burada olacak.</string>
 
     <!-- Added in 2.5 — update gate (iOS ForceUpdateView / optional update alert, verbatim) -->
     <string name="force_update_title">Güncelleme Gerekli</string>
@@ -104,4 +102,24 @@
     <string name="account_sign_out_dialog_title">Çıkış yapılsın mı?</string>
     <string name="account_sign_out_dialog_message">Arşive tekrar ulaşmak için numaranı yeniden doğrulaman gerekir.</string>
     <string name="account_sign_out_dialog_cancel">Vazgeç</string>
+
+    <!-- Added in 2.5 — exam viewers (iOS ExamImagesView / FullScreenPagerView / PDFExamView copy, verbatim) -->
+    <string name="exam_images_empty">Bu sınavda sayfa yok</string>
+    <string name="exam_page_caption">Sayfa %1$d / %2$d</string>
+    <string name="exam_page_failed">Sayfa yüklenemedi</string>
+    <string name="cd_exam_page_failed">Sayfa %1$d / %2$d, yüklenemedi</string>
+    <string name="cd_exam_page_open">Sayfayı tam ekran açar</string>
+    <string name="cd_exam_page_retry">Sayfayı yeniden yükler</string>
+    <string name="cd_exam_page_image">Sayfa %1$d</string>
+    <string name="exam_viewer_counter">%1$d / %2$d</string>
+    <string name="cd_exam_viewer_close">Kapat</string>
+    <string name="exam_pdf_empty">Bu sınavda dosya yok</string>
+    <string name="exam_pdf_downloading">Belge indiriliyor…</string>
+    <string name="exam_pdf_page_indicator">%1$d / %2$d</string>
+    <string name="cd_exam_pdf_page_indicator">Sayfa %1$d / %2$d</string>
+    <string name="cd_exam_pdf_files">Dosyalar</string>
+    <string name="exam_pdf_file_item">Dosya %1$d</string>
+    <string name="exam_capture_cover_title">Ekran kaydı sırasında sınav içeriği gizlenir</string>
+    <string name="exam_capture_cover_message">Kaydı durdurduğunda içerik yeniden görünür.</string>
+    <string name="exam_screenshot_notice">Sınav içeriği korumalıdır</string>
 </resources>

@@ -1,24 +1,16 @@
 package com.salticusteam.vifi.app
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
-import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.data.session.SessionState
-import com.salticusteam.vifi.core.designsystem.component.EmptyView
 import com.salticusteam.vifi.core.designsystem.component.LoadingView
-import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
-import com.salticusteam.vifi.core.designsystem.component.icon
 import com.salticusteam.vifi.core.model.ArchiveItem
 import com.salticusteam.vifi.core.model.ArchiveLevel
 import com.salticusteam.vifi.core.model.AuthUser
@@ -29,6 +21,7 @@ import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
 import com.salticusteam.vifi.feature.account.AccountScreen
 import com.salticusteam.vifi.feature.browse.BrowseScreen
+import com.salticusteam.vifi.feature.examviewer.ExamViewerScreen
 import com.salticusteam.vifi.feature.login.LoginScreen
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
 import com.salticusteam.vifi.feature.update.AppUpdateGate
@@ -80,18 +73,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
             BrowseScreen(onItemClick = { router.open(it) }, onBack = { router.pop() })
         },
         exam = { path, kind ->
-            // Placeholder until the exam viewers (VIEW-01/02) land.
-            Scaffold(
-                containerColor = MaterialTheme.colorScheme.background,
-                topBar = { ViFiTopAppBar(title = path.displayName.orEmpty(), onBack = { router.pop() }) },
-            ) { padding ->
-                EmptyView(
-                    title = path.displayName.orEmpty(),
-                    icon = kind.icon,
-                    message = stringResource(R.string.exam_viewer_coming_soon),
-                    modifier = Modifier.padding(padding),
-                )
-            }
+            ExamViewerScreen(path = path, routeKind = kind, onBack = { router.pop() })
         },
         account = {
             AccountScreen(

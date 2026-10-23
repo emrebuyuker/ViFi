@@ -111,6 +111,10 @@ dependencies {
     implementation libs.kotlinx.serialization.json
     implementation libs.timber
     implementation libs.androidx.datastore.preferences
+    // Exam file downloads (ARCH-08), page images (VIEW-05) and zoomable pages (VIEW-03): pure JVM, no native code.
+    implementation libs.okhttp
+    implementation libs.coil.compose
+    implementation libs.telephoto.zoomable.image.coil
 
     implementation libs.hilt.android
     ksp libs.hilt.compiler
@@ -136,6 +140,7 @@ dependencies {
     testImplementation libs.kotlinx.coroutines.test
     testImplementation libs.turbine
     testImplementation libs.mockk
+    testImplementation libs.okhttp.mockwebserver
     androidTestImplementation libs.androidx.test.ext.junit
     androidTestImplementation libs.androidx.test.runner
     // compose ui-test pulls Espresso 3.5.x, which crashes on API 36+ (InputManager.getInstance removed).
