@@ -175,4 +175,18 @@
     <string name="about_contact_header">İletişim</string>
     <string name="about_contact_button">Bize Ulaş</string>
     <string name="about_contact_footer">Görüş, öneri ve sorularını bize e-posta ile iletebilirsin.</string>
+
+    <!-- Added in 2.5 — home screen: hero, add-exam call and recently viewed shelf (iOS HomeView copy) -->
+    <string name="home_hero_title">Sınav Arşivi</string>
+    <string name="home_hero_subtitle">Üniversitelerin geçmiş sınavlarına hızlıca ulaş.</string>
+    <string name="home_add_exam_title">Sınav Ekle</string>
+    <string name="home_add_exam_subtitle">Arşive sınav ekle, onaylanınca coin kazan.</string>
+    <string name="home_recents_title">Son Görüntülenenler</string>
+    <string name="home_recents_clear">Temizle</string>
+    <string name="home_recents_remove">Listeden Kaldır</string>
+    <string name="home_recents_clear_title">Son görüntülenenler temizlensin mi?</string>
+    <string name="home_recents_clear_message">Sınavlar arşivde kalmaya devam eder; yalnızca bu liste boşaltılır.</string>
+    <string name="home_recents_clear_confirm">Tümünü Temizle</string>
+    <string name="home_recents_clear_cancel">Vazgeç</string>
+    <string name="home_about_open">Hakkında</string>
 </resources>

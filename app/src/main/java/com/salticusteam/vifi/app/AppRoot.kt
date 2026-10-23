@@ -27,6 +27,7 @@ import com.salticusteam.vifi.feature.account.AccountScreen
 import com.salticusteam.vifi.feature.addexam.AddExamScreen
 import com.salticusteam.vifi.feature.browse.BrowseScreen
 import com.salticusteam.vifi.feature.examviewer.ExamViewerScreen
+import com.salticusteam.vifi.feature.home.HomeScreen
 import com.salticusteam.vifi.feature.inbox.InboxScreen
 import com.salticusteam.vifi.feature.notifications.NotificationPrompt
 import com.salticusteam.vifi.feature.login.LoginScreen
@@ -85,11 +86,14 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         navController = navController,
         modifier = Modifier.fillMaxSize(),
         home = {
-            BrowseScreen(
+            HomeScreen(
                 onItemClick = { router.open(it) },
-                onBack = null,
+                onRecentClick = { router.push(ViFiRoute.Exam(it.path, it.kind)) },
+                // TODO(add-exam): push ViFiRoute.AddExam once the add-exam flow lands.
+                onAddExamClick = {},
                 onAccountClick = { router.push(ViFiRoute.Account) },
                 onInboxClick = { router.push(ViFiRoute.Inbox) },
+                onAboutClick = { router.push(ViFiRoute.About) },
             )
         },
         browse = { _ ->
