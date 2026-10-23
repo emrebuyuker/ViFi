@@ -1,6 +1,8 @@
 package com.salticusteam.vifi.core.data.repository
 
+import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,9 +17,15 @@ import javax.inject.Singleton
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
+abstract class RepositoryModule {
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideArchiveRepository(): ArchiveRepository = FakeArchiveRepository()
+    abstract fun bindExamUnlockService(impl: FirebaseExamUnlockService): ExamUnlockService
+
+    companion object {
+        @Provides
+        @Singleton
+        fun provideArchiveRepository(): ArchiveRepository = FakeArchiveRepository()
+    }
 }
