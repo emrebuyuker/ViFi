@@ -40,7 +40,7 @@ import com.salticusteam.vifi.core.model.ExamUnlockError
 /**
  * Shown when the user taps a locked exam (iOS ExamUnlockSheet): offers to unlock it with coins, or — when the
  * balance is too low — points to adding exams to earn coins. Cannot be dismissed while an unlock is in flight.
- * [onEarnCoins] is `null` until the add-exam flow exists; the earn branch then shows its explanation only.
+ * [onEarnCoins] opens the add-exam flow; when `null` the earn branch shows its explanation only.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

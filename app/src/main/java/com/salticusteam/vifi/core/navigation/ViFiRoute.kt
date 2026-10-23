@@ -52,4 +52,8 @@ sealed interface ViFiRoute {
     /** Edits the signed-in user's profile (opened from the account screen). */
     @Serializable
     data object EditProfile : ViFiRoute
+
+    /** Submits an exam for moderation (opened from the home screen and the unlock sheet's "Sınav Ekle"). */
+    @Serializable
+    data object AddExam : ViFiRoute
 }
