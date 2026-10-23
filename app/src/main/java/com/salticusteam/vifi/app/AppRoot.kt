@@ -22,7 +22,6 @@ import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
 import com.salticusteam.vifi.core.notifications.InboxDeepLink
-        },
 import com.salticusteam.vifi.feature.about.AboutScreen
 import com.salticusteam.vifi.feature.account.AccountScreen
 import com.salticusteam.vifi.feature.browse.BrowseScreen
