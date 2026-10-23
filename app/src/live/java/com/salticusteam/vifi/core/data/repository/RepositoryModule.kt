@@ -1,6 +1,12 @@
 package com.salticusteam.vifi.core.data.repository
 
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
+import com.salticusteam.vifi.core.data.preferences.DataStoreOnboardingPreferences
+import com.salticusteam.vifi.core.data.preferences.DataStoreRecentExamsRepository
+import com.salticusteam.vifi.core.data.preferences.DataStoreUserPreferencesRepository
+import com.salticusteam.vifi.core.data.preferences.OnboardingPreferences
+import com.salticusteam.vifi.core.data.preferences.RecentExamsRepository
+import com.salticusteam.vifi.core.data.preferences.UserPreferencesRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import dagger.Binds
 import dagger.Module
@@ -23,6 +29,18 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindExamUnlockService(impl: FirebaseExamUnlockService): ExamUnlockService
+
+    @Binds
+    @Singleton
+    abstract fun bindUserPreferences(impl: DataStoreUserPreferencesRepository): UserPreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRecentExams(impl: DataStoreRecentExamsRepository): RecentExamsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindOnboardingPreferences(impl: DataStoreOnboardingPreferences): OnboardingPreferences
 
     companion object {
         @Provides

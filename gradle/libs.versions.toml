@@ -15,6 +15,7 @@ lifecycle = "2.8.6"
 kotlinxSerialization = "1.7.3"
 desugarJdkLibs = "2.1.2"
 timber = "5.0.1"
+datastore = "1.1.1"
 
 
 firebaseBom = "33.5.1"
@@ -53,6 +54,7 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 # java.time (Instant, Duration, ...) on API 24-25; minSdk is 24.
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 
