@@ -26,8 +26,8 @@ import kotlinx.coroutines.withContext
  * to Cloud Storage (`pending/<uid>/<submissionId>/…`) (iOS FirebaseExamSubmissionService).
  *
  * Files are uploaded first, one at a time, then the document is written with their stable `storagePath`s and a
- * server timestamp — so the moderation function (which bypasses the rules) can copy the owner's files on
- * approval. If any step fails, the already-uploaded files are removed best-effort so no orphans are left.
+ * server timestamp — so an admin's moderation (ModerationService, gated by the rules' `isAdmin()`) can copy
+ * the owner's files on approval. If any step fails, the already-uploaded files are removed best-effort so no orphans are left.
  */
 class FirebaseExamSubmissionService @Inject constructor(
     private val authService: AuthService,
