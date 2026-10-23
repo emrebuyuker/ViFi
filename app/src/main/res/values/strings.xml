@@ -36,4 +36,12 @@
     <string name="cd_clear_search">Aramayı temizle</string>
     <!-- Temporary until the exam viewer (VIEW-01/02) lands -->
     <string name="exam_viewer_coming_soon">Sınav görüntüleyici yakında burada olacak.</string>
+
+    <!-- Added in 2.5 — update gate (iOS ForceUpdateView / optional update alert, verbatim) -->
+    <string name="force_update_title">Güncelleme Gerekli</string>
+    <string name="force_update_default_message">Uygulamayı kullanmaya devam etmek için en son sürüme güncellemen gerekiyor.</string>
+    <string name="update_action_update">Güncelle</string>
+    <string name="optional_update_title">Yeni sürüm mevcut</string>
+    <string name="optional_update_default_message">ViFi %1$s Google Play\'de. En iyi deneyim için uygulamayı güncelle.</string>
+    <string name="optional_update_later">Daha Sonra</string>
 </resources>

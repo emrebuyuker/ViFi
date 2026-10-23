@@ -7,6 +7,7 @@ import com.salticusteam.vifi.core.data.preferences.fake.FakeOnboardingPreference
 import com.salticusteam.vifi.core.data.preferences.fake.FakeRecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.fake.FakeUserPreferencesRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
+import com.salticusteam.vifi.core.data.repository.fake.FakeAppUpdateChecker
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamUnlockService
 import dagger.Module
@@ -46,4 +47,8 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideAnalyticsTracker(): AnalyticsTracker = FakeAnalyticsTracker()
+
+    @Provides
+    @Singleton
+    fun provideAppUpdateChecker(): AppUpdateChecker = FakeAppUpdateChecker()
 }

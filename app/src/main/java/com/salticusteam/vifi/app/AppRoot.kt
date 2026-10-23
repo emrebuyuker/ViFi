@@ -19,6 +19,7 @@ import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
 import com.salticusteam.vifi.feature.browse.BrowseScreen
+import com.salticusteam.vifi.feature.update.AppUpdateGate
 
 /**
  * The app's root composable (iOS RootView). Today it hosts the archive navigation stack; the gates that wrap
@@ -27,6 +28,14 @@ import com.salticusteam.vifi.feature.browse.BrowseScreen
  */
 @Composable
 fun AppRoot() {
+    // The required-update gate is outermost: it replaces everything beneath it, sign-in included.
+    AppUpdateGate {
+        AppContent()
+    }
+}
+
+@Composable
+private fun AppContent() {
     val navController = rememberNavController()
     val router = rememberViFiRouter(navController)
 

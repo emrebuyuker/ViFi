@@ -1,7 +1,9 @@
 package com.salticusteam.vifi.core.data.repository
 
+import com.salticusteam.vifi.BuildConfig
 import com.salticusteam.vifi.core.data.firebase.FirebaseAnalyticsTracker
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
+import com.salticusteam.vifi.core.data.firebase.RtdbAppConfigReader
 import com.salticusteam.vifi.core.data.preferences.DataStoreOnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.DataStoreRecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.DataStoreUserPreferencesRepository
@@ -47,7 +49,16 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindAnalyticsTracker(impl: FirebaseAnalyticsTracker): AnalyticsTracker
 
+    @Binds
+    @Singleton
+    abstract fun bindAppConfigReader(impl: RtdbAppConfigReader): AppConfigReader
+
     companion object {
+        @Provides
+        @Singleton
+        fun provideAppUpdateChecker(reader: AppConfigReader): AppUpdateChecker =
+            RemoteAppUpdateChecker(reader, installedVersion = BuildConfig.VERSION_NAME)
+
         @Provides
         @Singleton
         fun provideArchiveRepository(): ArchiveRepository = FakeArchiveRepository()
