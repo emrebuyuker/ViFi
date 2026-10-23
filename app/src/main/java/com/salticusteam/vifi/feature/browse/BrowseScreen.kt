@@ -40,10 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.salticusteam.vifi.R
+import com.salticusteam.vifi.core.designsystem.component.CoinBalanceBadge
 import com.salticusteam.vifi.core.designsystem.component.EmptyView
 import com.salticusteam.vifi.core.designsystem.component.ErrorView
+import com.salticusteam.vifi.core.designsystem.component.ExamKindBadge
 import com.salticusteam.vifi.core.designsystem.component.IconBadge
 import com.salticusteam.vifi.core.designsystem.component.LoadingView
+import com.salticusteam.vifi.core.designsystem.component.LockBadge
+import com.salticusteam.vifi.core.designsystem.component.badgeRes
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.component.childCountText
 import com.salticusteam.vifi.core.designsystem.component.contentText
@@ -57,6 +61,7 @@ import com.salticusteam.vifi.core.model.ArchiveItem
 import com.salticusteam.vifi.core.model.ArchiveLevel
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
+import com.salticusteam.vifi.core.model.ExamLock
 import com.salticusteam.vifi.core.model.ExamSummary
 
 /**
@@ -69,11 +74,25 @@ fun BrowseScreen(
     onBack: (() -> Unit)?,
     /** Opens the account screen; only the home screen passes it (the toolbar's account button). */
     onAccountClick: (() -> Unit)? = null,
+    /** Opens the add-exam flow from the unlock sheet's earn branch; `null` until that flow exists. */
+    onEarnCoins: (() -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel(),
+    unlockViewModel: ExamUnlockViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val lockState by unlockViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { viewModel.onScreenShown() }
+
+    LaunchedEffect(Unit) {
+        unlockViewModel.events.collect { event ->
+            when (event) {
+                // An unlocked exam opens through the same action as a free one.
+                is ExamUnlockEvent.Unlocked -> onItemClick(event.exam)
+                ExamUnlockEvent.EarnCoins -> onEarnCoins?.invoke()
+            }
+        }
+    }
 
     BrowseContent(
         state = state,
@@ -83,7 +102,19 @@ fun BrowseScreen(
         onRefresh = viewModel::refresh,
         onBack = onBack,
         onAccountClick = onAccountClick,
+        lockState = lockState,
+        onLockedExamTap = unlockViewModel::onLockedExamTap,
     )
+
+    lockState.examToUnlock?.let { exam ->
+        ExamUnlockSheet(
+            examName = exam.name,
+            state = lockState,
+            onUnlock = unlockViewModel::onUnlockConfirm,
+            onEarnCoins = onEarnCoins?.let { { unlockViewModel.onEarnCoins() } },
+            onDismiss = unlockViewModel::onSheetDismiss,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,6 +127,8 @@ internal fun BrowseContent(
     onRefresh: () -> Unit,
     onBack: (() -> Unit)?,
     onAccountClick: (() -> Unit)? = null,
+    lockState: ExamUnlockUiState = ExamUnlockUiState(),
+    onLockedExamTap: (ArchiveItem) -> Unit = {},
 ) {
     val listedLevel = state.path.childLevel ?: ArchiveLevel.EXAM
     val title = state.path.displayName ?: stringResource(R.string.archive_home_title)
@@ -107,6 +140,7 @@ internal fun BrowseContent(
                 title = title,
                 onBack = onBack,
                 actions = {
+                    CoinBalanceBadge(balance = lockState.balance, modifier = Modifier.padding(end = 4.dp))
                     if (onAccountClick != null) {
                         IconButton(onClick = onAccountClick, modifier = Modifier.testTag("toolbar.account")) {
                             Icon(
@@ -150,7 +184,10 @@ internal fun BrowseContent(
                             ArchiveList(
                                 title = stringResource(listedLevel.listTitleRes),
                                 items = state.visibleItems,
+                                // Free exams come from the full list, so a search never changes them.
+                                lockedPaths = lockState.lockedPaths(items),
                                 onItemClick = onItemClick,
+                                onLockedExamTap = onLockedExamTap,
                             )
                         }
                     }
@@ -183,7 +220,13 @@ private fun SearchField(text: String, placeholder: String, onTextChange: (String
 }
 
 @Composable
-private fun ArchiveList(title: String, items: List<ArchiveItem>, onItemClick: (ArchiveItem) -> Unit) {
+private fun ArchiveList(
+    title: String,
+    items: List<ArchiveItem>,
+    lockedPaths: Set<ArchivePath>,
+    onItemClick: (ArchiveItem) -> Unit,
+    onLockedExamTap: (ArchiveItem) -> Unit,
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag("browse.list"),
         contentPadding = PaddingValues(bottom = 16.dp),
@@ -192,7 +235,13 @@ private fun ArchiveList(title: String, items: List<ArchiveItem>, onItemClick: (A
             SectionHeader(title = title, count = items.size)
         }
         items(items = items, key = { it.path.components.joinToString("/") }) { item ->
-            ArchiveRow(item = item, onClick = { onItemClick(item) })
+            val isLocked = item.path in lockedPaths
+            ArchiveRow(
+                item = item,
+                isLocked = isLocked,
+                // A locked exam never opens directly; it offers the unlock sheet (iOS ArchiveNavigationRow).
+                onClick = { if (isLocked) onLockedExamTap(item) else onItemClick(item) },
+            )
             HorizontalDivider(Modifier.padding(start = 72.dp))
         }
     }
@@ -223,31 +272,40 @@ private fun SectionHeader(title: String, count: Int) {
     }
 }
 
-/** One entry: level icon, name and child count (or the exam's content). */
+/**
+ * One entry: level icon, name and child count (or the exam's content); an exam also shows its format, or a lock
+ * with the unlock cost when [isLocked].
+ */
 @Composable
-private fun ArchiveRow(item: ArchiveItem, onClick: () -> Unit) {
+private fun ArchiveRow(item: ArchiveItem, isLocked: Boolean, onClick: () -> Unit) {
     val exam = item.exam
     // An exam node without files cannot be opened (iOS shows it disabled).
     val enabled = item.level != ArchiveLevel.EXAM || exam != null
     val subtitle = when {
         exam != null -> exam.kind.contentText(exam.fileCount)
         item.childCount != null -> item.level.childCountText(item.childCount)
+        item.level == ArchiveLevel.EXAM -> stringResource(R.string.exam_no_files)
         else -> null
     }
+    val lockedHint = stringResource(R.string.exam_locked_hint)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(enabled = enabled, onClickLabel = if (isLocked) lockedHint else null, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .testTag("row.${item.name}"),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconBadge(icon = exam?.kind?.icon ?: item.level.icon)
+        IconBadge(
+            icon = exam?.kind?.icon ?: item.level.icon,
+            tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Column(Modifier.weight(1f)) {
             Text(
                 text = item.name,
                 style = MaterialTheme.typography.titleMedium,
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -257,6 +315,13 @@ private fun ArchiveRow(item: ArchiveItem, onClick: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+        }
+        if (exam != null) {
+            if (isLocked) {
+                LockBadge(cost = ExamLock.UNLOCK_COST, modifier = Modifier.testTag("row.lock"))
+            } else {
+                ExamKindBadge(text = stringResource(exam.kind.badgeRes))
             }
         }
     }

@@ -48,15 +48,20 @@ class FakeArchiveRepository(
             val lesson = department.appending(u.lessonId, u.lessonName)
             children[university] = listOf(ArchiveItem(faculty, ArchiveLevel.FACULTY, 1, null))
             children[faculty] = listOf(ArchiveItem(department, ArchiveLevel.DEPARTMENT, 1, null))
-            children[department] = listOf(ArchiveItem(lesson, ArchiveLevel.LESSON, 2, null))
+            children[department] = listOf(ArchiveItem(lesson, ArchiveLevel.LESSON, 4, null))
 
-            // Newest first, like the real archive.
+            // Newest first, like the real archive. The two oldest are free; the newer two are coin-locked.
             val pdf = lesson.appending("2023-vize", "2023 Vize")
             val images = lesson.appending("2022-final", "2022 Final")
+            val olderPdfs = listOf("2021-vize" to "2021 Vize", "2020-final" to "2020 Final")
+                .map { (id, name) -> lesson.appending(id, name) }
             children[lesson] = listOf(
                 ArchiveItem(pdf, ArchiveLevel.EXAM, null, ExamSummary(ExamKind.PDF, 1)),
                 ArchiveItem(images, ArchiveLevel.EXAM, null, ExamSummary(ExamKind.IMAGES, 3)),
-            )
+            ) + olderPdfs.map { ArchiveItem(it, ArchiveLevel.EXAM, null, ExamSummary(ExamKind.PDF, 1)) }
+            olderPdfs.forEach { path ->
+                documents[path] = ExamDocument(path, ExamKind.PDF, listOf("https://example.com/${u.id}/${path.components.last()}.pdf"))
+            }
             documents[pdf] = ExamDocument(pdf, ExamKind.PDF, listOf("https://example.com/${u.id}/2023-vize.pdf"))
             documents[images] = ExamDocument(
                 images,

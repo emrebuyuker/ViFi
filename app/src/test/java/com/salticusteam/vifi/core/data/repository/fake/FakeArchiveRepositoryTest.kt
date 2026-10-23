@@ -27,13 +27,13 @@ class FakeArchiveRepositoryTest {
     }
 
     @Test
-    fun `items when drilling down reaches lesson with two exams`() = runTest {
+    fun `items when drilling down reaches lesson with four exams`() = runTest {
         var path = ArchivePath.ROOT
         repeat(4) { path = sut.items(path).first().path }
 
         val exams = sut.items(path)
 
-        assertEquals(listOf(ExamKind.PDF, ExamKind.IMAGES), exams.map { it.exam?.kind })
+        assertEquals(listOf(ExamKind.PDF, ExamKind.IMAGES, ExamKind.PDF, ExamKind.PDF), exams.map { it.exam?.kind })
         assertTrue(exams.all { it.level == ArchiveLevel.EXAM && it.childCount == null })
     }
 

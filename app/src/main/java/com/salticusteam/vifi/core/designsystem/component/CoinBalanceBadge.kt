@@ -38,7 +38,7 @@ fun CoinBalanceBadge(
     modifier: Modifier = Modifier,
 ) {
     val shown by animateIntAsState(targetValue = balance, label = "coinBalance")
-    val description = stringResource(R.string.cd_coin_balance, TURKISH_NUMBER.format(balance.toLong()))
+    val description = stringResource(R.string.cd_coin_balance, formatCoins(balance))
 
     Row(
         modifier = modifier
@@ -56,12 +56,15 @@ fun CoinBalanceBadge(
             modifier = Modifier.size(18.dp),
         )
         Text(
-            text = TURKISH_NUMBER.format(shown.toLong()),
+            text = formatCoins(shown),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold,
         )
     }
 }
+
+/** A coin amount with Turkish digit grouping ("1.250"), for every coin label in the UI. */
+fun formatCoins(amount: Int): String = TURKISH_NUMBER.format(amount.toLong())
 
 // NumberFormat is not thread-safe; it is only used from composition, which runs on the main thread.
 private val TURKISH_NUMBER: NumberFormat = NumberFormat.getIntegerInstance(Locale.forLanguageTag("tr-TR"))

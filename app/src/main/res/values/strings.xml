@@ -104,4 +104,17 @@
     <string name="account_sign_out_dialog_title">Çıkış yapılsın mı?</string>
     <string name="account_sign_out_dialog_message">Arşive tekrar ulaşmak için numaranı yeniden doğrulaman gerekir.</string>
     <string name="account_sign_out_dialog_cancel">Vazgeç</string>
+
+    <!-- Added in 2.5 — coin lock (iOS ExamUnlockSheet / ArchiveRow LockBadge copy, verbatim) -->
+    <string name="exam_unlock_title">Sınavı Aç</string>
+    <string name="exam_unlock_locked">Bu sınav kilitli.</string>
+    <string name="exam_unlock_cost_balance">%1$s coin · Bakiyen: %2$s</string>
+    <string name="exam_unlock_confirm">Aç (%1$s coin)</string>
+    <string name="exam_unlock_permanent_note">Açtığın sınav hesabında kalıcı olur, bir daha kilitlenmez.</string>
+    <string name="exam_unlock_earn_message">Coin kazanmak için uygulamada olmayan sınavları ekleyebilirsin.</string>
+    <string name="exam_unlock_earn_button">Sınav Ekle</string>
+    <string name="exam_unlock_close">Kapat</string>
+    <string name="exam_locked_hint">Kilitli; açmak için dokun</string>
+    <string name="exam_no_files">Dosya bulunamadı</string>
+    <string name="cd_exam_locked">Kilitli, %1$s coin</string>
 </resources>
