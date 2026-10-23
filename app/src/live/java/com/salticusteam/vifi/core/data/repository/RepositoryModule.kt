@@ -3,6 +3,7 @@ package com.salticusteam.vifi.core.data.repository
 import com.salticusteam.vifi.BuildConfig
 import com.salticusteam.vifi.core.data.firebase.FirebaseAnalyticsTracker
 import com.salticusteam.vifi.core.data.firebase.FirebaseAuthService
+import com.salticusteam.vifi.core.data.firebase.FirebaseExamSubmissionService
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
 import com.salticusteam.vifi.core.data.firebase.FirebaseLoginDiagnosticsReporter
 import com.salticusteam.vifi.core.data.firebase.FirebaseNotificationService
@@ -36,6 +37,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindExamUnlockService(impl: FirebaseExamUnlockService): ExamUnlockService
+
+    /** Uploads to Storage `pending/<uid>/<id>/` and creates Firestore `submissions/<id>` (BE-14). */
+    @Binds
+    @Singleton
+    abstract fun bindExamSubmissionService(impl: FirebaseExamSubmissionService): ExamSubmissionService
 
     @Binds
     @Singleton

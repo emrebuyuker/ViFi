@@ -10,4 +10,7 @@ object FirebaseConstants {
 
     /** Host of Firebase Storage download URLs (iOS RemoteFileLoader.firebaseStorageHost). */
     const val STORAGE_HOST = "firebasestorage.googleapis.com"
+
+    /** Firestore collection of user exam submissions awaiting moderation (named `vifi` database). */
+    const val COLLECTION_SUBMISSIONS = "submissions"
 }
