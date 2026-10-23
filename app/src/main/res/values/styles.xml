@@ -7,6 +7,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- MainActivity's former framework theme; wrapped so values-v35 can opt out of edge-to-edge. -->
+    <style name="LegacyLightTheme" parent="Base.Theme.AppCompat.Light" />
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

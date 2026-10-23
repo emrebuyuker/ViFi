@@ -1,15 +1,11 @@
 package com.salticusteam.vifi;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -80,15 +76,8 @@ public class AddPdfLessonActivity extends AppCompatActivity {
         selectFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (ContextCompat.checkSelfPermission(AddPdfLessonActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-
-                    selectPdf();
-
-                } else {
-                    ActivityCompat.requestPermissions(AddPdfLessonActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 9);
-                }
-
+                // ACTION_GET_CONTENT grants read access to the picked URI; no storage permission is needed.
+                selectPdf();
             }
         });
 
@@ -199,24 +188,8 @@ public class AddPdfLessonActivity extends AppCompatActivity {
     }
 
     public void addLessonImagesSelect(View view) {
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
-
-        } else {
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, 1);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == 9 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            selectPdf();
-        } else {
-            Toast.makeText(AddPdfLessonActivity.this, "please provide permission", Toast.LENGTH_SHORT).show();
-        }
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, 1);
     }
 
     @Override

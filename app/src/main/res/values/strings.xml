@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">ViFi</string>
+    <string name="notification_channel_general_name">Genel bildirimler</string>
     <string name="spinner_title" />
     <string name="title_activity_main2">Main2Activity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

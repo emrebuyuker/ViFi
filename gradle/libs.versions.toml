@@ -11,7 +11,6 @@ googleServices = "4.4.2"
 appcompat = "1.7.0"
 constraintlayout = "2.2.0"
 recyclerview = "1.3.2"
-multidex = "2.0.1"
 material = "1.12.0"
 
 firebaseCore = "16.0.8"
@@ -33,7 +32,6 @@ androidxTestRunner = "1.6.2"
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
-androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 
 firebase-core = { module = "com.google.firebase:firebase-core", version.ref = "firebaseCore" }
