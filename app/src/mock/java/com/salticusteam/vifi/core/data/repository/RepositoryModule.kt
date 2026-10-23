@@ -1,7 +1,10 @@
 package com.salticusteam.vifi.core.data.repository
 
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
+import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamUnlockService
+import com.salticusteam.vifi.core.util.LaunchArg
+import com.salticusteam.vifi.core.util.LaunchArgs
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,4 +26,13 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideExamUnlockService(): ExamUnlockService = FakeExamUnlockService()
+
+    /** Signed in as the sample user unless launched with `vifi_signed_out` (read after MainActivity parsed it). */
+    @Provides
+    @Singleton
+    fun provideAuthService(): AuthService = FakeAuthService(isSignedIn = !LaunchArgs.isSet(LaunchArg.SIGNED_OUT))
+
+    @Provides
+    @Singleton
+    fun provideLoginDiagnosticsReporter(): LoginDiagnosticsReporter = NoopLoginDiagnosticsReporter
 }

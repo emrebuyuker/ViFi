@@ -3,6 +3,7 @@ package com.salticusteam.vifi.core.data.repository
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.firebase.FirebaseApp
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
+import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamUnlockService
 import com.salticusteam.vifi.core.model.ArchivePath
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -23,6 +24,8 @@ class MockGraphTest {
 
     @Inject lateinit var archiveRepository: ArchiveRepository
     @Inject lateinit var examUnlockService: ExamUnlockService
+    @Inject lateinit var authService: AuthService
+    @Inject lateinit var loginDiagnosticsReporter: LoginDiagnosticsReporter
 
     @Before
     fun setUp() {
@@ -33,6 +36,8 @@ class MockGraphTest {
     fun graph_bindsFakesOnly() = runTest {
         assertTrue(archiveRepository is FakeArchiveRepository)
         assertTrue(examUnlockService is FakeExamUnlockService)
+        assertTrue(authService is FakeAuthService)
+        assertTrue(loginDiagnosticsReporter === NoopLoginDiagnosticsReporter)
         assertTrue(archiveRepository.items(ArchivePath.ROOT).isNotEmpty())
     }
 

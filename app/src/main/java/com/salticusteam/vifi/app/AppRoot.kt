@@ -5,11 +5,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.salticusteam.vifi.R
+import com.salticusteam.vifi.core.data.session.SessionState
 import com.salticusteam.vifi.core.designsystem.component.EmptyView
+import com.salticusteam.vifi.core.designsystem.component.LoadingView
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.component.icon
 import com.salticusteam.vifi.core.model.ArchiveItem
@@ -19,14 +26,30 @@ import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
 import com.salticusteam.vifi.feature.browse.BrowseScreen
+import com.salticusteam.vifi.feature.login.LoginScreen
 
 /**
- * The app's root composable (iOS RootView). Today it hosts the archive navigation stack; the gates that wrap
- * it on iOS — required update (forceupdate), sign-in (auth) and profile completion (profile) — are layered
- * here as their roadmap items land, as are the lifecycle hooks (badge clearing, disk-cache pruning).
+ * The app's root composable (iOS RootView): gates the archive behind sign-in, then behind a completed profile
+ * ([ProfileGate]). The remaining iOS gate — required update (forceupdate) — and the lifecycle hooks (badge
+ * clearing, disk-cache pruning) are layered here as their roadmap items land.
  */
 @Composable
-fun AppRoot() {
+fun AppRoot(sessionViewModel: SessionViewModel = hiltViewModel()) {
+    val session by sessionViewModel.session.collectAsStateWithLifecycle()
+
+    when (val state = session) {
+        SessionState.Unknown -> LoadingView(modifier = Modifier.testTag("session.loading"))
+        SessionState.SignedOut -> LoginScreen()
+        // Keyed by user: after a sign-out the next user starts on the home screen with a fresh stack (iOS popToRoot).
+        is SessionState.SignedIn -> key(state.user.id) {
+            ProfileGate(user = state.user) { ArchiveHost() }
+        }
+    }
+}
+
+/** The archive navigation stack, shown once the user is signed in. */
+@Composable
+private fun ArchiveHost() {
     val navController = rememberNavController()
     val router = rememberViFiRouter(navController)
 
