@@ -10,15 +10,19 @@
 
 ## 0. Durum Özeti
 
-| | iOS (hedef) | Android (mevcut) |
-|---|---|---|
-| Sürüm | **3.1.0** | **2.5** (versionCode 16) |
-| UI | SwiftUI + MVVM(@Observable) | Java + Activity/Fragment |
-| Kütüphane tabanı | Firebase 12, SwiftPM | `com.android.support` (**AndroidX ÖNCESİ**), AGP 3.4.2, jcenter(ölü), Firebase 16.x (2018), Parse SDK |
-| Arşiv verisi | **Cloud Firestore** (isimli `vifi` DB) | **RTDB `Universitiess`** (silinmeye aday rollback ağacı) |
-| Giriş | **Firebase Phone Auth (+90)** + App Check | **email/şifre** (yeni kurallara takılır) |
-| Monetizasyon | Coin ekonomisi (reklamsız) | **AdMob** banner/interstitial/rewarded |
-| Özellikler | profil kapısı, coin kilidi, gönderim+moderasyon, bildirim merkezi, onboarding, ekran koruması, force update, analytics, Türkçe-only | yok |
+> **İlerleme (23 Ekim 2026):** Toplam 217 kalemin **19'u tamam, 7'si yarım, 191'i başlanmadı.** Faz 1 (Temel) 24 kalemin
+> 18'i tamam, 5'i yarım, yalnız FM-24 başlanmadı; Faz 0'dan BE-02/BE-08/BE-12 kod tarafı yapıldı. Sıradaki: **FM-24** (DataStore), ardından Faz 0
+> Console işleri (BE-01 SHA, BE-03 Play Integrity) ve Faz 2 **Phone Auth** (BE-04 / AUTH) + canlı arşiv (**BE-15**).
+
+| | iOS (hedef) | Android (23 Ekim 2026) | Android (başlangıç, v2.5) |
+|---|---|---|---|
+| Sürüm | **3.1.0** | 2.5 (versionCode 16) — versionName kararı açık | 2.5 |
+| UI | SwiftUI + MVVM(@Observable) | **Compose + Material3 + MVVM (Hilt, StateFlow)**, tek `MainActivity`, Navigation-Compose | Java + Activity/Fragment |
+| Kütüphane tabanı | Firebase 12, SwiftPM | AndroidX, AGP 8.7.2, Kotlin 2.0.21, Firebase BoM 33.5.1, `libs.versions.toml`, R8 | `com.android.support`, AGP 3.4.2, jcenter, Firebase 16.x, Parse |
+| Arşiv verisi | **Cloud Firestore** (isimli `vifi` DB) | Arayüz + `BrowseScreen` hazır; canlı Firestore impl. yok (geçici örnek veri) | RTDB `Universitiess` |
+| Giriş | **Firebase Phone Auth (+90)** + App Check | App Check (Debug/Play Integrity) kurulu; giriş ekranı yok | e-posta/şifre |
+| Monetizasyon | Coin ekonomisi (reklamsız) | Reklam yok; `unlockExam` servisi hazır, UI yok | AdMob |
+| Özellikler | profil kapısı, coin kilidi, gönderim+moderasyon, bildirim merkezi, onboarding, ekran koruması, force update, analytics, Türkçe-only | Tasarım sistemi, arşiv gezinme (örnek veri), `live`/`mock` flavor | yok |
 
 ## 1. Kapsam Kararları (sabit)
 
@@ -38,14 +42,14 @@
 
 ## 3. Başlamadan Verilecek Kararlar (öncelikli)
 
-- [ ] **UI mimarisi:** Jetpack Compose (önerilen) mı, Views+ViewModel mi? Tüm UI alanlarını etkiler.
-- [ ] **minSdk:** 24 (Android 7, ~%99 cihaz, Compose/Play Integrity/Photo Picker uyumlu — önerilen) mı?
+- [x] **UI mimarisi:** Jetpack Compose (önerilen) mı, Views+ViewModel mi? Tüm UI alanlarını etkiler. → **Compose** (onaylandı).
+- [x] **minSdk:** 24 (Android 7, ~%99 cihaz, Compose/Play Integrity/Photo Picker uyumlu — önerilen) mı? → **24** (onaylandı).
 - [ ] **config/rewards:** Android `config/rewards/android` düğümü mü açılacak yoksa `ios` reuse mı? (Değerler aynı; fallback android→ios önerilir.)
 - [ ] **versionName hizalama:** Android kendi serisini mi (2.5→3.0.0) sürdürecek yoksa `3.1.0`'a mı hizalanacak? `config/appUpdate/android/minimumVersion` buna bağlı.
-- [ ] **Reklam kaldırma kapsamı:** `play-services-ads` bağımlılığı tamamen mi kaldırılacak (önerilen) yoksa sadece çağrılar mı?
+- [x] **Reklam kaldırma kapsamı:** `play-services-ads` bağımlılığı tamamen mi kaldırılacak (önerilen) yoksa sadece çağrılar mı? → **Tamamen** (FM-08; AD_ID izinleri de kaldırıldı).
 - [ ] **App Check enforce zamanı:** Firestore enforce ne zaman açılacak? (Android sürümü Play'de verified trafiğe ulaşınca.)
 - [ ] **Play App Signing:** Kullanılıyor mu? Kullanılıyorsa upload + Google app-signing SHA-256'ların ikisi de Firebase'e eklenmeli.
-- [ ] **Paket adı:** `com.salticusteam.vifi` **korunmalı** (Firebase/Play kaydı buna bağlı) — teyit.
+- [x] **Paket adı:** `com.salticusteam.vifi` **korunmalı** (Firebase/Play kaydı buna bağlı) — teyit. → **Korunuyor.**
 
 ---
 

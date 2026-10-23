@@ -2,9 +2,10 @@
 
 Üniversitelerin geçmiş sınavlarını tek yerde toplayan sınav arşivi uygulamasının Android istemcisi.
 
-> **Durum:** Uygulama ŞU AN eski bir kod tabanıdır (Java + Activity/Fragment, v2.5) ve **iOS v3.1.0 paritesi** hedefiyle
-> **Kotlin + Jetpack Compose + MVVM**'e modernleştirilmektedir. Yapılacak işlerin tam listesi, adımları ve kabul
-> kriterleri [`ANDROID-PARITY-ROADMAP.md`](ANDROID-PARITY-ROADMAP.md) (özet) ve [`ANDROID-PARITY-DETAIL.md`](ANDROID-PARITY-DETAIL.md)
+> **Durum (23 Ekim 2026):** Faz 1 (Temel & Modernizasyon) büyük ölçüde tamam — uygulama artık **Kotlin + Jetpack
+> Compose + MVVM + Hilt** üzerinde, eski Java/Activity kodu silindi (FM-23). Giriş (Phone Auth) ve canlı arşiv henüz yok;
+> live arşiv geçici olarak örnek veri gösterir. **iOS v3.1.0 paritesi** hedefinde ilerleme ve kalan işler
+> [`ANDROID-PARITY-ROADMAP.md`](ANDROID-PARITY-ROADMAP.md) (özet) ve [`ANDROID-PARITY-DETAIL.md`](ANDROID-PARITY-DETAIL.md)
 > (ayrıntı) dosyalarındadır.
 
 ---
@@ -205,4 +206,4 @@ Projeyi modernize et / Firestore'a taşı.
 ---
 
 **Son güncelleme:** Ekim 2026
-**Proje:** ViFi Android (`com.salticusteam.vifi`, v2.5 → iOS 3.1.0 parite hedefinde)
+**Proje:** ViFi Android (`com.salticusteam.vifi`, v2.5 → iOS 3.1.0 parite hedefinde; Faz 1 büyük ölçüde tamam)
