@@ -52,7 +52,7 @@ fun ExamViewerScreen(
 }
 
 @Composable
-private fun ExamImagesScreen(
+internal fun ExamImagesScreen(
     state: ExamViewerUiState,
     imageLoader: ImageLoader,
     onBack: () -> Unit,
@@ -84,7 +84,7 @@ private fun ExamImagesScreen(
 }
 
 @Composable
-private fun ExamPdfScreen(
+internal fun ExamPdfScreen(
     state: ExamViewerUiState,
     onBack: () -> Unit,
     onRetryDocument: () -> Unit,

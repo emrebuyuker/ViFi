@@ -29,4 +29,7 @@ interface ModerationService {
      * count, and best-effort deletes the Storage files. [path] is the exam's archive path (.../course/exam).
      */
     suspend fun deleteExam(path: ArchivePath)
+
+    /** Download URLs of the submission's pending files in reading order, for the admin preview (no I/O). */
+    fun fileUrls(record: ExamSubmissionRecord): List<String>
 }

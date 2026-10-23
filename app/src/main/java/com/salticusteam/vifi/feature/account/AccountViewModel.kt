@@ -60,12 +60,20 @@ class AccountViewModel @Inject constructor(
     /** The deletion half of the state; the profile and phone fields are filled in from the stores. */
     private val _deletion = MutableStateFlow(AccountUiState())
 
+    /** Whether the user is an admin; resolved from the ID token's claim when the screen opens (iOS `.task`). */
+    private val _isAdmin = MutableStateFlow(false)
+
     val uiState: StateFlow<AccountUiState> =
-        combine(sessionStore.state, profileStore.state, _deletion, ::accountState)
+        combine(sessionStore.state, profileStore.state, _deletion, _isAdmin, ::accountState)
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
-                initialValue = accountState(sessionStore.state.value, profileStore.state.value, _deletion.value),
+                initialValue = accountState(
+                    sessionStore.state.value,
+                    profileStore.state.value,
+                    _deletion.value,
+                    _isAdmin.value,
+                ),
             )
 
     // Internal state
@@ -75,6 +83,8 @@ class AccountViewModel @Inject constructor(
     // Intents
     fun onScreenShown() {
         analytics.trackScreen(AnalyticsScreen.ACCOUNT)
+        // UI gating only: the rules' isAdmin() is what actually authorizes moderation writes.
+        viewModelScope.launch { _isAdmin.value = authService.isCurrentUserAdmin() }
     }
 
     /** Signs out after the user confirmed it. */
@@ -214,9 +224,14 @@ class AccountViewModel @Inject constructor(
         }
     }
 
-    private fun accountState(session: SessionState, profile: ProfileState, deletion: AccountUiState) =
-        deletion.copy(
-            profileName = (profile as? ProfileState.Present)?.profile?.fullName,
-            formattedPhoneNumber = (session as? SessionState.SignedIn)?.user?.formattedPhoneNumber,
-        )
+    private fun accountState(
+        session: SessionState,
+        profile: ProfileState,
+        deletion: AccountUiState,
+        isAdmin: Boolean,
+    ) = deletion.copy(
+        profileName = (profile as? ProfileState.Present)?.profile?.fullName,
+        formattedPhoneNumber = (session as? SessionState.SignedIn)?.user?.formattedPhoneNumber,
+        isAdmin = isAdmin,
+    )
 }

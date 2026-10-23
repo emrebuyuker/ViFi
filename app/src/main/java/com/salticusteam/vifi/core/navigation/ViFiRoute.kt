@@ -56,4 +56,16 @@ sealed interface ViFiRoute {
     /** Submits an exam for moderation (opened from the home screen and the unlock sheet's "Sınav Ekle"). */
     @Serializable
     data object AddExam : ViFiRoute
+
+    /** The admin moderation queue (opened from the account screen, by an admin only). */
+    @Serializable
+    data object Moderation : ViFiRoute
+
+    /** One pending submission under review; the record itself is read from the loaded queue. */
+    @Serializable
+    data class ModerationDetail(val submissionId: String) : ViFiRoute
+
+    /** The pending files of the submission [submissionId], previewed before approving. */
+    @Serializable
+    data class SubmissionPreview(val submissionId: String) : ViFiRoute
 }

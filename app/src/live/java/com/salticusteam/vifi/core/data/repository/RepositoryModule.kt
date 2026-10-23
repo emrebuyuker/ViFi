@@ -6,6 +6,7 @@ import com.salticusteam.vifi.core.data.firebase.FirebaseAuthService
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamSubmissionService
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
 import com.salticusteam.vifi.core.data.firebase.FirebaseLoginDiagnosticsReporter
+import com.salticusteam.vifi.core.data.firebase.FirebaseModerationBackend
 import com.salticusteam.vifi.core.data.firebase.FirebaseNotificationService
 import com.salticusteam.vifi.core.data.firebase.FirebaseProfileService
 import com.salticusteam.vifi.core.data.firebase.FirestoreAnnouncementsReader
@@ -14,6 +15,8 @@ import com.salticusteam.vifi.core.data.firebase.FirestoreUnlocksReader
 import com.salticusteam.vifi.core.data.firebase.FirestoreWalletReader
 import com.salticusteam.vifi.core.data.firebase.RtdbAppConfigReader
 import com.salticusteam.vifi.core.data.firebase.RtdbRewardsConfigReader
+import com.salticusteam.vifi.core.data.moderation.AdminModerationService
+import com.salticusteam.vifi.core.data.moderation.ModerationBackend
 import com.salticusteam.vifi.core.data.preferences.AnnouncementReadPreferences
 import com.salticusteam.vifi.core.data.preferences.DataStoreAnnouncementReadPreferences
 import com.salticusteam.vifi.core.data.preferences.DataStoreOnboardingPreferences
@@ -42,6 +45,15 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindExamSubmissionService(impl: FirebaseExamSubmissionService): ExamSubmissionService
+
+    /** Serverless admin moderation: the admin's device publishes and credits, gated by the rules' isAdmin(). */
+    @Binds
+    @Singleton
+    abstract fun bindModerationService(impl: AdminModerationService): ModerationService
+
+    @Binds
+    @Singleton
+    abstract fun bindModerationBackend(impl: FirebaseModerationBackend): ModerationBackend
 
     @Binds
     @Singleton

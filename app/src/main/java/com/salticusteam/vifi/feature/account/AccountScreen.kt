@@ -3,6 +3,7 @@ package com.salticusteam.vifi.feature.account
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,13 +55,14 @@ import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 /**
  * The signed-in account (iOS AccountView), opened from the home screen: the profile (opens the editor), the
  * verified phone number, signing out and deleting the account (with a re-verification of the number when
- * Firebase asks for a recent sign-in). The coin balance and moderation join later.
+ * Firebase asks for a recent sign-in). An admin also gets the Moderasyon entry.
  */
 @Composable
 fun AccountScreen(
     onEditProfile: () -> Unit,
     onAbout: () -> Unit,
     onBack: () -> Unit,
+    onModeration: () -> Unit = {},
     viewModel: AccountViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,6 +93,7 @@ fun AccountScreen(
         onCancelReverification = viewModel::cancelReverification,
         onBack = onBack,
         onAbout = onAbout,
+        onModeration = onModeration,
     )
 }
 
@@ -109,6 +112,7 @@ fun AccountContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onAbout: () -> Unit = {},
+    onModeration: () -> Unit = {},
 ) {
     var isConfirmingSignOut by rememberSaveable { mutableStateOf(false) }
     var isConfirmingDeletion by rememberSaveable { mutableStateOf(false) }
@@ -139,6 +143,12 @@ fun AccountContent(
             item(key = "phone") {
                 PhoneRow(formattedPhoneNumber = state.formattedPhoneNumber)
                 HorizontalDivider()
+            }
+            if (state.isAdmin) {
+                item(key = "moderation") {
+                    ModerationRow(enabled = !state.isWorking, onClick = onModeration)
+                    HorizontalDivider()
+                }
             }
             item(key = "about") {
                 ListItem(
@@ -261,6 +271,23 @@ private fun PhoneRow(formattedPhoneNumber: String?) {
         modifier = Modifier
             .semantics(mergeDescendants = true) {}
             .testTag("account.phone"),
+    )
+}
+
+/** "Moderasyon": the admin's review queue (iOS `moderationSection`). */
+@Composable
+private fun ModerationRow(enabled: Boolean, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = {
+            Text(text = stringResource(R.string.moderation_account_row_title), fontWeight = FontWeight.SemiBold)
+        },
+        supportingContent = { Text(stringResource(R.string.moderation_account_row_subtitle)) },
+        leadingContent = { IconBadge(icon = Icons.Filled.Checklist) },
+        trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .testTag("account.moderation"),
     )
 }
 

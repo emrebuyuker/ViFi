@@ -13,7 +13,7 @@ interface ExamSubmissionService {
     /**
      * Uploads the submission's files and creates the pending submission owned by [ownerId]. On success the
      * files live under `pending/<ownerId>/<submissionId>/...` and the document is written with
-     * `status: "pending"`; the server (Admin SDK) handles moderation and any coin reward afterwards.
+     * `status: "pending"`; an admin's device moderates it and credits any coins afterwards (ModerationService).
      */
     suspend fun submit(submission: ExamSubmission, ownerId: String)
 }

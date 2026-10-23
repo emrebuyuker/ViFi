@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.feature.browse
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,10 +15,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,14 +30,21 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.pluralStringResource
@@ -90,9 +100,11 @@ fun BrowseScreen(
     listHeader: (@Composable () -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel(),
     unlockViewModel: ExamUnlockViewModel = hiltViewModel(),
+    deletionViewModel: ExamDeletionViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val lockState by unlockViewModel.uiState.collectAsStateWithLifecycle()
+    val deletionState by deletionViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { viewModel.onScreenShown() }
 
@@ -102,6 +114,15 @@ fun BrowseScreen(
                 // An unlocked exam opens through the same action as a free one.
                 is ExamUnlockEvent.Unlocked -> onItemClick(event.exam)
                 ExamUnlockEvent.EarnCoins -> onEarnCoins?.invoke()
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        deletionViewModel.events.collect { event ->
+            when (event) {
+                // Dropped at once: a refetch could still hit the cached copy of the deleted exam.
+                is ExamDeletionEvent.Deleted -> viewModel.remove(event.exam)
             }
         }
     }
@@ -119,7 +140,22 @@ fun BrowseScreen(
         onInboxClick = onInboxClick,
         onAboutClick = onAboutClick,
         listHeader = listHeader,
+        // Admins may delete the exams listed under a course (iOS `canDeleteExams`).
+        onDeleteExam = deletionViewModel::onDeleteRequested.takeIf {
+            deletionState.isAdmin && state.path.childLevel == ArchiveLevel.EXAM
+        },
     )
+
+    deletionState.examToDelete?.let { exam ->
+        DeleteExamDialog(
+            examName = exam.name,
+            onConfirm = deletionViewModel::confirmDelete,
+            onDismiss = deletionViewModel::onDeleteDismissed,
+        )
+    }
+    deletionState.error?.let { message ->
+        DeleteFailedDialog(message = message, onDismiss = deletionViewModel::onErrorDismissed)
+    }
 
     lockState.examToUnlock?.let { exam ->
         ExamUnlockSheet(
@@ -147,6 +183,8 @@ internal fun BrowseContent(
     onInboxClick: (() -> Unit)? = null,
     onAboutClick: (() -> Unit)? = null,
     listHeader: (@Composable () -> Unit)? = null,
+    /** Offers the swipe-to-delete action on each row; `null` hides it (non-admins, levels above exams). */
+    onDeleteExam: ((ArchiveItem) -> Unit)? = null,
 ) {
     val listedLevel = state.path.childLevel ?: ArchiveLevel.EXAM
     val title = state.path.displayName ?: stringResource(R.string.archive_home_title)
@@ -216,6 +254,7 @@ internal fun BrowseContent(
                                 onItemClick = onItemClick,
                                 onLockedExamTap = onLockedExamTap,
                                 header = listHeader.takeUnless { state.isFiltering },
+                                onDelete = onDeleteExam,
                             )
                         }
                     }
@@ -271,6 +310,7 @@ private fun ArchiveList(
     onItemClick: (ArchiveItem) -> Unit,
     onLockedExamTap: (ArchiveItem) -> Unit,
     header: (@Composable () -> Unit)? = null,
+    onDelete: ((ArchiveItem) -> Unit)? = null,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag("browse.list"),
@@ -282,15 +322,97 @@ private fun ArchiveList(
         }
         items(items = items, key = { it.path.components.joinToString("/") }) { item ->
             val isLocked = item.path in lockedPaths
-            ArchiveRow(
-                item = item,
-                isLocked = isLocked,
-                // A locked exam never opens directly; it offers the unlock sheet (iOS ArchiveNavigationRow).
-                onClick = { if (isLocked) onLockedExamTap(item) else onItemClick(item) },
-            )
+            val row = @Composable {
+                ArchiveRow(
+                    item = item,
+                    isLocked = isLocked,
+                    // A locked exam never opens directly; it offers the unlock sheet (iOS ArchiveNavigationRow).
+                    onClick = { if (isLocked) onLockedExamTap(item) else onItemClick(item) },
+                )
+            }
+            if (onDelete != null) {
+                DeletableRow(onDelete = { onDelete(item) }, testTag = "browse.delete.${item.name}", content = row)
+            } else {
+                row()
+            }
             HorizontalDivider(Modifier.padding(start = 72.dp))
         }
     }
+}
+
+/**
+ * A row an admin can swipe from the end to delete (iOS trailing swipe action, no full swipe): the swipe only
+ * asks for confirmation and springs back. TalkBack users get the same action as a custom accessibility action.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DeletableRow(onDelete: () -> Unit, testTag: String, content: @Composable () -> Unit) {
+    val currentOnDelete by rememberUpdatedState(onDelete)
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) currentOnDelete()
+            false
+        },
+    )
+    val actionLabel = stringResource(R.string.moderation_delete_exam_action)
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.error)
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Filled.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.onError)
+                Text(text = actionLabel, color = MaterialTheme.colorScheme.onError)
+            }
+        },
+        modifier = Modifier
+            .semantics {
+                customActions = listOf(CustomAccessibilityAction(actionLabel) { currentOnDelete(); true })
+            }
+            .testTag(testTag),
+    ) {
+        Box(Modifier.background(MaterialTheme.colorScheme.background)) { content() }
+    }
+}
+
+/** "Sınav silinsin mi?": the deletion cannot be undone. */
+@Composable
+private fun DeleteExamDialog(examName: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.moderation_delete_exam_dialog_title)) },
+        text = { Text(stringResource(R.string.moderation_delete_exam_dialog_message, examName)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm, modifier = Modifier.testTag("browse.delete.confirm")) {
+                Text(stringResource(R.string.moderation_delete_exam_action), color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, modifier = Modifier.testTag("browse.delete.cancel")) {
+                Text(stringResource(R.string.moderation_dialog_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun DeleteFailedDialog(message: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.moderation_delete_exam_failed_title)) },
+        text = { Text(message) },
+        confirmButton = {
+            TextButton(onClick = onDismiss, modifier = Modifier.testTag("browse.delete.failed.ok")) {
+                Text(stringResource(R.string.common_ok))
+            }
+        },
+    )
 }
 
 /** Level title and the number of listed entries (iOS ArchiveSectionHeader). */
