@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -48,6 +49,15 @@ class BrowseContentTest {
         composeRule.onNodeWithTag("row.2021 Bütünleme").assertIsNotEnabled()
 
         assertEquals(pdf, clicked)
+    }
+
+    @Test
+    fun loadedList_sectionHeaderShowsLevelTitleAndCount() {
+        show(BrowseUiState(path = lesson, isLoading = false, items = listOf(pdf, empty)))
+
+        composeRule.onNodeWithTag("browse.sectionHeader").assertIsDisplayed()
+        composeRule.onNodeWithText("Sınavlar").assertIsDisplayed()
+        composeRule.onNodeWithText("2").assertIsDisplayed()
     }
 
     @Test
