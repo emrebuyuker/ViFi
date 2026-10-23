@@ -29,6 +29,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +47,7 @@ import com.salticusteam.vifi.core.designsystem.component.childCountText
 import com.salticusteam.vifi.core.designsystem.component.contentText
 import com.salticusteam.vifi.core.designsystem.component.emptyListTitleRes
 import com.salticusteam.vifi.core.designsystem.component.icon
+import com.salticusteam.vifi.core.designsystem.component.listTitleRes
 import com.salticusteam.vifi.core.designsystem.component.searchPromptRes
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.model.ArchiveError
@@ -121,7 +124,11 @@ internal fun BrowseContent(
                                 modifier = Modifier.testTag("state.noResults"),
                             )
                         } else {
-                            ArchiveList(items = state.visibleItems, onItemClick = onItemClick)
+                            ArchiveList(
+                                title = stringResource(listedLevel.listTitleRes),
+                                items = state.visibleItems,
+                                onItemClick = onItemClick,
+                            )
                         }
                     }
                 }
@@ -153,15 +160,43 @@ private fun SearchField(text: String, placeholder: String, onTextChange: (String
 }
 
 @Composable
-private fun ArchiveList(items: List<ArchiveItem>, onItemClick: (ArchiveItem) -> Unit) {
+private fun ArchiveList(title: String, items: List<ArchiveItem>, onItemClick: (ArchiveItem) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag("browse.list"),
         contentPadding = PaddingValues(bottom = 16.dp),
     ) {
+        item(key = "sectionHeader") {
+            SectionHeader(title = title, count = items.size)
+        }
         items(items = items, key = { it.path.components.joinToString("/") }) { item ->
             ArchiveRow(item = item, onClick = { onItemClick(item) })
             HorizontalDivider(Modifier.padding(start = 72.dp))
         }
+    }
+}
+
+/** Level title and the number of listed entries (iOS ArchiveSectionHeader). */
+@Composable
+private fun SectionHeader(title: String, count: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)
+            .semantics(mergeDescendants = true) { heading() }
+            .testTag("browse.sectionHeader"),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

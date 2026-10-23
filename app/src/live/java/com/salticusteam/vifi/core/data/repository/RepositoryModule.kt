@@ -1,21 +1,14 @@
 package com.salticusteam.vifi.core.data.repository
 
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
-import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
+import com.salticusteam.vifi.core.data.firebase.FirestoreArchiveRepository
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Repository bindings (iOS `AppEnvironment.live()` parity).
- *
- * TEMPORARY: ArchiveRepository is bound to the sample-data fake until the live Firestore implementation
- * lands in the archive area (BE-15 / ARCH), so the live build shows sample data until then. The app has no
- * users and is not released, which is why this is acceptable for now.
- */
+/** Repository bindings (iOS `AppEnvironment.live()` parity). */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
@@ -24,9 +17,8 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindExamUnlockService(impl: FirebaseExamUnlockService): ExamUnlockService
 
-    companion object {
-        @Provides
-        @Singleton
-        fun provideArchiveRepository(): ArchiveRepository = FakeArchiveRepository()
-    }
+    /** The archive reads the named 'vifi' Firestore database (BE-15); the RTDB `Universitiess` tree is unused. */
+    @Binds
+    @Singleton
+    abstract fun bindArchiveRepository(impl: FirestoreArchiveRepository): ArchiveRepository
 }
