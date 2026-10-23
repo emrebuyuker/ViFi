@@ -89,8 +89,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
             HomeScreen(
                 onItemClick = { router.open(it) },
                 onRecentClick = { router.push(ViFiRoute.Exam(it.path, it.kind)) },
-                // TODO(add-exam): push ViFiRoute.AddExam once the add-exam flow lands.
-                onAddExamClick = {},
+                onAddExamClick = { router.push(ViFiRoute.AddExam) },
                 onAccountClick = { router.push(ViFiRoute.Account) },
                 onInboxClick = { router.push(ViFiRoute.Inbox) },
                 onAboutClick = { router.push(ViFiRoute.About) },
