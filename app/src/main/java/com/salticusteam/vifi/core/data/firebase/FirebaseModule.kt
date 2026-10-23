@@ -35,13 +35,10 @@ object FirebaseModule {
             firestoreSettings = firestoreSettings { setLocalCacheSettings(persistentCacheSettings { }) }
         }
 
-    /**
-     * Default RTDB instance. Disk persistence is enabled in FM-15: it must be switched on before *any*
-     * RTDB use, and the legacy Java screens still call `FirebaseDatabase.getInstance()` directly.
-     */
+    /** Default RTDB instance; persistence is configured once in VifiApplication ([FirebaseDatabaseSetup]). */
     @Provides
     @Singleton
-    fun provideDatabase(): FirebaseDatabase = FirebaseDatabase.getInstance()
+    fun provideDatabase(): FirebaseDatabase = FirebaseDatabase.getInstance().also { FirebaseDatabaseSetup.configure(it) }
 
     @Provides
     @Singleton
