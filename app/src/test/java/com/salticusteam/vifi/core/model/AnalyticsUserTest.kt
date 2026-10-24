@@ -3,6 +3,7 @@ package com.salticusteam.vifi.core.model
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import com.salticusteam.vifi.core.util.Slug
 import org.junit.Test
 
 class AnalyticsUserTest {
@@ -53,5 +54,21 @@ class AnalyticsUserTest {
 
         assertEquals(36, user.properties.getValue("university_id").length)
         assertFalse("faculty_id" in user.properties)
+    }
+
+    @Test
+    fun `properties when names were typed by the user carry their canonical topic-safe slugs`() {
+        val typed = profile.copy(
+            universityId = Slug.make("Özel Işık Üniversitesi"), universityIsCustom = true,
+            facultyId = Slug.make("Fen-Edebiyat Fakültesi"), facultyIsCustom = true,
+        )
+
+        val props = AnalyticsUser.from("u1", typed, isAdmin = false).properties
+
+        assertEquals("ozel-isik-universitesi", props["university_id"])
+        assertEquals("fen-edebiyat-fakultesi", props["faculty_id"])
+        listOf("university_id", "faculty_id", "department_id").forEach {
+            assertTrue(props.getValue(it).matches(Regex("[a-z0-9-]+")))
+        }
     }
 }

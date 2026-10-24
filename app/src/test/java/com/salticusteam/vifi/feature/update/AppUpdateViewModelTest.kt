@@ -2,6 +2,7 @@ package com.salticusteam.vifi.feature.update
 
 import app.cash.turbine.test
 import com.salticusteam.vifi.core.data.repository.AppUpdateChecker
+import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.model.AppUpdate
 import com.salticusteam.vifi.core.model.AppUpdateStatus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +27,8 @@ class AppUpdateViewModelTest {
         override fun statusChanges(): Flow<AppUpdateStatus> = status
     }
 
+    private val analytics = FakeAnalyticsTracker()
+
     private fun update(version: String) = AppUpdate(version, "https://store", null)
 
     @Before
@@ -37,7 +40,7 @@ class AppUpdateViewModelTest {
     @Test
     fun `required status exposes the required update only`() = runTest {
         status.value = AppUpdateStatus.Required(update("4.0"))
-        val sut = AppUpdateViewModel(checker)
+        val sut = AppUpdateViewModel(checker, analytics)
         assertEquals("4.0", sut.uiState.value.required?.version)
         assertNull(sut.uiState.value.optional)
     }
@@ -45,7 +48,7 @@ class AppUpdateViewModelTest {
     @Test
     fun `optional dismissed is hidden for that version only`() = runTest {
         status.value = AppUpdateStatus.Optional(update("3.2"))
-        val sut = AppUpdateViewModel(checker)
+        val sut = AppUpdateViewModel(checker, analytics)
         assertEquals("3.2", sut.uiState.value.optional?.version)
 
         sut.onOptionalDismissed()
@@ -58,7 +61,7 @@ class AppUpdateViewModelTest {
     @Test
     fun `required update appearing later replaces the optional prompt`() = runTest {
         status.value = AppUpdateStatus.Optional(update("3.2"))
-        val sut = AppUpdateViewModel(checker)
+        val sut = AppUpdateViewModel(checker, analytics)
         sut.uiState.test {
             assertEquals("3.2", awaitItem().optional?.version)
             status.value = AppUpdateStatus.Required(update("4.0"))
@@ -70,6 +73,6 @@ class AppUpdateViewModelTest {
 
     @Test
     fun `up to date shows nothing`() = runTest {
-        assertEquals(AppUpdateUiState(), AppUpdateViewModel(checker).uiState.value)
+        assertEquals(AppUpdateUiState(), AppUpdateViewModel(checker, analytics).uiState.value)
     }
 }

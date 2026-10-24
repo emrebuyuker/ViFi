@@ -33,6 +33,8 @@ fun AppUpdateGate(
         onOpenStore = { update -> StoreLauncher.openStore(context, update.storeUrl) },
         onOptionalDismissed = viewModel::onOptionalDismissed,
         modifier = modifier,
+        onOptionalUpdateChosen = viewModel::onOptionalUpdateChosen,
+        onOptionalLaterChosen = viewModel::onOptionalLaterChosen,
         content = content,
     )
 }
@@ -44,6 +46,9 @@ fun AppUpdateGateContent(
     onOpenStore: (AppUpdate) -> Unit,
     onOptionalDismissed: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Analytics hooks of the optional prompt's two answers; the dismissal itself goes to [onOptionalDismissed]. */
+    onOptionalUpdateChosen: () -> Unit = {},
+    onOptionalLaterChosen: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val required = state.required
@@ -59,10 +64,14 @@ fun AppUpdateGateContent(
         OptionalUpdateDialog(
             update = update,
             onUpdate = {
+                onOptionalUpdateChosen()
                 onOpenStore(update)
                 onOptionalDismissed()
             },
-            onLater = onOptionalDismissed,
+            onLater = {
+                onOptionalLaterChosen()
+                onOptionalDismissed()
+            },
         )
     }
 }

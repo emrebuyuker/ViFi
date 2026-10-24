@@ -73,6 +73,10 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
     }
 
     LaunchedEffect(Unit) {
+        viewModel.onScreenShown()
+    }
+
+    LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is LoginEvent.ContactSupport -> contactSupport.open(event.context)

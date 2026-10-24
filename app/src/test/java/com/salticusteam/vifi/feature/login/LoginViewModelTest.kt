@@ -1,6 +1,7 @@
 package com.salticusteam.vifi.feature.login
 
 import app.cash.turbine.test
+import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.model.AuthError
 import com.salticusteam.vifi.core.model.LoginFailureStage
@@ -39,7 +40,7 @@ class LoginViewModelTest {
         auth = FakeAuthService(isSignedIn = false, latency = kotlin.time.Duration.ZERO)
         diagnostics = RecordingLoginDiagnosticsReporter()
         clock = MutableClock()
-        sut = LoginViewModel(auth, diagnostics, clock)
+        sut = LoginViewModel(auth, diagnostics, FakeAnalyticsTracker(), clock)
     }
 
     private fun TestScope.sendCodeTo(input: String = "0532 123 45 67") {
