@@ -1,6 +1,7 @@
 package com.salticusteam.vifi.app
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -41,9 +42,14 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) inboxDeepLink.handle(intent?.extras)
         // Before any ViewModel or fake reads a scenario flag (debug builds only).
         LaunchArgs.update(intent?.extras)
+        // The recent-apps snapshot never shows app content: Android 13+ drops the screenshot itself, older
+        // versions see the branded AppSwitcherCover the content lays over itself once paused.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) setRecentsScreenshotEnabled(false)
         setContent {
             ViFiTheme {
-                AppRoot()
+                AppSwitcherCover {
+                    AppRoot()
+                }
             }
         }
     }
