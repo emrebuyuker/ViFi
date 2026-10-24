@@ -13,13 +13,22 @@ class RtdbAppConfigReaderTest {
             mapOf(
                 "minimumVersion" to "3.0",
                 "latestVersion" to "3.1",
-                "storeUrl" to "https://play.google.com/store/apps/details?id=com.salticusteam.vifi",
+                "storeURL" to "https://play.google.com/store/apps/details?id=com.salticusteam.vifi",
                 "message" to "Güncelle",
             ),
         )
         assertEquals(
             AppUpdateConfig("3.0", "3.1", "https://play.google.com/store/apps/details?id=com.salticusteam.vifi", "Güncelle"),
             config,
+        )
+    }
+
+    @Test
+    fun `parse reads the store url from the shared storeURL key only`() {
+        // iOS and the database rules spell it `storeURL`; a lower-case `storeUrl` is not part of the schema.
+        assertEquals(
+            AppUpdateConfig(minimumVersion = "3.0"),
+            RtdbAppConfigReader.parse(mapOf("minimumVersion" to "3.0", "storeUrl" to "https://play.google.com/x")),
         )
     }
 
@@ -33,11 +42,11 @@ class RtdbAppConfigReaderTest {
     fun `parse drops an invalid store url`() {
         assertEquals(
             AppUpdateConfig(minimumVersion = "3.0"),
-            RtdbAppConfigReader.parse(mapOf("minimumVersion" to "3.0", "storeUrl" to "not a url")),
+            RtdbAppConfigReader.parse(mapOf("minimumVersion" to "3.0", "storeURL" to "not a url")),
         )
         assertEquals(
             AppUpdateConfig(minimumVersion = "3.0"),
-            RtdbAppConfigReader.parse(mapOf("minimumVersion" to "3.0", "storeUrl" to "javascript:alert(1)")),
+            RtdbAppConfigReader.parse(mapOf("minimumVersion" to "3.0", "storeURL" to "javascript:alert(1)")),
         )
     }
 

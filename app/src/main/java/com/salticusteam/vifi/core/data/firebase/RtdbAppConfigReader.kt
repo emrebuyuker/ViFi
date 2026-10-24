@@ -48,9 +48,10 @@ class RtdbAppConfigReader @Inject constructor(
 
     companion object {
         const val PATH = "config/appUpdate/android"
+        const val STORE_URL_KEY = "storeURL"
 
         /**
-         * Parses the node's value, keeping only well-formed fields: a non-string, empty or (for `storeUrl`)
+         * Parses the node's value, keeping only well-formed fields: a non-string, empty or (for `storeURL`)
          * non-http(s) field is dropped. Returns `null` when the node is missing or has no usable field.
          */
         fun parse(value: Any?): AppUpdateConfig? {
@@ -61,7 +62,8 @@ class RtdbAppConfigReader @Inject constructor(
             val config = AppUpdateConfig(
                 minimumVersion = string("minimumVersion"),
                 latestVersion = string("latestVersion"),
-                storeUrl = string("storeUrl")?.takeIf(::isWebUrl),
+                // The wire key is `storeURL`, as on iOS and in the shared database rules.
+                storeUrl = string(STORE_URL_KEY)?.takeIf(::isWebUrl),
                 message = string("message"),
             )
             return config.takeUnless { it == AppUpdateConfig() }
