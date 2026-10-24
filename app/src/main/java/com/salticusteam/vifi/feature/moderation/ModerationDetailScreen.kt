@@ -51,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.data.repository.fake.FakeModerationService
 import com.salticusteam.vifi.core.designsystem.component.EmptyView
+import com.salticusteam.vifi.core.designsystem.component.LoadingView
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.component.labelResId
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
@@ -123,7 +124,9 @@ fun ModerationDetailContent(
         },
     ) { padding ->
         val record = state.record
-        if (record == null) {
+        if (state.isLoading) {
+            LoadingView(Modifier.padding(padding))
+        } else if (record == null) {
             EmptyView(
                 title = stringResource(R.string.moderation_detail_missing_title),
                 icon = Icons.Filled.SearchOff,

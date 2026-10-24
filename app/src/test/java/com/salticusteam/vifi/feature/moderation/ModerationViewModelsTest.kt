@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.feature.moderation
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeModerationService
@@ -31,7 +32,11 @@ class ModerationViewModelsTest {
     private val service = FakeModerationService(latency = Duration.ZERO)
     private val queue = ModerationQueue(service)
 
-    private fun detail(id: String = "sub-1") = ModerationDetailViewModel(id, queue, service, analytics)
+    private fun detail(
+        id: String = "sub-1",
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        queue: ModerationQueue = this.queue,
+    ) = ModerationDetailViewModel(id, savedStateHandle, queue, service, analytics)
 
     // --- Queue ---
 
@@ -206,6 +211,45 @@ class ModerationViewModelsTest {
         assertNull(sut.uiState.value.record)
         assertFalse(sut.uiState.value.isWorking)
         assertFalse(sut.uiState.value.isConfirmingReject)
+    }
+
+    @Test
+    fun `detail after process death reloads the queue to restore its record and the typed rejection`() = runTest {
+        queue.reload()
+        val handle = SavedStateHandle()
+        val before = detail("sub-2", handle)
+        before.onRejectRequested()
+        before.onRejectReasonChange("okunmuyor")
+
+        // A recreated process: the singleton queue starts empty, the route id and saved state survive.
+        val sut = detail("sub-2", SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }), ModerationQueue(service))
+        assertTrue(sut.uiState.value.isLoading)
+        advanceUntilIdle()
+
+        val state = sut.uiState.value
+        assertFalse(state.isLoading)
+        assertEquals("sub-2", state.record?.id)
+        assertTrue(state.isConfirmingReject)
+        assertEquals("okunmuyor", state.rejectReason)
+    }
+
+    @Test
+    fun `detail after process death for a submission that is gone shows it missing`() = runTest {
+        val sut = detail("missing", queue = ModerationQueue(service))
+        advanceUntilIdle()
+
+        assertFalse(sut.uiState.value.isLoading)
+        assertNull(sut.uiState.value.record)
+    }
+
+    @Test
+    fun `detail with the queue already loaded does not reload it`() = runTest {
+        queue.reload()
+        service.failure = ModerationError.Offline
+
+        val sut = detail("missing")
+
+        assertFalse(sut.uiState.value.isLoading)
     }
 
     // --- Preview ---
