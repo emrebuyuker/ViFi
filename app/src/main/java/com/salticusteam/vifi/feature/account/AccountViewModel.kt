@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.feature.account
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.salticusteam.vifi.core.data.coins.CoinWalletStore
@@ -43,6 +44,9 @@ import kotlinx.coroutines.launch
  * the account. When Firebase asks for a recent sign-in, a code is sent to the same number; once it is confirmed
  * the user is reauthenticated and the account deleted. Neither path navigates: the session gate replaces the
  * whole archive, this screen included, with the login screen, and the app-wide teardown resets the rest.
+ *
+ * The re-verification (code entry, typed code, verification id, resend cooldown) lives in the [SavedStateHandle],
+ * so a process death while the SMS is on its way brings the user back to the same code entry.
  */
 @HiltViewModel
 class AccountViewModel @Inject constructor(
@@ -57,11 +61,12 @@ class AccountViewModel @Inject constructor(
     private val clock: Clock,
     /** Outlives this screen: the purge after a deletion must finish after the session gate removed it. */
     @ApplicationScope private val appScope: CoroutineScope,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     // State
     /** The deletion half of the state; the profile and phone fields are filled in from the stores. */
-    private val _deletion = MutableStateFlow(AccountUiState())
+    private val _deletion = MutableStateFlow(restoredDeletion())
 
     /** Whether the user is an admin; resolved from the ID token's claim when the screen opens (iOS `.task`). */
     private val _isAdmin = MutableStateFlow(false)
@@ -81,10 +86,21 @@ class AccountViewModel @Inject constructor(
             )
 
     // Internal state
-    /** The id the re-verification code must be combined with; set while [AccountUiState.isReverifying]. */
-    private var verificationId: String? = null
+    /**
+     * The id the re-verification code must be combined with; set while [AccountUiState.isReverifying]. Kept in
+     * the SavedStateHandle, so it survives a process death.
+     */
+    private var verificationId: String?
+        get() = savedStateHandle[KEY_VERIFICATION_ID]
+        set(value) {
+            savedStateHandle[KEY_VERIFICATION_ID] = value
+        }
 
     // Intents
+    init {
+        viewModelScope.launch { _deletion.collect(::saveDeletion) }
+    }
+
     fun onScreenShown() {
         analytics.trackScreen(AnalyticsScreen.ACCOUNT)
         // UI gating only: the rules' isAdmin() is what actually authorizes moderation writes.
@@ -228,6 +244,26 @@ class AccountViewModel @Inject constructor(
         }
     }
 
+    /** The re-verification saved before a process death (or none); a step that was running is not resumed. */
+    private fun restoredDeletion(): AccountUiState {
+        val isReverifying = savedStateHandle[KEY_IS_REVERIFYING] ?: false
+        if (!isReverifying || verificationId == null) return AccountUiState()
+        return AccountUiState(
+            isReverifying = true,
+            codeText = savedStateHandle[KEY_CODE_TEXT] ?: "",
+            error = savedStateHandle[KEY_ERROR],
+            resendAvailableAt = savedStateHandle.get<Long>(KEY_RESEND_AVAILABLE_AT)?.let(Instant::ofEpochMilli),
+        )
+    }
+
+    /** Mirrors the restorable part of the deletion state into the SavedStateHandle (bundle-safe values only). */
+    private fun saveDeletion(state: AccountUiState) {
+        savedStateHandle[KEY_IS_REVERIFYING] = state.isReverifying
+        savedStateHandle[KEY_CODE_TEXT] = state.codeText
+        savedStateHandle[KEY_ERROR] = state.error
+        savedStateHandle[KEY_RESEND_AVAILABLE_AT] = state.resendAvailableAt?.toEpochMilli()
+    }
+
     private fun accountState(
         session: SessionState,
         profile: ProfileState,
@@ -240,4 +276,13 @@ class AccountViewModel @Inject constructor(
         formattedPhoneNumber = (session as? SessionState.SignedIn)?.user?.formattedPhoneNumber,
         isAdmin = isAdmin,
     )
+
+    private companion object {
+        // SavedStateHandle keys
+        const val KEY_IS_REVERIFYING = "account.isReverifying"
+        const val KEY_CODE_TEXT = "account.codeText"
+        const val KEY_ERROR = "account.error"
+        const val KEY_RESEND_AVAILABLE_AT = "account.resendAvailableAt"
+        const val KEY_VERIFICATION_ID = "account.verificationId"
+    }
 }

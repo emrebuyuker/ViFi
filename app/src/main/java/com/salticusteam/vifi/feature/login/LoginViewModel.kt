@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.feature.login
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
@@ -35,6 +36,10 @@ import kotlinx.coroutines.launch
  * Success needs no handling here: the session gate replaces the login screen once the user is signed in, so the
  * model stays busy until then. That also covers Android's automatic verification, where Play services signs the
  * user in without the code being typed.
+ *
+ * The step, the typed number and code, the verification id and the resend cooldown live in the
+ * [SavedStateHandle], so a configuration change or a process death while the SMS is on its way brings the user
+ * back to the same code entry (no iOS counterpart: iOS does not kill a backgrounded app's state this way).
  */
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -43,27 +48,52 @@ class LoginViewModel @Inject constructor(
     private val analytics: AnalyticsTracker,
     /** The clock the resend cooldown is measured with (a fixed or stepping clock in tests). */
     private val clock: Clock,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     // State
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val _uiState = MutableStateFlow(restoredState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     // One-shot events
     private val _events = Channel<LoginEvent>(Channel.BUFFERED)
     val events: Flow<LoginEvent> = _events.receiveAsFlow()
 
-    // Internal state
-    private var verificationId: String? = null
+    // Internal state (kept in the SavedStateHandle, so it survives a process death)
+    private var verificationId: String?
+        get() = savedStateHandle[KEY_VERIFICATION_ID]
+        set(value) {
+            savedStateHandle[KEY_VERIFICATION_ID] = value
+        }
 
     /** The last code sent, kept across [changeNumber] so re-entering the same number cannot skip the cooldown. */
-    private var lastSentCode: SentCode? = null
+    private var lastSentCode: SentCode?
+        get() {
+            val phoneNumber = savedStateHandle.get<String>(KEY_LAST_SENT_NUMBER)?.let(PhoneNumber::fromNational)
+            val id = savedStateHandle.get<String>(KEY_LAST_SENT_VERIFICATION_ID)
+            val resendAvailableAt = savedStateHandle.get<Long>(KEY_LAST_SENT_RESEND_AT)?.let(Instant::ofEpochMilli)
+            if (phoneNumber == null || id == null || resendAvailableAt == null) return null
+            return SentCode(phoneNumber, id, resendAvailableAt)
+        }
+        set(value) {
+            savedStateHandle[KEY_LAST_SENT_NUMBER] = value?.phoneNumber?.nationalNumber
+            savedStateHandle[KEY_LAST_SENT_VERIFICATION_ID] = value?.verificationId
+            savedStateHandle[KEY_LAST_SENT_RESEND_AT] = value?.resendAvailableAt?.toEpochMilli()
+        }
 
-    /** The most recent failure, used to prefill the support e-mail ("Bize Ulaş") with what went wrong. */
-    private var lastFailureInfo: LoginFailureInfo? = null
+    /**
+     * The most recent failure's [LoginFailureInfo.supportContext], used to prefill the support e-mail
+     * ("Bize Ulaş") with what went wrong.
+     */
+    private var lastFailureContext: String?
+        get() = savedStateHandle[KEY_LAST_FAILURE_CONTEXT]
+        set(value) {
+            savedStateHandle[KEY_LAST_FAILURE_CONTEXT] = value
+        }
 
     // Intents
     init {
+        viewModelScope.launch { _uiState.collect(::saveState) }
         // The login screen lives outside the NavHost, so this model outlives a session and stays busy after a
         // successful sign-in. Start over on sign-out, like iOS presenting a fresh LoginView.
         viewModelScope.launch {
@@ -166,7 +196,7 @@ class LoginViewModel @Inject constructor(
      * number; `null` when there is nothing useful to add.
      */
     fun supportContext(): String? {
-        lastFailureInfo?.let { return it.supportContext }
+        lastFailureContext?.let { return it }
         val phoneNumber = _uiState.value.phoneNumber ?: return null
         return "Giriş sorunu bildirimi\nNumara: ${phoneNumber.e164}"
     }
@@ -176,7 +206,7 @@ class LoginViewModel @Inject constructor(
     private fun reset() {
         verificationId = null
         lastSentCode = null
-        lastFailureInfo = null
+        lastFailureContext = null
         _uiState.value = LoginUiState()
     }
 
@@ -225,7 +255,7 @@ class LoginViewModel @Inject constructor(
             phoneNumber = attemptedNumber()?.e164,
             occurredAt = clock.instant(),
         )
-        lastFailureInfo = info
+        lastFailureContext = info.supportContext
         analytics.track(AnalyticsEvent.LoginFailed(reason = info.reason, step = stage.raw))
         // Fire-and-forget: the reporter throttles duplicates and never blocks or surfaces.
         diagnostics.report(info)
@@ -241,6 +271,28 @@ class LoginViewModel @Inject constructor(
             }
         }
         if (authError == AuthError.CodeExpired) lastSentCode = null
+    }
+
+    /** The state saved before a process death (or a fresh one); a request that was running is not resumed. */
+    private fun restoredState(): LoginUiState {
+        val codeNumber = savedStateHandle.get<String>(KEY_CODE_STEP_NUMBER)?.let(PhoneNumber::fromNational)
+        val step = if (codeNumber != null && verificationId != null) LoginStep.Code(codeNumber) else LoginStep.Phone
+        return LoginUiState(
+            step = step,
+            phoneText = savedStateHandle[KEY_PHONE_TEXT] ?: "",
+            codeText = if (step is LoginStep.Code) savedStateHandle[KEY_CODE_TEXT] ?: "" else "",
+            error = savedStateHandle[KEY_ERROR],
+            resendAvailableAt = savedStateHandle.get<Long>(KEY_RESEND_AVAILABLE_AT)?.let(Instant::ofEpochMilli),
+        )
+    }
+
+    /** Mirrors the restorable part of [state] into the SavedStateHandle (bundle-safe values only). */
+    private fun saveState(state: LoginUiState) {
+        savedStateHandle[KEY_PHONE_TEXT] = state.phoneText
+        savedStateHandle[KEY_CODE_STEP_NUMBER] = (state.step as? LoginStep.Code)?.phoneNumber?.nationalNumber
+        savedStateHandle[KEY_CODE_TEXT] = state.codeText
+        savedStateHandle[KEY_ERROR] = state.error
+        savedStateHandle[KEY_RESEND_AVAILABLE_AT] = state.resendAvailableAt?.toEpochMilli()
     }
 
     /** The number the failed attempt used: the one on the code step, otherwise the number being typed. */
@@ -270,5 +322,17 @@ class LoginViewModel @Inject constructor(
 
         /** Support e-mail context when nothing more specific is known (iOS "Giriş ekranı"). */
         private const val LOGIN_SCREEN_CONTEXT = "Giriş ekranı"
+
+        // SavedStateHandle keys
+        private const val KEY_PHONE_TEXT = "login.phoneText"
+        private const val KEY_CODE_STEP_NUMBER = "login.codeStepNumber"
+        private const val KEY_CODE_TEXT = "login.codeText"
+        private const val KEY_ERROR = "login.error"
+        private const val KEY_RESEND_AVAILABLE_AT = "login.resendAvailableAt"
+        private const val KEY_VERIFICATION_ID = "login.verificationId"
+        private const val KEY_LAST_SENT_NUMBER = "login.lastSent.number"
+        private const val KEY_LAST_SENT_VERIFICATION_ID = "login.lastSent.verificationId"
+        private const val KEY_LAST_SENT_RESEND_AT = "login.lastSent.resendAvailableAt"
+        private const val KEY_LAST_FAILURE_CONTEXT = "login.lastFailureContext"
     }
 }
