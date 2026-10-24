@@ -14,6 +14,8 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.app.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import timber.log.Timber
 
 /**
@@ -21,7 +23,10 @@ import timber.log.Timber
  * opens the app on the inbox (iOS parity). In the background the system shows "notification" messages itself
  * (channel, icon and colour come from the manifest defaults); this service shows foreground and data-only pushes.
  */
+@AndroidEntryPoint
 class ViFiMessagingService : FirebaseMessagingService() {
+
+    @Inject lateinit var pushTokenRegistration: PushTokenRegistration
 
     override fun onMessageReceived(message: RemoteMessage) {
         val content = NotificationContent.from(
@@ -32,10 +37,11 @@ class ViFiMessagingService : FirebaseMessagingService() {
         if (!content.isEmpty) show(content)
     }
 
-    /** A new token only matters for topic delivery here: re-subscribe so pushes to `all` keep arriving. */
+    /** Re-subscribe so pushes to `all` keep arriving, and store the token for the signed-in user (N11). */
     override fun onNewToken(token: String) {
         FirebaseMessaging.getInstance().subscribeToTopic(PushTopics.ALL)
             .addOnFailureListener { Timber.w(it, "Subscribing to the all topic failed") }
+        pushTokenRegistration.onNewToken(token)
     }
 
     // POST_NOTIFICATIONS is checked below; lint cannot see through the helper.

@@ -10,6 +10,7 @@ import com.salticusteam.vifi.core.data.preferences.fake.FakeRecentExamsRepositor
 import com.salticusteam.vifi.core.data.preferences.fake.FakeUserPreferencesRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnnouncementsReader
+import com.salticusteam.vifi.core.data.repository.fake.FakeDeviceTokenStore
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationService
 import com.salticusteam.vifi.core.data.repository.fake.FakeAppUpdateChecker
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
@@ -112,6 +113,10 @@ object RepositoryModule {
             NotificationPermission.AUTHORIZED
         },
     )
+
+    @Provides
+    @Singleton
+    fun provideDeviceTokenStore(): DeviceTokenStore = FakeDeviceTokenStore()
 
     /**
      * Seeded with a sample profile for the mock user, so the gate opens straight into the archive; empty when
