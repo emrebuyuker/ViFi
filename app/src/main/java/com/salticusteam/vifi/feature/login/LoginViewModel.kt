@@ -2,14 +2,18 @@ package com.salticusteam.vifi.feature.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.AuthService
 import com.salticusteam.vifi.core.data.repository.LoginDiagnosticsReporter
+import com.salticusteam.vifi.core.model.AnalyticsEvent
+import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.AuthError
 import com.salticusteam.vifi.core.model.LoginFailureInfo
 import com.salticusteam.vifi.core.model.LoginFailureStage
 import com.salticusteam.vifi.core.model.PhoneNumber
 import com.salticusteam.vifi.core.model.VerificationCode
 import com.salticusteam.vifi.core.model.userMessage
+import com.salticusteam.vifi.core.util.trackScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.Duration
@@ -36,6 +40,7 @@ import kotlinx.coroutines.launch
 class LoginViewModel @Inject constructor(
     private val authService: AuthService,
     private val diagnostics: LoginDiagnosticsReporter,
+    private val analytics: AnalyticsTracker,
     /** The clock the resend cooldown is measured with (a fixed or stepping clock in tests). */
     private val clock: Clock,
 ) : ViewModel() {
@@ -70,6 +75,10 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun onScreenShown() {
+        analytics.trackScreen(AnalyticsScreen.LOGIN)
+    }
+
     /** Takes an edit of the number field, formatted so pasted `+90 5…` or `05…` numbers become `5XX XXX XX XX`. */
     fun onPhoneTextChange(input: String) {
         if (_uiState.value.isWorking) return
@@ -98,14 +107,14 @@ class LoginViewModel @Inject constructor(
             showCodeStep(sent)
             return
         }
-        requestCode(phoneNumber)
+        requestCode(phoneNumber, isResend = false)
     }
 
     /** Sends a new code to the same number once the cooldown is over. */
     fun resendCode() {
         val step = _uiState.value.step as? LoginStep.Code ?: return
         if (!canResendCode()) return
-        requestCode(step.phoneNumber)
+        requestCode(step.phoneNumber, isResend = true)
     }
 
     /** Signs in with the entered code. */
@@ -117,6 +126,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 authService.signIn(id, state.codeText)
+                analytics.track(AnalyticsEvent.LoginSucceeded)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -170,11 +180,14 @@ class LoginViewModel @Inject constructor(
         _uiState.value = LoginUiState()
     }
 
-    private fun requestCode(phoneNumber: PhoneNumber) {
+    private fun requestCode(phoneNumber: PhoneNumber, isResend: Boolean) {
         _uiState.update { it.copy(isWorking = true, error = null) }
+        analytics.track(AnalyticsEvent.LoginCodeRequested(isResend))
         viewModelScope.launch {
             try {
                 val id = authService.sendVerificationCode(phoneNumber.e164)
+                // Play services verified the number and signed the user in without a code (Android only).
+                if (id == AuthService.INSTANT_VERIFICATION_ID) analytics.track(AnalyticsEvent.LoginSucceeded)
                 didSendCode(phoneNumber, id)
             } catch (e: CancellationException) {
                 throw e
@@ -213,6 +226,7 @@ class LoginViewModel @Inject constructor(
             occurredAt = clock.instant(),
         )
         lastFailureInfo = info
+        analytics.track(AnalyticsEvent.LoginFailed(reason = info.reason, step = stage.raw))
         // Fire-and-forget: the reporter throttles duplicates and never blocks or surfaces.
         diagnostics.report(info)
 
