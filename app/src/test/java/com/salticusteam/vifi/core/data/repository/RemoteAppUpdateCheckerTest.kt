@@ -1,6 +1,7 @@
 package com.salticusteam.vifi.core.data.repository
 
 import app.cash.turbine.test
+import com.salticusteam.vifi.core.model.AppStoreLink
 import com.salticusteam.vifi.core.model.AppUpdateConfig
 import com.salticusteam.vifi.core.model.AppUpdateStatus
 import kotlinx.coroutines.flow.Flow
@@ -102,5 +103,29 @@ class RemoteAppUpdateCheckerTest {
         val items = checker(AppUpdateConfig(latestVersion = "3.2"), AppUpdateConfig(minimumVersion = "3.2")).collected()
         assertTrue(items[0] is AppUpdateStatus.Optional)
         assertTrue(items[1] is AppUpdateStatus.Required)
+    }
+
+    @Test
+    fun `status without a store url uses the built-in Play Store page`() {
+        val status = RemoteAppUpdateChecker.status(AppUpdateConfig(minimumVersion = "3.2"), "3.1")
+        assertEquals(AppStoreLink.PRODUCT_URL, (status as AppUpdateStatus.Required).update.storeUrl)
+    }
+
+    @Test
+    fun `status with no store url and no fallback is up to date`() {
+        val config = AppUpdateConfig(minimumVersion = "3.2", latestVersion = "3.3")
+        assertEquals(AppUpdateStatus.UpToDate, RemoteAppUpdateChecker.status(config, "3.1", fallbackStoreUrl = null))
+    }
+
+    @Test
+    fun `stream with no store url anywhere never gates`() = runTest {
+        val checker = RemoteAppUpdateChecker(
+            reader = object : AppConfigReader {
+                override fun configChanges(): Flow<AppUpdateConfig?> = flowOf(AppUpdateConfig(minimumVersion = "3.2"), null)
+            },
+            installedVersion = "3.1",
+            fallbackStoreUrl = null,
+        )
+        assertEquals(listOf(AppUpdateStatus.UpToDate), checker.collected())
     }
 }
