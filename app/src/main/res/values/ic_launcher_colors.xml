@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The app icon's orange (same as the iOS app icon), behind the adaptive icon's foreground. -->
+    <color name="ic_launcher_background">#FB910D</color>
+</resources>
