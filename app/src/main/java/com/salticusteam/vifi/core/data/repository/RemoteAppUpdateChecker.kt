@@ -14,11 +14,12 @@ import kotlinx.coroutines.flow.flow
  *
  * A required update is latched: once the gate is up, a later unreadable policy (`null`) keeps it up, and only
  * a successful read that proves the installed version satisfies the policy lifts it. Required wins over optional.
+ * [fallbackStoreUrl] is used only when the policy omits `storeUrl`.
  */
 class RemoteAppUpdateChecker(
     private val reader: AppConfigReader,
     private val installedVersion: String,
-    private val fallbackStoreUrl: String = AppStoreLink.PRODUCT_URL,
+    private val fallbackStoreUrl: String? = AppStoreLink.PRODUCT_URL,
 ) : AppUpdateChecker {
 
     override fun statusChanges(): Flow<AppUpdateStatus> = flow {
@@ -39,13 +40,17 @@ class RemoteAppUpdateChecker(
     }.distinctUntilChanged()
 
     companion object {
-        /** The requirement a readable [config] puts on [installedVersion]; required wins over optional. */
+        /**
+         * The requirement a readable [config] puts on [installedVersion]; required wins over optional. Up to date
+         * when there is nowhere to send the user (no `storeUrl` and no fallback): a prompt without a destination
+         * would be a dead end.
+         */
         fun status(
             config: AppUpdateConfig,
             installedVersion: String,
-            fallbackStoreUrl: String = AppStoreLink.PRODUCT_URL,
+            fallbackStoreUrl: String? = AppStoreLink.PRODUCT_URL,
         ): AppUpdateStatus {
-            val storeUrl = config.storeUrl ?: fallbackStoreUrl
+            val storeUrl = config.storeUrl ?: fallbackStoreUrl ?: return AppUpdateStatus.UpToDate
             val minimum = config.minimumVersion
             val latest = config.latestVersion
             return when {

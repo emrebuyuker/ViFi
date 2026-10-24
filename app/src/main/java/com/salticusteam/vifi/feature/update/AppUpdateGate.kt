@@ -1,10 +1,12 @@
 package com.salticusteam.vifi.feature.update
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -35,6 +37,7 @@ fun AppUpdateGate(
         modifier = modifier,
         onOptionalUpdateChosen = viewModel::onOptionalUpdateChosen,
         onOptionalLaterChosen = viewModel::onOptionalLaterChosen,
+        onOptionalSkipChosen = viewModel::onOptionalSkipChosen,
         content = content,
     )
 }
@@ -46,9 +49,10 @@ fun AppUpdateGateContent(
     onOpenStore: (AppUpdate) -> Unit,
     onOptionalDismissed: () -> Unit,
     modifier: Modifier = Modifier,
-    /** Analytics hooks of the optional prompt's two answers; the dismissal itself goes to [onOptionalDismissed]. */
+    /** The optional prompt's three answers; the dismissal itself goes to [onOptionalDismissed]. */
     onOptionalUpdateChosen: () -> Unit = {},
     onOptionalLaterChosen: () -> Unit = {},
+    onOptionalSkipChosen: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val required = state.required
@@ -68,6 +72,10 @@ fun AppUpdateGateContent(
                 onOpenStore(update)
                 onOptionalDismissed()
             },
+            onSkip = {
+                onOptionalSkipChosen()
+                onOptionalDismissed()
+            },
             onLater = {
                 onOptionalLaterChosen()
                 onOptionalDismissed()
@@ -76,11 +84,15 @@ fun AppUpdateGateContent(
     }
 }
 
-/** The dismissible "new version available" suggestion (iOS optional-update alert). */
+/**
+ * The dismissible "new version available" suggestion (iOS optional-update alert): update, skip this version
+ * for good, or later (also a tap-away).
+ */
 @Composable
 private fun OptionalUpdateDialog(
     update: AppUpdate,
     onUpdate: () -> Unit,
+    onSkip: () -> Unit,
     onLater: () -> Unit,
 ) {
     AlertDialog(
@@ -88,14 +100,18 @@ private fun OptionalUpdateDialog(
         modifier = Modifier.testTag("optionalUpdate.dialog"),
         title = { Text(stringResource(R.string.optional_update_title)) },
         text = { Text(update.message ?: stringResource(R.string.optional_update_default_message, update.version)) },
+        // Three answers stacked in iOS order (the two-slot row would split them unevenly across lines).
         confirmButton = {
-            TextButton(onClick = onUpdate, modifier = Modifier.testTag("optionalUpdate.update")) {
-                Text(stringResource(R.string.update_action_update))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onLater, modifier = Modifier.testTag("optionalUpdate.later")) {
-                Text(stringResource(R.string.optional_update_later))
+            Column(horizontalAlignment = Alignment.End) {
+                TextButton(onClick = onUpdate, modifier = Modifier.testTag("optionalUpdate.update")) {
+                    Text(stringResource(R.string.update_action_update))
+                }
+                TextButton(onClick = onSkip, modifier = Modifier.testTag("optionalUpdate.skip")) {
+                    Text(stringResource(R.string.optional_update_skip))
+                }
+                TextButton(onClick = onLater, modifier = Modifier.testTag("optionalUpdate.later")) {
+                    Text(stringResource(R.string.optional_update_later))
+                }
             }
         },
     )

@@ -12,6 +12,7 @@ enum class LaunchArg(val extraKey: String) {
     SIGNED_OUT("vifi_signed_out"),
     PHONE_AUTH_TESTING("vifi_phone_auth_testing"),
     FORCE_UPDATE("vifi_force_update"),
+    OPTIONAL_UPDATE("vifi_optional_update"),
     PROFILE_INCOMPLETE("vifi_profile_incomplete"),
     ADMIN("vifi_admin"),
     NO_COINS("vifi_no_coins"),

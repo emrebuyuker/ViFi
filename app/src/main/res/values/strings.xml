@@ -45,6 +45,8 @@
     <string name="optional_update_title">Yeni sürüm mevcut</string>
     <string name="optional_update_default_message">ViFi %1$s Google Play\'de. En iyi deneyim için uygulamayı güncelle.</string>
     <string name="optional_update_later">Daha Sonra</string>
+    <!-- Added in 3.1.0 — optional update prompt: skip this version for good (iOS, verbatim) -->
+    <string name="optional_update_skip">Bu sürümü atla</string>
 
     <!-- Added in 2.5 — phone sign-in (iOS LoginView copy, verbatim) -->
     <string name="auth_phone_title">Giriş Yap</string>

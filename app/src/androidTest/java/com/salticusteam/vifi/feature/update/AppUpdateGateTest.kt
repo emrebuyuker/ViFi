@@ -28,9 +28,10 @@ class AppUpdateGateTest {
         state: AppUpdateUiState,
         onOpenStore: (AppUpdate) -> Unit = {},
         onDismissed: () -> Unit = {},
+        onSkip: () -> Unit = {},
     ) = composeRule.setContent {
         ViFiTheme {
-            AppUpdateGateContent(state, onOpenStore, onDismissed) {
+            AppUpdateGateContent(state, onOpenStore, onDismissed, onOptionalSkipChosen = onSkip) {
                 Text("içerik", Modifier.testTag("app.content"))
             }
         }
@@ -87,6 +88,25 @@ class AppUpdateGateTest {
 
         assertEquals(update, opened)
         assertEquals(1, dismissed)
+    }
+
+    @Test
+    fun optional_skipSkipsAndDismissesWithoutOpeningStore() {
+        var opened: AppUpdate? = null
+        var skipped = 0
+        var dismissed = 0
+        setGate(
+            AppUpdateUiState(optional = update),
+            onOpenStore = { opened = it },
+            onDismissed = { dismissed++ },
+            onSkip = { skipped++ },
+        )
+
+        composeRule.onNodeWithTag("optionalUpdate.skip").assertIsDisplayed().performClick()
+
+        assertEquals(1, skipped)
+        assertEquals(1, dismissed)
+        assertEquals(null, opened)
     }
 
     @Test
