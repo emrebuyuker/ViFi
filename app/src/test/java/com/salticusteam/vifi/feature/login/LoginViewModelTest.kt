@@ -1,18 +1,22 @@
 package com.salticusteam.vifi.feature.login
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.model.AuthError
 import com.salticusteam.vifi.core.model.LoginFailureStage
 import com.salticusteam.vifi.core.model.PhoneNumber
+import com.salticusteam.vifi.core.util.ContactSupport
 import com.salticusteam.vifi.fake.RecordingLoginDiagnosticsReporter
 import com.salticusteam.vifi.testing.MainDispatcherRule
 import com.salticusteam.vifi.testing.MutableClock
+import com.salticusteam.vifi.testing.afterProcessDeath
 import java.time.Duration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -31,6 +35,7 @@ class LoginViewModelTest {
     private lateinit var auth: FakeAuthService
     private lateinit var diagnostics: RecordingLoginDiagnosticsReporter
     private lateinit var clock: MutableClock
+    private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var sut: LoginViewModel
 
     private val number = PhoneNumber.fromNational("5321234567")
@@ -40,7 +45,17 @@ class LoginViewModelTest {
         auth = FakeAuthService(isSignedIn = false, latency = kotlin.time.Duration.ZERO)
         diagnostics = RecordingLoginDiagnosticsReporter()
         clock = MutableClock()
-        sut = LoginViewModel(auth, diagnostics, FakeAnalyticsTracker(), clock)
+        savedStateHandle = SavedStateHandle()
+        sut = makeSut(savedStateHandle)
+    }
+
+    private fun makeSut(handle: SavedStateHandle) =
+        LoginViewModel(auth, diagnostics, FakeAnalyticsTracker(), clock, handle)
+
+    /** The ViewModel the system recreates after a process death, from what [sut] saved. */
+    private fun TestScope.recreateAfterProcessDeath(): LoginViewModel {
+        advanceUntilIdle()
+        return makeSut(savedStateHandle.afterProcessDeath()).also { advanceUntilIdle() }
     }
 
     private fun TestScope.sendCodeTo(input: String = "0532 123 45 67") {
@@ -236,6 +251,23 @@ class LoginViewModelTest {
     }
 
     @Test
+    fun `onContactSupport after a failure carries the failure details`() = runTest {
+        auth.sendFailure = AuthError.SmsTemporarilyUnavailable
+        sendCodeTo()
+
+        sut.events.test {
+            sut.onContactSupport()
+            val context = (awaitItem() as LoginEvent.ContactSupport).context
+            // The full prefilled body, line for line as on iOS (iOS adds the build number to the footer).
+            assertEquals(
+                "Giriş sorunu bildirimi\nNumara: +905321234567\nAşama: Kod gönderme\n" +
+                    "Sebep: sms_temporarily_unavailable (Error code: 39)\n\n\n—\nViFi 3.1.0 · Android 15",
+                ContactSupport.body(appVersion = "3.1.0", androidVersion = "15", context = context),
+            )
+        }
+    }
+
+    @Test
     fun `input is ignored while a request runs`() = runTest {
         sut.onPhoneTextChange("5321234567")
         sut.sendCode()
@@ -263,5 +295,78 @@ class LoginViewModelTest {
         assertEquals(LoginUiState(), sut.uiState.value)
         assertEquals(0, sut.resendCooldownRemaining())
         assertNull(sut.supportContext())
+    }
+
+    // --- process death ---
+
+    @Test
+    fun `process death on the code step restores the number, the typed code and the cooldown`() = runTest {
+        sendCodeTo()
+        sut.onCodeChange("123")
+        clock.advance(Duration.ofSeconds(20))
+
+        val restored = recreateAfterProcessDeath()
+
+        val state = restored.uiState.value
+        assertEquals(LoginStep.Code(requireNotNull(number)), state.step)
+        assertEquals("532 123 45 67", state.phoneText)
+        assertEquals("123", state.codeText)
+        assertFalse(state.isWorking)
+        assertEquals(40, restored.resendCooldownRemaining())
+        assertFalse(restored.canResendCode())
+
+        // The saved verification id still signs in, without another SMS.
+        restored.onCodeChange(FakeAuthService.VALID_CODE)
+        advanceUntilIdle()
+        assertTrue(auth.currentUser != null)
+        assertEquals(1, auth.sentCodeNumbers.size)
+    }
+
+    @Test
+    fun `process death after changeNumber keeps the cooldown for the same number`() = runTest {
+        sendCodeTo()
+        sut.changeNumber()
+
+        val restored = recreateAfterProcessDeath()
+        assertEquals(LoginStep.Phone, restored.uiState.value.step)
+        restored.sendCode()
+        advanceUntilIdle()
+
+        assertEquals(1, auth.sentCodeNumbers.size)
+        assertTrue(restored.uiState.value.step is LoginStep.Code)
+        assertEquals(60, restored.resendCooldownRemaining())
+    }
+
+    @Test
+    fun `process death keeps the last failure for the support e-mail`() = runTest {
+        auth.sendFailure = AuthError.SmsTemporarilyUnavailable
+        sendCodeTo()
+
+        val restored = recreateAfterProcessDeath()
+
+        assertEquals(AuthError.SmsTemporarilyUnavailable.userMessage, restored.uiState.value.error)
+        assertEquals(sut.supportContext(), restored.supportContext())
+    }
+
+    @Test
+    fun `process death during a code request restores the number step, not a stuck spinner`() = runTest {
+        auth = FakeAuthService(isSignedIn = false, latency = kotlin.time.Duration.parse("1s"))
+        sut = makeSut(savedStateHandle)
+        sut.onPhoneTextChange("5321234567")
+        sut.sendCode()
+        runCurrent()
+        assertTrue(sut.uiState.value.isWorking)
+
+        val restored = makeSut(savedStateHandle.afterProcessDeath())
+
+        assertEquals(LoginStep.Phone, restored.uiState.value.step)
+        assertFalse(restored.uiState.value.isWorking)
+        assertEquals("532 123 45 67", restored.uiState.value.phoneText)
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `a fresh handle starts on an empty number step`() {
+        assertEquals(LoginUiState(), sut.uiState.value)
     }
 }

@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.feature.login
 
+import androidx.lifecycle.SavedStateHandle
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.model.AnalyticsEvent
@@ -30,7 +31,7 @@ class LoginAnalyticsTest {
         auth = FakeAuthService(isSignedIn = false, latency = kotlin.time.Duration.ZERO)
         clock = MutableClock()
         analytics = FakeAnalyticsTracker()
-        sut = LoginViewModel(auth, RecordingLoginDiagnosticsReporter(), analytics, clock)
+        sut = LoginViewModel(auth, RecordingLoginDiagnosticsReporter(), analytics, clock, SavedStateHandle())
     }
 
     private fun TestScope.sendCode() {

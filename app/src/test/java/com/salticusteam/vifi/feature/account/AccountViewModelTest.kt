@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.feature.account
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.salticusteam.vifi.core.data.coins.CoinWalletStore
 import com.salticusteam.vifi.core.data.local.fake.FakeLocalDataCleaner
@@ -16,6 +17,7 @@ import com.salticusteam.vifi.core.model.ProfileError
 import com.salticusteam.vifi.feature.login.LoginViewModel
 import com.salticusteam.vifi.testing.MainDispatcherRule
 import com.salticusteam.vifi.testing.MutableClock
+import com.salticusteam.vifi.testing.afterProcessDeath
 import java.time.Duration
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,6 +51,7 @@ class AccountViewModelTest {
         profileStore: ProfileStore = ProfileStore(profileService),
         walletReader: FakeWalletReader = FakeWalletReader(),
         sessionStore: SessionStore = SessionStore(authService, backgroundScope),
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ) = AccountViewModel(
         sessionStore = sessionStore,
         profileStore = profileStore,
@@ -60,6 +63,7 @@ class AccountViewModelTest {
         clock = clock,
         // The test scope itself, so the post-deletion purge is foreground work advanceUntilIdle waits for.
         appScope = this,
+        savedStateHandle = savedStateHandle,
     )
 
     private fun reauthAuthService() =
@@ -395,5 +399,51 @@ class AccountViewModelTest {
 
         assertNotNull(authService.currentUser)
         assertTrue(analytics.events.isEmpty())
+    }
+
+    // --- Process death ---
+
+    @Test
+    fun `process death during re-verification restores the code entry and still deletes`() = runTest {
+        val authService = reauthAuthService()
+        val handle = SavedStateHandle()
+        val first = makeSut(authService = authService, savedStateHandle = handle)
+        first.deleteAccount()
+        advanceUntilIdle()
+        first.onCodeChange("12")
+        advanceUntilIdle()
+        clock.advance(Duration.ofSeconds(20))
+
+        val restored = makeSut(authService = authService, savedStateHandle = handle.afterProcessDeath())
+        runCurrent()
+
+        val state = restored.uiState.value
+        assertTrue(state.isReverifying)
+        assertFalse(state.isWorking)
+        assertEquals("12", state.codeText)
+        assertEquals(40, restored.resendCooldownRemaining())
+
+        restored.onCodeChange(FakeAuthService.VALID_CODE)
+        advanceUntilIdle()
+        assertNull(authService.currentUser)
+        assertEquals(1, authService.sentCodeNumbers.size)
+        assertEquals(1, cleaner.purgeCount)
+    }
+
+    @Test
+    fun `process death after cancelling re-verification starts without the code entry`() = runTest {
+        val authService = reauthAuthService()
+        val handle = SavedStateHandle()
+        val first = makeSut(authService = authService, savedStateHandle = handle)
+        first.deleteAccount()
+        advanceUntilIdle()
+        first.cancelReverification()
+        advanceUntilIdle()
+
+        val restored = makeSut(authService = authService, savedStateHandle = handle.afterProcessDeath())
+        runCurrent()
+
+        assertFalse(restored.uiState.value.isReverifying)
+        assertNull(restored.uiState.value.resendAvailableAt)
     }
 }
