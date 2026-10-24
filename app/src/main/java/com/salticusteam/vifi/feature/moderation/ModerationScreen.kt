@@ -40,6 +40,7 @@ import com.salticusteam.vifi.core.designsystem.component.LoadingView
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.component.icon
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.ExamSubmissionRecord
 
 /**
@@ -165,7 +166,7 @@ private fun ModerationRow(record: ExamSubmissionRecord, onClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun ModerationContentPreview() {
     ViFiTheme {

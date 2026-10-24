@@ -55,6 +55,7 @@ import com.salticusteam.vifi.core.designsystem.component.LoadingView
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.component.labelResId
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.ApprovalResult
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamSubmissionRecord
@@ -335,7 +336,7 @@ private fun ApprovedDialog(result: ApprovalResult, onAcknowledge: () -> Unit) {
     )
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun ModerationDetailPreview() {
     ViFiTheme {

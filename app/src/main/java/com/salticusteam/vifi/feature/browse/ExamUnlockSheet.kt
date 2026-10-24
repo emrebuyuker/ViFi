@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.designsystem.component.formatCoins
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.ExamLock
 import com.salticusteam.vifi.core.model.ExamUnlockError
 
@@ -198,7 +199,7 @@ private fun EarnContent(onEarnCoins: (() -> Unit)?) {
     }
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun ExamUnlockSheetAffordPreview() {
     ViFiTheme {

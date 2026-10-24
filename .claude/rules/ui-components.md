@@ -607,9 +607,14 @@ fun ViFiTheme(
 }
 ```
 
-- Tema renklerini (`MaterialTheme.colorScheme.*`) kullanan her şey koyu moda otomatik uyum sağlar.
-- Koyu modda **değişmemesi** gereken öğeler için `Color.kt`'teki sabit token'ı doğrudan kullan (ör. `VifiAlwaysWhite`, `VifiAlwaysInk`) — colorScheme üzerinden değil (iOS `constantWhite`/`constantEsimBlack` karşılığı).
-- `dynamicColor` **kapalı** tutulur: marka turuncusu (`VifiOrange`) her cihazda sabit kalmalı.
+> **Karar (2026-10-24):** Uygulama **hem açık hem karanlık temayı** tam destekler ve **sistem ayarını izler** (`isSystemInDarkTheme()`; uygulama içi tema seçici yok). iOS karanlık temayı kaldırmıştı; Android bilinçli olarak ayrışır.
+
+- Tema renklerini (`MaterialTheme.colorScheme.*`) kullanan her şey koyu moda otomatik uyum sağlar. Yeni ekran/bileşen **her iki temada** okunur olmalı; ana ekranlar `@ViFiThemePreviews` (açık + koyu önizleme, `core/designsystem/theme/ViFiThemePreviews.kt`) kullanır.
+- `VifiDarkColors` **tam** tanımlıdır: Material3 baseline'ın mor nötrleri/konteynerleri yerine sıcak nötr yüzeyler (`surfaceContainer*` rampası) ve turuncu tonlu konteynerler. Rol eklerken/değiştirirken WCAG AA'yı koru — `VifiColorContrastTest` (birim test) metin/arka plan çiftlerini ≥ 4.5:1 doğrular.
+- Kart dolgusu `surfaceVariant` / `surfaceContainer*`; ayırıcı `outlineVariant`; ikincil metin `onSurfaceVariant`. Alfa ile türetilmiş tint (`primary.copy(alpha = 0.14f)`) serbest — tema rengi üzerinden olduğu için iki temada da çalışır.
+- Koyu modda **değişmemesi** gereken öğeler için `Color.kt`'teki sabit token'ı doğrudan kullan (`VifiAlwaysBlack`, `VifiAlwaysWhite`) — colorScheme üzerinden değil (iOS `constantWhite` karşılığı). Bilinçli sabitler: tam ekran görüntüleyici (siyah zemin + beyaz kontroller), PDF sayfası "kâğıdı" (beyaz), turuncu üstündeki siyah metin.
+- Pencere teması da temayı izler: `res/values/styles.xml` açık, `res/values-night/styles.xml` koyu (`window_background_dark` = `VifiDarkColors.background`) — Android 12+ splash ve Compose öncesi pencere beyaz parlamaz. Sistem çubuğu ikonları `enableEdgeToEdge()` (auto) ile sistem temasını izler.
+- `dynamicColor` **kapalı** tutulur: marka turuncusu (`VifiOrange` açık / `VifiOrangeOnDark` koyu) her cihazda sabit kalmalı.
 
 ---
 
@@ -632,7 +637,7 @@ fun ViFiTheme(
 15. ✅ **AL** kullanıcıya görünen HER metni `stringResource(R.string.x)`'ten; sabit string gömme (bkz. `localization.md`).
 16. ✅ **BELİRT** en dış kapsayıcının arka plan rengini (`Scaffold containerColor` ya da `Modifier.background`); stilli kapsayıcı içinde `Color.Transparent`.
 17. ❌ **ASLA** yeni ekranda Fragment/XML layout/`findViewById`/elle `RecyclerView.Adapter` kullanma (legacy istisna).
-18. ❌ **ASLA** `dynamicColor` açma (marka turuncusu sabit) — ve koyu modda değişmemesi gereken renge `colorScheme` kullanma.
+18. ❌ **ASLA** `dynamicColor` açma (marka turuncusu sabit) — ve koyu modda değişmemesi gereken renge `colorScheme` kullanma. Uygulama açık + karanlık temayı sistemle birlikte destekler; yeni UI her iki temada doğrulanır.
 19. ❌ **ASLA** `DateFormatter` karşılığını Composable içinde kurma; tarih biçimleme `.claude/rules/date-handling.md`'deki yardımcılardan gelir.
 20. 📝 **VERSİYONLU DOC YORUMU:** Var olan bir model/`data class`'a eklenen her alan ve `enum`/`sealed`'e eklenen her case `// Added in <versionName> — <amaç>.` taşır (versiyon = `app/build.gradle` `versionName`), ör. `// Added in 3.0.0 — exam favorite toggle için.`
 

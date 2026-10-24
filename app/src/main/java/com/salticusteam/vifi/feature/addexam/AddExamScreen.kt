@@ -58,7 +58,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,6 +65,7 @@ import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.designsystem.component.formatCoins
 import com.salticusteam.vifi.core.designsystem.component.labelResId
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.CatalogSelection
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamSubmission
@@ -520,7 +520,7 @@ private fun ExamKind.labelResId(): Int = when (this) {
 
 private const val PDF_MIME_TYPE = "application/pdf"
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun AddExamContentPreview() {
     ViFiTheme {

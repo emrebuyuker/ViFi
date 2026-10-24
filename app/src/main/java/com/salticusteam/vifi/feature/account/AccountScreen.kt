@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -411,7 +412,7 @@ private fun DeleteAccountDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     )
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun AccountContentPreview() {
     ViFiTheme {

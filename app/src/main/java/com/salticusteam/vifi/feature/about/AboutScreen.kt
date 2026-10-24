@@ -45,7 +45,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.salticusteam.vifi.BuildConfig
@@ -55,6 +54,7 @@ import com.salticusteam.vifi.core.designsystem.component.IconBadge
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.component.rememberContactSupportLauncher
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.AnalyticsValues
 import com.salticusteam.vifi.feature.onboarding.OnboardingScreen
 
@@ -235,7 +235,7 @@ private fun HighlightRow(icon: ImageVector, label: Int) {
     )
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun AboutContentPreview() {
     ViFiTheme {

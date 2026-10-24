@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- VifiDarkColors.background — the window behind Compose in dark mode (used by values-night/styles.xml). -->
+    <color name="window_background_dark">#141311</color>
+</resources>
