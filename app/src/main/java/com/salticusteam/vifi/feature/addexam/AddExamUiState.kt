@@ -37,6 +37,11 @@ data class AddExamUiState(
     val catalog: UniversityCatalog = UniversityCatalog.EMPTY,
     val picker: AddExamPicker? = null,
     val isWorking: Boolean = false,
+    /**
+     * Set while a queued submit uploads in the background: the user may leave, the upload goes on and its outcome
+     * is notified.
+     */
+    val isSendingInBackground: Boolean = false,
     /** Set while picked files are being read or transcoded, so submitting waits for them. */
     val isPreparingFiles: Boolean = false,
     val error: String? = null,
@@ -52,6 +57,9 @@ data class AddExamUiState(
 
     /** Whether the user may edit the form (nothing is being sent). */
     val isEditable: Boolean get() = !isWorking
+
+    /** Whether the form may be closed: not while a submit is still being handed to the background queue. */
+    val canClose: Boolean get() = isEditable || isSendingInBackground
 
     /** The lesson row needs a department to look the archive lessons up under. */
     val canPickLesson: Boolean get() = isEditable && department.name.isNotEmpty()

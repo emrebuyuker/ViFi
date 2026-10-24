@@ -1,7 +1,9 @@
 package com.salticusteam.vifi
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.work.Configuration
 import com.salticusteam.vifi.app.AppLifecycleHooks
 import com.salticusteam.vifi.core.notifications.NotificationChannels
 import com.salticusteam.vifi.core.util.Logging
@@ -11,11 +13,19 @@ import javax.inject.Inject
 /**
  * App entry point. Backend start-up is flavor-specific ([BackendStartup]): `live` wires Firebase
  * (App Check first, then RTDB persistence); `mock` touches no Firebase at all (iOS `-ViFiMockData`).
+ *
+ * WorkManager is initialized on demand with Hilt's worker factory (the manifest drops its start-up initializer),
+ * so the exam-submission upload worker gets its dependencies injected.
  */
 @HiltAndroidApp
-class VifiApplication : Application() {
+class VifiApplication : Application(), Configuration.Provider {
 
     @Inject lateinit var lifecycleHooks: AppLifecycleHooks
+
+    @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
     override fun onCreate() {
         super.onCreate()

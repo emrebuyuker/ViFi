@@ -9,7 +9,12 @@ import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamSubmissionService
 import com.salticusteam.vifi.core.data.repository.fake.FakeProfileService
 import com.salticusteam.vifi.core.data.repository.fake.FakeRewardsConfigReader
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelStore
+import com.salticusteam.vifi.core.data.submission.FileSubmissionDraftStore
+import com.salticusteam.vifi.core.data.submission.SubmissionStatus
 import com.salticusteam.vifi.core.data.submission.SubmissionTierResolver
+import com.salticusteam.vifi.core.data.submission.SubmissionUploader
 import com.salticusteam.vifi.core.model.AnalyticsEvent
 import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.ArchiveError
@@ -24,25 +29,42 @@ import com.salticusteam.vifi.core.model.SubmissionFileError
 import com.salticusteam.vifi.core.model.SubmissionTier
 import com.salticusteam.vifi.core.model.UserProfile
 import com.salticusteam.vifi.fake.FakeSubmissionFileSource
+import com.salticusteam.vifi.fake.FakeSubmissionQueue
 import com.salticusteam.vifi.testing.MainDispatcherRule
 import com.salticusteam.vifi.testing.MutableClock
 import kotlin.time.Duration
+import java.io.File
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AddExamViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
+
+    @get:Rule
+    val folder = TemporaryFolder()
+
+    /**
+     * Runs the queue's uploads and the app-scope work on the test scheduler as foreground work (unlike
+     * `backgroundScope`, which `advanceUntilIdle()` skips); an upload left suspended is cancelled after the test.
+     */
+    private val outlivingJob = SupervisorJob()
+    private val outlivingScope by lazy { CoroutineScope(mainDispatcherRule.testDispatcher + outlivingJob) }
 
     /** Matches FakeArchiveRepository's İTÜ > Mühendislik > Bilgisayar Mühendisliği > BLG 101 > 2023 Vize. */
     private val profile = FakeProfileService.SAMPLE_PROFILE.copy(
@@ -58,6 +80,11 @@ class AddExamViewModelTest {
     private lateinit var archive: FakeArchiveRepository
     private lateinit var files: FakeSubmissionFileSource
     private lateinit var analytics: FakeAnalyticsTracker
+    private lateinit var draftRoot: File
+    private lateinit var draftStore: FileSubmissionDraftStore
+
+    /** Set by [viewModel]: the queue the last ViewModel was created with. */
+    private lateinit var queue: FakeSubmissionQueue
 
     @Before
     fun setUp() {
@@ -66,12 +93,40 @@ class AddExamViewModelTest {
         archive = FakeArchiveRepository()
         files = FakeSubmissionFileSource(images = (1..60).associate { "img$it" to byteArrayOf(it.toByte()) })
         analytics = FakeAnalyticsTracker()
+        draftRoot = folder.newFolder("drafts")
+        draftStore = FileSubmissionDraftStore(draftRoot, MutableClock(), mainDispatcherRule.testDispatcher)
     }
 
-    private fun viewModel(ownerId: String = "uid", profile: UserProfile? = this.profile) = AddExamViewModel(
+    @After
+    fun tearDown() {
+        outlivingJob.cancel()
+    }
+
+    /** A form; pass the [savedStateHandle] of an earlier one to recreate it as after process death. */
+    private fun TestScope.viewModel(
+        ownerId: String = "uid",
+        profile: UserProfile? = this@AddExamViewModelTest.profile,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+    ): AddExamViewModel {
+        queue = FakeSubmissionQueue(
+            draftStore,
+            SubmissionUploader(draftStore, submissionService, analytics),
+            outlivingScope,
+        )
+        return viewModel(ownerId, profile, savedStateHandle, queue)
+    }
+
+    private fun TestScope.viewModel(
+        ownerId: String,
+        profile: UserProfile?,
+        savedStateHandle: SavedStateHandle,
+        queue: FakeSubmissionQueue,
+    ) = AddExamViewModel(
         ownerId = ownerId,
         profile = profile,
-        submissionService = submissionService,
+        savedStateHandle = savedStateHandle,
+        draftStore = draftStore,
+        submissionQueue = queue,
         rewardsConfigReader = rewards,
         tierResolver = SubmissionTierResolver(archive),
         fileSource = files,
@@ -83,8 +138,12 @@ class AddExamViewModelTest {
             )
         },
         analytics = analytics,
+        appScope = outlivingScope,
         clock = MutableClock(),
     )
+
+    /** The saved state as it comes back after process death: only its values survive, not the object. */
+    private fun SavedStateHandle.afterProcessDeath() = SavedStateHandle(keys().associateWith { get<Any>(it) })
 
     private fun AddExamViewModel.choose(picker: AddExamPicker, selection: CatalogSelection) {
         onPickerOpen(picker)
@@ -332,5 +391,165 @@ class AddExamViewModelTest {
 
         assertEquals(ExamKind.IMAGES, sut.uiState.value.kind)
         assertNull(sut.uiState.value.picker)
+    }
+
+    // --- Process death / background upload ---
+
+    @Test
+    fun `after process death the picks and the prepared pages come back`() = runTest {
+        val handle = SavedStateHandle()
+        val first = viewModel(savedStateHandle = handle)
+        first.fillIn(lesson = "MAT 101", year = 2021)
+        first.onPickerOpen(AddExamPicker.EXAM_NAME)
+        advanceUntilIdle()
+
+        val sut = viewModel(savedStateHandle = handle.afterProcessDeath())
+        advanceUntilIdle()
+
+        val state = sut.uiState.value
+        assertEquals("MAT 101", state.lesson.name)
+        assertEquals(vize.name, state.examName.name)
+        assertEquals(2021, state.year)
+        assertEquals(AddExamPicker.EXAM_NAME, state.picker)
+        assertEquals(listOf(byteArrayOf(1).toList(), byteArrayOf(2).toList()), state.files.map { it.data.toList() })
+        assertEquals(listOf(1, 2), state.files.map { it.order })
+        assertFalse(state.isPreparingFiles)
+    }
+
+    @Test
+    fun `after process death a cleared or switched draft comes back empty`() = runTest {
+        val handle = SavedStateHandle()
+        val first = viewModel(savedStateHandle = handle)
+        first.fillIn()
+        advanceUntilIdle()
+        first.onKindSelected(ExamKind.PDF)
+        advanceUntilIdle()
+
+        val sut = viewModel(savedStateHandle = handle.afterProcessDeath())
+        advanceUntilIdle()
+
+        assertEquals(ExamKind.PDF, sut.uiState.value.kind)
+        assertTrue(sut.uiState.value.files.isEmpty())
+    }
+
+    @Test
+    fun `onSubmit queues the draft and lets the user leave while it uploads`() = runTest {
+        submissionService = FakeExamSubmissionService(latency = Duration.INFINITE)
+        val sut = viewModel()
+        sut.fillIn()
+        advanceUntilIdle()
+
+        sut.onSubmit()
+        advanceUntilIdle()
+
+        val state = sut.uiState.value
+        assertTrue(state.isWorking)
+        assertTrue(state.isSendingInBackground)
+        assertTrue(state.canClose)
+        assertEquals(1, queue.enqueued.size)
+    }
+
+    @Test
+    fun `onSubmit when the draft cannot be queued shows the message and stays editable`() = runTest {
+        val sut = viewModel()
+        sut.fillIn()
+        advanceUntilIdle()
+        queue.enqueueFailure = ExamSubmissionError.Unknown(ExamSubmissionError.GENERIC_MESSAGE)
+
+        sut.onSubmit()
+        advanceUntilIdle()
+
+        val state = sut.uiState.value
+        assertFalse(state.isWorking)
+        assertEquals(ExamSubmissionError.GENERIC_MESSAGE, state.error)
+        assertTrue(AnalyticsEvent.ExamSubmitFailed("unknown") in analytics.events)
+    }
+
+    @Test
+    fun `a failed submit can be sent again under a new submission id`() = runTest {
+        submissionService.failure = ExamSubmissionError.PermissionDenied
+        val sut = viewModel()
+        sut.fillIn()
+        advanceUntilIdle()
+        sut.onSubmit()
+        advanceUntilIdle()
+        submissionService.failure = null
+
+        sut.events.test {
+            sut.onSubmit()
+            assertEquals(AddExamEvent.Submitted, awaitItem())
+        }
+
+        val (failed, sent) = queue.enqueued
+        assertTrue(failed.submissionId != sent.submissionId)
+        assertEquals(listOf(sent.submissionId), submissionService.submissionIds)
+    }
+
+    @Test
+    fun `after process death during an upload the form follows it until it is stored`() = runTest {
+        submissionService = FakeExamSubmissionService(latency = Duration.INFINITE)
+        val handle = SavedStateHandle()
+        val first = viewModel(savedStateHandle = handle)
+        first.fillIn()
+        advanceUntilIdle()
+        first.onSubmit()
+        advanceUntilIdle()
+        val submissionId = queue.enqueued.single().submissionId
+        val survivingQueue = queue
+
+        val sut = viewModel("uid", profile, handle.afterProcessDeath(), survivingQueue)
+        advanceUntilIdle()
+        assertTrue(sut.uiState.value.isWorking)
+        assertTrue(sut.uiState.value.isSendingInBackground)
+
+        sut.events.test {
+            survivingQueue.set(submissionId, SubmissionStatus.Sent)
+            assertEquals(AddExamEvent.Submitted, awaitItem())
+        }
+    }
+
+    @Test
+    fun `after process death a submit that was given up shows why and can be sent again`() = runTest {
+        submissionService = FakeExamSubmissionService(latency = Duration.INFINITE)
+        val handle = SavedStateHandle()
+        val first = viewModel(savedStateHandle = handle)
+        first.fillIn()
+        advanceUntilIdle()
+        first.onSubmit()
+        advanceUntilIdle()
+        val survivingQueue = queue
+        survivingQueue.set(survivingQueue.enqueued.single().submissionId, SubmissionStatus.Failed(ExamSubmissionError.Offline))
+
+        val sut = viewModel("uid", profile, handle.afterProcessDeath(), survivingQueue)
+        advanceUntilIdle()
+
+        val state = sut.uiState.value
+        assertFalse(state.isWorking)
+        assertEquals(ExamSubmissionError.Offline.userMessage, state.error)
+        assertEquals(2, state.files.size)
+        assertTrue(state.canSubmit)
+    }
+
+    @Test
+    fun `closing an unsubmitted form discards its draft, a queued one is kept for the upload`() = runTest {
+        val unsubmitted = viewModel()
+        unsubmitted.fillIn()
+        advanceUntilIdle()
+        submissionService = FakeExamSubmissionService(latency = Duration.INFINITE)
+        val queued = viewModel()
+        queued.fillIn()
+        advanceUntilIdle()
+        queued.onSubmit()
+        advanceUntilIdle()
+        assertEquals(2, draftRoot.listFiles()?.size)
+
+        ViewModelStore().apply {
+            put("unsubmitted", unsubmitted)
+            put("queued", queued)
+        }.clear()
+        advanceUntilIdle()
+
+        val remaining = draftRoot.listFiles().orEmpty().single()
+        assertTrue(File(remaining, "submission.json").exists())
     }
 }

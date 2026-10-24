@@ -59,4 +59,13 @@
     <string name="submission_tier_new_course">Yeni ders</string>
     <string name="submission_tier_new_exam">Yeni sınav</string>
     <string name="submission_tier_duplicate">Mevcut sınav</string>
+
+    <!-- Added in 3.1.0 — background upload (WorkManager) -->
+    <string name="add_exam_background_hint">Gönderim arka planda sürer; bu ekrandan çıkabilirsin. Sonucu bildirimle haber veririz.</string>
+    <string name="notification_channel_submissions_name">Sınav gönderimleri</string>
+    <string name="notification_channel_submissions_description">Gönderdiğin sınavların yüklenme durumu</string>
+    <string name="submission_notification_progress_title">Sınavın gönderiliyor…</string>
+    <string name="submission_notification_sent_title">Sınavın gönderildi</string>
+    <string name="submission_notification_sent_message">İncelendikten sonra arşive eklenir; onaylanırsa coin kazanırsın.</string>
+    <string name="submission_notification_failed_title">Sınavın gönderilemedi</string>
 </resources>

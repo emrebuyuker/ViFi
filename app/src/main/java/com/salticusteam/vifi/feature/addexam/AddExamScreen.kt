@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.MonetizationOn
@@ -77,7 +78,8 @@ import com.salticusteam.vifi.feature.profile.CatalogPicker
  * The "Sınav Ekle" flow (iOS AddExamView): pick the school (pre-filled from the profile, list-only), the lesson
  * (archive or typed), the exam name / year / kind, attach image pages or a PDF, and submit it for moderation.
  * Opened from the home screen and from the unlock sheet's "Sınav Ekle"; [onClose] returns to where it came from,
- * also after a successful submit. Back and close are disabled while sending.
+ * also after a successful submit. Back and close are disabled while the submit is being queued; once it uploads in
+ * the background the form may be closed (the upload goes on and its outcome is notified).
  */
 @Composable
 fun AddExamScreen(
@@ -111,8 +113,8 @@ fun AddExamScreen(
     }
 
     val picker = state.picker
-    // While a picker is open, back closes it; while sending, back does nothing (iOS interactiveDismissDisabled).
-    BackHandler(enabled = picker != null || state.isWorking) {
+    // While a picker is open, back closes it; while a submit is being queued, back does nothing.
+    BackHandler(enabled = picker != null || !state.canClose) {
         if (picker != null) viewModel.onPickerDismiss()
     }
 
@@ -171,7 +173,7 @@ internal fun AddExamContent(
                 navigationIcon = {
                     IconButton(
                         onClick = onClose,
-                        enabled = state.isEditable,
+                        enabled = state.canClose,
                         modifier = Modifier.testTag("addExam.cancel"),
                     ) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.add_exam_cancel))
@@ -200,50 +202,63 @@ internal fun AddExamContent(
             )
         },
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .testTag("addExam.form"),
-            contentPadding = PaddingValues(bottom = 24.dp),
-        ) {
-            item(key = "school") {
-                Section(title = stringResource(R.string.add_exam_section_school)) {
-                    PickerRow(AddExamPicker.UNIVERSITY, state.university, state.isEditable, onPickerOpen)
-                    PickerRow(AddExamPicker.FACULTY, state.faculty, state.isEditable, onPickerOpen)
-                    PickerRow(AddExamPicker.DEPARTMENT, state.department, state.isEditable, onPickerOpen)
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            // Pinned above the form (not a list item), so it shows whatever the form is scrolled to.
+            if (state.isSendingInBackground) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.add_exam_background_hint)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.CloudUpload, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    modifier = Modifier.testTag("addExam.backgroundHint"),
+                )
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .testTag("addExam.form"),
+                contentPadding = PaddingValues(bottom = 24.dp),
+            ) {
+                item(key = "school") {
+                    Section(title = stringResource(R.string.add_exam_section_school)) {
+                        PickerRow(AddExamPicker.UNIVERSITY, state.university, state.isEditable, onPickerOpen)
+                        PickerRow(AddExamPicker.FACULTY, state.faculty, state.isEditable, onPickerOpen)
+                        PickerRow(AddExamPicker.DEPARTMENT, state.department, state.isEditable, onPickerOpen)
+                    }
                 }
-            }
-            item(key = "lesson") {
-                Section(title = stringResource(R.string.add_exam_section_lesson)) {
-                    PickerRow(AddExamPicker.LESSON, state.lesson, state.canPickLesson, onPickerOpen)
+                item(key = "lesson") {
+                    Section(title = stringResource(R.string.add_exam_section_lesson)) {
+                        PickerRow(AddExamPicker.LESSON, state.lesson, state.canPickLesson, onPickerOpen)
+                    }
                 }
-            }
-            item(key = "exam") {
-                Section(title = stringResource(R.string.add_exam_section_exam)) {
-                    PickerRow(AddExamPicker.EXAM_NAME, state.examName, state.isEditable, onPickerOpen)
-                    YearPicker(state.year, state.yearOptions, state.isEditable, onYearSelected)
-                    KindSelector(state.kind, state.isEditable, onKindSelected)
+                item(key = "exam") {
+                    Section(title = stringResource(R.string.add_exam_section_exam)) {
+                        PickerRow(AddExamPicker.EXAM_NAME, state.examName, state.isEditable, onPickerOpen)
+                        YearPicker(state.year, state.yearOptions, state.isEditable, onYearSelected)
+                        KindSelector(state.kind, state.isEditable, onKindSelected)
+                    }
                 }
-            }
-            item(key = "files") {
-                Section(title = stringResource(R.string.add_exam_section_files)) {
-                    FilesSection(state, onPickImages, onPickPdf, onClearFiles)
+                item(key = "files") {
+                    Section(title = stringResource(R.string.add_exam_section_files)) {
+                        FilesSection(state, onPickImages, onPickPdf, onClearFiles)
+                    }
                 }
-            }
-            item(key = "coinNote") {
-                CoinNoteRow(state.coinNote)
-            }
-            state.error?.let { message ->
-                item(key = "error") {
-                    ListItem(
-                        headlineContent = { Text(message, color = MaterialTheme.colorScheme.error) },
-                        leadingContent = {
-                            Icon(Icons.Filled.Error, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-                        },
-                        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
-                        modifier = Modifier.testTag("addExam.error"),
-                    )
+                item(key = "coinNote") {
+                    CoinNoteRow(state.coinNote)
+                }
+                state.error?.let { message ->
+                    item(key = "error") {
+                        ListItem(
+                            headlineContent = { Text(message, color = MaterialTheme.colorScheme.error) },
+                            leadingContent = {
+                                Icon(Icons.Filled.Error, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                            },
+                            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+                            modifier = Modifier.testTag("addExam.error"),
+                        )
+                    }
                 }
             }
         }

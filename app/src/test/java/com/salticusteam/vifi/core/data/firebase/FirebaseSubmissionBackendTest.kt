@@ -7,26 +7,26 @@ import org.junit.Assert.assertSame
 import org.junit.Test
 
 /** Firestore/Storage error codes need the Firebase runtime; only the transport and fallback paths run on the JVM. */
-class FirebaseExamSubmissionServiceTest {
+class FirebaseSubmissionBackendTest {
 
     @Test
     fun `submissionError when transport fails maps to offline`() {
-        assertSame(ExamSubmissionError.Offline, FirebaseExamSubmissionService.submissionError(IOException("reset")))
+        assertSame(ExamSubmissionError.Offline, FirebaseSubmissionBackend.submissionError(IOException("reset")))
     }
 
     @Test
     fun `submissionError passes a domain error through`() {
         assertSame(
             ExamSubmissionError.NotSignedIn,
-            FirebaseExamSubmissionService.submissionError(ExamSubmissionError.NotSignedIn),
+            FirebaseSubmissionBackend.submissionError(ExamSubmissionError.NotSignedIn),
         )
     }
 
     @Test
     fun `submissionError when unexpected falls back to the generic message`() {
-        val error = FirebaseExamSubmissionService.submissionError(IllegalStateException("boom"))
+        val error = FirebaseSubmissionBackend.submissionError(IllegalStateException("boom"))
 
-        assertEquals(ExamSubmissionError.Unknown(FirebaseExamSubmissionService.GENERIC_MESSAGE), error)
+        assertEquals(ExamSubmissionError.Unknown(ExamSubmissionError.GENERIC_MESSAGE), error)
         assertEquals("unknown", error.analyticsReason)
     }
 }

@@ -1,14 +1,19 @@
 package com.salticusteam.vifi.feature.addexam
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.salticusteam.vifi.core.data.catalog.CatalogSource
 import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
-import com.salticusteam.vifi.core.data.repository.ExamSubmissionService
 import com.salticusteam.vifi.core.data.repository.PickedPdf
 import com.salticusteam.vifi.core.data.repository.RewardsConfigReader
 import com.salticusteam.vifi.core.data.repository.SubmissionFileSource
+import com.salticusteam.vifi.core.data.submission.PendingSubmission
+import com.salticusteam.vifi.core.data.submission.SubmissionDraftStore
+import com.salticusteam.vifi.core.data.submission.SubmissionQueue
+import com.salticusteam.vifi.core.data.submission.SubmissionStatus
 import com.salticusteam.vifi.core.data.submission.SubmissionTierResolver
+import com.salticusteam.vifi.core.di.ApplicationScope
 import com.salticusteam.vifi.core.model.AnalyticsEvent
 import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.CatalogSelection
@@ -20,31 +25,44 @@ import com.salticusteam.vifi.core.model.SubmissionFileError
 import com.salticusteam.vifi.core.model.SubmissionLocation
 import com.salticusteam.vifi.core.model.UserProfile
 import com.salticusteam.vifi.core.model.userMessage
+import com.salticusteam.vifi.core.util.LogCategory
 import com.salticusteam.vifi.core.util.trackScreen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.io.IOException
 import java.time.Clock
 import java.time.ZoneId
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Collects and submits a user-contributed exam (iOS AddExamViewModel + AddExamScreen's reward/estimate tasks).
  *
  * Picked images are transcoded to JPEG pages and a picked PDF is size-checked through [SubmissionFileSource];
  * the novelty tier is re-estimated against the archive whenever the placement changes (the previous estimate
- * is cancelled) and, together with the live reward values, drives the coin note. A successful submit emits
- * [AddExamEvent.Submitted] and stays busy while the screen closes.
+ * is cancelled) and, together with the live reward values, drives the coin note.
+ *
+ * Survives process death: the picks are kept in the [SavedStateHandle] and the prepared pages in a draft directory
+ * ([SubmissionDraftStore]) whose id is saved with them. Submitting hands the draft to the background
+ * [SubmissionQueue], so the upload completes even if the user leaves or the process dies; while the form is open
+ * it follows that upload — [AddExamEvent.Submitted] once stored (staying busy while the screen closes), the
+ * message when it was given up. Leaving the form unsubmitted discards its draft.
  */
 @HiltViewModel(assistedFactory = AddExamViewModel.Factory::class)
 class AddExamViewModel @AssistedInject constructor(
@@ -52,12 +70,16 @@ class AddExamViewModel @AssistedInject constructor(
     @Assisted ownerId: String,
     /** The signed-in user's profile, which pre-fills the school rows. */
     @Assisted profile: UserProfile?,
-    private val submissionService: ExamSubmissionService,
+    private val savedStateHandle: SavedStateHandle,
+    private val draftStore: SubmissionDraftStore,
+    private val submissionQueue: SubmissionQueue,
     private val rewardsConfigReader: RewardsConfigReader,
     private val tierResolver: SubmissionTierResolver,
     private val fileSource: SubmissionFileSource,
     private val catalogSource: CatalogSource,
     private val analytics: AnalyticsTracker,
+    /** Outlives the form, to discard its draft after it is closed. */
+    @ApplicationScope private val appScope: CoroutineScope,
     clock: Clock,
 ) : ViewModel() {
 
@@ -82,8 +104,37 @@ class AddExamViewModel @AssistedInject constructor(
     /** The placement the current (or running) estimate is for, so an unrelated edit does not re-resolve. */
     private var estimatedLocation: SubmissionLocation? = null
 
+    /** The form saved before process death, `null` for a fresh form. */
+    private val restored: AddExamSavedForm? = AddExamSavedForm.decode(savedStateHandle[KEY_FORM])
+
+    /** The on-disk draft holding this form's pages. */
+    private val draftId: String = restored?.draftId ?: draftStore.newDraftId()
+
+    /** The queued submit the form follows; `null` while none is queued or running. */
+    private val activeSubmissionId = MutableStateFlow(restored?.submissionId)
+
+    /** Serializes the draft's page writes (FIFO), so a clear never overtakes an earlier append. */
+    private val pagesMutex = Mutex()
+
+    /** Set when a page write failed: the draft is rewritten in full before it is submitted. */
+    private var pagesOutOfSync = false
+
+    private var observeJob: Job? = null
+
     // Intents
     init {
+        restored?.let { saved -> _uiState.update { saved.applyTo(it) } }
+        if (restored == null) {
+            appScope.launch { draftStore.pruneStale(keep = draftId) }
+        } else {
+            restorePages(restored)
+        }
+        viewModelScope.launch {
+            combine(_uiState, activeSubmissionId) { state, submissionId ->
+                AddExamSavedForm.of(state, draftId, submissionId)
+            }.distinctUntilChanged().collect { savedStateHandle[KEY_FORM] = it.encode() }
+        }
+        activeSubmissionId.value?.let(::follow)
         viewModelScope.launch {
             val catalog = catalogSource.catalog()
             _uiState.update { it.copy(catalog = catalog) }
@@ -128,8 +179,11 @@ class AddExamViewModel @AssistedInject constructor(
     }
 
     /** Switching the kind clears the already-picked files, which belong to the other kind. */
-    fun onKindSelected(kind: ExamKind) = edit { state ->
-        if (state.kind == kind) state else state.copy(kind = kind, files = emptyList(), error = null)
+    fun onKindSelected(kind: ExamKind) {
+        val state = _uiState.value
+        if (!state.isEditable || state.kind == kind) return
+        _uiState.update { it.copy(kind = kind, files = emptyList(), error = null) }
+        persistPages { draftStore.clearPages(draftId) }
     }
 
     /**
@@ -152,6 +206,7 @@ class AddExamViewModel @AssistedInject constructor(
                 val jpeg = fileSource.jpegPage(uri, ExamSubmission.MAX_FILE_BYTES)
                 if (jpeg != null) added += jpeg else error = SubmissionFileError.ImageUnusable
             }
+            var appended = emptyList<SubmissionFile>()
             _uiState.update { current ->
                 // The kind may have been switched meanwhile; images then no longer belong to the form.
                 val files = if (current.kind == ExamKind.IMAGES) {
@@ -159,8 +214,10 @@ class AddExamViewModel @AssistedInject constructor(
                 } else {
                     current.files
                 }
+                appended = files.drop(current.files.size)
                 current.copy(files = files, isPreparingFiles = false, error = error?.userMessage)
             }
+            if (appended.isNotEmpty()) persistPages { draftStore.writePages(draftId, appended) }
         }
     }
 
@@ -171,11 +228,15 @@ class AddExamViewModel @AssistedInject constructor(
         _uiState.update { it.copy(isPreparingFiles = true, error = null) }
         viewModelScope.launch {
             val picked = fileSource.pdf(uri, ExamSubmission.MAX_FILE_BYTES)
+            var stored: SubmissionFile? = null
             _uiState.update { current ->
                 val idle = current.copy(isPreparingFiles = false)
+                stored = null
                 when (picked) {
                     is PickedPdf.Data -> if (current.kind == ExamKind.PDF) {
-                        idle.copy(files = listOf(SubmissionFile(picked.bytes, order = 1)))
+                        val file = SubmissionFile(picked.bytes, order = 1)
+                        stored = file
+                        idle.copy(files = listOf(file))
                     } else {
                         idle
                     }
@@ -184,21 +245,38 @@ class AddExamViewModel @AssistedInject constructor(
                     PickedPdf.Unreadable -> idle.copy(error = SubmissionFileError.Unreadable.userMessage)
                 }
             }
+            stored?.let { file ->
+                persistPages {
+                    draftStore.clearPages(draftId)
+                    draftStore.writePages(draftId, listOf(file))
+                }
+            }
         }
     }
 
-    fun onClearFiles() = edit { it.copy(files = emptyList(), error = null) }
+    fun onClearFiles() {
+        if (!_uiState.value.isEditable) return
+        _uiState.update { it.copy(files = emptyList(), error = null) }
+        persistPages { draftStore.clearPages(draftId) }
+    }
 
-    /** Sends the submission for moderation. Ignored while busy or while the form is incomplete. */
+    /**
+     * Queues the submission for a background upload and follows it (see the class doc). Ignored while busy or while
+     * the form is incomplete. Each submit gets a fresh submission id; its retries reuse it.
+     */
     fun onSubmit() {
         val state = _uiState.value
         if (!state.canSubmit) return
         val submission = state.builtSubmission ?: return
-        val estimatedTier = state.estimatedTier
+        val pending = PendingSubmission.of(submission, state.ownerId, state.estimatedTier)
         _uiState.update { it.copy(isWorking = true, error = null) }
         viewModelScope.launch {
             try {
-                submissionService.submit(submission, state.ownerId)
+                // Behind every queued page write, so the worker reads exactly the submitted pages.
+                pagesMutex.withLock {
+                    if (pagesOutOfSync) rewritePages(submission.files)
+                    submissionQueue.enqueue(draftId, pending)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -208,12 +286,83 @@ class AddExamViewModel @AssistedInject constructor(
                 )
                 return@launch
             }
-            analytics.track(AnalyticsEvent.ExamSubmitted(submission.kind, submission.files.size, estimatedTier))
-            _events.send(AddExamEvent.Submitted)
+            activeSubmissionId.value = pending.submissionId
+            follow(pending.submissionId)
         }
     }
 
+    override fun onCleared() {
+        // The form is closed for good (not on process death): an unsubmitted draft is not needed any more.
+        appScope.launch { draftStore.discardIfNotQueued(draftId) }
+    }
+
     // Helpers
+    /**
+     * Follows the queued submit until it ends: stored → [AddExamEvent.Submitted] (still busy while the screen
+     * closes); given up → the message, and the form is editable again for another try.
+     */
+    private fun follow(submissionId: String) {
+        observeJob?.cancel()
+        _uiState.update { it.copy(isWorking = true, isSendingInBackground = true) }
+        observeJob = viewModelScope.launch {
+            when (val status = submissionQueue.status(draftId, submissionId).first { it != SubmissionStatus.Sending }) {
+                SubmissionStatus.Sent -> _events.send(AddExamEvent.Submitted)
+                is SubmissionStatus.Failed -> {
+                    activeSubmissionId.value = null
+                    _uiState.update {
+                        it.copy(isWorking = false, isSendingInBackground = false, error = status.error.userMessage)
+                    }
+                }
+                // Nothing recorded for it (never queued, or long pruned): the form is simply editable again.
+                SubmissionStatus.Unknown -> {
+                    activeSubmissionId.value = null
+                    _uiState.update { it.copy(isWorking = false, isSendingInBackground = false) }
+                }
+                SubmissionStatus.Sending -> Unit
+            }
+        }
+    }
+
+    /** Reads the restored draft's pages back, unless the kind was switched (and the pages cleared) meanwhile. */
+    private fun restorePages(saved: AddExamSavedForm) {
+        _uiState.update { it.copy(isPreparingFiles = true) }
+        viewModelScope.launch {
+            val pages = pagesMutex.withLock { draftStore.readPages(draftId) }
+            _uiState.update { current ->
+                val restoredFiles = if (current.kind.raw == saved.kind && current.files.isEmpty()) {
+                    when (current.kind) {
+                        ExamKind.IMAGES -> renumbered(pages.take(ExamSubmission.MAX_FILE_COUNT).map { it.data })
+                        ExamKind.PDF -> pages.take(1).map { SubmissionFile(it.data, order = 1) }
+                    }
+                } else {
+                    current.files
+                }
+                current.copy(files = restoredFiles, isPreparingFiles = false)
+            }
+        }
+    }
+
+    /** Runs a draft write after the earlier ones; a failure is logged and the draft rewritten when submitted. */
+    private fun persistPages(write: suspend () -> Unit) {
+        viewModelScope.launch {
+            pagesMutex.withLock {
+                try {
+                    write()
+                } catch (e: IOException) {
+                    LogCategory.FILES.log.w(e, "Could not store the draft pages")
+                    pagesOutOfSync = true
+                }
+            }
+        }
+    }
+
+    /** Replaces the draft's pages with [files]; throws `IOException`. Call with [pagesMutex] held. */
+    private suspend fun rewritePages(files: List<SubmissionFile>) {
+        draftStore.clearPages(draftId)
+        draftStore.writePages(draftId, files)
+        pagesOutOfSync = false
+    }
+
     /** Applies a field edit unless a submit is running. */
     private fun edit(transform: (AddExamUiState) -> AddExamUiState) {
         _uiState.update { state -> if (state.isEditable) transform(state) else state }
@@ -249,5 +398,8 @@ class AddExamViewModel @AssistedInject constructor(
     private companion object {
         /** `exam_submit_failed.reason` for an error without its own reason (iOS "unknown"). */
         const val UNKNOWN_REASON = "unknown"
+
+        /** The [SavedStateHandle] key of the encoded [AddExamSavedForm]. */
+        const val KEY_FORM = "addExam.form"
     }
 }
