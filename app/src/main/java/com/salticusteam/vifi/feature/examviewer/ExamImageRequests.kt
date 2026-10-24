@@ -47,8 +47,10 @@ internal fun pageRequest(context: Context, url: String, attempt: Int, configure:
 /** The Turkish message for a page that failed to load (iOS `error.userMessage`). */
 internal fun Throwable.pageErrorMessage(): String = when (this) {
     is ArchiveIOException -> error.userMessage
-    is HttpException -> when (response.code) {
-        401, 403 -> ArchiveError.PermissionDenied.userMessage
+    is HttpException -> when {
+        // Offline, Coil asks for a cache-only response; OkHttp answers a cache miss with a synthetic 504.
+        response.code == 504 && response.request.cacheControl.onlyIfCached -> ArchiveError.Offline.userMessage
+        response.code == 401 || response.code == 403 -> ArchiveError.PermissionDenied.userMessage
         else -> ArchiveError.FileUnavailable(response.code).userMessage
     }
     is IOException -> ArchiveError.Offline.userMessage
