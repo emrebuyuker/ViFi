@@ -40,6 +40,10 @@
         <meta-data
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
+        <!-- Nor mark its data as usable for ad personalization (no ads; iOS sends no ad signals either). -->
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="false" />
         <!-- Screens are reported by hand (AnalyticsScreen names, iOS parity), not by Activity class. -->
         <meta-data
             android:name="google_analytics_automatic_screen_reporting_enabled"
