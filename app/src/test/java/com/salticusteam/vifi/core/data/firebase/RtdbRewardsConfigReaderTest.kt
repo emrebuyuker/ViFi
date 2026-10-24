@@ -31,15 +31,4 @@ class RtdbRewardsConfigReaderTest {
         assertNull(RtdbRewardsConfigReader.parse(null))
         assertEquals(RewardsConfig(), RtdbRewardsConfigReader.parse(mapOf("examUploadCoins" to -3L)))
     }
-
-    @Test
-    fun `preferred uses android values when set and falls back to ios`() {
-        val android = RewardsConfig(examUploadCoins = 20)
-        val ios = RewardsConfig(examUploadCoins = 10)
-
-        assertEquals(android, RtdbRewardsConfigReader.preferred(android, ios))
-        assertEquals(ios, RtdbRewardsConfigReader.preferred(null, ios))
-        assertEquals(ios, RtdbRewardsConfigReader.preferred(RewardsConfig(), ios))
-        assertNull(RtdbRewardsConfigReader.preferred(null, null))
-    }
 }

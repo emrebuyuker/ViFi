@@ -16,7 +16,7 @@
 
 | | iOS (hedef) | Android (24 Ekim 2026) | Android (başlangıç, v2.5) |
 |---|---|---|---|
-| Sürüm | **3.1.0** | 2.5 (versionCode 16) — versionName kararı açık | 2.5 |
+| Sürüm | **3.1.0** | **3.1.0** (versionCode 17) — iOS ile aynı seri | 2.5 |
 | UI | SwiftUI + MVVM(@Observable) | **Compose + Material3 + MVVM (Hilt, StateFlow)**, tek `MainActivity`, Navigation-Compose | Java + Activity/Fragment |
 | Kütüphane tabanı | Firebase 12, SwiftPM | AndroidX, AGP 8.7.2, Kotlin 2.0.21, Firebase BoM 33.5.1, `libs.versions.toml`, R8 | `com.android.support`, AGP 3.4.2, jcenter, Firebase 16.x, Parse |
 | Arşiv verisi | **Cloud Firestore** (isimli `vifi` DB) | `FirestoreArchiveRepository` (isimli `vifi`, offline önbellek) — canlıda doğrulandı; dosya görüntüleyiciler yok | RTDB `Universitiess` |
@@ -44,8 +44,8 @@
 
 - [x] **UI mimarisi:** Jetpack Compose (önerilen) mı, Views+ViewModel mi? Tüm UI alanlarını etkiler. → **Compose** (onaylandı).
 - [x] **minSdk:** 24 (Android 7, ~%99 cihaz, Compose/Play Integrity/Photo Picker uyumlu — önerilen) mı? → **24** (onaylandı).
-- [ ] **config/rewards:** Android `config/rewards/android` düğümü mü açılacak yoksa `ios` reuse mı? (Değerler aynı; fallback android→ios önerilir.)
-- [ ] **versionName hizalama:** Android kendi serisini mi (2.5→3.0.0) sürdürecek yoksa `3.1.0`'a mı hizalanacak? `config/appUpdate/android/minimumVersion` buna bağlı.
+- [x] **config/rewards:** Android `config/rewards/android` düğümü mü açılacak yoksa `ios` reuse mı? → **iOS düğümü (`config/rewards/ios`) doğrudan kullanılır** (2026-10-24; android düğümü/fallback kaldırıldı).
+- [x] **versionName hizalama:** Android kendi serisini mi (2.5→3.0.0) sürdürecek yoksa `3.1.0`'a mı hizalanacak? `config/appUpdate/android/minimumVersion` buna bağlı. → **iOS ile aynı: `3.1.0`** (versionCode 17; 2026-10-24).
 - [x] **Reklam kaldırma kapsamı:** `play-services-ads` bağımlılığı tamamen mi kaldırılacak (önerilen) yoksa sadece çağrılar mı? → **Tamamen** (FM-08; AD_ID izinleri de kaldırıldı).
 - [ ] **App Check enforce zamanı:** Firestore enforce ne zaman açılacak? (Android sürümü Play'de verified trafiğe ulaşınca.)
 - [ ] **Play App Signing:** Kullanılıyor mu? Kullanılıyorsa upload + Google app-signing SHA-256'ların ikisi de Firebase'e eklenmeli.
@@ -405,7 +405,7 @@
   <br><sub>**Neden:** Android 12+ üzerinde PendingIntent oluştururken FLAG_IMMUTABLE/MUTABLE açıkça verilmezse uygulama çöker. Ayrıca bildirim tap'inin doğru ekrana deep-link ile yönlendirilmesi gerekir. Bildirimler #1 sadece 'dokunma' diyor; bu Android-özgü zo… · **Nereye:** _Bildirimler #1 (MyFirebaseMessagingService) + Navigation Compose deep link (Temel #10)_</sub>
 - [ ] **(medium)** WorkManager: arka plana alınınca kesilebilen Storage upload'ının dayanıklılığı (iOS arka-plan URLSession upload paritesi) ve ArchivePrefetcher zamanlaması; gerekirse Android 14 dataSync foreground service type. (Exact alarm/genel foreground service ViFi'de GEREKSİZ — hiçbir kalem bunları varsaymamalı.)
   <br><sub>**Neden:** Android uygulama arka plana alınınca süreç öldürülebilir ve devam eden çoklu-dosya upload yarıda kalır; iOS'un arka-plan upload'ının Android karşılığı WorkManager'dır. Sinav Ekleme #12 düz (süreç-içi) upload tarif ediyor, dayanıklılık yok.… · **Nereye:** _Sinav Ekleme #12 (gönderim servisi); Arşiv/Gezinme #10 (ArchivePrefetcher)_</sub>
-- [ ] **(low)** Gece/karanlık tema KARARI: iOS dark'ı kaldırdı; Android'de ya force-light (DesignSystem teması + values-night tanımlamama/DayNight.NoActionBar kapatma) ya da Material3 tam dark desteği — explicit karar ve tüm ekranlarda uygulama.
+- [ ] **(low)** Gece/karanlık tema KARARI: iOS dark'ı kaldırdı; Android'de ya force-light (DesignSystem teması + values-night tanımlamama/DayNight.NoActionBar kapatma) ya da Material3 tam dark desteği — explicit karar ve tüm ekranlarda uygulama. → **Karar (2026-10-24): hem açık hem karanlık tema desteklenir** (sistem ayarını izler; Material3 tam dark).
   <br><sub>**Neden:** Android sistem-geneli dark mode varsayılan devreye girer; karar verilmezse yarı-stilli/okunaksız ekranlar oluşur (turuncu birincil/siyah metin kontrastı bozulur). DesignSystem kaleminde (Temel #14 / Hesap #11) explicit karar yok; yalnız On… · **Nereye:** _Temel #14 ve Hesap #11 (Material3 tema/renk sistemi)_</sub>
 - [x] **(low)** android:allowBackup ve Android 12+ dataExtractionRules/fullBackupContent gözden geçirmesi — Firestore offline cache, DataStore tercihleri, FCM token ve okunmuş-durum verisinin cloud/cihaz yedeğinden hariç tutulması. ✔️ _Tamamlandı (2026-10-24): `allowBackup=false` + `data_extraction_rules.xml` (cloud + device-transfer tüm alanlar hariç) + `backup_rules.xml`._
   <br><sub>**Neden:** Mevcut manifest allowBackup=true; auth oturum artefaktları, coin/unlock önbelleği ve okunmuş-durum Auto Backup ile buluta gidebilir — gizlilik/güvenlik riski. iOS'ta Keychain/exclude-from-backup farklı ele alınır. 14 alanda yok. · **Nereye:** _Temel #24 (DataStore kalıcı katman) + güvenlik; AndroidManifest + xml/data_extraction_rul…_</sub>

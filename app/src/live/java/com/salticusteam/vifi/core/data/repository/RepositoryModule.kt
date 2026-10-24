@@ -64,7 +64,7 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindUnlocksReader(impl: FirestoreUnlocksReader): UnlocksReader
 
-    /** `config/rewards/android`, falling back to the iOS node (BE-07). */
+    /** `config/rewards/ios`, shared with iOS (BE-07). */
     @Binds
     @Singleton
     abstract fun bindRewardsConfigReader(impl: RtdbRewardsConfigReader): RewardsConfigReader
