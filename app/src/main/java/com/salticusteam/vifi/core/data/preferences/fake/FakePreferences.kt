@@ -17,15 +17,15 @@ import kotlinx.coroutines.flow.update
 class FakeUserPreferencesRepository : UserPreferencesRepository {
     private val skipped = MutableStateFlow<String?>(null)
     private val prompted = MutableStateFlow(false)
-    private val prefetch = MutableStateFlow(false)
+    private val prefetchedAt = MutableStateFlow<Long?>(null)
 
     override val skippedUpdateVersion: Flow<String?> = skipped
     override val notificationsPrompted: Flow<Boolean> = prompted
-    override val prefetchDone: Flow<Boolean> = prefetch
+    override val archivePrefetchedAt: Flow<Long?> = prefetchedAt
 
     override suspend fun setSkippedUpdateVersion(version: String?) { skipped.value = version }
     override suspend fun setNotificationsPrompted(prompted: Boolean) { this.prompted.value = prompted }
-    override suspend fun setPrefetchDone(done: Boolean) { prefetch.value = done }
+    override suspend fun setArchivePrefetchedAt(epochMillis: Long) { prefetchedAt.value = epochMillis }
 }
 
 /** In-memory onboarding flag; starts as a fresh install ([OnboardingState.Presenting]) unless [seen]. */

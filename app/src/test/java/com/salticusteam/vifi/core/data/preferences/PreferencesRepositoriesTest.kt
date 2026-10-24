@@ -145,14 +145,14 @@ class PreferencesRepositoriesTest {
         val repo = DataStoreUserPreferencesRepository(newStore())
         assertNull(repo.skippedUpdateVersion.first())
         assertFalse(repo.notificationsPrompted.first())
-        assertFalse(repo.prefetchDone.first())
+        assertNull(repo.archivePrefetchedAt.first())
 
         repo.setSkippedUpdateVersion("3.1.0")
         repo.setNotificationsPrompted(true)
-        repo.setPrefetchDone(true)
+        repo.setArchivePrefetchedAt(1_000L)
         assertEquals("3.1.0", repo.skippedUpdateVersion.first())
         assertTrue(repo.notificationsPrompted.first())
-        assertTrue(repo.prefetchDone.first())
+        assertEquals(1_000L, repo.archivePrefetchedAt.first())
 
         repo.setSkippedUpdateVersion(null)
         assertNull(repo.skippedUpdateVersion.first())

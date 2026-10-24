@@ -34,6 +34,9 @@
     <string name="archive_empty_message">Yeni içerik eklendiğinde burada görünecek.</string>
     <string name="archive_search_no_results">"%1$s" için sonuç yok</string>
     <string name="cd_clear_search">Aramayı temizle</string>
+    <!-- Added in 2.5 — breadcrumb trail + home action (iOS BreadcrumbBar / BrowseView toolbar, verbatim) -->
+    <string name="archive_breadcrumb_hint">Bu seviyeye döner</string>
+    <string name="archive_home_action">Ana Sayfa</string>
 
     <!-- Added in 2.5 — update gate (iOS ForceUpdateView / optional update alert, verbatim) -->
     <string name="force_update_title">Güncelleme Gerekli</string>

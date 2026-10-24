@@ -11,13 +11,13 @@ interface UserPreferencesRepository {
     /** Whether the notification permission rationale was already shown. */
     val notificationsPrompted: Flow<Boolean>
 
-    /** Whether the one-time archive prefetch already ran. */
-    val prefetchDone: Flow<Boolean>
+    /** When the last archive prefetch completed (epoch milliseconds); `null` when it never did. */
+    val archivePrefetchedAt: Flow<Long?>
 
     /** `null` clears the skipped version. */
     suspend fun setSkippedUpdateVersion(version: String?)
 
     suspend fun setNotificationsPrompted(prompted: Boolean)
 
-    suspend fun setPrefetchDone(done: Boolean)
+    suspend fun setArchivePrefetchedAt(epochMillis: Long)
 }
