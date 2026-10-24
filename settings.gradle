@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = 'ViFi'
 include ':app'
+// Baseline Profile generator (Macrobenchmark, mock flavor); see baselineprofile/build.gradle.
+include ':baselineprofile'

@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 android {
@@ -89,6 +90,14 @@ androidComponents {
     }
 }
 
+// Baseline Profile: generated on the mock flavor (sample data, Firebase never starts) and merged into src/main,
+// so liveRelease ships it. Regenerate with a device connected: ./gradlew :app:generateBaselineProfile
+baselineProfile {
+    mergeIntoMain = true
+    // Regenerated on demand only; a release build must not need a device.
+    automaticGenerationDuringBuild = false
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
@@ -125,6 +134,9 @@ dependencies {
     implementation libs.androidx.lifecycle.runtime.compose
     // App foreground/background hooks (badge clearing, disk-cache pruning).
     implementation libs.androidx.lifecycle.process
+    // Installs the bundled Baseline Profile on first launch when Play has not (sideloads, older Play).
+    implementation libs.androidx.profileinstaller
+    baselineProfile project(':baselineprofile')
     // Preview rendering + test host activity: debug only, never shipped in release.
     debugImplementation libs.compose.ui.tooling
     debugImplementation libs.compose.ui.test.manifest
