@@ -62,6 +62,16 @@ class ExamViewerViewModelTest {
     }
 
     @Test
+    fun `supportPath joins the full location for the Bize Ulas e-mail`() = runTest {
+        val sut = viewModel(ScriptedArchiveRepository({ document }), ExamKind.IMAGES)
+
+        assertEquals(
+            "BOZOK ÜNİVERSİTESİ › MÜHENDİSLİK › BİLGİSAYAR › MÜHENDİSLİK MATEMATİĞİ › 2019 FİNAL",
+            sut.uiState.value.supportPath,
+        )
+    }
+
+    @Test
     fun `kind follows the loaded document when the list summary was stale`() = runTest {
         val pdf = document.copy(kind = ExamKind.PDF)
         val sut = viewModel(ScriptedArchiveRepository({ pdf }), ExamKind.IMAGES)

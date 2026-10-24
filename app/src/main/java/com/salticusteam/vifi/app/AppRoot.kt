@@ -40,8 +40,8 @@ import com.salticusteam.vifi.feature.update.AppUpdateGate
 
 /**
  * The app's root composable (iOS RootView): gates the archive behind sign-in, then behind a completed profile
- * ([ProfileGate]), all beneath the required-update gate ([AppUpdateGate]). The lifecycle hooks (badge
- * clearing, disk-cache pruning) are layered here as their roadmap items land.
+ * ([ProfileGate]), all beneath the required-update gate ([AppUpdateGate]). The app-switcher privacy cover wraps it
+ * in [MainActivity]; badge clearing and disk-cache pruning follow the process lifecycle ([AppLifecycleHooks]).
  */
 @Composable
 fun AppRoot() {

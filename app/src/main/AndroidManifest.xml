@@ -27,15 +27,24 @@
         </intent>
     </queries>
 
+    <!--
+        Backup: off, and excluded from Android 12+ device transfer as well (sign-in session, Firestore cache,
+        DataStore, FCM token stay on this device). Predictive back: system back goes through OnBackPressedDispatcher
+        (Compose BackHandler), so Android 13+ can animate it. Icon: adaptive with a monochrome (themed) layer.
+    -->
     <application
         android:name=".VifiApplication"
-        android:allowBackup="true"
-        android:icon="@mipmap/icon"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/roundicon"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ViFi"
-        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:targetApi="33">
         <!-- Analytics must not collect the advertising ID (no ads in the app). -->
         <meta-data
             android:name="google_analytics_adid_collection_enabled"

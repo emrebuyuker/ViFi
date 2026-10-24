@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12+: nothing leaves the device through cloud backup or device-to-device transfer. The app's data is
+    the Firebase sign-in session, the Firestore offline cache, DataStore preferences (read state, recents,
+    onboarding) and the FCM registration: none of it should be restored onto another device, where it would be
+    stale or tied to this install. The archive itself is re-read from the backend after signing in.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>

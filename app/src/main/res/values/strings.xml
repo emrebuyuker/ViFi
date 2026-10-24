@@ -116,6 +116,9 @@
     <string name="cd_exam_page_image">Sayfa %1$d</string>
     <string name="exam_viewer_counter">%1$d / %2$d</string>
     <string name="cd_exam_viewer_close">Kapat</string>
+    <string name="cd_exam_viewer_contact_support">Bize Ulaş</string>
+    <!-- Support e-mail context line; %1$s is the exam's location, e.g. "BOZOK ÜNİVERSİTESİ › … › 2019 FİNAL". -->
+    <string name="exam_viewer_support_context">Sınav: %1$s</string>
     <string name="exam_pdf_empty">Bu sınavda dosya yok</string>
     <string name="exam_pdf_downloading">Belge indiriliyor…</string>
     <string name="exam_pdf_page_indicator">%1$d / %2$d</string>

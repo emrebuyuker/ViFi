@@ -9,6 +9,7 @@ import com.salticusteam.vifi.core.data.firebase.FirebaseLoginDiagnosticsReporter
 import com.salticusteam.vifi.core.data.firebase.FirebaseModerationBackend
 import com.salticusteam.vifi.core.data.firebase.FirebaseNotificationService
 import com.salticusteam.vifi.core.data.firebase.FirebaseProfileService
+import com.salticusteam.vifi.core.data.firebase.FirestoreDeviceTokenStore
 import com.salticusteam.vifi.core.data.firebase.FirestoreAnnouncementsReader
 import com.salticusteam.vifi.core.data.firebase.FirestoreArchiveRepository
 import com.salticusteam.vifi.core.data.firebase.FirestoreUnlocksReader
@@ -116,6 +117,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindNotificationService(impl: FirebaseNotificationService): NotificationService
+
+    /** `users/<uid>/devices/<token>` in the named 'vifi' database (N11). */
+    @Binds
+    @Singleton
+    abstract fun bindDeviceTokenStore(impl: FirestoreDeviceTokenStore): DeviceTokenStore
 
     companion object {
         @Provides

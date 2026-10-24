@@ -21,6 +21,9 @@ data class ExamViewerUiState(
         get() = listOfNotNull(path.displayNames.firstOrNull(), path.displayNames.dropLast(1).lastOrNull())
             .joinToString(" › ")
 
+    /** The exam's full location, "University › … › Exam", prefilled in the "Bize Ulaş" e-mail (VIEW-13). */
+    val supportPath: String get() = path.displayNames.joinToString(" › ")
+
     /**
      * The viewer to show: the document's own kind once loaded, so an exam whose files changed kind since the
      * list was read opens in the right viewer (iOS `redirectIfKindChanged`).

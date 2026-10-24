@@ -121,6 +121,8 @@ dependencies {
     implementation libs.androidx.hilt.navigation.compose
     implementation libs.androidx.lifecycle.viewmodel.compose
     implementation libs.androidx.lifecycle.runtime.compose
+    // App foreground/background hooks (badge clearing, disk-cache pruning).
+    implementation libs.androidx.lifecycle.process
     // Preview rendering + test host activity: debug only, never shipped in release.
     debugImplementation libs.compose.ui.tooling
     debugImplementation libs.compose.ui.test.manifest
