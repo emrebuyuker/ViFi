@@ -38,7 +38,7 @@ data class UniversityCatalog(
         const val FACULTIES_ASSET = "catalog/turkish-faculties.json"
         const val DEPARTMENTS_ASSET = "catalog/turkish-departments.json"
 
-        private val turkish = Locale("tr", "TR")
+        private val turkish = Locale.forLanguageTag("tr-TR")
         private val combiningMarks = "\\p{Mn}+".toRegex()
         private val json = Json { ignoreUnknownKeys = true }
 

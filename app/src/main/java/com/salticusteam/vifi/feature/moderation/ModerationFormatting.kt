@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 private val submissionDateFormatter: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("d MMM yyyy HH:mm", Locale("tr", "TR")).withZone(ZoneId.systemDefault())
+    DateTimeFormatter.ofPattern("d MMM yyyy HH:mm", Locale.forLanguageTag("tr-TR")).withZone(ZoneId.systemDefault())
 
 /** "12 Eki 2026 14:30" (iOS `.abbreviated` date + `.shortened` time). Built once; formatters are thread-safe. */
 fun Instant.toSubmissionDate(): String = submissionDateFormatter.format(this)

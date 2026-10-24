@@ -10,7 +10,7 @@ iOS v3.1.0 paritesi hedefiyle **Kotlin + Jetpack Compose + MVVM + Hilt** üzerin
 ## Gereklilikler
 
 - Android Studio (güncel) ve Android SDK 35
-- Gradle'ı çalıştırmak için **JDK 17–21** (Android Studio'nun gömülü JBR 25'i Gradle 8.9 ile çalışmaz), ör.:
+- Gradle'ı çalıştırmak için **JDK 17–21** (Android Studio'nun gömülü JBR 25'i Gradle 8.14 ile çalışmaz), ör.:
   `export JAVA_HOME="$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home"`
 - `app/google-services.json` (ortak `vifi-831a8` Firebase projesi)
 

@@ -76,7 +76,7 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
 | Konu | Değer |
 |---|---|
 | **Dil/UI** | Kotlin + Compose (eski Java/XML ekranlar FM-23'te silindi); tek `app/MainActivity` + `AppRoot` + `ViFiNavHost` |
-| **Uygulama** | `com.salticusteam.vifi`, `versionName 3.1.0` (iOS ile aynı), `versionCode 17`, `compileSdk/targetSdk 35`, `minSdk 24` |
+| **Uygulama** | `com.salticusteam.vifi`, `versionName 3.1.0` (iOS ile aynı), `versionCode 17`, `compileSdk/targetSdk 36`, `minSdk 24` |
 | **Flavor** | `live` (canlı vifi-831a8) · `mock` (örnek veri, Firebase başlamaz, yalnız debug) |
 | **Veri (arşiv)** | Live `FirestoreArchiveRepository` → named `vifi` Firestore `catalogNodes`/`exams` (`BE-15`); mock örnek veri |
 | **Sınav dosyaları** | `RemoteFileLoader` (OkHttp + ID token/App Check) → `cacheDir/ExamFiles` (Files + Coil Images); görsel pager + platform `PdfRenderer`; `FLAG_SECURE` ekran koruması; hesap silmede `purge()` |
@@ -84,7 +84,7 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
 | **Bildirim** | Native FCM (`all` topic, kanal, `FLAG_IMMUTABLE` dokunma yönlendirmesi), `POST_NOTIFICATIONS` izin akışı, `announcements` → Inbox |
 | **Giriş** | Phone Auth `+90` (`BE-04`) → `SessionStore` → `ProfileGate` (`ProfileStore`, RTDB `users/<uid>/profile`) → arşiv |
 | **Senaryo bayrakları** | Debug intent extra'ları (`core/util/LaunchArgs.kt`); bağlı olanlar: mock'ta `vifi_signed_out`, `vifi_profile_incomplete`, `vifi_force_update`, `vifi_optional_update`, `vifi_delete_requires_reauth`, `vifi_no_coins`, `vifi_show_onboarding`, `vifi_notifications_prompt` (`vifi_admin` tanımlı, moderasyonla bağlanacak); live debug'da `vifi_phone_auth_testing` (yalnız Console test numaralarıyla) |
-| **Kütüphane** | AndroidX, AGP 8.7.2 + Gradle 8.9, `libs.versions.toml`, Kotlin 2.0.21 + Coroutines, Hilt 2.52, Compose BoM 2024.10.01, Navigation 2.8.3, Firebase BoM 33.5.1, Timber |
+| **Kütüphane** | AndroidX, AGP 8.13.2 + Gradle 8.14.3, `libs.versions.toml`, Kotlin 2.0.21 + Coroutines, Hilt 2.52, Compose BoM 2024.10.01, Navigation 2.8.3, Firebase BoM 33.5.1, Timber |
 | **Build** | Gradle Groovy DSL (plugins DSL), `google-services` 4.4.2, Java 17 hedefi + desugaring; Gradle'ı JDK 17–21 ile çalıştır (Android Studio JBR 25 desteklenmez); release R8 küçültmeli |
 | **❌ Yeni kodda yapma** | `com.android.support`/`jcenter`, AdMob, XML ekran (Compose kullan), sır/keystore commit'i, mock'a canlı Firebase binding'i |
 

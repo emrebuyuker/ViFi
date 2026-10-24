@@ -18,7 +18,7 @@
 |---|---|---|---|
 | Sürüm | **3.1.0** | **3.1.0** (versionCode 17) — iOS ile aynı seri | 2.5 |
 | UI | SwiftUI + MVVM(@Observable) | **Compose + Material3 + MVVM (Hilt, StateFlow)**, tek `MainActivity`, Navigation-Compose | Java + Activity/Fragment |
-| Kütüphane tabanı | Firebase 12, SwiftPM | AndroidX, AGP 8.7.2, Kotlin 2.0.21, Firebase BoM 33.5.1, `libs.versions.toml`, R8 | `com.android.support`, AGP 3.4.2, jcenter, Firebase 16.x, Parse |
+| Kütüphane tabanı | Firebase 12, SwiftPM | AndroidX, AGP 8.13.2 + Gradle 8.14.3, compileSdk/targetSdk 36, Kotlin 2.0.21, Firebase BoM 33.5.1, `libs.versions.toml`, R8 | `com.android.support`, AGP 3.4.2, jcenter, Firebase 16.x, Parse |
 | Arşiv verisi | **Cloud Firestore** (isimli `vifi` DB) | `FirestoreArchiveRepository` (isimli `vifi`, offline önbellek) — canlıda doğrulandı; dosya görüntüleyiciler yok | RTDB `Universitiess` |
 | Giriş | **Firebase Phone Auth (+90)** + App Check | **Phone Auth (+90)** + oturum ve profil kapısı — canlıda doğrulandı (debug imza); App Check Debug/Play Integrity | e-posta/şifre |
 | Monetizasyon | Coin ekonomisi (reklamsız) | Reklam yok; `unlockExam` servisi hazır, UI yok | AdMob |
@@ -350,7 +350,7 @@
 #### Google Play hesabı ve yayın  ·  `release`  (1 kalem)
 <sub>`buyukeryazilim` geliştirici hesabı ve ViFi dahil tüm uygulamalar, hesap doğrulaması tamamlanmadığı için 19 Kasım 2024'te Google Play'den kaldırıldı (Play Console'da "İşlem gerekli"). Release imzası, Play Integrity ve mağaza dağıtımına bağlı tüm işler bu kaleme toplandı; geliştirme ve test debug imzayla sürer.</sub>
 
-- [ ] **`REL-01`** Play Store sorunlarını çöz ve uygulamayı Play Store'da yayınla _(P0·L)_ — Play Console hesap doğrulaması + kaldırılan uygulamanın geri alınması (ya da yeni hesap/paket kararı); Play App Signing durumu; App signing + upload key SHA-1/SHA-256'nın Firebase'e eklenmesi (BE-01'in release kısmı); App Check Play Integrity kaydı ve enforce sırası (BE-03); güncel `google-services.json`; release imza yapılandırması (`keystore.properties`, repoya girmez); `versionName` hizalama kararı; Data Safety formu; kapalı test → üretim yayını. ⟶ bağımlı: `BE-01`, `BE-03`, `FM-20`
+- [ ] **`REL-01`** Play Store sorunlarını çöz ve uygulamayı Play Store'da yayınla _(P0·L)_ — Play Console hesap doğrulaması + kaldırılan uygulamanın geri alınması (ya da yeni hesap/paket kararı); Play App Signing durumu; App signing + upload key SHA-1/SHA-256'nın Firebase'e eklenmesi (BE-01'in release kısmı); App Check Play Integrity kaydı ve enforce sırası (BE-03); güncel `google-services.json`; release imza yapılandırması (`keystore.properties`, repoya girmez); `versionName` hizalama kararı; Data Safety formu; kapalı test → üretim yayını. ⟶ bağımlı: `BE-01`, `BE-03`, `FM-20` 🟡 _İlerleme (2026-10-24): Play Console hesabı (buyukeryazilim) 19 Kasım 2024'te doğrulama eksikliğiyle kısıtlanmış; ödeme profili resmi adresle güncellendi, kişisel hesap türü seçildi, kimlik belgesi yüklendi → Google incelemesi bekleniyor; sonra telefon doğrulaması + Uygulama imzalama (Play App Signing) kontrolü. Kod: Play'in güncel hedef API şartı için compileSdk/targetSdk 36 (AGP 8.13.2, Gradle 8.14.3); `Locale(String, String)` → `Locale.forLanguageTag`; derleme + lint (0 hata) + 1647 birim testi geçti, API 37 emülatörde canlı Home/görüntüleyici/geri hareketi çökmesiz._
 
 ---
 

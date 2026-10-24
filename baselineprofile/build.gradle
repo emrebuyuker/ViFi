@@ -9,11 +9,11 @@ plugins {
 
 android {
     namespace 'com.salticusteam.vifi.baselineprofile'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         minSdkVersion 28
-        targetSdkVersion 35
+        targetSdkVersion 36
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         // The app has a "backend" flavor dimension; profile the sample-data flavor.
         missingDimensionStrategy "backend", "mock"

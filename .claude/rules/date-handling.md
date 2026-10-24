@@ -49,7 +49,7 @@ Kotlin'de bir `Custom` alt tipidir (enum runtime string taşıyamaz → `sealed 
 | `DateDisplayFormat.DashDateTime` | `yyyy-MM-dd HH:mm:ss` | `2026-05-28 12:36:26` |
 | `DateDisplayFormat.Custom(pattern)` | herhangi bir pattern | `"yyyy-MM"` vb. |
 
-Ay adları Türkçe çıksın diye display formatter'ları `Locale("tr", "TR")` ile kurulur
+Ay adları Türkçe çıksın diye display formatter'ları `Locale.forLanguageTag("tr-TR")` ile kurulur (`Locale(String, String)` yapıcısı compileSdk 36 ile deprecated)
 (bkz. `localization.md`). Yeni bir preset'i enum'a yalnızca **birden fazla yerde** tekrar
 kullanılacaksa ekle; tek seferlik biçimler `Custom("...")` kullanır.
 
@@ -100,7 +100,7 @@ import java.util.concurrent.ConcurrentHashMap
 object DateFormats {
 
     // Turkish month names ("28 Mayıs 2026"); app is Türkçe-only.
-    private val displayLocale = Locale("tr", "TR")
+    private val displayLocale = Locale.forLanguageTag("tr-TR")
 
     // Render in the device's local zone; backend keeps UTC/offset.
     private val displayZone: ZoneId = ZoneId.systemDefault()

@@ -13,7 +13,7 @@ import java.util.Locale
  */
 object ArchiveNameMatch {
 
-    private val turkish = Locale("tr", "TR")
+    private val turkish = Locale.forLanguageTag("tr-TR")
     private val combiningMarks = "\\p{Mn}+".toRegex()
 
     /** Trailing academic suffixes an archive department may carry ("MATEMATİK BÖLÜMÜ"), already folded. */
