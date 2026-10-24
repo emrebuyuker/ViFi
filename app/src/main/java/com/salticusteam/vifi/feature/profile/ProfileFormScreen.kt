@@ -25,11 +25,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.CatalogSelection
 import com.salticusteam.vifi.core.model.Gender
 
@@ -161,7 +161,7 @@ private fun CompletionHeader() {
     }
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun ProfileCompletionPreview() {
     ViFiTheme {

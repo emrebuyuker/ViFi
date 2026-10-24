@@ -41,7 +41,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -50,6 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.designsystem.component.IconBadge
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.designsystem.theme.VifiSystemOrange
 import com.salticusteam.vifi.core.model.AnalyticsValues
 import kotlinx.coroutines.launch
@@ -225,7 +225,7 @@ private fun PageDots(count: Int, current: Int, modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun OnboardingContentPreview() {
     ViFiTheme {

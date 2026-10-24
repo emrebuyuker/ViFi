@@ -48,6 +48,7 @@ import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.designsystem.component.ContactSupportDialog
 import com.salticusteam.vifi.core.designsystem.component.rememberContactSupportLauncher
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.AuthError
 import com.salticusteam.vifi.core.model.PhoneNumber
 import com.salticusteam.vifi.core.util.ContactSupport
@@ -255,7 +256,7 @@ internal fun LoginErrorMessage(message: String?) {
     }
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun LoginPhonePreview() {
     ViFiTheme {

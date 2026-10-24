@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,6 +40,7 @@ import com.salticusteam.vifi.core.designsystem.component.ErrorView
 import com.salticusteam.vifi.core.designsystem.component.LoadingView
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.Announcement
 import java.time.Instant
 
@@ -165,7 +165,7 @@ private fun Context.openNotificationSettings() {
     startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun InboxContentPreview() {
     ViFiTheme {

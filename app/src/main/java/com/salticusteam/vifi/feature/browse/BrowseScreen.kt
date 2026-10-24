@@ -72,6 +72,7 @@ import com.salticusteam.vifi.core.designsystem.component.icon
 import com.salticusteam.vifi.core.designsystem.component.listTitleRes
 import com.salticusteam.vifi.core.designsystem.component.searchPromptRes
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.ArchiveError
 import com.salticusteam.vifi.core.model.ArchiveItem
 import com.salticusteam.vifi.core.model.ArchiveLevel
@@ -516,7 +517,7 @@ private fun ArchiveRow(item: ArchiveItem, isLocked: Boolean, onClick: () -> Unit
     }
 }
 
-@Preview(showBackground = true)
+@ViFiThemePreviews
 @Composable
 private fun BrowseContentLoadedPreview() {
     val university = ArchivePath.ROOT.appending("itu", "İSTANBUL TEKNİK ÜNİVERSİTESİ")
