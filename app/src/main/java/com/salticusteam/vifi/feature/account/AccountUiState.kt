@@ -4,7 +4,7 @@ import com.salticusteam.vifi.core.model.VerificationCode
 import java.time.Instant
 
 /**
- * The account screen (iOS AccountView + AccountViewModel): who is signed in, for the profile and phone rows, and
+ * The account screen (iOS AccountView + AccountViewModel): who is signed in, for the profile, coin and phone rows, and
  * the account deletion with its re-verification of the number.
  */
 data class AccountUiState(
@@ -24,6 +24,8 @@ data class AccountUiState(
     val resendAvailableAt: Instant? = null,
     /** The user carries the `admin` claim: the Moderasyon entry is shown. */
     val isAdmin: Boolean = false,
+    /** The live spendable coin balance (`wallets/<uid>`), `0` until the wallet is read. */
+    val coinBalance: Int = 0,
 ) {
     /** "Doğrula ve Hesabı Sil" is enabled: all six digits are there and nothing is running. */
     val canConfirmReverification: Boolean

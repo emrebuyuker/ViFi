@@ -22,6 +22,10 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -49,6 +53,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.designsystem.component.IconBadge
+import com.salticusteam.vifi.core.designsystem.component.formatCoins
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 
@@ -138,6 +143,10 @@ fun AccountContent(
         ) {
             item(key = "profile") {
                 ProfileRow(profileName = state.profileName, enabled = !state.isWorking, onClick = onEditProfile)
+                HorizontalDivider()
+            }
+            item(key = "coins") {
+                CoinBalanceRow(balance = state.coinBalance)
                 HorizontalDivider()
             }
             item(key = "phone") {
@@ -243,6 +252,35 @@ private fun ProfileRow(profileName: String?, enabled: Boolean, onClick: () -> Un
         modifier = Modifier
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .testTag("account.editProfile"),
+    )
+}
+
+/** "Coin bakiyen" with the live balance, counting between values (iOS `coinSection`); read as one element. */
+@Composable
+private fun CoinBalanceRow(balance: Int) {
+    val shown by animateIntAsState(targetValue = balance, label = "accountCoinBalance")
+    val description = stringResource(R.string.cd_coin_balance, formatCoins(balance))
+    ListItem(
+        overlineContent = { Text(stringResource(R.string.account_coin_balance_label)) },
+        headlineContent = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = formatCoins(shown),
+                    style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = stringResource(R.string.account_coin_balance_footer),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        leadingContent = { IconBadge(icon = Icons.Filled.MonetizationOn) },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .testTag("account.coinBalance")
+            .clearAndSetSemantics { contentDescription = description },
     )
 }
 

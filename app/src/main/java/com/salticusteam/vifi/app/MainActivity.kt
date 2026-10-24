@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.app
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -9,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.notifications.InboxDeepLink
+import com.salticusteam.vifi.core.util.AppLocale
 import com.salticusteam.vifi.core.notifications.NotificationPermissionRequester
 import com.salticusteam.vifi.core.util.ForegroundActivityHolder
 import com.salticusteam.vifi.core.util.LaunchArgs
@@ -30,6 +32,11 @@ class MainActivity : ComponentActivity() {
     // through [permissionRequester] by the notification service.
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         permissionRequester.onResult(it)
+    }
+
+    // Turkish-only: library texts too, whatever the device language (LOC-01).
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocale.wrap(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

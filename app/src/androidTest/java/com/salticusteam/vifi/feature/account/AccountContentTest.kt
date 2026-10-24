@@ -3,6 +3,7 @@ package com.salticusteam.vifi.feature.account
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -52,6 +53,15 @@ class AccountContentTest {
         composeRule.onNodeWithTag("account.editProfile").assert(hasText("Ayşe Yılmaz")).assertIsDisplayed()
         composeRule.onNodeWithTag("account.phone").assert(hasText("+90 532 123 45 67")).assertIsDisplayed()
         composeRule.onNodeWithTag("topBar.backButton").assertIsDisplayed()
+    }
+
+    @Test
+    fun account_showsCoinBalance() {
+        setContent(AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67", coinBalance = 1250))
+
+        // The row is one TalkBack element whose description carries the Turkish-grouped amount.
+        composeRule.onNodeWithTag("account.coinBalance").assertIsDisplayed()
+            .assert(hasContentDescription("1.250", substring = true))
     }
 
     @Test

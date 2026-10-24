@@ -19,6 +19,8 @@ android {
         versionCode 16
         versionName "2.5"
         testInstrumentationRunner "com.salticusteam.vifi.HiltTestRunner"
+        // Turkish-only (LOC-01): package only the default (Turkish) and tr resources, dropping libraries' other locales.
+        resourceConfigurations += ["tr"]
     }
 
     compileOptions {

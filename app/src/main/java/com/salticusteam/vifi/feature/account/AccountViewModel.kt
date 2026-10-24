@@ -2,6 +2,7 @@ package com.salticusteam.vifi.feature.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.salticusteam.vifi.core.data.coins.CoinWalletStore
 import com.salticusteam.vifi.core.data.local.LocalDataCleaner
 import com.salticusteam.vifi.core.data.profile.ProfileState
 import com.salticusteam.vifi.core.data.profile.ProfileStore
@@ -14,6 +15,7 @@ import com.salticusteam.vifi.core.di.ApplicationScope
 import com.salticusteam.vifi.core.model.AnalyticsEvent
 import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.AuthError
+import com.salticusteam.vifi.core.model.CoinWallet
 import com.salticusteam.vifi.core.model.VerificationCode
 import com.salticusteam.vifi.core.model.userMessage
 import com.salticusteam.vifi.core.util.trackScreen
@@ -34,8 +36,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * The signed-in account (iOS AccountViewModel): the profile name and verified number, both followed live,
- * signing out, and deleting the account.
+ * The signed-in account (iOS AccountViewModel): the profile name, coin balance and verified number, all followed
+ * live, signing out, and deleting the account.
  *
  * Deleting removes the profile first, while the user is still signed in (the owner-only rules allow it), then
  * the account. When Firebase asks for a recent sign-in, a code is sent to the same number; once it is confirmed
@@ -46,6 +48,7 @@ import kotlinx.coroutines.launch
 class AccountViewModel @Inject constructor(
     private val sessionStore: SessionStore,
     profileStore: ProfileStore,
+    coinWalletStore: CoinWalletStore,
     private val authService: AuthService,
     private val profileService: ProfileService,
     private val localDataCleaner: LocalDataCleaner,
@@ -64,13 +67,14 @@ class AccountViewModel @Inject constructor(
     private val _isAdmin = MutableStateFlow(false)
 
     val uiState: StateFlow<AccountUiState> =
-        combine(sessionStore.state, profileStore.state, _deletion, _isAdmin, ::accountState)
+        combine(sessionStore.state, profileStore.state, coinWalletStore.wallet, _deletion, _isAdmin, ::accountState)
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
                 initialValue = accountState(
                     sessionStore.state.value,
                     profileStore.state.value,
+                    coinWalletStore.wallet.value,
                     _deletion.value,
                     _isAdmin.value,
                 ),
@@ -227,10 +231,12 @@ class AccountViewModel @Inject constructor(
     private fun accountState(
         session: SessionState,
         profile: ProfileState,
+        wallet: CoinWallet,
         deletion: AccountUiState,
         isAdmin: Boolean,
     ) = deletion.copy(
         profileName = (profile as? ProfileState.Present)?.profile?.fullName,
+        coinBalance = wallet.balance,
         formattedPhoneNumber = (session as? SessionState.SignedIn)?.user?.formattedPhoneNumber,
         isAdmin = isAdmin,
     )

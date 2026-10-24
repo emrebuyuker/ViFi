@@ -99,6 +99,8 @@
     <string name="cd_account_open">Hesap</string>
     <string name="account_profile_label">Profil</string>
     <string name="account_edit_profile">Profili Düzenle</string>
+    <string name="account_coin_balance_label">Coin bakiyen</string>
+    <string name="account_coin_balance_footer">Onaylanan sınav yüklemelerinden coin kazanırsın.</string>
     <string name="account_phone_label">Telefon numarası</string>
     <string name="account_phone_missing">Telefon numarası yok</string>
     <string name="account_sign_out_button">Çıkış Yap</string>

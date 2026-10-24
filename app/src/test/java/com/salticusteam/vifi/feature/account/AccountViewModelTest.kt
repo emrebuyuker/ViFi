@@ -1,11 +1,13 @@
 package com.salticusteam.vifi.feature.account
 
 import app.cash.turbine.test
+import com.salticusteam.vifi.core.data.coins.CoinWalletStore
 import com.salticusteam.vifi.core.data.local.fake.FakeLocalDataCleaner
 import com.salticusteam.vifi.core.data.profile.ProfileStore
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.data.repository.fake.FakeProfileService
+import com.salticusteam.vifi.core.data.repository.fake.FakeWalletReader
 import com.salticusteam.vifi.core.data.session.SessionStore
 import com.salticusteam.vifi.core.model.AnalyticsEvent
 import com.salticusteam.vifi.core.model.AnalyticsScreen
@@ -45,9 +47,12 @@ class AccountViewModelTest {
         authService: FakeAuthService = FakeAuthService(isSignedIn = true, latency = KotlinDuration.ZERO),
         profileService: FakeProfileService = FakeProfileService(mapOf(uid to FakeProfileService.SAMPLE_PROFILE)),
         profileStore: ProfileStore = ProfileStore(profileService),
+        walletReader: FakeWalletReader = FakeWalletReader(),
+        sessionStore: SessionStore = SessionStore(authService, backgroundScope),
     ) = AccountViewModel(
-        sessionStore = SessionStore(authService, backgroundScope),
+        sessionStore = sessionStore,
         profileStore = profileStore,
+        coinWalletStore = CoinWalletStore(walletReader, sessionStore, backgroundScope),
         authService = authService,
         profileService = profileService,
         localDataCleaner = cleaner,
@@ -60,7 +65,18 @@ class AccountViewModelTest {
     private fun reauthAuthService() =
         FakeAuthService(isSignedIn = true, latency = KotlinDuration.ZERO, requiresRecentLoginForDeletion = true)
 
-    // --- Profile and phone ---
+    // --- Profile, coins and phone ---
+
+    @Test
+    fun `uiState shows the live coin balance of the signed-in user`() = runTest {
+        val sut = makeSut(walletReader = FakeWalletReader(balance = 1250))
+
+        // The wallet listener runs in backgroundScope, which advanceUntilIdle alone does not drain.
+        advanceUntilIdle()
+        runCurrent()
+
+        assertEquals(1250, sut.uiState.value.coinBalance)
+    }
 
     @Test
     fun `onScreenShown reveals moderation to an admin only`() = runTest {
