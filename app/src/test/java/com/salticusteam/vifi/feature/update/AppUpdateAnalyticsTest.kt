@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.feature.update
 
+import com.salticusteam.vifi.core.data.preferences.fake.FakeUserPreferencesRepository
 import com.salticusteam.vifi.core.data.repository.AppUpdateChecker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.model.AnalyticsEvent
@@ -27,6 +28,7 @@ class AppUpdateAnalyticsTest {
         override fun statusChanges(): Flow<AppUpdateStatus> = status
     }
     private val analytics = FakeAnalyticsTracker()
+    private val preferences = FakeUserPreferencesRepository()
 
     private fun update(version: String) = AppUpdate(version, "https://store", null)
 
@@ -38,7 +40,7 @@ class AppUpdateAnalyticsTest {
 
     @Test
     fun `up to date reports nothing`() = runTest {
-        AppUpdateViewModel(checker, analytics)
+        AppUpdateViewModel(checker, analytics, preferences)
 
         assertTrue(analytics.events.isEmpty())
     }
@@ -46,7 +48,7 @@ class AppUpdateAnalyticsTest {
     @Test
     fun `required prompt is counted once per version`() = runTest {
         status.value = AppUpdateStatus.Required(update("4.0"))
-        AppUpdateViewModel(checker, analytics)
+        AppUpdateViewModel(checker, analytics, preferences)
 
         status.value = AppUpdateStatus.Required(update("4.0"))
         status.value = AppUpdateStatus.Required(update("4.1"))
@@ -60,7 +62,7 @@ class AppUpdateAnalyticsTest {
     @Test
     fun `optional prompt is counted when shown, not again once dismissed`() = runTest {
         status.value = AppUpdateStatus.Optional(update("3.2"))
-        val sut = AppUpdateViewModel(checker, analytics)
+        val sut = AppUpdateViewModel(checker, analytics, preferences)
 
         sut.onOptionalLaterChosen()
         sut.onOptionalDismissed()
@@ -75,11 +77,26 @@ class AppUpdateAnalyticsTest {
     @Test
     fun `optional update choice reports the update action`() = runTest {
         status.value = AppUpdateStatus.Optional(update("3.2"))
-        val sut = AppUpdateViewModel(checker, analytics)
+        val sut = AppUpdateViewModel(checker, analytics, preferences)
 
         sut.onOptionalUpdateChosen()
         sut.onOptionalDismissed()
 
         assertEquals(AnalyticsEvent.UpdateAction("update"), analytics.events.last())
+    }
+
+    @Test
+    fun `optional skip reports the skip action and is not counted as shown again`() = runTest {
+        status.value = AppUpdateStatus.Optional(update("3.2"))
+        val sut = AppUpdateViewModel(checker, analytics, preferences)
+
+        sut.onOptionalSkipChosen()
+        sut.onOptionalDismissed()
+        status.value = AppUpdateStatus.Optional(update("3.2"))
+
+        assertEquals(
+            listOf(AnalyticsEvent.UpdatePromptShown(false), AnalyticsEvent.UpdateAction("skip")),
+            analytics.events,
+        )
     }
 }
