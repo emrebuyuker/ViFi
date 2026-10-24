@@ -17,11 +17,14 @@ data class ModerationUiState(
 )
 
 /**
- * One submission under review (iOS `ModerationDetailView`). [record] is `null` when the queue no longer holds it
- * (e.g. the process was recreated); the screen then offers to go back.
+ * One submission under review (iOS `ModerationDetailView`). [record] is `null` when the queue no longer holds it;
+ * the screen then offers to go back. After process death the queue is empty: [isLoading] is set while it is
+ * reloaded to find the record again.
  */
 data class ModerationDetailUiState(
     val record: ExamSubmissionRecord? = null,
+    /** The queue is being reloaded to restore [record] (the process was recreated). */
+    val isLoading: Boolean = false,
     /** An approval or rejection is running: every control and the back navigation are locked. */
     val isWorking: Boolean = false,
     /** The last failure's message, shown under the actions. */

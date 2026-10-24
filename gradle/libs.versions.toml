@@ -23,6 +23,9 @@ telephoto = "0.13.0"
 baselineprofile = "1.4.1"
 profileinstaller = "1.4.0"
 uiautomator = "2.3.0"
+# Durable exam-submission uploads (survive backgrounding and process death).
+work = "2.9.1"
+androidxHilt = "1.2.0"
 
 
 firebaseBom = "33.5.1"
@@ -70,6 +73,9 @@ telephoto-zoomable-image-coil = { module = "me.saket.telephoto:zoomable-image-co
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "baselineprofile" }
 androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 

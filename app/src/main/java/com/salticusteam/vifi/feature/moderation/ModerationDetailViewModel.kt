@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.feature.moderation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
@@ -23,17 +24,27 @@ import kotlinx.coroutines.launch
  * One submission under review (iOS `ModerationDetailView` + `ModerationViewModel.approve/reject`): approving
  * publishes the exam and credits the owner, rejecting records an optional reason. Either removes the submission
  * from the [ModerationQueue] on success; a failure keeps it, with the Turkish message under the actions.
+ *
+ * The route carries only the submission id; after process death the shared queue is empty, so it is reloaded to
+ * find the record again, and a rejection being typed is kept in the [SavedStateHandle].
  */
 @HiltViewModel(assistedFactory = ModerationDetailViewModel.Factory::class)
 class ModerationDetailViewModel @AssistedInject constructor(
-    @Assisted submissionId: String,
+    @Assisted private val submissionId: String,
+    private val savedStateHandle: SavedStateHandle,
     private val queue: ModerationQueue,
     private val moderationService: ModerationService,
     private val analytics: AnalyticsTracker,
 ) : ViewModel() {
 
     // State
-    private val _uiState = MutableStateFlow(ModerationDetailUiState(record = queue.record(submissionId)))
+    private val _uiState = MutableStateFlow(
+        ModerationDetailUiState(
+            record = queue.record(submissionId),
+            isConfirmingReject = savedStateHandle[KEY_CONFIRMING_REJECT] ?: false,
+            rejectReason = savedStateHandle[KEY_REJECT_REASON] ?: "",
+        ),
+    )
     val uiState: StateFlow<ModerationDetailUiState> = _uiState.asStateFlow()
 
     // One-shot events
@@ -41,6 +52,11 @@ class ModerationDetailViewModel @AssistedInject constructor(
     val events = _events.receiveAsFlow()
 
     // Intents
+    init {
+        // Never loaded in this process: it was recreated on this screen.
+        if (_uiState.value.record == null && queue.records.value == null) restoreRecord()
+    }
+
     /** "Onayla ve Yayınla": publishes and credits; the result dialog follows. Ignored while working. */
     fun approve() {
         val state = _uiState.value
@@ -72,14 +88,17 @@ class ModerationDetailViewModel @AssistedInject constructor(
         val state = _uiState.value
         if (state.record == null || state.isWorking) return
         _uiState.update { it.copy(isConfirmingReject = true, rejectReason = "", error = null) }
+        saveReject()
     }
 
     fun onRejectReasonChange(text: String) {
         _uiState.update { it.copy(rejectReason = text) }
+        saveReject()
     }
 
     fun onRejectDismissed() {
         _uiState.update { it.copy(isConfirmingReject = false) }
+        saveReject()
     }
 
     /** Rejects with the typed reason (blank means none); back to the queue on success. */
@@ -89,6 +108,7 @@ class ModerationDetailViewModel @AssistedInject constructor(
         if (state.isWorking) return
         val reason = state.rejectReason.trim().ifEmpty { null }
         _uiState.update { it.copy(isConfirmingReject = false, isWorking = true, error = null) }
+        saveReject()
         viewModelScope.launch {
             try {
                 moderationService.reject(record, reason)
@@ -104,8 +124,38 @@ class ModerationDetailViewModel @AssistedInject constructor(
         }
     }
 
+    // Helpers
+    /** Reloads the queue and picks the record from it; a failure leaves it missing (the screen offers to go back). */
+    private fun restoreRecord() {
+        _uiState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            try {
+                queue.reload()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Missing below; the queue screen shows the reason when the admin goes back.
+            }
+            val record = queue.record(submissionId)
+            _uiState.update {
+                it.copy(isLoading = false, record = record, isConfirmingReject = it.isConfirmingReject && record != null)
+            }
+        }
+    }
+
+    private fun saveReject() {
+        val state = _uiState.value
+        savedStateHandle[KEY_CONFIRMING_REJECT] = state.isConfirmingReject
+        savedStateHandle[KEY_REJECT_REASON] = state.rejectReason
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(submissionId: String): ModerationDetailViewModel
+    }
+
+    private companion object {
+        const val KEY_CONFIRMING_REJECT = "moderationDetail.confirmingReject"
+        const val KEY_REJECT_REASON = "moderationDetail.rejectReason"
     }
 }

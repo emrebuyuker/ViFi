@@ -29,4 +29,25 @@ sealed class ExamSubmissionError(val userMessage: String) : Exception(userMessag
             Offline -> "offline"
             is Unknown -> "unknown"
         }
+
+    /** Whether a later attempt may succeed (a dropped connection, an unexplained failure), so the upload retries. */
+    val isRetryable: Boolean
+        get() = when (this) {
+            Offline, is Unknown -> true
+            NotSignedIn, InvalidSubmission, PermissionDenied -> false
+        }
+
+    companion object {
+        /** Shown for a failure with no specific mapping (iOS copy, verbatim). */
+        const val GENERIC_MESSAGE = "Gönderimin kaydedilemedi. Lütfen tekrar dene."
+
+        /** The error an [analyticsReason] stands for (how a background upload hands its failure back). */
+        fun fromAnalyticsReason(reason: String?): ExamSubmissionError = when (reason) {
+            "not_signed_in" -> NotSignedIn
+            "invalid_submission" -> InvalidSubmission
+            "permission_denied" -> PermissionDenied
+            "offline" -> Offline
+            else -> Unknown(GENERIC_MESSAGE)
+        }
+    }
 }

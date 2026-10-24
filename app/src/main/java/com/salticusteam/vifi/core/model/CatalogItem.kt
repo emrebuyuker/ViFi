@@ -12,6 +12,8 @@ data class CatalogItem(
 )
 
 // Added in 2.5 — the value a profile picker holds: a listed item or free text the user typed (iOS CatalogSelection).
+/** Serializable so a form can keep its picks across process death (SavedStateHandle). */
+@Serializable
 data class CatalogSelection(
     val name: String,
     val id: String,

@@ -130,6 +130,10 @@ dependencies {
     implementation libs.hilt.android
     ksp libs.hilt.compiler
     implementation libs.androidx.hilt.navigation.compose
+    // Exam-submission uploads run as WorkManager work, created by Hilt (@HiltWorker).
+    implementation libs.androidx.work.runtime
+    implementation libs.androidx.hilt.work
+    ksp libs.androidx.hilt.compiler
     implementation libs.androidx.lifecycle.viewmodel.compose
     implementation libs.androidx.lifecycle.runtime.compose
     // App foreground/background hooks (badge clearing, disk-cache pruning).

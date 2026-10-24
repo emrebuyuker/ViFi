@@ -3,12 +3,12 @@ package com.salticusteam.vifi.core.data.repository
 import com.salticusteam.vifi.BuildConfig
 import com.salticusteam.vifi.core.data.firebase.FirebaseAnalyticsTracker
 import com.salticusteam.vifi.core.data.firebase.FirebaseAuthService
-import com.salticusteam.vifi.core.data.firebase.FirebaseExamSubmissionService
 import com.salticusteam.vifi.core.data.firebase.FirebaseExamUnlockService
 import com.salticusteam.vifi.core.data.firebase.FirebaseLoginDiagnosticsReporter
 import com.salticusteam.vifi.core.data.firebase.FirebaseModerationBackend
 import com.salticusteam.vifi.core.data.firebase.FirebaseNotificationService
 import com.salticusteam.vifi.core.data.firebase.FirebaseProfileService
+import com.salticusteam.vifi.core.data.firebase.FirebaseSubmissionBackend
 import com.salticusteam.vifi.core.data.firebase.FirestoreDeviceTokenStore
 import com.salticusteam.vifi.core.data.firebase.FirestoreAnnouncementsReader
 import com.salticusteam.vifi.core.data.firebase.FirestoreArchiveRepository
@@ -26,6 +26,8 @@ import com.salticusteam.vifi.core.data.preferences.DataStoreUserPreferencesRepos
 import com.salticusteam.vifi.core.data.preferences.OnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.RecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.UserPreferencesRepository
+import com.salticusteam.vifi.core.data.submission.ResumableExamSubmissionService
+import com.salticusteam.vifi.core.data.submission.SubmissionBackend
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -42,10 +44,17 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindExamUnlockService(impl: FirebaseExamUnlockService): ExamUnlockService
 
-    /** Uploads to Storage `pending/<uid>/<id>/` and creates Firestore `submissions/<id>` (BE-14). */
+    /**
+     * Uploads to Storage `pending/<uid>/<id>/` and creates Firestore `submissions/<id>` (BE-14), resumably: the
+     * upload worker may retry it after a lost connection or a killed process.
+     */
     @Binds
     @Singleton
-    abstract fun bindExamSubmissionService(impl: FirebaseExamSubmissionService): ExamSubmissionService
+    abstract fun bindExamSubmissionService(impl: ResumableExamSubmissionService): ExamSubmissionService
+
+    @Binds
+    @Singleton
+    abstract fun bindSubmissionBackend(impl: FirebaseSubmissionBackend): SubmissionBackend
 
     /** Serverless admin moderation: the admin's device publishes and credits, gated by the rules' isAdmin(). */
     @Binds
