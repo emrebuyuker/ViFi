@@ -1,0 +1,46 @@
+// Baseline Profile generator: drives the app's cold start → Home → one university on a connected
+// device/emulator and writes the profile into :app (merged into src/main, shipped by liveRelease).
+// Runs on the mock flavor only, so live Firebase is never touched.
+plugins {
+    alias(libs.plugins.android.test)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.androidx.baselineprofile)
+}
+
+android {
+    namespace 'com.salticusteam.vifi.baselineprofile'
+    compileSdk 35
+
+    defaultConfig {
+        minSdkVersion 28
+        targetSdkVersion 35
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // The app has a "backend" flavor dimension; profile the sample-data flavor.
+        missingDimensionStrategy "backend", "mock"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    targetProjectPath = ":app"
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+// Generate on whatever device is connected (emulator or phone); no Gradle Managed Device.
+baselineProfile {
+    useConnectedDevices = true
+}
+
+dependencies {
+    implementation libs.androidx.test.ext.junit
+    implementation libs.androidx.espresso.core
+    implementation libs.androidx.test.uiautomator
+    implementation libs.androidx.benchmark.macro.junit4
+}
