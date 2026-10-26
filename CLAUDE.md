@@ -6,7 +6,8 @@
 > silindi, FM-23). **Phone Auth (+90)**, oturum + profil kapısı, **canlı arşiv** (isimli `vifi` Firestore), profil
 > tamamlama/düzenleme, Hesap ekranı (çıkış + hesap silme), sınav görüntüleyicileri, coin cüzdanı + sınav kilidi, bildirimler
 > (FCM + Inbox), onboarding, Hakkında, force update kapısı ve analytics hazır; ana akışlar canlıda emülatörde doğrulandı.
-> Google Play geliştirici hesabı Kasım 2024'ten beri kaldırılmış durumda — release/mağaza işleri `REL-01`'de.
+> Google Play hesabı kısıtlaması 26 Ekim 2026'da kalktı; ViFi hâlâ Play'den kaldırılmış durumda, yeni yükleme anahtarı
+> 28 Ekim 2026'da geçerli — release/mağaza işleri `REL-01`'de.
 > **iOS v3.1.0 paritesi** hedefinde ilerleme ve kalan işler
 > [`ANDROID-PARITY-ROADMAP.md`](ANDROID-PARITY-ROADMAP.md) (özet) ve [`ANDROID-PARITY-DETAIL.md`](ANDROID-PARITY-DETAIL.md)
 > (ayrıntı) dosyalarındadır.

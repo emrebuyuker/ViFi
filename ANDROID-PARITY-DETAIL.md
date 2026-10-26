@@ -3845,6 +3845,7 @@
 
 #### `REL-01` — Play Store sorunlarını çöz ve uygulamayı Play Store'da yayınla  _(P0 · efor: L)_
 - **Durum (2026-10-24):** `buyukeryazilim` geliştirici hesabı ve ViFi dahil tüm uygulamalar 19 Kasım 2024'te Google Play'den kaldırıldı (hesap doğrulaması son tarihe kadar tamamlanmadı; Play Console "İşlem gerekli"). ViFi üretimde etkin değil, yeni sürüm yayınlanamıyor.
+- **Durum (2026-10-26):** Kimlik ve telefon doğrulaması tamamlandı, hesap kısıtlaması kalktı. Play App Signing etkin (paket adı korunur); yükleme anahtarı sıfırlandı, yeni anahtar 28 Ekim 2026 16:08 UTC'de geçerli. Beyanlar kaydedildi; kalan engel Android geliştirici doğrulamasında paket adı kaydı (Play imzalı APK gerekiyor). Ayrıntılı ilerleme ROADMAP'teki REL-01 notunda.
 - **Neden ayrı kalem:** Release imzası, Play App Signing ve Play Integrity mağaza dağıtımına bağlı. Bu işler hesap durumu çözülmeden yapılamaz; geliştirme ve testler debug imzayla (BE-01 debug izleri kayıtlı) sürer.
 - **Adımlar:**
   - Play Console'da hesap doğrulamasını tamamla ve kaldırılan uygulamaların geri alınması için başvur. Olmazsa yeni hesap / paket adı kararını ver (`com.salticusteam.vifi` eski hesaba bağlı kalabilir; Firebase kaydı ve iOS ile paylaşılan proje bu karardan etkilenir).
