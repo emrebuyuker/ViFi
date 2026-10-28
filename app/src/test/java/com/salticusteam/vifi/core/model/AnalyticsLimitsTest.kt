@@ -99,10 +99,10 @@ class AnalyticsLimitsTest {
             AnalyticsScreen.HOME, AnalyticsScreen.BROWSE, AnalyticsScreen.LOGIN, AnalyticsScreen.ONBOARDING,
             AnalyticsScreen.PROFILE_COMPLETION, AnalyticsScreen.EDIT_PROFILE, AnalyticsScreen.ADD_EXAM,
             AnalyticsScreen.EXAM_VIEWER, AnalyticsScreen.EXAM_PDF, AnalyticsScreen.EXAM_IMAGES, AnalyticsScreen.INBOX,
-            AnalyticsScreen.MODERATION, AnalyticsScreen.ABOUT, AnalyticsScreen.ACCOUNT,
+            AnalyticsScreen.MODERATION, AnalyticsScreen.ABOUT, AnalyticsScreen.ACCOUNT, AnalyticsScreen.PAYWALL,
         )
 
-        assertEquals(14, screens.toSet().size)
+        assertEquals(15, screens.toSet().size)
         screens.forEach { assertTrue(it.length <= PARAM_VALUE_MAX) }
     }
 

@@ -98,6 +98,9 @@ object AnalyticsScreen {
     const val MODERATION = "Moderation"
     const val ABOUT = "About"
     const val ACCOUNT = "Account"
+
+    // Added in 4.0.0 — the ViFi Premium paywall (iOS `screenView(name: "Paywall")`).
+    const val PAYWALL = "Paywall"
 }
 
 // Added in 2.5 — fixed values of event parameters that iOS reports as plain strings.

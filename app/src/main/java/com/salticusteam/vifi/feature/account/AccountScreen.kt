@@ -3,9 +3,14 @@ package com.salticusteam.vifi.feature.account
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.ui.platform.LocalContext
+import com.salticusteam.vifi.core.util.LegalLinks
+import com.salticusteam.vifi.feature.premium.PremiumLinks
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -59,9 +64,10 @@ import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 
 /**
- * The signed-in account (iOS AccountView), opened from the home screen: the profile (opens the editor), the
- * verified phone number, signing out and deleting the account (with a re-verification of the number when
- * Firebase asks for a recent sign-in). An admin also gets the Moderasyon entry.
+ * The signed-in account (iOS AccountView), opened from the home screen: the profile (opens the editor), ViFi Premium
+ * (the upgrade row, or the active status with "Aboneliği Yönet"), the coin balance (hidden for a subscriber), the
+ * verified phone number, signing out and deleting the account (with a re-verification of the number when Firebase
+ * asks for a recent sign-in). An admin also gets the Moderasyon entry.
  */
 @Composable
 fun AccountScreen(
@@ -69,9 +75,12 @@ fun AccountScreen(
     onAbout: () -> Unit,
     onBack: () -> Unit,
     onModeration: () -> Unit = {},
+    /** Opens the Premium paywall from the upgrade row; `null` hides the row (the active status still shows). */
+    onOpenPaywall: (() -> Unit)? = null,
     viewModel: AccountViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.onScreenShown()
@@ -100,6 +109,9 @@ fun AccountScreen(
         onBack = onBack,
         onAbout = onAbout,
         onModeration = onModeration,
+        onUpgradePremium = onOpenPaywall,
+        // Google Play's own subscription page: change the plan, update the payment method, or cancel.
+        onManageSubscription = { LegalLinks.open(context, PremiumLinks.MANAGE_SUBSCRIPTIONS_URL) },
     )
 }
 
@@ -119,6 +131,8 @@ fun AccountContent(
     modifier: Modifier = Modifier,
     onAbout: () -> Unit = {},
     onModeration: () -> Unit = {},
+    onUpgradePremium: (() -> Unit)? = null,
+    onManageSubscription: () -> Unit = {},
 ) {
     var isConfirmingSignOut by rememberSaveable { mutableStateOf(false) }
     var isConfirmingDeletion by rememberSaveable { mutableStateOf(false) }
@@ -146,9 +160,24 @@ fun AccountContent(
                 ProfileRow(profileName = state.profileName, enabled = !state.isWorking, onClick = onEditProfile)
                 HorizontalDivider()
             }
-            item(key = "coins") {
-                CoinBalanceRow(balance = state.coinBalance)
-                HorizontalDivider()
+            if (state.isSubscribed) {
+                item(key = "premiumActive") {
+                    PremiumActiveRow()
+                    ManageSubscriptionRow(enabled = !state.isWorking, onClick = onManageSubscription)
+                    HorizontalDivider()
+                }
+            } else {
+                if (onUpgradePremium != null) {
+                    item(key = "premiumUpgrade") {
+                        PremiumUpgradeRow(enabled = !state.isWorking, onClick = onUpgradePremium)
+                        HorizontalDivider()
+                    }
+                }
+                // A subscriber has no coin economy (iOS hides the coin section).
+                item(key = "coins") {
+                    CoinBalanceRow(balance = state.coinBalance)
+                    HorizontalDivider()
+                }
             }
             item(key = "phone") {
                 PhoneRow(formattedPhoneNumber = state.formattedPhoneNumber)
@@ -253,6 +282,56 @@ private fun ProfileRow(profileName: String?, enabled: Boolean, onClick: () -> Un
         modifier = Modifier
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .testTag("account.editProfile"),
+    )
+}
+
+/** "ViFi Premium'a Geç · Tüm sınavlara sınırsız eriş": opens the paywall (iOS `AccountPremiumSection`). */
+@Composable
+private fun PremiumUpgradeRow(enabled: Boolean, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = {
+            Text(text = stringResource(R.string.account_premium_upgrade_title), fontWeight = FontWeight.SemiBold)
+        },
+        supportingContent = { Text(stringResource(R.string.account_premium_upgrade_subtitle)) },
+        leadingContent = { IconBadge(icon = Icons.Filled.WorkspacePremium) },
+        trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .testTag("account.premium.upgrade"),
+    )
+}
+
+/** "ViFi Premium · Tüm sınavlar açık"; read as one element. */
+@Composable
+private fun PremiumActiveRow() {
+    ListItem(
+        headlineContent = {
+            Text(text = stringResource(R.string.account_premium_title), fontWeight = FontWeight.SemiBold)
+        },
+        supportingContent = { Text(stringResource(R.string.account_premium_active)) },
+        leadingContent = { IconBadge(icon = Icons.Filled.WorkspacePremium) },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .semantics(mergeDescendants = true) {}
+            .testTag("account.premium.active"),
+    )
+}
+
+/** "Aboneliği Yönet": Google Play's subscription page, with where to manage or cancel it. */
+@Composable
+private fun ManageSubscriptionRow(enabled: Boolean, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.account_premium_manage)) },
+        supportingContent = { Text(stringResource(R.string.account_premium_manage_footer)) },
+        trailingContent = { Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null) },
+        colors = ListItemDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.background,
+            headlineColor = MaterialTheme.colorScheme.primary,
+        ),
+        modifier = Modifier
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .testTag("account.premium.manage"),
     )
 }
 
@@ -418,6 +497,29 @@ private fun AccountContentPreview() {
     ViFiTheme {
         AccountContent(
             state = AccountUiState(profileName = "Ayşe Yılmaz", formattedPhoneNumber = "+90 532 123 45 67"),
+            resendSecondsRemaining = 0,
+            onEditProfile = {},
+            onSignOut = {},
+            onDeleteAccount = {},
+            onCodeChange = {},
+            onConfirmReverification = {},
+            onResendCode = {},
+            onCancelReverification = {},
+            onBack = {},
+        )
+    }
+}
+
+@ViFiThemePreviews
+@Composable
+private fun AccountPremiumPreview() {
+    ViFiTheme {
+        AccountContent(
+            state = AccountUiState(
+                profileName = "Ayşe Yılmaz",
+                formattedPhoneNumber = "+90 532 123 45 67",
+                isSubscribed = true,
+            ),
             resendSecondsRemaining = 0,
             onEditProfile = {},
             onSignOut = {},

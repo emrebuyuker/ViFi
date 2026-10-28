@@ -82,6 +82,13 @@ class DesignSystemTest {
     }
 
     @Test
+    fun coinBalanceBadge_isHiddenForASubscriber() {
+        composeRule.setContent { ViFiTheme { CoinBalanceBadge(balance = 1250, isSubscribed = true) } }
+
+        composeRule.onNodeWithTag("coin.balance").assertDoesNotExist()
+    }
+
+    @Test
     fun topAppBar_backButtonOnlyWhenNavigable() {
         var backs = 0
         composeRule.setContent { ViFiTheme { ViFiTopAppBar(title = "Fakülteler", onBack = { backs++ }) } }

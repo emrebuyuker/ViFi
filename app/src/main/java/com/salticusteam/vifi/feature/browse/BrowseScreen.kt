@@ -107,6 +107,8 @@ fun BrowseScreen(
     onBreadcrumbSelect: ((ArchivePath) -> Unit)? = null,
     /** Returns to the home screen (toolbar "Ana Sayfa"); `null` hides the action (the home screen itself). */
     onHomeClick: (() -> Unit)? = null,
+    /** Opens the Premium paywall from the unlock sheet; `null` hides the sheet's "Premium'a geç" link. */
+    onOpenPaywall: (() -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel(),
     unlockViewModel: ExamUnlockViewModel = hiltViewModel(),
     deletionViewModel: ExamDeletionViewModel = hiltViewModel(),
@@ -123,6 +125,7 @@ fun BrowseScreen(
                 // An unlocked exam opens through the same action as a free one.
                 is ExamUnlockEvent.Unlocked -> onItemClick(event.exam)
                 is ExamUnlockEvent.EarnCoins -> onEarnCoins?.invoke(event.lesson)
+                ExamUnlockEvent.GoPremium -> onOpenPaywall?.invoke()
             }
         }
     }
@@ -173,7 +176,9 @@ fun BrowseScreen(
             examName = exam.name,
             state = lockState,
             onUnlock = unlockViewModel::onUnlockConfirm,
+            onPurchaseWithMoney = unlockViewModel::onPurchaseWithMoney,
             onEarnCoins = onEarnCoins?.let { { unlockViewModel.onEarnCoins() } },
+            onGoPremium = onOpenPaywall?.let { { unlockViewModel.onGoPremium() } },
             onDismiss = unlockViewModel::onSheetDismiss,
         )
     }
@@ -209,7 +214,11 @@ internal fun BrowseContent(
                 title = title,
                 onBack = onBack,
                 actions = {
-                    CoinBalanceBadge(balance = lockState.balance, modifier = Modifier.padding(end = 4.dp))
+                    CoinBalanceBadge(
+                        balance = lockState.balance,
+                        isSubscribed = lockState.isSubscribed,
+                        modifier = Modifier.padding(end = 4.dp),
+                    )
                     if (onHomeClick != null) {
                         IconButton(onClick = onHomeClick, modifier = Modifier.testTag("toolbar.home")) {
                             Icon(
