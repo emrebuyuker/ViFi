@@ -13,7 +13,8 @@
 | 3 | Play Console → Uygulama paketi gezgini | Play'deki en yüksek `versionCode`'u kontrol et (bizde 17). | Eşit ya da daha düşük kod yüklenemez. |
 | 4 | Play Console → Uygulama içeriği | §2'deki cevaplar. | Yayın engeli. |
 | 5 | Play Console → Mağaza varlığı → Ana mağaza girişi | §3 metinler + §4 görseller. | Yayın engeli. |
-| 6 | 28 Ekim 19:08 TRT sonrası | AAB'yi iç teste taslak yükle → Uygulama paketi gezgini'nden Play imzalı universal APK'yı indir → `apksigner verify --print-certs` ile SHA-256'nın `B2:F6…` olduğunu teyit et → APK'yı Android geliştirici doğrulamasına yükle. | "Kayıtlı olmayan paket adı" engeli. |
+| 6 | 28 Ekim 19:08 TRT sonrası | AAB'yi iç teste taslak yükle → Uygulama paketi gezgini'nden Play imzalı universal APK'yı indir → `apksigner verify --print-certs` ile SHA-256'nın `B2:F6…` olduğunu teyit et → APK'yı Android geliştirici doğrulamasına yükle. | "Kayıtlı olmayan paket adı" engeli. ✔️ 28 Ekim 19:30: dahili teste yayınlandı, APK `B2:F6` doğrulandı, paket adı kayıtlı. |
+| 7 | Yayın özeti | 17 (3.1.0) üretime %100 (16 (2.5) dahil edilmez) → 13 değişikliği incelemeye gönder. | ✔️ 28 Ekim'de gönderildi; yönetilen yayınlama kapalı, onayda yayında. |
 
 ## 2. Uygulama içeriği — cevaplar
 
@@ -23,7 +24,7 @@
 | Uygulama erişimi | "Bazı işlevler kısıtlı" → giriş talimatı ekle | Uygulamanın tamamı telefonla (+90) girişin arkasında. İnceleme için Firebase Console'daki **test numarasını ve sabit kodunu** yaz; numara bu dosyaya yazılmaz (sır kuralı). Test hesabının profili tamamlanmış olmalı. Önerilen talimat: _"Uygulama telefon numarasıyla giriş ister. Giriş ekranına \<numara\> yazıp Kod Gönder'e dokunun, kod alanına \<kod\> yazın. Bu bir test numarasıdır, SMS gönderilmez."_ |
 | Reklamlar | Hayır, reklam içermiyor | AdMob tamamen kaldırıldı (FM-08). |
 | İçerik derecelendirmesi | Kategori: Referans, Haber veya Eğitim. Şiddet, cinsellik, küfür, madde, kumar: Hayır. Kullanıcılar birbiriyle içerik paylaşabiliyor mu: **Evet** (sınav görselleri/PDF'leri; yayından önce incelenir). Konum paylaşımı: Hayır. Dijital satın alma: Hayır. | Coin gerçek parayla satın alınmaz ve paraya çevrilmez; kumar sayılmaz. |
-| Hedef kitle ve içerik | **Karar bekliyor.** Öneri: 18 ve üzeri. | Hedef üniversite öğrencileri. 13 yaş altı seçilmemeli (Aile politikası). |
+| Hedef kitle ve içerik | 18 yaş ve üstü; uygulama çocuklara hitap etmiyor | 28 Ekim'de Console'da doğrulandı (önceden kayıtlı). 13 yaş altı seçilmemeli (Aile politikası). |
 | Haber uygulaması | Hayır | |
 | Devlet uygulaması | Hayır | |
 | Finans özellikleri | Yok | 26 Ekim'de kaydedildi. |
@@ -111,6 +112,5 @@ ViFi yenilendi: yeni tasarım, telefon numarasıyla giriş, coin ile kilitli sı
   zorunlu onay kutusu var; işaretlenmeden Gönder açılmaz. Hakkında'da Kullanım Koşulları ve Gizlilik Politikası
   bağlantıları var. Gönderimler yayından önce yönetici onayından geçiyor; görüntüleyicideki "Bize Ulaş" şikâyet yolu.
   **Kalan:** aynı onay kutusu iOS'ta yok (parite işi).
-- **Hedef kitle:** §2'deki yaş grubu seçimi.
 - **"Bağımsız uygulama" cümlesi:** Tam açıklamadaki üniversitelerle resmi bağlantı olmadığı cümlesinin doğruluğunu ürün
   sahibi teyit etmeli; üniversite adları geçtiği için yanıltıcı içerik politikası açısından önerilir.
