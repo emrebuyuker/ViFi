@@ -6,8 +6,8 @@
 > silindi, FM-23). **Phone Auth (+90)**, oturum + profil kapısı, **canlı arşiv** (isimli `vifi` Firestore), profil
 > tamamlama/düzenleme, Hesap ekranı (çıkış + hesap silme), sınav görüntüleyicileri, coin cüzdanı + sınav kilidi, bildirimler
 > (FCM + Inbox), onboarding, Hakkında, force update kapısı ve analytics hazır; ana akışlar canlıda emülatörde doğrulandı.
-> ViFi 3.1.0 (17) 28 Ekim 2026'dan beri Play'de üretimde (`REL-01` kapandı); 4.0.0 (18) `v-4.0.0` dalında hazırlanıyor,
-> yayını `REL-02`'de ve yalnızca ürün sahibi "release çıkalım" dediğinde.
+> ViFi 3.1.0 (17) 28 Ekim 2026'dan beri Play'de üretimde; 4.0.0 (18) `v-4.0.0` dalında hazırlanıyor ve yalnızca
+> ürün sahibi "release çıkalım" dediğinde yayınlanır. Yol haritasının 223 kalemi tamam (29 Ekim 2026).
 > **iOS v3.1.0 paritesi** hedefinde ilerleme ve kalan işler
 > [`ANDROID-PARITY-ROADMAP.md`](ANDROID-PARITY-ROADMAP.md) (özet) ve [`ANDROID-PARITY-DETAIL.md`](ANDROID-PARITY-DETAIL.md)
 > (ayrıntı) dosyalarındadır.

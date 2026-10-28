@@ -3918,6 +3918,7 @@
 - **Kabul kriteri:** Bir dersten açılan form o okul/fakülte/bölüm/dersle dolu; Home'dan açılan form profille dolu; eşleşmeyen ad güvenli şekilde boş kalır.
 
 #### `REL-02` — Düzeltme sürümü (versionCode 18)  _(P1 · efor: S)_
+- **Durum (2026-10-29, kapandı):** ✔️ Kapatıldı (ürün sahibi kararı). 4.0.0 (18) `v-4.0.0` dalında QA-01…QA-04 ile hazır ama yayınlanmadı: 4.0.0'a başka değişiklikler de girecek. Yayın (release AAB, iç test → üretim, mağaza sürümünde kontrol) yalnız ürün sahibi "release çıkalım" dediğinde yapılır; sürüm notları kapsam kesinleşince güncellenir.
 - **Durum (2026-10-29):** Sürüm adı **4.0.0** (iOS ile aynı seri), `versionCode 18`; `v-4.0.0` dalında QA-01…QA-03 ile birlikte. Sürüm notları `PLAY-STORE-LISTING.md`'de (240/500 karakter). Kalan: release AAB, iç test → üretim, mağaza sürümünde kontrol.
 - **Kapsam:** QA-01, QA-02, QA-03, QA-04 (4.0.0'a başka değişiklikler de girecek). Sürüm adı iOS serisine göre seçilir (iOS 4.0.0'a geçiyor; CLAUDE.md "iOS ile aynı seri").
 - **Adımlar:**
