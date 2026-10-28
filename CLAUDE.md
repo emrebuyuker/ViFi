@@ -179,7 +179,7 @@ Android ve iOS **aynı** `vifi-831a8` projesini paylaşır (ayrıntı: `.claude/
 | Konu | Değer |
 |---|---|
 | **Proje** | `vifi-831a8` (proje no `441043948320`, Blaze; bucket `vifi-831a8.appspot.com`) |
-| **Android kaydı** | `com.salticusteam.vifi` — bu geliştirme Mac'inin debug SHA-1/SHA-256'sı kayıtlı (`BE-01`); release izleri + `google-services.json` yenileme `REL-01`'de |
+| **Android kaydı** | `com.salticusteam.vifi` — debug (bu Mac), Play uygulama imzalama ve yükleme anahtarının SHA-1/SHA-256'ları kayıtlı (`BE-01`, 28 Ekim 2026); Play Integrity sağlayıcı kaydı `REL-01`'de |
 | **Arşiv** | named `vifi` Firestore `catalogNodes`/`exams` (`BE-05`, `BE-15`); RTDB `Universitiess` artık okunmuyor |
 | **Giriş** | Phone Auth `+90` (`BE-04`); canlı test için Console'daki test numarası + `111111` |
 | **App Check** | Storage/RTDB/Auth enforce **AÇIK** → Play Integrity kurulmadan **403**; Firestore enforce en son açılır (`BE-02/03`) |

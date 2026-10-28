@@ -101,7 +101,7 @@
   - App Check metriklerinde 'verified vs outdated client' oranını Android sürümü çıktıktan sonra izle.
 - **Gradle/bağımlılık:** Yok (Console).
 - **Bağımlılık:** BE-02, Browse/Arşiv alanı (Firestore cutover)
-- **Tuzaklar:** Firestore enforce'u erken açmak iOS dahil tüm eski istemcileri kırabilir; sıralamaya uyulmalı.
+- **Tuzaklar:** Firestore enforce'u erken açmak iOS dahil tüm eski istemcileri kırabilir; sıralamaya uyulmalı. Enforce anahtarı servis bazındadır (uygulama bazında değil): açıldığında iOS ve Android birlikte etkilenir. Play Integrity sağlayıcı kaydı ve SHA izleri ise yalnız Android uygulama kaydına aittir; iOS'ta değişiklik gerektirmez (2026-10-28 kontrolü: ViFi-iOS'ta Android imzasına bağlı kod/doküman yok).
 - **Kabul kriteri:** Play Integrity Android için aktif; Firestore enforce'u yalnız Firestore okuyan sürümler yaygınlaşınca açılıyor.
 
 #### `BE-04` — Phone Auth (+90) client akışı — ortak kuralların beklediği auth.token.phone_number'ı üret  _(P0 · efor: M)_
@@ -3846,6 +3846,7 @@
 #### `REL-01` — Play Store sorunlarını çöz ve uygulamayı Play Store'da yayınla  _(P0 · efor: L)_
 - **Durum (2026-10-24):** `buyukeryazilim` geliştirici hesabı ve ViFi dahil tüm uygulamalar 19 Kasım 2024'te Google Play'den kaldırıldı (hesap doğrulaması son tarihe kadar tamamlanmadı; Play Console "İşlem gerekli"). ViFi üretimde etkin değil, yeni sürüm yayınlanamıyor.
 - **Durum (2026-10-26):** Kimlik ve telefon doğrulaması tamamlandı, hesap kısıtlaması kalktı. Play App Signing etkin (paket adı korunur); yükleme anahtarı sıfırlandı, yeni anahtar 28 Ekim 2026 16:08 UTC'de geçerli. Beyanlar kaydedildi; kalan engel Android geliştirici doğrulamasında paket adı kaydı (Play imzalı APK gerekiyor). Ayrıntılı ilerleme ROADMAP'teki REL-01 notunda.
+- **Durum (2026-10-28):** Uygulama imzalama ve yükleme anahtarının SHA-1/SHA-256'ları Firebase Android uygulamasına eklendi (BE-01 tamam). `google-services.json` yenilenmedi: tazesi işlevsel olarak aynı (yalnız kullanılmayan OAuth istemcileri düşüyor). Kalan: Play Integrity API + App Check'te sağlayıcı kaydı, Play imzalı APK ile `B2:F6` teyidi, mağazadan inen sürümde giriş/App Check denemesi.
 - **Neden ayrı kalem:** Release imzası, Play App Signing ve Play Integrity mağaza dağıtımına bağlı. Bu işler hesap durumu çözülmeden yapılamaz; geliştirme ve testler debug imzayla (BE-01 debug izleri kayıtlı) sürer.
 - **Adımlar:**
   - Play Console'da hesap doğrulamasını tamamla ve kaldırılan uygulamaların geri alınması için başvur. Olmazsa yeni hesap / paket adı kararını ver (`com.salticusteam.vifi` eski hesaba bağlı kalabilir; Firebase kaydı ve iOS ile paylaşılan proje bu karardan etkilenir).
