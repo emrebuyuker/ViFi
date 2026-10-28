@@ -80,6 +80,12 @@ ViFi bağımsız bir uygulamadır; listelenen üniversitelerle resmi bir bağlan
 Görüş ve önerilerin için: buyukeryazilim@gmail.com
 ```
 
+**Sürüm notları** (4.0.0, en çok 500 karakter):
+
+```
+Hata düzeltmeleri ve iyileştirmeler: tanıtım turundaki buton artık ekranın alt kısmındaki gezinme çubuğunun altında kalmıyor, arşivde bir ekrandan geri dönünce üstteki konum çubuğu bulunduğun yeri gösteriyor ve açık tema renkleri yenilendi.
+```
+
 **Sürüm notları** (3.1.0, en çok 500 karakter):
 
 ```
