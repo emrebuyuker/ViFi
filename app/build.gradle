@@ -140,6 +140,8 @@ dependencies {
     implementation libs.androidx.lifecycle.process
     // Installs the bundled Baseline Profile on first launch when Play has not (sideloads, older Play).
     implementation libs.androidx.profileinstaller
+    // Premium and paid exam unlocks (4.0.0): live only, so the mock flavor never talks to Google Play.
+    liveImplementation libs.billing
     baselineProfile project(':baselineprofile')
     // Preview rendering + test host activity: debug only, never shipped in release.
     debugImplementation libs.compose.ui.tooling

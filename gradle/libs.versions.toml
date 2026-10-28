@@ -26,6 +26,9 @@ uiautomator = "2.3.0"
 # Durable exam-submission uploads (survive backgrounding and process death).
 work = "2.9.1"
 androidxHilt = "1.2.0"
+# Google Play Billing (4.0.0 Premium); Play requires 8+ for new apps and updates from 2026-08-31. Only the Java
+# artifact: billing-ktx 9.x pulls kotlin-stdlib 2.2, newer than this project's Kotlin 2.0 compiler can read.
+billing = "9.1.0"
 
 
 firebaseBom = "33.5.1"
@@ -76,6 +79,7 @@ androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", 
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
+billing = { module = "com.android.billingclient:billing", version.ref = "billing" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 
