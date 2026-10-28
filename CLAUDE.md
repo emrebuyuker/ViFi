@@ -8,6 +8,7 @@
 > (FCM + Inbox), onboarding, Hakkında, force update kapısı ve analytics hazır; ana akışlar canlıda emülatörde doğrulandı.
 > ViFi 3.1.0 (17) 28 Ekim 2026'dan beri Play'de üretimde; 4.0.0 (18) `v-4.0.0` dalında hazırlanıyor ve yalnızca
 > ürün sahibi "release çıkalım" dediğinde yayınlanır. Yol haritasının 223 kalemi tamam (29 Ekim 2026).
+> **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
 > **iOS v3.1.0 paritesi** hedefinde ilerleme ve kalan işler
 > [`ANDROID-PARITY-ROADMAP.md`](ANDROID-PARITY-ROADMAP.md) (özet) ve [`ANDROID-PARITY-DETAIL.md`](ANDROID-PARITY-DETAIL.md)
 > (ayrıntı) dosyalarındadır.
@@ -46,6 +47,8 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
    sonucu olduğu gibi raporla.
 6. **Canlı Firebase'e dokunmadan önce onay al.** Android, iOS ile **aynı** `vifi-831a8` projesini paylaşır. Kurallar ve
    Cloud Functions **ortaktır ve `ViFi-iOS/firebase/` altında yaşar**; Android yeni backend yazmaz, yeniden kullanır.
+   **Onaylı istisna (4.0.0, `DEC-04`):** `purchaseExamUnlock`'a Google Play dalı ortak depoda yazılır (iOS yolu
+   değişmez); deploy'u (`SRV-03`) ayrıca açık onay ister.
    Kural yayını / canlı veri yazma-silme / App Check / Auth ayarı / `google-services.json` yenileme yalnızca açık onayla.
 7. **Sır ve kişisel veri yazma.** Test hesapları/numaraları, App Check debug token'ları, kişisel e-postalar, servis
    hesabı anahtarları ve imzalama keystore'ları commit'e girmez. Yeni sır ekleme; `local.properties`/keystore commit'leme.
@@ -98,6 +101,7 @@ ViFi-Android/
 ├── CLAUDE.md                     # Bu dosya (Claude talimatları)
 ├── ANDROID-PARITY-ROADMAP.md     # iOS 3.1.0 parite — özet master liste
 ├── ANDROID-PARITY-DETAIL.md      # Aynı kalemlerin adım/kabul-kriteri/gotcha ayrıntısı
+├── ANDROID-4.0.0-ROADMAP.md      # 4.0.0 iş listesi (ViFi Premium) — fazlar, paralel hatlar, ayrıntı
 ├── .claude/                      # ⚠️ Claude yapılandırması & kod üretim bilgisi
 │   ├── settings.json             # İzinler
 │   ├── rules/                    # Proje kuralları (okuma zorunlu — aşağıdaki tablo)
@@ -184,7 +188,7 @@ Android ve iOS **aynı** `vifi-831a8` projesini paylaşır (ayrıntı: `.claude/
 | **Giriş** | Phone Auth `+90` (`BE-04`); canlı test için Console'daki test numarası + `111111` |
 | **App Check** | Storage/RTDB/Auth/Firestore enforce **AÇIK** (Firestore 28 Ekim 2026, `BE-03`) → geçerli token yoksa **403** / `PERMISSION_DENIED`; Cloud Functions'ta enforce kapalı |
 | **Bildirim** | Native FCM (Parse kaldırıldı, `BE-11`), topic `all`, `POST_NOTIFICATIONS`, `announcements` (isimli `vifi`) → Inbox |
-| **Cloud Functions (ortak, europe-west1)** | `unlockExam`, `recordLoginDiagnostic` — Android **çağırır** (`BE-08/09`), yeni function yazmaz |
+| **Cloud Functions (ortak, europe-west1)** | `unlockExam`, `recordLoginDiagnostic`, `purchaseExamUnlock` — Android **çağırır** (`BE-08/09`), yeni function yazmaz; istisna: `purchaseExamUnlock` Google Play dalı (4.0.0 `DEC-04`/`SRV-01`) |
 
 ---
 
