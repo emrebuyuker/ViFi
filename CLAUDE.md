@@ -77,7 +77,7 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
 | Konu | Değer |
 |---|---|
 | **Dil/UI** | Kotlin + Compose (eski Java/XML ekranlar FM-23'te silindi); tek `app/MainActivity` + `AppRoot` + `ViFiNavHost` |
-| **Uygulama** | `com.salticusteam.vifi`, `versionName 3.1.0` (iOS ile aynı), `versionCode 17`, `compileSdk/targetSdk 36`, `minSdk 24` |
+| **Uygulama** | `com.salticusteam.vifi`, `versionName 4.0.0` (iOS ile aynı seri), `versionCode 18`, `compileSdk/targetSdk 36`, `minSdk 24` |
 | **Flavor** | `live` (canlı vifi-831a8) · `mock` (örnek veri, Firebase başlamaz, yalnız debug) |
 | **Veri (arşiv)** | Live `FirestoreArchiveRepository` → named `vifi` Firestore `catalogNodes`/`exams` (`BE-15`); mock örnek veri |
 | **Sınav dosyaları** | `RemoteFileLoader` (OkHttp + ID token/App Check) → `cacheDir/ExamFiles` (Files + Coil Images); görsel pager + platform `PdfRenderer`; `FLAG_SECURE` ekran koruması; hesap silmede `purge()` |
@@ -214,5 +214,5 @@ Projeyi modernize et / Firestore'a taşı.
 
 ---
 
-**Son güncelleme:** 24 Ekim 2026
-**Proje:** ViFi Android (`com.salticusteam.vifi`, v3.1.0 — iOS 3.1.0 paritesi; giriş, arşiv, görüntüleyiciler, coin, bildirim, profil ve Hesap hazır)
+**Son güncelleme:** 29 Ekim 2026
+**Proje:** ViFi Android (`com.salticusteam.vifi`, v4.0.0 — iOS 3.1.0 paritesi; giriş, arşiv, görüntüleyiciler, coin, bildirim, profil ve Hesap hazır)

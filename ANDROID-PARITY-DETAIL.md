@@ -3868,6 +3868,7 @@
 > 28 Ekim 2026'da Play'den inen 17 (3.1.0) gerçek cihazda baştan sona denendi (REL-01 smoke testi). Ana akışlar çalıştı; aşağıdakiler o turda görülen üç hata, bir iyileştirme ve düzeltme sürümü.
 
 #### `QA-01` — Tanıtım turu sistem çubuklarıyla çakışıyor ("İleri"/"Başla" gezinme çubuğunun altında, üstte gri şerit)  _(P1 · efor: S)_
+- **Durum (2026-10-29, tamam):** Planlanan `decorFitsSystemWindows = false` Compose 1.7.5'te tek başına yetmedi: API 31+'da `DialogWrapper` uygulamanın kayan diyalog temasını kullanıyor, pencere `fitInsetsTypes` ile çubukların içine sığdırılıyor; Android 15+'ta (`targetSdk` 35+) `DialogLayout` içeriği yapılandırmadaki tam ekran yüksekliğiyle (2400 px) ölçüp pencereyi o boyuta ayarlıyor, çerçeve ise 63–2337 px — içerik 63 px kayıp gezinme çubuğunun altına taşıyor. Çözüm `EdgeToEdgeDialogWindow`: Android 15+'ta `decorFitsSystemWindows = false`, `fitInsetsTypes = 0`, kesik için `ALWAYS`, `FLAG_DIM_BEHIND` kapalı; ikon rengi tur zeminine göre. Android 15 öncesinde içerik çubuklar arasına göre ölçüldüğünden pencere ayarlarına dokunulmadı (API 24–30'da bayrak Compose 1.7'yi ortalanmış, kayan olmayan pencereye geçirirdi) (buton görünür; durum çubuğu altında karartma kalabilir — cihazda denenmedi). Compose 1.7 pencere genişliğini 1079 px'e yuvarladığı için son sütunda alttaki ekran seçilebilir; büyütmeden görünmüyor.
 - **Gözlem:** Gerçek cihazda (hareketle gezinme) ve emülatörde (API 37) aynı: tur açıkken durum çubuğunun altı karartılmış gri bir şerit kalıyor; alttaki birincil butonun metni gezinme tutamacıyla üst üste biniyor, butonun alt kenarı ekrandan taşıyor. İlk açılışta ve Hakkında → "Tanıtım turunu tekrar izle"de görülür.
 - **Neden:** `OnboardingScreen` turu `Dialog(usePlatformDefaultWidth = false)` penceresinde gösteriyor. Dialog penceresi `decorFitsSystemWindows = true` (varsayılan) ile sistem çubuklarına göre yerleşmiyor; içerideki `safeDrawingPadding()` boşluk vermiyor.
 - **Adımlar:**
@@ -3879,6 +3880,7 @@
 - **Kabul kriteri:** Hareketle ve 3 tuşlu gezinmede, açık ve karanlık temada buton gezinme çubuğunun üstünde ve tam görünür; üstte gri şerit yok, durum çubuğu ikonları okunur; geri tuşu turu Atla olarak kapatır; ilk açılış ve tekrar izleme aynı.
 
 #### `QA-02` — Breadcrumb ekrana geri dönünce güncel çipi göstermiyor  _(P1 · efor: S)_
+- **Durum (2026-10-29, tamam):** `scrollToEndOnceMeasured()` + `BreadcrumbScrollTest` (JVM; korumasız sürümde `expected:<700> but was:<-2147483588>`) + `BreadcrumbBarTest`'e dar iz ve `StateRestorationTester` UI testleri. Simülasyon: 1–3000 px arası geri yüklenen değerlerin 1529'u bozuluyor; emülatörde mock izin değeri (~965 px) güvenli aralıkta olduğundan saha hatası orada yeniden üretilemedi, UI testleri de efekt sırası nedeniyle düzeltmesiz geçiyor — regresyonu JVM testi yakalıyor.
 - **Gözlem:** Sınavlar listesinde (5 çipli iz) "Sınav Ekle"ye gidip kapatınca iz artık sonda değil: güncel çip ("DİFERANSİYEL DENKLEMLER") sağda kesik. İlk girişte doğru.
 - **Neden:** `BreadcrumbBar`'daki `LaunchedEffect(path, scrollState.maxValue) { scrollState.scrollTo(scrollState.maxValue) }` ilk çizimden önce koşuyor; o anda `maxValue` henüz `Int.MAX_VALUE`. Ekran geri yüklendiğinde `rememberScrollState()` sıfırdan büyük kayıtlı değerle başlar ve `ScrollState`'in `value + round(delta)` toplamı tamsayı taşar (Compose foundation 1.7.5 bytecode'u + JVM simülasyonuyla doğrulandı: kayıtlı 700 → 59). Sonraki `scrollTo(max)` float hassasiyetiyle rastgele bir konuma düşer. İlk girişte değer 0 olduğu için taşma yok.
 - **Adımlar:**
@@ -3889,6 +3891,7 @@
 - **Kabul kriteri:** Sınav Ekle, görüntüleyici, Hesap ve döndürmeden sonra iz her zaman sonda; güncel çip tam görünür; UI testi geçer.
 
 #### `QA-03` — Açık tema: Material3 varsayılan mor nötr/konteyner tonlarını marka uyumlu tam açık şemayla değiştir  _(P2 · efor: M)_
+- **Durum (2026-10-29, tamam):** `VifiLightColors` tam şema (beyaz zemin, sıcak nötr kart/sheet, turuncu tonlu konteynerler), `window_background_light` + `values/styles.xml` `windowBackground`; `VifiColorContrastTest` açık tema AA çiftleri, outline ≥ 3:1 ve "mavi baskın ton yok" testi. Emülatörde açık temada Home, breadcrumb, kilit sheet'i, Sınav Ekle, Profil ve Hesap gözden geçirildi.
 - **Gözlem:** Açık temada seçili segment (Sınav Ekle "Görsel/PDF", profil "Kadın/Erkek") lila, Sınav Ekle kartı ve breadcrumb çipleri lavanta-gri, kilit sheet'i lavanta, zemin hafif pembe. Turuncu marka rengiyle uyumsuz; karanlık tema bu sorunu taşımıyor.
 - **Neden:** `VifiLightColors` yalnız `primary/onPrimary/secondary/onSecondary` tanımlıyor; geri kalan roller Material3 baseline (mor tonlu) değerlerinde kalıyor (`background`, `surfaceVariant`, `secondaryContainer`, `surfaceContainer*`, `outline*`, `tertiary*`).
 - **Adımlar:**
@@ -3912,6 +3915,7 @@
 - **Kabul kriteri:** Bir dersten açılan form o okul/fakülte/bölüm/dersle dolu; Home'dan açılan form profille dolu; eşleşmeyen ad güvenli şekilde boş kalır.
 
 #### `REL-02` — Düzeltme sürümü (versionCode 18)  _(P1 · efor: S)_
+- **Durum (2026-10-29):** Sürüm adı **4.0.0** (iOS ile aynı seri), `versionCode 18`; `v-4.0.0` dalında QA-01…QA-03 ile birlikte. Kalan: sürüm notları, release AAB, iç test → üretim, mağaza sürümünde kontrol.
 - **Kapsam:** QA-01, QA-02, QA-03 (QA-04 karara bağlı). Sürüm adı iOS serisine göre seçilir (iOS 4.0.0'a geçiyor; CLAUDE.md "iOS ile aynı seri").
 - **Adımlar:**
   - `versionCode 18` + sürüm adı; derleme, lint, birim + UI testleri.
