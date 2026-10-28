@@ -3496,6 +3496,7 @@
 - **Kabul kriteri:** Tüm call-site'lar tek AnalyticsTracker örneğini kullanır; testte NoOp/fake ile değiştirilebilir; Firebase örneği bir kez oluşturulur.
 
 #### `AN-11` — Play Data Safety beyanı + QA (DebugView, R8, isim/limit doğrulama)  _(P2 · efor: S)_
+- **Durum (2026-10-29):** ✔️ Kapatıldı (ürün sahibi kararı). Ad/parametre limitleri birim testte, Data Safety beyanı Play'de onaylı, DebugView'da 12 ekran ve oturumsuz olaylar doğrulandı; Play'den inen 3.1.0 (17) GA4'te olay gönderiyor (28 Eki: `first_open`, `session_start`, `screen_view`, `browse_level`, `exam_open`, `onboarding_complete`, `unlock_sheet_shown`). İşleme gecikmesi nedeniyle `login_success`, `profile_completed`, `earn_coins_tapped` kapanışta henüz raporda değildi; kodda engel yok.
 - **iOS davranışı:** iOS yalnız ekran adı/level/format gönderir, kullanıcıyı tanımlayan hiçbir şey göndermez (dosya başı yorum: 'never archive names or anything that could identify the user').
 - **iOS karşılığı/kaynak:** FirebaseAnalyticsTracker.swift başlık yorumu; AnalyticsUser yalnız slug+flag.
 - **Android mevcut:** Data Safety formu analitik toplamayı yansıtmıyor; DebugView/QA süreci yok.
@@ -3846,6 +3847,7 @@
 ## Google Play hesabı ve yayın  ·  `release`
 
 #### `REL-01` — Play Store sorunlarını çöz ve uygulamayı Play Store'da yayınla  _(P0 · efor: L)_
+- **Durum (2026-10-29):** ✔️ Kapatıldı (ürün sahibi kararı). Hesap aktif, paket adı `com.salticusteam.vifi` korunarak kayıtlı, 17 (3.1.0) üretimde %100 yayında ve mağaza sürümü gerçek cihazda doğrulandı. Politika durumunda kalan 3 uyarı (hedef API 35, hedef API 36, 16 KB) bu sürümle karşılanıyor; Google'ın listeden düşürmesi beklenmeden kapatıldı (düşmezse kanallarda eski etkin sürüm aranır).
 - **Durum (2026-10-24):** `buyukeryazilim` geliştirici hesabı ve ViFi dahil tüm uygulamalar 19 Kasım 2024'te Google Play'den kaldırıldı (hesap doğrulaması son tarihe kadar tamamlanmadı; Play Console "İşlem gerekli"). ViFi üretimde etkin değil, yeni sürüm yayınlanamıyor.
 - **Durum (2026-10-26):** Kimlik ve telefon doğrulaması tamamlandı, hesap kısıtlaması kalktı. Play App Signing etkin (paket adı korunur); yükleme anahtarı sıfırlandı, yeni anahtar 28 Ekim 2026 16:08 UTC'de geçerli. Beyanlar kaydedildi; kalan engel Android geliştirici doğrulamasında paket adı kaydı (Play imzalı APK gerekiyor). Ayrıntılı ilerleme ROADMAP'teki REL-01 notunda.
 - **Durum (2026-10-28):** Uygulama imzalama ve yükleme anahtarının SHA-1/SHA-256'ları Firebase Android uygulamasına eklendi (BE-01 tamam). `google-services.json` yenilenmedi: tazesi işlevsel olarak aynı (yalnız kullanılmayan OAuth istemcileri düşüyor). Play Integrity API bağlandı ve App Check'te sağlayıcı kayıtlı. 19:30'da 17 (3.1.0) dahili teste yayınlandı; Play imzalı APK `apksigner` ile `B2:F6…:75:90` doğrulandı; paket adı Android geliştirici doğrulamasında kayıtlı. Aynı sürüm üretime %100 eklendi ve beyanlar + mağaza girişiyle birlikte 13 değişiklik incelemeye gönderildi (yönetilen yayınlama kapalı); aynı akşam onaylandı, üretimde %100 yayında. Kalan: politika durumundaki eski sorunların temizlenmesi, mağazadan inen sürümde giriş/App Check denemesi, BE-03 enforce sırası.
