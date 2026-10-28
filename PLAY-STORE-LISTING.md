@@ -14,7 +14,7 @@
 | 4 | Play Console → Uygulama içeriği | §2'deki cevaplar. | Yayın engeli. |
 | 5 | Play Console → Mağaza varlığı → Ana mağaza girişi | §3 metinler + §4 görseller. | Yayın engeli. |
 | 6 | 28 Ekim 19:08 TRT sonrası | AAB'yi iç teste taslak yükle → Uygulama paketi gezgini'nden Play imzalı universal APK'yı indir → `apksigner verify --print-certs` ile SHA-256'nın `B2:F6…` olduğunu teyit et → APK'yı Android geliştirici doğrulamasına yükle. | "Kayıtlı olmayan paket adı" engeli. ✔️ 28 Ekim 19:30: dahili teste yayınlandı, APK `B2:F6` doğrulandı, paket adı kayıtlı. |
-| 7 | Yayın özeti | 17 (3.1.0) üretime %100 (16 (2.5) dahil edilmez) → 13 değişikliği incelemeye gönder. | ✔️ 28 Ekim'de gönderildi; yönetilen yayınlama kapalı, onayda yayında. |
+| 7 | Yayın özeti | 17 (3.1.0) üretime %100 (16 (2.5) dahil edilmez) → 13 değişikliği incelemeye gönder. | ✔️ 28 Ekim'de gönderildi ve aynı akşam onaylandı; üretimde %100 yayında. |
 
 ## 2. Uygulama içeriği — cevaplar
 
