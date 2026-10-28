@@ -4,8 +4,8 @@ import com.salticusteam.vifi.core.model.VerificationCode
 import java.time.Instant
 
 /**
- * The account screen (iOS AccountView + AccountViewModel): who is signed in, for the profile, coin and phone rows, and
- * the account deletion with its re-verification of the number.
+ * The account screen (iOS AccountView + AccountViewModel): who is signed in, for the profile, Premium, coin and phone
+ * rows, and the account deletion with its re-verification of the number.
  */
 data class AccountUiState(
     /** The profile's `Ad Soyad`, or `null` when no profile is loaded (the row then offers to edit it). */
@@ -26,6 +26,8 @@ data class AccountUiState(
     val isAdmin: Boolean = false,
     /** The live spendable coin balance (`wallets/<uid>`), `0` until the wallet is read. */
     val coinBalance: Int = 0,
+    /** An active Premium subscription: the active status and "Aboneliği Yönet" replace the upgrade row; no coin row. */
+    val isSubscribed: Boolean = false,
 ) {
     /** "Doğrula ve Hesabı Sil" is enabled: all six digits are there and nothing is running. */
     val canConfirmReverification: Boolean

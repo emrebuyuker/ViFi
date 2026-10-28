@@ -31,12 +31,15 @@ import java.util.Locale
 /**
  * Compact pill with the user's coin balance for top bars (iOS CoinBalanceBadge). Stateless: the caller passes
  * the live balance from the wallet store (coin area), so every bar updates at once. The number counts between values.
+ * Draws nothing while [isSubscribed]: a Premium subscriber has the whole archive open and no coin economy.
  */
 @Composable
 fun CoinBalanceBadge(
     balance: Int,
     modifier: Modifier = Modifier,
+    isSubscribed: Boolean = false,
 ) {
+    if (isSubscribed) return
     val shown by animateIntAsState(targetValue = balance, label = "coinBalance")
     val description = stringResource(R.string.cd_coin_balance, formatCoins(balance))
 

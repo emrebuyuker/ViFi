@@ -205,4 +205,40 @@
     <string name="home_recents_clear_cancel">Vazgeç</string>
     <string name="home_about_open">Hakkında</string>
     <string name="common_relative_just_now">Az önce</string>
+
+    <!-- Added in 4.0.0 — ViFi Premium paywall (iOS PaywallView copy; App Store adapted to Google Play) -->
+    <string name="paywall_title">ViFi Premium</string>
+    <string name="paywall_close">Kapat</string>
+    <string name="paywall_headline">Tüm sınavlara sınırsız eriş</string>
+    <string name="paywall_subtitle">Premium ile her dersteki bütün sınavlar kilitsiz açılır; coin biriktirmene gerek kalmaz.</string>
+    <string name="paywall_benefit_all_exams">Her dersin tüm sınavları açık</string>
+    <string name="paywall_benefit_no_locks">Kilitli sınav kalmaz, coin gerekmez</string>
+    <string name="paywall_benefit_unlimited">İstediğin kadar görüntüle ve indir</string>
+    <string name="paywall_benefit_cancel">İstediğin zaman iptal et</string>
+    <string name="paywall_plan_monthly">Aylık</string>
+    <string name="paywall_plan_yearly">Yıllık</string>
+    <string name="paywall_plan_best_value">En avantajlı</string>
+    <string name="paywall_load_failed">Abonelik planları yüklenemedi.</string>
+    <string name="paywall_auto_renew_note">Abonelik, dönem sonunda otomatik olarak yenilenir. Yenilemeyi istediğin zaman Google Play abonelik ayarlarından kapatabilirsin; iptal, içinde bulunduğun dönemin sonunda geçerli olur.</string>
+    <string name="paywall_terms">Kullanım Koşulları</string>
+    <string name="paywall_privacy">Gizlilik Politikası</string>
+    <string name="paywall_subscribe">Abone Ol</string>
+    <string name="paywall_subscribe_price">Abone Ol · %1$s</string>
+    <string name="paywall_restore">Satın alımları geri yükle</string>
+    <string name="paywall_purchase_pending">Satın alma onay bekliyor; onaylanınca aboneliğin başlar.</string>
+    <string name="paywall_nothing_to_restore">Geri yüklenecek bir abonelik bulunamadı.</string>
+
+    <!-- Added in 4.0.0 — unlock sheet: buying a single exam with money, or switching to Premium (iOS ExamUnlockSheet) -->
+    <string name="exam_unlock_or">veya</string>
+    <string name="exam_unlock_buy">Parayla bu sınavı aç</string>
+    <string name="exam_unlock_premium">Tek tek açmak yerine Premium\'a geç</string>
+    <string name="exam_unlock_purchase_pending">Satın alma onay bekliyor; onaylanınca sınav açılır.</string>
+
+    <!-- Added in 4.0.0 — account: Premium section (iOS AccountPremiumSection; App Store adapted to Google Play) -->
+    <string name="account_premium_title">ViFi Premium</string>
+    <string name="account_premium_active">Tüm sınavlar açık</string>
+    <string name="account_premium_manage">Aboneliği Yönet</string>
+    <string name="account_premium_manage_footer">Aboneliğini Google Play ayarlarından yönetebilir veya iptal edebilirsin.</string>
+    <string name="account_premium_upgrade_title">ViFi Premium\'a Geç</string>
+    <string name="account_premium_upgrade_subtitle">Tüm sınavlara sınırsız eriş</string>
 </resources>

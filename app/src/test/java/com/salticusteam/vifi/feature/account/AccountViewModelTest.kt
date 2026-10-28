@@ -2,12 +2,14 @@ package com.salticusteam.vifi.feature.account
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import com.salticusteam.vifi.core.data.billing.SubscriptionStore
 import com.salticusteam.vifi.core.data.coins.CoinWalletStore
 import com.salticusteam.vifi.core.data.local.fake.FakeLocalDataCleaner
 import com.salticusteam.vifi.core.data.profile.ProfileStore
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.data.repository.fake.FakeProfileService
+import com.salticusteam.vifi.core.data.repository.fake.FakeSubscriptionService
 import com.salticusteam.vifi.core.data.repository.fake.FakeWalletReader
 import com.salticusteam.vifi.core.data.session.SessionStore
 import com.salticusteam.vifi.core.model.AnalyticsEvent
@@ -52,10 +54,12 @@ class AccountViewModelTest {
         walletReader: FakeWalletReader = FakeWalletReader(),
         sessionStore: SessionStore = SessionStore(authService, backgroundScope),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        subscriptionService: FakeSubscriptionService = FakeSubscriptionService(latency = KotlinDuration.ZERO),
     ) = AccountViewModel(
         sessionStore = sessionStore,
         profileStore = profileStore,
         coinWalletStore = CoinWalletStore(walletReader, sessionStore, backgroundScope),
+        subscriptionStore = SubscriptionStore(subscriptionService, backgroundScope),
         authService = authService,
         profileService = profileService,
         localDataCleaner = cleaner,
@@ -80,6 +84,32 @@ class AccountViewModelTest {
         runCurrent()
 
         assertEquals(1250, sut.uiState.value.coinBalance)
+    }
+
+    @Test
+    fun `uiState follows the Premium state, independent of the signed-in user`() = runTest {
+        val subscription = FakeSubscriptionService(latency = KotlinDuration.ZERO)
+        val sut = makeSut(subscriptionService = subscription)
+        advanceUntilIdle()
+        runCurrent()
+        assertFalse(sut.uiState.value.isSubscribed)
+
+        subscription.setSubscribed(true)
+        runCurrent()
+        assertTrue(sut.uiState.value.isSubscribed)
+
+        subscription.setSubscribed(false)
+        runCurrent()
+        assertFalse(sut.uiState.value.isSubscribed)
+    }
+
+    @Test
+    fun `uiState starts subscribed when Premium is already active`() = runTest {
+        val sut = makeSut(subscriptionService = FakeSubscriptionService(subscribed = true, latency = KotlinDuration.ZERO))
+        advanceUntilIdle()
+        runCurrent()
+
+        assertTrue(sut.uiState.value.isSubscribed)
     }
 
     @Test

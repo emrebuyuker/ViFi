@@ -25,6 +25,8 @@ class AccountContentTest {
     private var cancelReverificationCalls = 0
     private val typedCodes = mutableListOf<String>()
     private var aboutClicks = 0
+    private var upgradeClicks = 0
+    private var manageClicks = 0
 
     private fun setContent(state: AccountUiState = AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67")) {
         composeRule.setContent {
@@ -41,6 +43,8 @@ class AccountContentTest {
                     onCancelReverification = { cancelReverificationCalls++ },
                     onBack = {},
                     onAbout = { aboutClicks++ },
+                    onUpgradePremium = { upgradeClicks++ },
+                    onManageSubscription = { manageClicks++ },
                 )
             }
         }
@@ -62,6 +66,33 @@ class AccountContentTest {
         // The row is one TalkBack element whose description carries the Turkish-grouped amount.
         composeRule.onNodeWithTag("account.coinBalance").assertIsDisplayed()
             .assert(hasContentDescription("1.250", substring = true))
+    }
+
+    @Test
+    fun account_whenFree_offersPremiumAndShowsCoins() {
+        setContent()
+
+        composeRule.onNodeWithTag("account.coinBalance").assertIsDisplayed()
+        composeRule.onNodeWithTag("account.premium.active").assertDoesNotExist()
+        composeRule.onNodeWithTag("account.premium.upgrade")
+            .assert(hasText("ViFi Premium'a Geç"))
+            .performClick()
+
+        assertEquals(1, upgradeClicks)
+    }
+
+    /** iOS `PremiumUITests.testAccountShowsActivePremiumAndHidesCoins`. */
+    @Test
+    fun account_whenSubscribed_showsActivePremiumAndHidesCoins() {
+        setContent(AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67", coinBalance = 1250, isSubscribed = true))
+
+        composeRule.onNodeWithTag("account.premium.active").assertIsDisplayed()
+            .assert(hasText("Tüm sınavlar açık", substring = true))
+        composeRule.onNodeWithTag("account.coinBalance").assertDoesNotExist()
+        composeRule.onNodeWithTag("account.premium.upgrade").assertDoesNotExist()
+
+        composeRule.onNodeWithTag("account.premium.manage").performClick()
+        assertEquals(1, manageClicks)
     }
 
     @Test

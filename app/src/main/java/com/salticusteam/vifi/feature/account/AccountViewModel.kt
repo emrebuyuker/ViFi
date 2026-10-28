@@ -3,6 +3,7 @@ package com.salticusteam.vifi.feature.account
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.salticusteam.vifi.core.data.billing.SubscriptionStore
 import com.salticusteam.vifi.core.data.coins.CoinWalletStore
 import com.salticusteam.vifi.core.data.local.LocalDataCleaner
 import com.salticusteam.vifi.core.data.profile.ProfileState
@@ -37,8 +38,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * The signed-in account (iOS AccountViewModel): the profile name, coin balance and verified number, all followed
- * live, signing out, and deleting the account.
+ * The signed-in account (iOS AccountViewModel): the profile name, Premium state, coin balance and verified number,
+ * all followed live, signing out, and deleting the account.
  *
  * Deleting removes the profile first, while the user is still signed in (the owner-only rules allow it), then
  * the account. When Firebase asks for a recent sign-in, a code is sent to the same number; once it is confirmed
@@ -53,6 +54,7 @@ class AccountViewModel @Inject constructor(
     private val sessionStore: SessionStore,
     profileStore: ProfileStore,
     coinWalletStore: CoinWalletStore,
+    subscriptionStore: SubscriptionStore,
     private val authService: AuthService,
     private val profileService: ProfileService,
     private val localDataCleaner: LocalDataCleaner,
@@ -73,6 +75,8 @@ class AccountViewModel @Inject constructor(
 
     val uiState: StateFlow<AccountUiState> =
         combine(sessionStore.state, profileStore.state, coinWalletStore.wallet, _deletion, _isAdmin, ::accountState)
+            // Premium follows the Google account, not the signed-in user (4.0.0 DEC-03).
+            .combine(subscriptionStore.isSubscribed) { state, isSubscribed -> state.copy(isSubscribed = isSubscribed) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
@@ -82,7 +86,7 @@ class AccountViewModel @Inject constructor(
                     coinWalletStore.wallet.value,
                     _deletion.value,
                     _isAdmin.value,
-                ),
+                ).copy(isSubscribed = subscriptionStore.isSubscribed.value),
             )
 
     // Internal state

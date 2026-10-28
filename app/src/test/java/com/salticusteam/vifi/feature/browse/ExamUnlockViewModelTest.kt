@@ -1,12 +1,16 @@
 package com.salticusteam.vifi.feature.browse
 
 import app.cash.turbine.test
+import com.salticusteam.vifi.core.data.billing.SubscriptionStore
 import com.salticusteam.vifi.core.data.coins.CoinWalletStore
 import com.salticusteam.vifi.core.data.coins.ExamUnlocksStore
+import com.salticusteam.vifi.core.data.repository.ExamPurchaseService
 import com.salticusteam.vifi.core.data.repository.ExamUnlockService
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
+import com.salticusteam.vifi.core.data.repository.fake.FakeExamPurchaseService
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamUnlockService
+import com.salticusteam.vifi.core.data.repository.fake.FakeSubscriptionService
 import com.salticusteam.vifi.core.data.repository.fake.FakeUnlocksReader
 import com.salticusteam.vifi.core.data.repository.fake.FakeWalletReader
 import com.salticusteam.vifi.core.data.session.SessionStore
@@ -19,6 +23,8 @@ import com.salticusteam.vifi.core.model.ExamLock
 import com.salticusteam.vifi.core.model.ExamSummary
 import com.salticusteam.vifi.core.model.ExamUnlockError
 import com.salticusteam.vifi.core.model.ExamUnlockResult
+import com.salticusteam.vifi.core.model.PurchaseResult
+import com.salticusteam.vifi.core.model.SubscriptionError
 import com.salticusteam.vifi.testing.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.TestScope
@@ -52,12 +58,21 @@ class ExamUnlockViewModelTest {
     private fun TestScope.makeSut(
         balance: Int = 120,
         service: ExamUnlockService = FakeExamUnlockService(),
+        purchaseService: ExamPurchaseService = FakeExamPurchaseService(),
+        subscriptionService: FakeSubscriptionService = FakeSubscriptionService(),
     ): ExamUnlockViewModel {
         val scope = backgroundScope
         val session = SessionStore(FakeAuthService(), scope)
         analytics = FakeAnalyticsTracker()
         unlocksStore = ExamUnlocksStore(FakeUnlocksReader(ids = setOf("e1")), session, scope)
-        return ExamUnlockViewModel(CoinWalletStore(FakeWalletReader(balance), session, scope), unlocksStore, service, analytics)
+        return ExamUnlockViewModel(
+            walletStore = CoinWalletStore(FakeWalletReader(balance), session, scope),
+            unlocksStore = unlocksStore,
+            subscriptionStore = SubscriptionStore(subscriptionService, scope),
+            unlockService = service,
+            purchaseService = purchaseService,
+            analytics = analytics,
+        )
     }
 
     @Test
@@ -194,5 +209,175 @@ class ExamUnlockViewModelTest {
 
         assertEquals(setOf(lesson.appending("e4")), locked)
         assertTrue(ExamUnlockUiState().lockedPaths(null).isEmpty())
+    }
+
+    // --- Premium (4.0.0 UI-03) ---
+
+    @Test
+    fun `init mirrors an active subscription and nothing is locked for a subscriber`() = runTest {
+        val subscription = FakeSubscriptionService(subscribed = true)
+        val sut = makeSut(subscriptionService = subscription)
+        settle()
+
+        val exams = listOf("e4", "e3", "e2", "e1").map {
+            ArchiveItem(lesson.appending(it), ArchiveLevel.EXAM, null, ExamSummary(ExamKind.IMAGES, 2))
+        }
+        assertTrue(sut.uiState.value.isSubscribed)
+        assertTrue(sut.uiState.value.lockedPaths(exams).isEmpty())
+
+        // A lapsed renewal brings the locks back.
+        subscription.setSubscribed(false)
+        settle()
+        assertFalse(sut.uiState.value.isSubscribed)
+        assertEquals(setOf(lesson.appending("e4"), lesson.appending("e3")), sut.uiState.value.lockedPaths(exams))
+    }
+
+    // --- Buying with money (4.0.0 UI-02) ---
+
+    @Test
+    fun `onPurchaseWithMoney when recorded marks unlocked, closes the sheet and emits Unlocked`() = runTest {
+        val purchases = FakeExamPurchaseService()
+        val sut = makeSut(balance = 0, purchaseService = purchases)
+        settle()
+        sut.onLockedExamTap(locked)
+
+        sut.events.test {
+            sut.onPurchaseWithMoney()
+            assertTrue(sut.uiState.value.isPurchasing)
+            assertTrue(sut.uiState.value.isBusy)
+
+            assertEquals(ExamUnlockEvent.Unlocked(locked), awaitItem())
+            val state = sut.uiState.value
+            assertFalse(state.isPurchasing)
+            assertNull(state.examToUnlock)
+            assertTrue(unlocksStore.isUnlocked("e9"))
+            assertEquals(listOf("e9"), purchases.purchasedExamIds)
+        }
+    }
+
+    @Test
+    fun `onPurchaseWithMoney when cancelled keeps the sheet without a message`() = runTest {
+        val sut = makeSut(purchaseService = FakeExamPurchaseService(purchaseResult = PurchaseResult.CANCELLED))
+        settle()
+        sut.onLockedExamTap(locked)
+
+        sut.onPurchaseWithMoney()
+        settle()
+
+        val state = sut.uiState.value
+        assertFalse(state.isPurchasing)
+        assertEquals(locked, state.examToUnlock)
+        assertNull(state.error)
+        assertFalse(state.isPurchasePending)
+        assertFalse(unlocksStore.isUnlocked("e9"))
+    }
+
+    @Test
+    fun `onPurchaseWithMoney when pending keeps the sheet and says the exam opens later`() = runTest {
+        val sut = makeSut(purchaseService = FakeExamPurchaseService(purchaseResult = PurchaseResult.PENDING))
+        settle()
+        sut.onLockedExamTap(locked)
+
+        sut.onPurchaseWithMoney()
+        settle()
+
+        val state = sut.uiState.value
+        assertFalse(state.isPurchasing)
+        assertEquals(locked, state.examToUnlock)
+        assertTrue(state.isPurchasePending)
+        assertFalse(unlocksStore.isUnlocked("e9"))
+
+        // Showing the sheet again starts without the old notice.
+        sut.onSheetDismiss()
+        sut.onLockedExamTap(locked)
+        assertFalse(sut.uiState.value.isPurchasePending)
+    }
+
+    @Test
+    fun `onPurchaseWithMoney when Google Play fails shows its message`() = runTest {
+        val sut = makeSut(purchaseService = FakeExamPurchaseService(failure = SubscriptionError.FailedVerification))
+        settle()
+        sut.onLockedExamTap(locked)
+
+        sut.onPurchaseWithMoney()
+        settle()
+
+        val state = sut.uiState.value
+        assertFalse(state.isPurchasing)
+        assertEquals(locked, state.examToUnlock)
+        assertEquals(SubscriptionError.FailedVerification.userMessage, state.error)
+    }
+
+    @Test
+    fun `while a purchase runs the coin unlock, earn, Premium and dismiss are ignored`() = runTest {
+        val gate = CompletableDeferred<PurchaseResult>()
+        var calls = 0
+        val purchases = object : ExamPurchaseService {
+            override suspend fun purchaseUnlock(examId: String): PurchaseResult {
+                calls++
+                return gate.await()
+            }
+
+            override suspend fun recoverPendingUnlock(): String? = null
+        }
+        val coins = FakeExamUnlockService()
+        val sut = makeSut(service = coins, purchaseService = purchases)
+        settle()
+        sut.onLockedExamTap(locked)
+
+        sut.events.test {
+            sut.onPurchaseWithMoney()
+            settle()
+            sut.onPurchaseWithMoney()
+            sut.onUnlockConfirm()
+            sut.onEarnCoins()
+            sut.onGoPremium()
+            sut.onSheetDismiss()
+            settle()
+
+            assertEquals(1, calls)
+            assertTrue(coins.unlockedExamIds.isEmpty())
+            assertEquals(locked, sut.uiState.value.examToUnlock)
+            expectNoEvents()
+
+            gate.complete(PurchaseResult.CANCELLED)
+            settle()
+            assertFalse(sut.uiState.value.isBusy)
+        }
+    }
+
+    @Test
+    fun `while a coin unlock runs buying with money is ignored`() = runTest {
+        val gate = CompletableDeferred<ExamUnlockResult>()
+        val coins = object : ExamUnlockService {
+            override suspend fun unlock(examId: String): ExamUnlockResult = gate.await()
+        }
+        val purchases = FakeExamPurchaseService()
+        val sut = makeSut(service = coins, purchaseService = purchases)
+        settle()
+        sut.onLockedExamTap(locked)
+
+        sut.onUnlockConfirm()
+        settle()
+        sut.onPurchaseWithMoney()
+        settle()
+
+        assertFalse(sut.uiState.value.isPurchasing)
+        assertTrue(purchases.purchasedExamIds.isEmpty())
+        gate.complete(ExamUnlockResult(balance = 20, alreadyUnlocked = false))
+        settle()
+    }
+
+    @Test
+    fun `onGoPremium closes the sheet and emits GoPremium`() = runTest {
+        val sut = makeSut()
+        settle()
+        sut.onLockedExamTap(locked)
+
+        sut.events.test {
+            sut.onGoPremium()
+            assertEquals(ExamUnlockEvent.GoPremium, awaitItem())
+        }
+        assertNull(sut.uiState.value.examToUnlock)
     }
 }
