@@ -92,8 +92,11 @@ fun BrowseScreen(
     onBack: (() -> Unit)?,
     /** Opens the account screen; only the home screen passes it (the toolbar's account button). */
     onAccountClick: (() -> Unit)? = null,
-    /** Opens the add-exam flow from the unlock sheet's earn branch; `null` until that flow exists. */
-    onEarnCoins: (() -> Unit)? = null,
+    /**
+     * Opens the add-exam flow from the unlock sheet's earn branch with the locked exam's lesson; `null` shows the
+     * earn branch's explanation only.
+     */
+    onEarnCoins: ((lesson: ArchivePath?) -> Unit)? = null,
     /** Opens the inbox; only the home screen passes it (the toolbar's bell). */
     onInboxClick: (() -> Unit)? = null,
     /** Opens the about screen; only the home screen passes it (the toolbar's info button). */
@@ -119,7 +122,7 @@ fun BrowseScreen(
             when (event) {
                 // An unlocked exam opens through the same action as a free one.
                 is ExamUnlockEvent.Unlocked -> onItemClick(event.exam)
-                ExamUnlockEvent.EarnCoins -> onEarnCoins?.invoke()
+                is ExamUnlockEvent.EarnCoins -> onEarnCoins?.invoke(event.lesson)
             }
         }
     }

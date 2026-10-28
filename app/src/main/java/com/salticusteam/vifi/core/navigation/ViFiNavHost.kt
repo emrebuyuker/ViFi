@@ -24,7 +24,7 @@ fun ViFiNavHost(
     about: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     inbox: @Composable () -> Unit = {},
-    addExam: @Composable () -> Unit = {},
+    addExam: @Composable (context: ArchivePath?) -> Unit = {},
     moderation: @Composable () -> Unit = {},
     moderationDetail: @Composable (submissionId: String) -> Unit = {},
     submissionPreview: @Composable (submissionId: String) -> Unit = {},
@@ -56,8 +56,8 @@ fun ViFiNavHost(
         composable<ViFiRoute.About> {
             about()
         }
-        composable<ViFiRoute.AddExam> {
-            addExam()
+        composable<ViFiRoute.AddExam> { entry ->
+            addExam(entry.toRoute<ViFiRoute.AddExam>().context)
         }
         composable<ViFiRoute.Moderation> {
             moderation()

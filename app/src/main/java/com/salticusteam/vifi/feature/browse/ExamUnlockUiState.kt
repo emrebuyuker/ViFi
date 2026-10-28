@@ -34,6 +34,6 @@ sealed interface ExamUnlockEvent {
     /** The exam was unlocked (or already was): the only continuation is opening it. */
     data class Unlocked(val exam: ArchiveItem) : ExamUnlockEvent
 
-    /** The user chose to earn coins (the add-exam flow). */
-    data object EarnCoins : ExamUnlockEvent
+    /** The user chose to earn coins (the add-exam flow); [lesson] is the locked exam's lesson, for the pre-fill. */
+    data class EarnCoins(val lesson: ArchivePath?) : ExamUnlockEvent
 }

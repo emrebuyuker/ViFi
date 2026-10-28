@@ -33,6 +33,9 @@ data class CatalogSelection(
             return CatalogSelection(name = trimmed, id = Slug.make(trimmed), isCustom = true)
         }
 
+        /** An archive entry (a lesson from the archive list): its name with a best-effort slug id, not custom. */
+        fun archive(name: String) = CatalogSelection(name = name, id = Slug.make(name), isCustom = false)
+
         /** Rebuilds a selection from stored profile fields (the edit screen's prefill). */
         fun stored(name: String, id: String, isCustom: Boolean) = CatalogSelection(name, id, isCustom)
     }

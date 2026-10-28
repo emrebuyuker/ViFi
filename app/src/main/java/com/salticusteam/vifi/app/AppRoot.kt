@@ -94,7 +94,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
                 onItemClick = { router.open(it) },
                 // The exam's whole hierarchy goes on the stack, so Back walks up the archive (iOS openExam).
                 onRecentClick = { router.openExam(it.path, it.kind) },
-                onAddExamClick = { router.push(ViFiRoute.AddExam) },
+                onAddExamClick = { router.push(ViFiRoute.AddExam()) },
                 onAccountClick = { router.push(ViFiRoute.Account) },
                 onInboxClick = { router.push(ViFiRoute.Inbox) },
                 onAboutClick = { router.push(ViFiRoute.About) },
@@ -106,8 +106,8 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
                 onBack = { router.pop() },
                 onBreadcrumbSelect = { router.popTo(it) },
                 onHomeClick = { router.popToRoot() },
-                // The unlock sheet's "Sınav Ekle": earn coins by contributing an exam.
-                onEarnCoins = { router.push(ViFiRoute.AddExam) },
+                // The unlock sheet's "Sınav Ekle": earn coins by contributing an exam, pre-filled with its lesson.
+                onEarnCoins = { lesson -> router.push(ViFiRoute.AddExam(lesson)) },
             )
         },
         exam = { path, kind ->
@@ -130,8 +130,8 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         about = {
             AboutScreen(onBack = { router.pop() })
         },
-        addExam = {
-            AddExamScreen(ownerId = user.id, profile = profile, onClose = { router.pop() })
+        addExam = { context ->
+            AddExamScreen(ownerId = user.id, profile = profile, archiveContext = context, onClose = { router.pop() })
         },
         moderation = {
             ModerationScreen(

@@ -87,11 +87,12 @@ class ExamUnlockViewModel @Inject constructor(
         }
     }
 
-    /** The low-balance branch: closes the sheet and hands over to the add-exam flow. */
+    /** The low-balance branch: closes the sheet and hands over to the add-exam flow, with the exam's lesson. */
     fun onEarnCoins() {
         analytics.track(AnalyticsEvent.EarnCoinsTapped)
+        val lesson = _uiState.value.examToUnlock?.path?.parent
         _uiState.update { it.copy(examToUnlock = null, error = null) }
-        viewModelScope.launch { _events.send(ExamUnlockEvent.EarnCoins) }
+        viewModelScope.launch { _events.send(ExamUnlockEvent.EarnCoins(lesson)) }
     }
 
     /** Closes the sheet; ignored while an unlock is in flight (iOS `interactiveDismissDisabled`). */

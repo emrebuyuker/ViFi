@@ -16,6 +16,7 @@ import com.salticusteam.vifi.core.data.submission.SubmissionTierResolver
 import com.salticusteam.vifi.core.di.ApplicationScope
 import com.salticusteam.vifi.core.model.AnalyticsEvent
 import com.salticusteam.vifi.core.model.AnalyticsScreen
+import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.CatalogSelection
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamSubmission
@@ -68,8 +69,13 @@ import kotlinx.coroutines.sync.withLock
 class AddExamViewModel @AssistedInject constructor(
     /** The signed-in user's uid; owns the submission. */
     @Assisted ownerId: String,
-    /** The signed-in user's profile, which pre-fills the school rows. */
+    /** The signed-in user's profile, which pre-fills the school rows when the form has no [archiveContext]. */
     @Assisted profile: UserProfile?,
+    /**
+     * The archive lesson the form was opened from (the unlock sheet), `null` from the home screen: it pre-fills the
+     * lesson at once and the school rows once the bundled lists are read (QA-04).
+     */
+    @Assisted private val archiveContext: ArchivePath?,
     private val savedStateHandle: SavedStateHandle,
     private val draftStore: SubmissionDraftStore,
     private val submissionQueue: SubmissionQueue,
@@ -85,12 +91,16 @@ class AddExamViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(ownerId: String, profile: UserProfile?): AddExamViewModel
+        fun create(ownerId: String, profile: UserProfile?, archiveContext: ArchivePath?): AddExamViewModel
     }
 
     // State
     private val _uiState = MutableStateFlow(
-        AddExamUiState.initial(ownerId, profile, currentYear = clock.instant().atZone(ZoneId.systemDefault()).year),
+        AddExamUiState.initial(
+            ownerId,
+            profile.takeIf { archiveContext == null },
+            currentYear = clock.instant().atZone(ZoneId.systemDefault()).year,
+        ).let { initial -> archiveContext?.let(initial::withArchiveLesson) ?: initial },
     )
     val uiState: StateFlow<AddExamUiState> = _uiState.asStateFlow()
 
@@ -137,7 +147,12 @@ class AddExamViewModel @AssistedInject constructor(
         activeSubmissionId.value?.let(::follow)
         viewModelScope.launch {
             val catalog = catalogSource.catalog()
-            _uiState.update { it.copy(catalog = catalog) }
+            _uiState.update { state ->
+                val loaded = state.copy(catalog = catalog)
+                // Fills only rows still empty, so neither a restored form nor an early pick is overwritten.
+                archiveContext?.let { loaded.withArchiveSchool(it, catalog) } ?: loaded
+            }
+            refreshEstimate()
         }
         viewModelScope.launch {
             rewardsConfigReader.rewardsChanges().collect { config -> _uiState.update { it.copy(rewards = config) } }

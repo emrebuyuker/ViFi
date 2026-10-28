@@ -53,9 +53,20 @@ sealed interface ViFiRoute {
     @Serializable
     data object EditProfile : ViFiRoute
 
-    /** Submits an exam for moderation (opened from the home screen and the unlock sheet's "Sınav Ekle"). */
+    /**
+     * Submits an exam for moderation (opened from the home screen and the unlock sheet's "Sınav Ekle"). From the
+     * unlock sheet [ids] / [names] carry the locked exam's lesson, which pre-fills the school and lesson rows.
+     */
     @Serializable
-    data object AddExam : ViFiRoute
+    data class AddExam(
+        val ids: List<String> = emptyList(),
+        val names: List<String> = emptyList(),
+    ) : ViFiRoute {
+        constructor(context: ArchivePath?) : this(context?.components.orEmpty(), context?.displayNames.orEmpty())
+
+        /** The archive location the form was opened from, `null` from the home screen. */
+        val context: ArchivePath? get() = ArchivePath(ids, names).takeUnless { it.isRoot }
+    }
 
     /** The admin moderation queue (opened from the account screen, by an admin only). */
     @Serializable

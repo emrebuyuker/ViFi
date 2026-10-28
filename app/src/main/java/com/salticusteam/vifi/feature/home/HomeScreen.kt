@@ -68,7 +68,7 @@ fun HomeScreen(
     onAccountClick: () -> Unit,
     onInboxClick: () -> Unit,
     onAboutClick: () -> Unit,
-    onEarnCoins: (() -> Unit)? = null,
+    onEarnCoins: ((lesson: ArchivePath?) -> Unit)? = null,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()

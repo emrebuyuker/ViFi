@@ -18,6 +18,7 @@ import com.salticusteam.vifi.core.data.submission.SubmissionUploader
 import com.salticusteam.vifi.core.model.AnalyticsEvent
 import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.ArchiveError
+import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.CatalogItem
 import com.salticusteam.vifi.core.model.CatalogSelection
 import com.salticusteam.vifi.core.model.ExamKind
@@ -76,6 +77,27 @@ class AddExamViewModelTest {
     )
     private val vize = ExamNameCatalog.names.first()
 
+    /** The fake archive's BLG 101 lesson, as the unlock sheet passes it (ids with display names). */
+    private val blgLesson = ArchivePath.ROOT
+        .appending("itu", "İstanbul Teknik Üniversitesi")
+        .appending("muhendislik", "Mühendislik")
+        .appending("bilgisayar", "Bilgisayar Mühendisliği")
+        .appending("blg-101", "BLG 101")
+
+    /** The bundled lists most tests use: one university, which is not on [blgLesson]'s path. */
+    private val egeOnly = UniversityCatalog(
+        listOf(CatalogItem("ege-universitesi", "Ege Üniversitesi")),
+        emptyList(),
+        emptyList(),
+    )
+
+    /** Bundled lists holding every school level of [blgLesson]. */
+    private val withItu = UniversityCatalog(
+        universities = egeOnly.universities + CatalogItem("istanbul-teknik-universitesi", "İstanbul Teknik Üniversitesi"),
+        faculties = listOf(CatalogItem("muhendislik-fakultesi", "Mühendislik Fakültesi")),
+        departments = listOf(CatalogItem("bilgisayar-muhendisligi", "Bilgisayar Mühendisliği")),
+    )
+
     private lateinit var submissionService: FakeExamSubmissionService
     private lateinit var rewards: FakeRewardsConfigReader
     private lateinit var archive: FakeArchiveRepository
@@ -108,13 +130,15 @@ class AddExamViewModelTest {
         ownerId: String = "uid",
         profile: UserProfile? = this@AddExamViewModelTest.profile,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        archiveContext: ArchivePath? = null,
+        catalog: UniversityCatalog = egeOnly,
     ): AddExamViewModel {
         queue = FakeSubmissionQueue(
             draftStore,
             SubmissionUploader(draftStore, submissionService, analytics),
             outlivingScope,
         )
-        return viewModel(ownerId, profile, savedStateHandle, queue)
+        return viewModel(ownerId, profile, savedStateHandle, queue, archiveContext, catalog)
     }
 
     private fun TestScope.viewModel(
@@ -122,9 +146,12 @@ class AddExamViewModelTest {
         profile: UserProfile?,
         savedStateHandle: SavedStateHandle,
         queue: FakeSubmissionQueue,
+        archiveContext: ArchivePath? = null,
+        catalog: UniversityCatalog = egeOnly,
     ) = AddExamViewModel(
         ownerId = ownerId,
         profile = profile,
+        archiveContext = archiveContext,
         savedStateHandle = savedStateHandle,
         draftStore = draftStore,
         submissionQueue = queue,
@@ -132,11 +159,7 @@ class AddExamViewModelTest {
         tierResolver = SubmissionTierResolver(archive),
         fileSource = files,
         catalogSource = object : CatalogSource {
-            override suspend fun catalog() = UniversityCatalog(
-                listOf(CatalogItem("ege-universitesi", "Ege Üniversitesi")),
-                emptyList(),
-                emptyList(),
-            )
+            override suspend fun catalog() = catalog
         },
         analytics = analytics,
         appScope = outlivingScope,
@@ -157,6 +180,49 @@ class AddExamViewModelTest {
         onYearSelected(year)
         onImagesPicked(listOf("img1", "img2"))
         onTermsAcceptedChange(acceptTerms)
+    }
+
+    @Test
+    fun `init from an archive lesson prefills its school and lesson instead of the profile`() = runTest {
+        val elsewhere = profile.copy(university = "Ege Üniversitesi", universityId = "ege-universitesi")
+
+        val sut = viewModel(profile = elsewhere, archiveContext = blgLesson, catalog = withItu)
+        advanceUntilIdle()
+
+        val state = sut.uiState.value
+        assertEquals(CatalogSelection.catalog(withItu.universities.last()), state.university)
+        assertEquals(CatalogSelection.catalog(withItu.faculties.single()), state.faculty)
+        assertEquals(CatalogSelection.catalog(withItu.departments.single()), state.department)
+        assertEquals(CatalogSelection.archive("BLG 101"), state.lesson)
+        assertTrue(state.canPickLesson)
+    }
+
+    @Test
+    fun `init from an archive lesson leaves a school level without a bundled match empty`() = runTest {
+        val sut = viewModel(archiveContext = blgLesson, catalog = egeOnly)
+        advanceUntilIdle()
+
+        val state = sut.uiState.value
+        assertTrue(state.university.isEmpty)
+        assertTrue(state.faculty.isEmpty)
+        assertTrue(state.department.isEmpty)
+        assertEquals("BLG 101", state.lesson.name)
+    }
+
+    @Test
+    fun `init from an archive lesson keeps the picks of a restored form`() = runTest {
+        val handle = SavedStateHandle()
+        val first = viewModel(savedStateHandle = handle, archiveContext = blgLesson, catalog = withItu)
+        advanceUntilIdle()
+        first.choose(AddExamPicker.UNIVERSITY, CatalogSelection.catalog(egeOnly.universities.single()))
+        first.choose(AddExamPicker.LESSON, CatalogSelection.custom("BLG 102"))
+        advanceUntilIdle()
+
+        val sut = viewModel(savedStateHandle = handle.afterProcessDeath(), archiveContext = blgLesson, catalog = withItu)
+        advanceUntilIdle()
+
+        assertEquals("Ege Üniversitesi", sut.uiState.value.university.name)
+        assertEquals("BLG 102", sut.uiState.value.lesson.name)
     }
 
     @Test

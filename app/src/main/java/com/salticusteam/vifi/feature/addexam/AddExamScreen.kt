@@ -71,6 +71,7 @@ import com.salticusteam.vifi.core.designsystem.component.formatCoins
 import com.salticusteam.vifi.core.designsystem.component.labelResId
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
+import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.CatalogSelection
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamSubmission
@@ -83,7 +84,8 @@ import com.salticusteam.vifi.feature.profile.CatalogPicker
 /**
  * The "Sınav Ekle" flow (iOS AddExamView): pick the school (pre-filled from the profile, list-only), the lesson
  * (archive or typed), the exam name / year / kind, attach image pages or a PDF, and submit it for moderation.
- * Opened from the home screen and from the unlock sheet's "Sınav Ekle"; [onClose] returns to where it came from,
+ * Opened from the home screen and from the unlock sheet's "Sınav Ekle", which passes the locked exam's lesson as
+ * [archiveContext] to pre-fill the school and lesson rows; [onClose] returns to where it came from,
  * also after a successful submit. Back and close are disabled while the submit is being queued; once it uploads in
  * the background the form may be closed (the upload goes on and its outcome is notified).
  */
@@ -91,9 +93,10 @@ import com.salticusteam.vifi.feature.profile.CatalogPicker
 fun AddExamScreen(
     ownerId: String,
     profile: UserProfile?,
+    archiveContext: ArchivePath?,
     onClose: () -> Unit,
     viewModel: AddExamViewModel = hiltViewModel<AddExamViewModel, AddExamViewModel.Factory> { factory ->
-        factory.create(ownerId, profile)
+        factory.create(ownerId, profile, archiveContext)
     },
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()

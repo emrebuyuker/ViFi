@@ -51,7 +51,6 @@ import com.salticusteam.vifi.core.model.ArchiveItem
 import com.salticusteam.vifi.core.model.ArchiveLevel
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.CatalogSelection
-import com.salticusteam.vifi.core.util.Slug
 
 /**
  * Picks the lesson (`ders`) of a submission (iOS LessonPickerView): the archive lessons of the chosen
@@ -187,7 +186,7 @@ internal fun LessonPickerContent(
                         colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                         modifier = Modifier
                             .clickable {
-                                onSelect(CatalogSelection(name = lesson.name, id = Slug.make(lesson.name), isCustom = false))
+                                onSelect(CatalogSelection.archive(lesson.name))
                             }
                             .semantics { selected = isSelected }
                             .testTag("lessonPicker.option"),

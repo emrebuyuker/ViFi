@@ -171,14 +171,14 @@ class ExamUnlockViewModelTest {
     }
 
     @Test
-    fun `onEarnCoins closes the sheet, reports and emits EarnCoins`() = runTest {
+    fun `onEarnCoins closes the sheet, reports and emits EarnCoins with the exam's lesson`() = runTest {
         val sut = makeSut(balance = 0)
         settle()
         sut.onLockedExamTap(locked)
 
         sut.events.test {
             sut.onEarnCoins()
-            assertEquals(ExamUnlockEvent.EarnCoins, awaitItem())
+            assertEquals(ExamUnlockEvent.EarnCoins(lesson = locked.path.parent), awaitItem())
         }
         assertNull(sut.uiState.value.examToUnlock)
         assertEquals(AnalyticsEvent.EarnCoinsTapped, analytics.events.last())

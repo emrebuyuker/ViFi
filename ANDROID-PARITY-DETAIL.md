@@ -3904,6 +3904,7 @@
 - **Kabul kriteri:** Açık temada mor/lila/pembe ton yok; tüm metin/zemin çiftleri AA; açılışta renk atlaması yok; karanlık tema değişmedi.
 
 #### `QA-04` — Sınav Ekle'yi bir dersten (kilit sheet'i) açınca okul + ders bağlamını ön-doldur  _(P3 · efor: M)_
+- **Durum (2026-10-29, tamam):** Ürün sahibi Android'de yapılmasına karar verdi (iOS'ta yok). Rota `AddExam(ids, names)`; kilit sheet'i `EarnCoins(lesson = exam.path.parent)` gönderiyor. Ders arşivden hemen, okul satırları paketli liste okununca (`withArchiveSchool`) yalnız boşsa doluyor: üniversite `ArchiveNameMatch.matches`, fakülte "fakültesi" eki tolere edilerek, bölüm `matchesDepartment` ("BÖLÜMÜ" eki). Eşleşmeyen seviye boş; profil yedeği yalnız bağlamsız (ana ekran) açılışta. Saha örneği (SAKARYA ÜNİVERSİTESİ › MÜHENDİSLİK FAKÜLTESİ › ELEKTRİK ELEKTRONİK MÜHENDİSLİĞİ) paketli listede birebir karşılığını buluyor.
 - **Gözlem:** Sakarya › Mühendislik › Elektrik Elektronik › Diferansiyel Denklemler'deki kilit sheet'inden "Sınav Ekle"ye gelince form profildeki okulla (başka üniversite/fakülte/bölüm) doluyor, ders boş.
 - **Durum:** Hata değil; iOS da aynı (`AddExamView()` argümansız, `AddExamViewModel` profilden dolduruyor). İyileştirme önerisi.
 - **Adımlar:**
@@ -3916,7 +3917,7 @@
 
 #### `REL-02` — Düzeltme sürümü (versionCode 18)  _(P1 · efor: S)_
 - **Durum (2026-10-29):** Sürüm adı **4.0.0** (iOS ile aynı seri), `versionCode 18`; `v-4.0.0` dalında QA-01…QA-03 ile birlikte. Sürüm notları `PLAY-STORE-LISTING.md`'de (240/500 karakter). Kalan: release AAB, iç test → üretim, mağaza sürümünde kontrol.
-- **Kapsam:** QA-01, QA-02, QA-03 (QA-04 karara bağlı). Sürüm adı iOS serisine göre seçilir (iOS 4.0.0'a geçiyor; CLAUDE.md "iOS ile aynı seri").
+- **Kapsam:** QA-01, QA-02, QA-03, QA-04 (4.0.0'a başka değişiklikler de girecek). Sürüm adı iOS serisine göre seçilir (iOS 4.0.0'a geçiyor; CLAUDE.md "iOS ile aynı seri").
 - **Adımlar:**
   - `versionCode 18` + sürüm adı; derleme, lint, birim + UI testleri.
   - Release AAB'yi yükleme anahtarıyla imzala, iç teste yükle, ardından üretime gönder.
