@@ -182,7 +182,7 @@ Android ve iOS **aynı** `vifi-831a8` projesini paylaşır (ayrıntı: `.claude/
 | **Android kaydı** | `com.salticusteam.vifi` — debug (bu Mac), Play uygulama imzalama ve yükleme anahtarının SHA-1/SHA-256'ları kayıtlı (`BE-01`, 28 Ekim 2026); Play Integrity sağlayıcı kaydı `REL-01`'de |
 | **Arşiv** | named `vifi` Firestore `catalogNodes`/`exams` (`BE-05`, `BE-15`); RTDB `Universitiess` artık okunmuyor |
 | **Giriş** | Phone Auth `+90` (`BE-04`); canlı test için Console'daki test numarası + `111111` |
-| **App Check** | Storage/RTDB/Auth enforce **AÇIK** → Play Integrity kurulmadan **403**; Firestore enforce en son açılır (`BE-02/03`) |
+| **App Check** | Storage/RTDB/Auth/Firestore enforce **AÇIK** (Firestore 28 Ekim 2026, `BE-03`) → geçerli token yoksa **403** / `PERMISSION_DENIED`; Cloud Functions'ta enforce kapalı |
 | **Bildirim** | Native FCM (Parse kaldırıldı, `BE-11`), topic `all`, `POST_NOTIFICATIONS`, `announcements` (isimli `vifi`) → Inbox |
 | **Cloud Functions (ortak, europe-west1)** | `unlockExam`, `recordLoginDiagnostic` — Android **çağırır** (`BE-08/09`), yeni function yazmaz |
 

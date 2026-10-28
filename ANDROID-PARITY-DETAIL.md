@@ -90,6 +90,7 @@
 - **Kabul kriteri:** Debug'ta debug token'la, release'te Play Integrity ile App Check token üretiliyor; enforce'lu Storage/RTDB okumaları 403 almıyor.
 
 #### `BE-03` — App Check Console: Play Integrity etkinleştir + enforce sırasını yönet (Firestore en son)  _(P0 · efor: S)_
+- **Durum (2026-10-28):** ✔️ Tamamlandı. Firestore metrikleri (son 7 gün): %94 doğrulanmış, eski sürüm 0, bilinmeyen kaynak 0, geçersiz token %6 → Firestore ~23:00'te Enforce'a alındı; emülatörde (debug token) arşiv, sınav listesi ve cüzdan okundu. Dört servis (Storage, RTDB, Auth, Firestore) enforce. Cloud Functions'ta `enforceAppCheck` kapalı (`unlockExam`, `purchaseExamUnlock`; `recordLoginDiagnostic` bilinçli olarak kapalı) — ortak backend, iOS deposunda.
 - **iOS davranışı:** firestore.rules yorumu: Firestore App Check enforce'u yalnızca Firestore okuyan sürüm çıktıktan SONRA açılır; Storage/RTDB/Auth zaten enforce.
 - **iOS karşılığı/kaynak:** Console yapılandırması (kodda değil).
 - **Android mevcut:** Android App Check'e hiç dahil değil.
@@ -3848,6 +3849,7 @@
 - **Durum (2026-10-24):** `buyukeryazilim` geliştirici hesabı ve ViFi dahil tüm uygulamalar 19 Kasım 2024'te Google Play'den kaldırıldı (hesap doğrulaması son tarihe kadar tamamlanmadı; Play Console "İşlem gerekli"). ViFi üretimde etkin değil, yeni sürüm yayınlanamıyor.
 - **Durum (2026-10-26):** Kimlik ve telefon doğrulaması tamamlandı, hesap kısıtlaması kalktı. Play App Signing etkin (paket adı korunur); yükleme anahtarı sıfırlandı, yeni anahtar 28 Ekim 2026 16:08 UTC'de geçerli. Beyanlar kaydedildi; kalan engel Android geliştirici doğrulamasında paket adı kaydı (Play imzalı APK gerekiyor). Ayrıntılı ilerleme ROADMAP'teki REL-01 notunda.
 - **Durum (2026-10-28):** Uygulama imzalama ve yükleme anahtarının SHA-1/SHA-256'ları Firebase Android uygulamasına eklendi (BE-01 tamam). `google-services.json` yenilenmedi: tazesi işlevsel olarak aynı (yalnız kullanılmayan OAuth istemcileri düşüyor). Play Integrity API bağlandı ve App Check'te sağlayıcı kayıtlı. 19:30'da 17 (3.1.0) dahili teste yayınlandı; Play imzalı APK `apksigner` ile `B2:F6…:75:90` doğrulandı; paket adı Android geliştirici doğrulamasında kayıtlı. Aynı sürüm üretime %100 eklendi ve beyanlar + mağaza girişiyle birlikte 13 değişiklik incelemeye gönderildi (yönetilen yayınlama kapalı); aynı akşam onaylandı, üretimde %100 yayında. Kalan: politika durumundaki eski sorunların temizlenmesi, mağazadan inen sürümde giriş/App Check denemesi, BE-03 enforce sırası.
+- **Durum (2026-10-28, smoke test):** Play'den inen 17 (3.1.0) gerçek cihazda denendi: giriş, profil tamamlama, tanıtım, arşiv, kilit sheet'i, Sınav Ekle formu, görsel sınav ve ekran koruması çalıştı; enforce açık Auth/RTDB/Storage geçtiği için Play Integrity sahada geçerli. Kabul kriterindeki "mağazadan indirilen sürümde giriş, arşiv ve App Check" karşılandı. Bulgular QA-01…QA-04, düzeltme sürümü REL-02. Kalan: politika rozeti, BE-03.
 - **Neden ayrı kalem:** Release imzası, Play App Signing ve Play Integrity mağaza dağıtımına bağlı. Bu işler hesap durumu çözülmeden yapılamaz; geliştirme ve testler debug imzayla (BE-01 debug izleri kayıtlı) sürer.
 - **Adımlar:**
   - Play Console'da hesap doğrulamasını tamamla ve kaldırılan uygulamaların geri alınması için başvur. Olmazsa yeni hesap / paket adı kararını ver (`com.salticusteam.vifi` eski hesaba bağlı kalabilir; Firebase kaydı ve iOS ile paylaşılan proje bu karardan etkilenir).
@@ -3860,3 +3862,60 @@
 - **Bağımlılık:** BE-01, BE-03, FM-20
 - **Tuzaklar:** Upload key yerine yalnız app signing key (veya tersi) eklenirse mağazadan inen sürümde telefonla giriş çalışmaz. Firestore App Check enforce, Firestore okuyan Android sürümü dağıtılmadan açılmamalı.
 - **Kabul kriteri:** Play hesabı aktif; ViFi kapalı testte ve ardından üretimde yayında; mağazadan indirilen sürümde telefonla giriş, arşiv ve App Check sorunsuz.
+
+## Mağaza sürümü saha testi bulguları  ·  `qa`
+
+> 28 Ekim 2026'da Play'den inen 17 (3.1.0) gerçek cihazda baştan sona denendi (REL-01 smoke testi). Ana akışlar çalıştı; aşağıdakiler o turda görülen üç hata, bir iyileştirme ve düzeltme sürümü.
+
+#### `QA-01` — Tanıtım turu sistem çubuklarıyla çakışıyor ("İleri"/"Başla" gezinme çubuğunun altında, üstte gri şerit)  _(P1 · efor: S)_
+- **Gözlem:** Gerçek cihazda (hareketle gezinme) ve emülatörde (API 37) aynı: tur açıkken durum çubuğunun altı karartılmış gri bir şerit kalıyor; alttaki birincil butonun metni gezinme tutamacıyla üst üste biniyor, butonun alt kenarı ekrandan taşıyor. İlk açılışta ve Hakkında → "Tanıtım turunu tekrar izle"de görülür.
+- **Neden:** `OnboardingScreen` turu `Dialog(usePlatformDefaultWidth = false)` penceresinde gösteriyor. Dialog penceresi `decorFitsSystemWindows = true` (varsayılan) ile sistem çubuklarına göre yerleşmiyor; içerideki `safeDrawingPadding()` boşluk vermiyor.
+- **Adımlar:**
+  - `DialogProperties(dismissOnClickOutside = false, usePlatformDefaultWidth = false, decorFitsSystemWindows = false)`: pencere tam ekran çizilsin, `Surface` durum çubuğunun altını da kaplasın (iOS `fullScreenCover`), mevcut `safeDrawingPadding()` gerçek boşlukları uygulasın.
+  - Dialog penceresinde (`LocalView.current.parent as DialogWindowProvider`) `WindowInsetsControllerCompat.isAppearanceLightStatusBars/NavigationBars = !darkTheme`: açık temada çubuk ikonları koyu, karanlıkta açık kalsın.
+  - Erişilebilirlik ve geri tuşu davranışı (`onDismissRequest` → Atla) değişmesin; ayrı pencere olarak kalması TalkBack'in arkadaki arşive gitmesini engeller.
+- **Bağımlılık:** OB-9
+- **Tuzaklar:** `decorFitsSystemWindows = false` iken ikon rengi ayarlanmazsa açık temada beyaz durum çubuğu ikonları beyaz zeminde kaybolur. Overlay'e (Dialog'suz) geçmek insets'i çözer ama arkadaki içerik semantics ağacında kalır.
+- **Kabul kriteri:** Hareketle ve 3 tuşlu gezinmede, açık ve karanlık temada buton gezinme çubuğunun üstünde ve tam görünür; üstte gri şerit yok, durum çubuğu ikonları okunur; geri tuşu turu Atla olarak kapatır; ilk açılış ve tekrar izleme aynı.
+
+#### `QA-02` — Breadcrumb ekrana geri dönünce güncel çipi göstermiyor  _(P1 · efor: S)_
+- **Gözlem:** Sınavlar listesinde (5 çipli iz) "Sınav Ekle"ye gidip kapatınca iz artık sonda değil: güncel çip ("DİFERANSİYEL DENKLEMLER") sağda kesik. İlk girişte doğru.
+- **Neden:** `BreadcrumbBar`'daki `LaunchedEffect(path, scrollState.maxValue) { scrollState.scrollTo(scrollState.maxValue) }` ilk çizimden önce koşuyor; o anda `maxValue` henüz `Int.MAX_VALUE`. Ekran geri yüklendiğinde `rememberScrollState()` sıfırdan büyük kayıtlı değerle başlar ve `ScrollState`'in `value + round(delta)` toplamı tamsayı taşar (Compose foundation 1.7.5 bytecode'u + JVM simülasyonuyla doğrulandı: kayıtlı 700 → 59). Sonraki `scrollTo(max)` float hassasiyetiyle rastgele bir konuma düşer. İlk girişte değer 0 olduğu için taşma yok.
+- **Adımlar:**
+  - Kaydırmayı yalnız `maxValue` bilindiğinde yap: `if (scrollState.maxValue != Int.MAX_VALUE) scrollState.scrollTo(scrollState.maxValue)` (ya da `snapshotFlow { maxValue }.first { it != Int.MAX_VALUE }`).
+  - Compose UI testi: dar genişlikte derin yol → son çip görünür; `StateRestorationTester.emulateSavedInstanceStateRestore()` sonrası son çip hâlâ görünür.
+- **Bağımlılık:** ARCH-15
+- **Tuzaklar:** `LaunchedEffect`'in anahtarından `maxValue`'yu çıkarmak ilk girişte izi baştan bırakır (genişlik layout'tan sonra bilinir). Aynı desen başka yatay kaydırmalarda kullanılırsa aynı düzeltme gerekir (şu an yalnız burada).
+- **Kabul kriteri:** Sınav Ekle, görüntüleyici, Hesap ve döndürmeden sonra iz her zaman sonda; güncel çip tam görünür; UI testi geçer.
+
+#### `QA-03` — Açık tema: Material3 varsayılan mor nötr/konteyner tonlarını marka uyumlu tam açık şemayla değiştir  _(P2 · efor: M)_
+- **Gözlem:** Açık temada seçili segment (Sınav Ekle "Görsel/PDF", profil "Kadın/Erkek") lila, Sınav Ekle kartı ve breadcrumb çipleri lavanta-gri, kilit sheet'i lavanta, zemin hafif pembe. Turuncu marka rengiyle uyumsuz; karanlık tema bu sorunu taşımıyor.
+- **Neden:** `VifiLightColors` yalnız `primary/onPrimary/secondary/onSecondary` tanımlıyor; geri kalan roller Material3 baseline (mor tonlu) değerlerinde kalıyor (`background`, `surfaceVariant`, `secondaryContainer`, `surfaceContainer*`, `outline*`, `tertiary*`).
+- **Adımlar:**
+  - `VifiDarkColors` gibi tüm rolleri tanımlayan bir açık şema: beyaz/çok açık nötr zemin (iOS `systemBackground`), nötr gri kart dolgusu (iOS `secondarySystemBackground` karşılığı `surfaceVariant`/`surfaceContainer*`), turuncu tonlu `primaryContainer`/`secondaryContainer`, sıcak nötr `outline`/`outlineVariant`.
+  - `res/values/styles.xml` `window_background` ve splash zeminini yeni `background` ile hizala (açılışta renk atlaması olmasın).
+  - `VifiColorContrastTest`'e açık tema metin/zemin çiftlerini ekle (gövde ≥ 4.5:1, outline ≥ 3:1).
+  - Etkilenen ekranları açık temada gözden geçir: Home kartı, breadcrumb, segmentli butonlar, kilit sheet'i, Sınav Ekle, profil, Hesap, Inbox.
+- **Bağımlılık:** DS-01
+- **Tuzaklar:** `secondaryContainer` seçili segmentin zemini; turuncu tonlu yapılırsa üstündeki metin `onSecondaryContainer` ile kontrastlı kalmalı. `dynamicColor` kapalı kalır. Turuncu üstünde siyah metin kuralı değişmez.
+- **Kabul kriteri:** Açık temada mor/lila/pembe ton yok; tüm metin/zemin çiftleri AA; açılışta renk atlaması yok; karanlık tema değişmedi.
+
+#### `QA-04` — Sınav Ekle'yi bir dersten (kilit sheet'i) açınca okul + ders bağlamını ön-doldur  _(P3 · efor: M)_
+- **Gözlem:** Sakarya › Mühendislik › Elektrik Elektronik › Diferansiyel Denklemler'deki kilit sheet'inden "Sınav Ekle"ye gelince form profildeki okulla (başka üniversite/fakülte/bölüm) doluyor, ders boş.
+- **Durum:** Hata değil; iOS da aynı (`AddExamView()` argümansız, `AddExamViewModel` profilden dolduruyor). İyileştirme önerisi.
+- **Adımlar:**
+  - `ViFiRoute.AddExam`'a opsiyonel bağlam argümanı (arşiv yolu) ekle; kilit sheet'i ve Browse'dan açılınca doldur, Home'dan açılınca profil yedeği.
+  - Arşiv düğümünü (catalogNodes slug + ad) paketli kataloğa (AE-01) ad-eşlemeyle bağla; eşleşmeyen seviyede profil/boş seçiciye düş.
+  - Ders, arşiv dersiyle doğrudan seçili gelsin (AE-05 ad-eşleme).
+- **Bağımlılık:** AE-02, AE-04, AE-05
+- **Tuzaklar:** Arşiv adları ile paketli katalog adları birebir aynı olmayabilir (büyük harf, "ÜNİVERSİTESİ" ekleri). Parite: iOS'ta yok, iOS'la birlikte karar verilmeli.
+- **Kabul kriteri:** Bir dersten açılan form o okul/fakülte/bölüm/dersle dolu; Home'dan açılan form profille dolu; eşleşmeyen ad güvenli şekilde boş kalır.
+
+#### `REL-02` — Düzeltme sürümü (versionCode 18)  _(P1 · efor: S)_
+- **Kapsam:** QA-01, QA-02, QA-03 (QA-04 karara bağlı). Sürüm adı iOS serisine göre seçilir (iOS 4.0.0'a geçiyor; CLAUDE.md "iOS ile aynı seri").
+- **Adımlar:**
+  - `versionCode 18` + sürüm adı; derleme, lint, birim + UI testleri.
+  - Release AAB'yi yükleme anahtarıyla imzala, iç teste yükle, ardından üretime gönder.
+  - Mağazadan inen sürümde tanıtım butonu, breadcrumb dönüşü ve açık tema yeniden kontrol edilir.
+- **Bağımlılık:** QA-01, QA-02, QA-03, REL-01
+- **Kabul kriteri:** Düzeltme sürümü üretimde; mağaza sürümünde üç bulgu yok.
