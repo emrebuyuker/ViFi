@@ -3823,6 +3823,7 @@
 - **Kabul kriteri:** Uygulamada hiçbir banner/reklam gösterilmez, play-services-ads bağımlılığı ve ads meta-data kaldırılmış, uygulama reklam SDK'sı olmadan sorunsuz açılır.
 
 #### `A11Y-01` — Erişilebilirlik — contentDescription, testTag kimlikleri, dokunma hedefleri, TalkBack  _(P2 · efor: M)_
+- **Durum (2026-10-28):** ✔️ Kapatıldı (ürün sahibi kararı). Etiketler, başlıklar, gruplama, ≥48dp hedefler ve testTag'ler emülatörde erişilebilirlik ağacıyla doğrulandı (2026-10-24); gerçek cihazda insanla sesli TalkBack turu yapılmadı — sorun görülürse yeni kalem açılır.
 - **iOS davranışı:** Her anlamlı öge accessibilityIdentifier taşır (account.sheet, account.editProfile, account.coinBalance, account.phone, account.signOut, account.delete, account.reauth.code/verify/resend/cancel, about.sheet/version/contact/replayOnboarding, state.loading/error/retry/empty, coin.balance, home.list/recents/addExam...). accessibilityLabel/Value/Hint, combine, isHeader, decorative ikonlar hidden, custom action 'Listeden Kaldır'.
 - **iOS karşılığı/kaynak:** iOS View'larındaki .accessibilityIdentifier/Label/Value/Hint/addTraits/accessibilityAction
 - **Android mevcut:** Yok; erişilebilirlik etiketleri/kimlikleri tanımsız.
