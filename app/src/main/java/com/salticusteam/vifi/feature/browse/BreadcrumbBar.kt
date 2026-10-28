@@ -1,6 +1,7 @@
 package com.salticusteam.vifi.feature.browse
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -72,8 +73,8 @@ fun BreadcrumbBar(
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
-    // Runs after the first layout (maxValue is known then), the iOS `defaultScrollAnchor(.trailing)`.
-    LaunchedEffect(path, scrollState.maxValue) { scrollState.scrollTo(scrollState.maxValue) }
+    // Re-runs once the first layout sets maxValue: the iOS `defaultScrollAnchor(.trailing)`.
+    LaunchedEffect(path, scrollState.maxValue) { scrollState.scrollToEndOnceMeasured() }
 
     Row(
         modifier = modifier
@@ -102,6 +103,15 @@ fun BreadcrumbBar(
             )
         }
     }
+}
+
+/**
+ * Scrolls to the end, but only once the content has been measured. Before the first layout `maxValue` is still
+ * `Int.MAX_VALUE`, and scrolling there from a restored non-zero offset (back navigation, configuration change)
+ * overflows `ScrollState`'s Int value, so the next scroll to the real end lands at a random spot (QA-02).
+ */
+internal suspend fun ScrollState.scrollToEndOnceMeasured() {
+    if (maxValue != Int.MAX_VALUE) scrollTo(maxValue)
 }
 
 /** A chip of the trail; [onClick] is `null` for the current (selected, not tappable) chip. */

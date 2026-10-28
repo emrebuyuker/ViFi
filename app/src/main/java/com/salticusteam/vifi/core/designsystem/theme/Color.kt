@@ -16,14 +16,46 @@ val VifiAlwaysBlack = Color(0xFF000000)
 val VifiAlwaysWhite = Color(0xFFFFFFFF)
 
 /**
- * Contrast rule (iOS): text on the brand orange is BLACK — white falls below 3:1.
- * Everything not listed keeps the Material3 baseline neutrals.
+ * Full light scheme, the counterpart of [VifiDarkColors] (QA-03). The Material3 baseline light neutrals are
+ * purple/pink-tinted (lilac selected segments, lavender cards, pink background); here the background is white
+ * (iOS systemBackground), cards and sheets are warm neutral greys and containers are orange tones of the brand.
+ * Contrast rule (iOS): text on the brand orange is BLACK — white falls below 3:1. All text/background pairs are
+ * WCAG AA (body text ≥ 7:1, outline ≥ 3:1).
  */
 internal val VifiLightColors = lightColorScheme(
     primary = VifiOrange,
     onPrimary = VifiAlwaysBlack,
+    primaryContainer = Color(0xFFFFDCBE),
+    onPrimaryContainer = Color(0xFF2D1600),
+    inversePrimary = Color(0xFFFFB870),
     secondary = VifiOrange,
     onSecondary = VifiAlwaysBlack,
+    // Selected segment (Görsel/PDF, Kadın/Erkek): a light orange tone instead of the baseline lilac.
+    secondaryContainer = Color(0xFFFFE3C9),
+    onSecondaryContainer = Color(0xFF2D1600),
+    tertiary = Color(0xFF626231),
+    onTertiary = VifiAlwaysWhite,
+    tertiaryContainer = Color(0xFFE9E9AA),
+    onTertiaryContainer = Color(0xFF1D1D00),
+    background = VifiAlwaysWhite,
+    onBackground = Color(0xFF1F1B17),
+    surface = VifiAlwaysWhite,
+    onSurface = Color(0xFF1F1B17),
+    // Card fill on Home/breadcrumb (iOS secondarySystemBackground role): a warm neutral grey just off white.
+    surfaceVariant = Color(0xFFF3F0ED),
+    onSurfaceVariant = Color(0xFF51463C),
+    surfaceTint = VifiOrange,
+    inverseSurface = Color(0xFF34302C),
+    inverseOnSurface = Color(0xFFF8EFE8),
+    outline = Color(0xFF857669),
+    outlineVariant = Color(0xFFD8D1CA),
+    surfaceDim = Color(0xFFE1DDD9),
+    surfaceBright = VifiAlwaysWhite,
+    surfaceContainerLowest = VifiAlwaysWhite,
+    surfaceContainerLow = Color(0xFFFBF9F7),
+    surfaceContainer = Color(0xFFF5F2EF),
+    surfaceContainerHigh = Color(0xFFEFECE9),
+    surfaceContainerHighest = Color(0xFFE9E5E1),
 )
 
 /**

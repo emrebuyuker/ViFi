@@ -1,5 +1,7 @@
 package com.salticusteam.vifi.feature.onboarding
 
+import android.os.Build
+import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -32,7 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -45,6 +50,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.designsystem.component.IconBadge
@@ -76,11 +83,47 @@ fun OnboardingScreen(
 
     Dialog(
         onDismissRequest = { finish(AnalyticsValues.ONBOARDING_SKIPPED) },
-        properties = DialogProperties(dismissOnClickOutside = false, usePlatformDefaultWidth = false),
+        properties = DialogProperties(
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false,
+            // Edge-to-edge only where EdgeToEdgeDialogWindow also lifts the window out of the bars; before
+            // Android 15 this flag would switch Compose 1.7 to a centred, non-floating window.
+            decorFitsSystemWindows = Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM,
+        ),
     ) {
+        EdgeToEdgeDialogWindow()
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             OnboardingContent(pages = OnboardingPage.tour, onFinish = finish, modifier = Modifier.safeDrawingPadding())
         }
+    }
+}
+
+/**
+ * Lets the tour's dialog window cover the whole screen, system bars included (iOS `fullScreenCover`), so
+ * safeDrawingPadding gets the real insets and the primary button stays above the navigation bar (QA-01). From
+ * Android 15 Compose 1.7 sizes the dialog to the full display but still fits the window between the bars, which
+ * slid the content under the navigation bar; earlier versions size it to the area between the bars, where it
+ * already fits. Bar icons follow the tour background so they stay readable.
+ */
+@Composable
+private fun EdgeToEdgeDialogWindow() {
+    val window = (LocalView.current.parent as? DialogWindowProvider)?.window ?: return
+    val lightBackground = MaterialTheme.colorScheme.background.luminance() > 0.5f
+    DisposableEffect(window, lightBackground) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            window.attributes = window.attributes.apply {
+                fitInsetsTypes = 0
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+            }
+            // Nothing is left to dim; a rounding pixel at the edge would show as a grey line.
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        }
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = lightBackground
+            isAppearanceLightNavigationBars = lightBackground
+        }
+        // The window goes away with the dialog; the activity's own bar appearance applies again.
+        onDispose {}
     }
 }
 
