@@ -11,7 +11,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **5'i tamam, 0'ı yarım, 22'si başlanmadı.** Faz 0 kararları (DEC-01…DEC-04) verildi; Hat A'nın sözleşmesi (BIL-01) tamamlandı; commit edilince Hat A ve Hat C paralel başlayabilir.
+> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **6'sı tamam, 1'i yarım, 20'si başlanmadı.** Faz 0 kararları (DEC-01…DEC-04) verildi; Hat A'nın sözleşmesi (BIL-01), `SubscriptionStore` (BIL-04) ve Hilt bağlaması (BIL-06'nın mock + yer tutucu kısmı) hazır → Hat A ve Hat C paralel başlayabilir.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -73,7 +73,7 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 | **C — Arayüz** | `feature/premium/**`, `feature/browse/ExamUnlock*`, `feature/account/**`, `CoinBalanceBadge`/`ViFiTopAppBar`, `strings.xml`, `ViFiRoute` (Paywall rotası) | DI modülleri, `core/data/**` (yalnız BIL-01 arayüzlerini ve Fake'leri kullanır) |
 | **D — Yasal/beyan** | `PLAY-DATA-SAFETY.md`, `PLAY-STORE-LISTING.md`, Play Console formları (ürün sahibiyle) | Kod |
 
-- **Senkron noktası 1:** BIL-01 birleşmeden Hat C başlamaz (arayüzler + Fake'ler sabitlenir).
+- **Senkron noktası 1:** BIL-01 + BIL-04 + BIL-06'nın DI kısmı birleşmeden Hat C başlamaz (arayüzler, Fake'ler, `SubscriptionStore` ve Hilt bağlaması sabitlenir — ViewModel'ler ancak bağlama varken derlenir). ✅ 29 Ekim'de hazır.
 - **Senkron noktası 2:** Hat A + Hat C birleşince INT-01 (`AppRoot`, `ViFiNavHost` bağlama yalnız burada).
 - **Senkron noktası 3:** SRV-03 yayında + OPS-01/02 hazır → Faz 3.
 
@@ -99,9 +99,9 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 - [x] **`BIL-01`** Sözleşme: modeller, arayüzler, Fake'ler _(P0·S)_ — `core/model/StoreProduct.kt` (`StoreProductIds`, `SubscriptionPeriod`, `SubscriptionOption`, `PurchaseResult`), `SubscriptionError` (Türkçe `userMessage` + `analyticsReason`, `Throwable.userMessage`'a bağlı), `core/data/repository/SubscriptionService` + `ExamPurchaseService`, `fake/FakeSubscriptionService` + `FakeExamPurchaseService`. ⟶ `DEC-01`, `DEC-03` ✅ _Tamamlandı (2026-10-29): arayüzler Activity almaz (canlı uygulama ön plandaki Activity'yi kendisi alır, `BIL-02`); `StoreProductTest` (5) + `FakeSubscriptionServiceTest` (4); derleme, lint ve 3 × 574 birim testi geçti._
 - [ ] **`BIL-02`** Play Billing bağımlılığı + bağlantı yöneticisi _(P0·M)_ — Güncel kararlı Billing Library (+ `billing-ktx`), tek `BillingClient`, bağlan/yeniden bağlan, bekleyen tek seferlik satın almalar etkin, `PurchasesUpdatedListener` → Flow. ⟶ `BIL-01`
 - [ ] **`BIL-03`** `PlayBillingSubscriptionService` _(P0·M)_ — Ürün/plan detayları ve yerel fiyat, `isSubscribed` (SUBS sorgusu, onaylanmamışı onayla), `statusChanges()` Flow (bağlantı, güncellemeler, ön plana dönüş), `purchase`, `restore` (yeniden sorgu). ⟶ `BIL-02`
-- [ ] **`BIL-04`** `SubscriptionStore` _(P0·S)_ — `@Singleton`, uygulama ömrü boyunca, oturumdan bağımsız; `isSubscribed: StateFlow<Boolean>` (`false` başlar), `options`, satın alma/geri yükleme sonrası yeniden okuma. ⟶ `BIL-01`
+- [x] **`BIL-04`** `SubscriptionStore` _(P0·S)_ — `@Singleton`, uygulama ömrü boyunca, oturumdan bağımsız; `isSubscribed: StateFlow<Boolean>` (`false` başlar), `options`, satın alma/geri yükleme sonrası yeniden okuma. ⟶ `BIL-01` ✅ _Tamamlandı (2026-10-29): `core/data/billing/SubscriptionStore.kt`, oluşturulduğu andan itibaren `@ApplicationScope`'ta durumu izler, okuma hatasında son durumu (başlangıçta kilitli) korur; `SubscriptionStoreTest` (5)._
 - [ ] **`BIL-05`** `PlayBillingExamPurchaseService` _(P0·M)_ — Satın almadan önce bekleyen sınav (DataStore) + `obfuscatedProfileId = examId`; başarıda `purchaseExamUnlock` (Android dalı) → **sunucu kaydından sonra** tüket; `recoverPendingUnlock()`; PENDING; Functions hata eşlemesi. ⟶ `BIL-02`; canlı uçtan uca `SRV-03`
-- [ ] **`BIL-06`** Mock flavor + `vifi_subscribed` + DI _(P1·S)_ — Live: PlayBilling*, mock: Fake* (Firebase/Billing başlamaz); `vifi_subscribed` aktif abonelikle başlatır. ⟶ `BIL-01`
+- [ ] **`BIL-06`** Mock flavor + `vifi_subscribed` + DI _(P1·S)_ — Live: PlayBilling*, mock: Fake* (Firebase/Billing başlamaz); `vifi_subscribed` aktif abonelikle başlatır. ⟶ `BIL-01` 🟡 _İlerleme (2026-10-29): mock `BillingModule` Fake'leri bağlıyor, `vifi_subscribed` (`LaunchArg.SUBSCRIBED`) eklendi. Live `BillingModule` şimdilik `UnavailableSubscriptionService` / `UnavailableExamPurchaseService` bağlıyor (Premium hiç aktif olmaz, satın alma `ProductUnavailable`) — canlı bir derleme ödemesiz Premium veremez. **Kalan:** live bağlamayı Play Billing uygulamalarına çevirip yer tutucuları silmek (`BIL-03`, `BIL-05` ile)._
 
 #### Hat B — Backend (ortak depo `ViFi-iOS/firebase/`) ⚠️ ONAY
 
@@ -191,6 +191,7 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 
 #### `BIL-06` — Mock flavor + `vifi_subscribed` + DI
 - Live Hilt modülü PlayBilling*'i, mock modülü Fake*'i bağlar (mock'ta Billing de başlamaz, `BackendStartup` deseni). `LaunchArg.SUBSCRIBED("vifi_subscribed")`.
+- **Durum (2026-10-29):** `app/src/{live,mock}/…/core/data/billing/BillingModule.kt` ayrı modüller (`RepositoryModule`'e dokunulmadı); live şimdilik `UnavailableBilling.kt` yer tutucularını bağlıyor. Hat A, `BIL-03`/`BIL-05` bitince yalnız live `BillingModule`'ü değiştirir ve `UnavailableBilling.kt`'yi siler; Hat C bu dosyalara dokunmaz.
 
 #### `SRV-01` — `purchaseExamUnlock` Google Play dalı
 - **Adımlar:** `data.platform === 'android'` dalı: `googleapis` (veya `@googleapis/androidpublisher`) ile `purchases.products.get({ packageName, productId, token })`; kontroller: `purchaseState === 0`, `productId === 'exam_unlock'`, `obfuscatedExternalProfileId === examId`; `transactionId = orderId`; mevcut transaction bloğu (`purchasedTransactions`, `unlocks` + `store: 'google_play'`). Hata kodları iOS ile aynı (`failed-precondition` doğrulama, `not-found` sınav, `permission-denied` oturum).
