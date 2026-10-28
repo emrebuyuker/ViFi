@@ -282,3 +282,6 @@ cmake-build-*/
 keystore.properties
 *.jks
 *.keystore
+
+### Play Store assets (live test data, release AAB — never commit) ###
+/play-store/
