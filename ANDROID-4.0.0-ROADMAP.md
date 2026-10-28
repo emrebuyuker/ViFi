@@ -11,7 +11,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **4'ü tamam, 0'ı yarım, 23'ü başlanmadı.** Faz 0 kararları (DEC-01…DEC-04) verildi.
+> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **5'i tamam, 0'ı yarım, 22'si başlanmadı.** Faz 0 kararları (DEC-01…DEC-04) verildi; Hat A'nın sözleşmesi (BIL-01) tamamlandı; commit edilince Hat A ve Hat C paralel başlayabilir.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -68,7 +68,7 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 
 | Hat | Dokunduğu yerler | Dokunmaz |
 |---|---|---|
-| **A — İstemci billing** | `core/data/billing/**`, `core/model/` yeni tipler, Hilt modülleri, `app/src/mock/**`, `LaunchArgs`, `gradle/libs.versions.toml`, `app/build.gradle` | `feature/**`, `strings.xml`, `AppRoot` |
+| **A — İstemci billing** | `core/data/billing/**` (canlı Play Billing), `core/data/repository/{SubscriptionService,ExamPurchaseService}.kt` + `fake/` karşılıkları, `core/model/` yeni tipler, Hilt modülleri, `app/src/mock/**`, `LaunchArgs`, `gradle/libs.versions.toml`, `app/build.gradle` | `feature/**`, `strings.xml`, `AppRoot` |
 | **B — Backend** | `ViFi-iOS/firebase/functions/**`, `firebase/tests/**`, `firebase/README.md` (ortak depo) | Android deposu |
 | **C — Arayüz** | `feature/premium/**`, `feature/browse/ExamUnlock*`, `feature/account/**`, `CoinBalanceBadge`/`ViFiTopAppBar`, `strings.xml`, `ViFiRoute` (Paywall rotası) | DI modülleri, `core/data/**` (yalnız BIL-01 arayüzlerini ve Fake'leri kullanır) |
 | **D — Yasal/beyan** | `PLAY-DATA-SAFETY.md`, `PLAY-STORE-LISTING.md`, Play Console formları (ürün sahibiyle) | Kod |
@@ -89,18 +89,18 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 - [x] **`DEC-02`** Fiyatlar ve teklifler _(P0·S)_ — iOS ile aynı: aylık 59,99 ₺, yıllık 399,99 ₺, tek sınav 29,99 ₺ (App Store Connect'teki gerçek fiyat farklıysa onunla eşitlenir); ücretsiz deneme / tanıtım teklifi yok. ⟶ `DEC-01` ✅ _Karar (2026-10-29, ürün sahibi)._
 - [x] **`DEC-03`** Abonelik hakkının kapsamı _(P0·S)_ — iOS gibi: Google hesabına bağlı, cihazda doğrulanır, iOS ile paylaşılmaz, çıkışta sıfırlanmaz; `subscriptions/{uid}` 4.0.0'da kullanılmaz. ✅ _Karar (2026-10-29, ürün sahibi)._
 - [x] **`DEC-04`** Tek sınav satın almanın sunucu doğrulaması _(P0·S)_ — Mevcut `purchaseExamUnlock`'a Google Play dalı (ortak backend `ViFi-iOS/firebase/`; CLAUDE.md "Android yeni backend yazmaz" kuralının onaylı istisnası), Play Developer API ile; sınav kimliği satın almaya `obfuscatedProfileId` ile bağlanır. Deploy (`SRV-03`) ayrıca onaya bağlı. ✅ _Karar (2026-10-29, ürün sahibi)._
-- [ ] **`OPS-01`** Play Console'da ürünler + lisans test kullanıcıları _(P0·S)_ — Abonelik + base planlar + `exam_unlock` oluşturulup etkinleştirilir; Ayarlar → Lisans testi'ne test hesapları. Ürün sahibi yapar. ⟶ `DEC-01`, `DEC-02`
+- [ ] **`OPS-01`** Play Console'da ürünler + lisans test kullanıcıları _(P0·S)_ — Abonelik + base planlar + `exam_unlock` oluşturulup etkinleştirilir; Ayarlar → Lisans testi'ne test hesapları. Ürün sahibi yapar. Play, faturalandırma izni taşıyan bir derleme yüklenmeden ürün açtırmayabilir → önce Console'da kontrol; gerekiyorsa `BIL-02` sonrası iç teste yükleme (yalnız ürün sahibi onayıyla). ⟶ `DEC-01`, `DEC-02`
 - [ ] **`OPS-02`** Sunucunun Play'e erişimi _(P0·S)_ — `vifi-831a8`'de "Google Play Android Developer API" etkin; Functions servis hesabı Play Console'a sipariş görüntüleme yetkisiyle eklenir. Canlı ayar → onayla. ⟶ `DEC-04`
 
 ### Faz 1 — Geliştirme (4 paralel hat)
 
 #### Hat A — İstemci billing katmanı
 
-- [ ] **`BIL-01`** Sözleşme: modeller, arayüzler, Fake'ler _(P0·S)_ — `StoreProductIds`, `SubscriptionPeriod`, `SubscriptionOption`, `PurchaseResult`, `SubscriptionError` (Türkçe `userMessage` + `analyticsReason`), `SubscriptionRepository`, `ExamPurchaseRepository`, `FakeSubscriptionRepository`, `FakeExamPurchaseRepository`. **İlk gün birleşir; Hat C buna bağlı.** ⟶ `DEC-01`, `DEC-03`
+- [x] **`BIL-01`** Sözleşme: modeller, arayüzler, Fake'ler _(P0·S)_ — `core/model/StoreProduct.kt` (`StoreProductIds`, `SubscriptionPeriod`, `SubscriptionOption`, `PurchaseResult`), `SubscriptionError` (Türkçe `userMessage` + `analyticsReason`, `Throwable.userMessage`'a bağlı), `core/data/repository/SubscriptionService` + `ExamPurchaseService`, `fake/FakeSubscriptionService` + `FakeExamPurchaseService`. ⟶ `DEC-01`, `DEC-03` ✅ _Tamamlandı (2026-10-29): arayüzler Activity almaz (canlı uygulama ön plandaki Activity'yi kendisi alır, `BIL-02`); `StoreProductTest` (5) + `FakeSubscriptionServiceTest` (4); derleme, lint ve 3 × 574 birim testi geçti._
 - [ ] **`BIL-02`** Play Billing bağımlılığı + bağlantı yöneticisi _(P0·M)_ — Güncel kararlı Billing Library (+ `billing-ktx`), tek `BillingClient`, bağlan/yeniden bağlan, bekleyen tek seferlik satın almalar etkin, `PurchasesUpdatedListener` → Flow. ⟶ `BIL-01`
-- [ ] **`BIL-03`** `PlayBillingSubscriptionRepository` _(P0·M)_ — Ürün/plan detayları ve yerel fiyat, `isSubscribed` (SUBS sorgusu, onaylanmamışı onayla), `statusChanges()` Flow (bağlantı, güncellemeler, ön plana dönüş), `purchase`, `restore` (yeniden sorgu). ⟶ `BIL-02`
+- [ ] **`BIL-03`** `PlayBillingSubscriptionService` _(P0·M)_ — Ürün/plan detayları ve yerel fiyat, `isSubscribed` (SUBS sorgusu, onaylanmamışı onayla), `statusChanges()` Flow (bağlantı, güncellemeler, ön plana dönüş), `purchase`, `restore` (yeniden sorgu). ⟶ `BIL-02`
 - [ ] **`BIL-04`** `SubscriptionStore` _(P0·S)_ — `@Singleton`, uygulama ömrü boyunca, oturumdan bağımsız; `isSubscribed: StateFlow<Boolean>` (`false` başlar), `options`, satın alma/geri yükleme sonrası yeniden okuma. ⟶ `BIL-01`
-- [ ] **`BIL-05`** `PlayBillingExamPurchaseRepository` _(P0·M)_ — Satın almadan önce bekleyen sınav (DataStore) + `obfuscatedProfileId = examId`; başarıda `purchaseExamUnlock` (Android dalı) → **sunucu kaydından sonra** tüket; `recoverPendingUnlock()`; PENDING; Functions hata eşlemesi. ⟶ `BIL-02`; canlı uçtan uca `SRV-03`
+- [ ] **`BIL-05`** `PlayBillingExamPurchaseService` _(P0·M)_ — Satın almadan önce bekleyen sınav (DataStore) + `obfuscatedProfileId = examId`; başarıda `purchaseExamUnlock` (Android dalı) → **sunucu kaydından sonra** tüket; `recoverPendingUnlock()`; PENDING; Functions hata eşlemesi. ⟶ `BIL-02`; canlı uçtan uca `SRV-03`
 - [ ] **`BIL-06`** Mock flavor + `vifi_subscribed` + DI _(P1·S)_ — Live: PlayBilling*, mock: Fake* (Firebase/Billing başlamaz); `vifi_subscribed` aktif abonelikle başlatır. ⟶ `BIL-01`
 
 #### Hat B — Backend (ortak depo `ViFi-iOS/firebase/`) ⚠️ ONAY
@@ -125,7 +125,7 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 ### Faz 2 — Entegrasyon ve Testler
 
 - [ ] **`INT-01`** Canlı bağlama _(P0·M)_ — `AppRoot`/`ViFiNavHost`: abonelik durumunu uygulama ömrü boyunca izle, oturum açıkken açılışta `recoverPendingUnlock()` → açılan sınavı işaretle, Paywall rotası, Hesap ve kilit sheet'i bağlantıları. ⟶ `BIL-03`…`BIL-06`, `UI-01`…`UI-03`
-- [ ] **`INT-02`** Birim testleri _(P0·M)_ — Store, repository'ler (sahte BillingClient sarmalayıcısıyla), ViewModel'ler, hata eşleme; `AnalyticsLimitsTest`. ⟶ `INT-01`
+- [ ] **`INT-02`** Birim testleri _(P0·M)_ — Store, servisler (sahte BillingClient sarmalayıcısıyla), ViewModel'ler, hata eşleme; `AnalyticsLimitsTest`. ⟶ `INT-01`
 - [ ] **`INT-03`** UI testleri ve emülatör doğrulaması _(P0·M)_ — iOS `PremiumUITests`/`ExamUnlockUITests` karşılıkları; mock'ta uçtan uca, açık/koyu tema. ⟶ `INT-01`
 
 ### Faz 3 — Gerçek Ortam Doğrulaması (yayın değildir)
@@ -168,15 +168,15 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 - **Tuzak:** İzinlerin yayılması saatler sürebilir; 401/403 bu yüzden olabilir.
 
 #### `BIL-01` — Sözleşme
-- **Adımlar:** `core/model/`: `StoreProductIds` (DEC-01), `SubscriptionPeriod { MONTHLY, YEARLY }`, `SubscriptionOption(id, basePlanId, offerToken, displayName, displayPrice, period)`, `PurchaseResult { SUCCESS, CANCELLED, PENDING }`, `sealed class SubscriptionError(userMessage)` (iOS'taki üç mesajın Google Play uyarlaması + `Unknown`). `core/data/billing/`: `SubscriptionRepository` (`subscriptionOptions()`, `isSubscribed()`, `statusChanges(): Flow<Boolean>`, `purchase(activity, option)`, `restore()`), `ExamPurchaseRepository` (`purchaseUnlock(activity, examId)`, `recoverPendingUnlock(): String?`), Fake'ler.
-- **Tuzak:** Satın alma akışı bir `Activity` ister; ViewModel'de `Activity` tutulmaz — akış Composable'dan `LocalActivity` ile başlatılan ince bir köprüyle tetiklenir (ViewModel yalnız sonucu işler). Sözleşme bunu baştan belirlemeli.
+- **Adımlar:** `core/model/`: `StoreProductIds` (DEC-01), `SubscriptionPeriod { MONTHLY, YEARLY }`, `SubscriptionOption(id, basePlanId, offerToken, displayName, displayPrice, period)`, `PurchaseResult { SUCCESS, CANCELLED, PENDING }`, `sealed class SubscriptionError(userMessage)` (iOS'taki üç mesajın Google Play uyarlaması + `Unknown`). `core/data/billing/`: `SubscriptionService` (`subscriptionOptions()`, `isSubscribed()`, `statusChanges(): Flow<Boolean>`, `purchase(activity, option)`, `restore()`), `ExamPurchaseService` (`purchaseUnlock(activity, examId)`, `recoverPendingUnlock(): String?`), Fake'ler.
+- **Karar (uygulandı):** Satın alma akışı bir `Activity` ister ama arayüzler Activity **almaz**; ViewModel'ler Activity tutmaz. Canlı uygulama (`BIL-02`) ön plandaki Activity'yi `ActivityLifecycleCallbacks` + zayıf referansla tutan tekil bir sağlayıcıdan alır (tek `MainActivity`).
 - **Kabul kriteri:** Arayüzler + Fake'ler derleniyor; Hat C bunlarla ekran yazabiliyor.
 
 #### `BIL-02` — Play Billing bağımlılığı + bağlantı yöneticisi
-- **Adımlar:** Billing Library'nin güncel kararlı sürümünü (Play'in zorunlu tuttuğu en düşük sürümün üstünde; başlarken doğrulanır) `libs.versions.toml`'a ekle; `BillingClientConnection` (`@Singleton`): `startConnection`, kopunca üstel bekleme ile yeniden bağlanma, `enablePendingPurchases` (tek seferlik), güncellemeleri `SharedFlow` olarak yayma; R8 kuralı gerekip gerekmediği kontrolü.
+- **Adımlar:** Billing Library'nin güncel kararlı sürümünü (Play'in zorunlu tuttuğu en düşük sürümün üstünde; başlarken doğrulanır) `libs.versions.toml`'a ekle; ön plandaki Activity'yi zayıf referansla tutan sağlayıcı (satın alma ekranı için); `BillingClientConnection` (`@Singleton`): `startConnection`, kopunca üstel bekleme ile yeniden bağlanma, `enablePendingPurchases` (tek seferlik), güncellemeleri `SharedFlow` olarak yayma; R8 kuralı gerekip gerekmediği kontrolü.
 - **Kabul kriteri:** Bağlantı koparsa çağrılar yeniden bağlanıp sonuç döndürüyor; çağrılar ana iş parçacığını bloklamıyor.
 
-#### `BIL-03` — `PlayBillingSubscriptionRepository`
+#### `BIL-03` — `PlayBillingSubscriptionService`
 - **Adımlar:** `queryProductDetails(SUBS)` → base plan + offer token + `formattedPrice` → `SubscriptionOption` (aylık önce); `isSubscribed` = `queryPurchasesAsync(SUBS)` içinde `PURCHASED` durumlu, bizim ürün kimliğimizle bir satın alma; onaylanmamışsa `acknowledgePurchase` (3 gün içinde onaylanmayan satın alma Google tarafından iade edilir); `statusChanges` = bağlantıda + her `PurchasesUpdated`'da + uygulama ön plana döndüğünde yeniden türet; `restore` = yeniden sorgu.
 - **Tuzak:** iOS'taki "doğrudan satın alma updates'e düşmez" sorunu Play'de yok, ama satın almadan sonra hak yine açıkça yeniden okunmalı (Store tek kaynak).
 - **Kabul kriteri:** Satın alma, iptal, süre dolumu ve başka cihazdaki satın alma uygulama açıkken / ön plana dönünce yansıyor.
@@ -184,7 +184,7 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 #### `BIL-04` — `SubscriptionStore`
 - iOS `SubscriptionStore` karşılığı: `@Singleton`, `@ApplicationScope`'ta `statusChanges()` toplar; `isSubscribed` `false` başlar; `loadOptions()` tembel; `purchase`/`restore` sonrası hak yeniden okunur. Çıkışta sıfırlanmaz.
 
-#### `BIL-05` — `PlayBillingExamPurchaseRepository`
+#### `BIL-05` — `PlayBillingExamPurchaseService`
 - **Adımlar:** `exam_unlock` ürün detayları → bekleyen sınavı DataStore'a yaz → `launchBillingFlow` (`obfuscatedProfileId = examId`, `obfuscatedAccountId` = uid'nin özeti) → `PURCHASED` ise `purchaseExamUnlock(platform = android, purchaseToken, productId, examId)` → başarıyla `consumeAsync` → bekleyeni sil → `SUCCESS`; `PENDING` → bekleyen kalır; iptal → bekleyen silinir. `recoverPendingUnlock`: `queryPurchasesAsync(INAPP)` içinde tüketilmemiş `exam_unlock` → sunucu → tüket → sınav kimliğini döndür.
 - **Tuzak:** Tüketme **yalnız** sunucu kaydından sonra; aksi halde ödeme alınır ama sınav açılmaz. Tüketilmemiş satın alma aynı ürünün yeniden alınmasını engeller — kurtarma bu yüzden açılışta şart.
 - **Kabul kriteri:** Ağ satın almadan sonra koparsa bir sonraki açılışta sınav açılıyor; aynı jeton iki kez kullanılamıyor.
