@@ -16,8 +16,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -56,11 +59,13 @@ import com.salticusteam.vifi.core.designsystem.component.rememberContactSupportL
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.AnalyticsValues
+import com.salticusteam.vifi.core.util.LegalLinks
 import com.salticusteam.vifi.feature.onboarding.OnboardingScreen
 
 /**
  * App information (iOS AboutView), opened from the account screen: logo, version, what ViFi offers, where its data
- * comes from, the tour replay and "Bize Ulaş". The replay never touches the first-launch flag.
+ * comes from, the tour replay, "Bize Ulaş" and the terms / privacy pages. The replay never touches the first-launch
+ * flag.
  */
 @Composable
 fun AboutScreen(
@@ -69,6 +74,7 @@ fun AboutScreen(
 ) {
     var isShowingTour by rememberSaveable { mutableStateOf(false) }
     val contactSupport = rememberContactSupportLauncher()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.onScreenShown()
@@ -79,6 +85,8 @@ fun AboutScreen(
         versionCode = BuildConfig.VERSION_CODE.toString(),
         onReplayTour = { isShowingTour = true },
         onContact = { contactSupport.open() },
+        onOpenTerms = { LegalLinks.open(context, LegalLinks.TERMS_URL) },
+        onOpenPrivacy = { LegalLinks.open(context, LegalLinks.PRIVACY_URL) },
         onBack = onBack,
     )
 
@@ -98,6 +106,8 @@ fun AboutContent(
     versionCode: String,
     onReplayTour: () -> Unit,
     onContact: () -> Unit,
+    onOpenTerms: () -> Unit,
+    onOpenPrivacy: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -166,6 +176,12 @@ fun AboutContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
+                HorizontalDivider()
+            }
+            item(key = "legal") {
+                SectionHeader(stringResource(R.string.about_legal_header))
+                LinkRow(Icons.Filled.Gavel, R.string.about_terms, "about.terms", onOpenTerms)
+                LinkRow(Icons.Filled.PrivacyTip, R.string.about_privacy, "about.privacy", onOpenPrivacy)
             }
         }
     }
@@ -235,10 +251,31 @@ private fun HighlightRow(icon: ImageVector, label: Int) {
     )
 }
 
+/** A row that opens a web page (the legal pages). */
+@Composable
+private fun LinkRow(icon: ImageVector, label: Int, testTag: String, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(stringResource(label)) },
+        leadingContent = { Icon(icon, contentDescription = null) },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .clickable(role = Role.Button, onClick = onClick)
+            .testTag(testTag),
+    )
+}
+
 @ViFiThemePreviews
 @Composable
 private fun AboutContentPreview() {
     ViFiTheme {
-        AboutContent(versionName = "2.5", versionCode = "16", onReplayTour = {}, onContact = {}, onBack = {})
+        AboutContent(
+            versionName = "2.5",
+            versionCode = "16",
+            onReplayTour = {},
+            onContact = {},
+            onOpenTerms = {},
+            onOpenPrivacy = {},
+            onBack = {},
+        )
     }
 }

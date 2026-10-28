@@ -42,6 +42,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.After
@@ -150,11 +151,12 @@ class AddExamViewModelTest {
         onSelection(selection)
     }
 
-    private fun AddExamViewModel.fillIn(lesson: String = "BLG 101", year: Int = 2023) {
+    private fun AddExamViewModel.fillIn(lesson: String = "BLG 101", year: Int = 2023, acceptTerms: Boolean = true) {
         choose(AddExamPicker.LESSON, CatalogSelection.custom(lesson))
         choose(AddExamPicker.EXAM_NAME, CatalogSelection.catalog(vize))
         onYearSelected(year)
         onImagesPicked(listOf("img1", "img2"))
+        onTermsAcceptedChange(acceptTerms)
     }
 
     @Test
@@ -379,6 +381,34 @@ class AddExamViewModelTest {
     }
 
     @Test
+    fun `onSubmit before the terms are accepted does nothing`() = runTest {
+        val sut = viewModel()
+        sut.fillIn(acceptTerms = false)
+        advanceUntilIdle()
+
+        assertNotNull(sut.uiState.value.builtSubmission)
+        assertFalse(sut.uiState.value.canSubmit)
+        sut.onSubmit()
+        advanceUntilIdle()
+
+        assertTrue(submissionService.submissions.isEmpty())
+        assertFalse(sut.uiState.value.isWorking)
+    }
+
+    @Test
+    fun `onTermsAcceptedChange toggles the acceptance and gates submitting`() = runTest {
+        val sut = viewModel()
+        sut.fillIn()
+        advanceUntilIdle()
+        assertTrue(sut.uiState.value.canSubmit)
+
+        sut.onTermsAcceptedChange(false)
+
+        assertFalse(sut.uiState.value.termsAccepted)
+        assertFalse(sut.uiState.value.canSubmit)
+    }
+
+    @Test
     fun `edits are ignored while submitting`() = runTest {
         submissionService = FakeExamSubmissionService(latency = Duration.INFINITE)
         val sut = viewModel()
@@ -388,9 +418,11 @@ class AddExamViewModelTest {
         sut.onSubmit()
         sut.onKindSelected(ExamKind.PDF)
         sut.onPickerOpen(AddExamPicker.UNIVERSITY)
+        sut.onTermsAcceptedChange(false)
 
         assertEquals(ExamKind.IMAGES, sut.uiState.value.kind)
         assertNull(sut.uiState.value.picker)
+        assertTrue(sut.uiState.value.termsAccepted)
     }
 
     // --- Process death / background upload ---
@@ -414,6 +446,7 @@ class AddExamViewModelTest {
         assertEquals(listOf(byteArrayOf(1).toList(), byteArrayOf(2).toList()), state.files.map { it.data.toList() })
         assertEquals(listOf(1, 2), state.files.map { it.order })
         assertFalse(state.isPreparingFiles)
+        assertTrue(state.termsAccepted)
     }
 
     @Test

@@ -21,6 +21,7 @@ class AddExamValidationTest {
         examName = CatalogSelection.stored("VİZE", "vize", false),
         year = 2023,
         files = listOf(SubmissionFile(byteArrayOf(1), 1)),
+        termsAccepted = true,
     )
 
     @Test
@@ -59,10 +60,11 @@ class AddExamValidationTest {
     }
 
     @Test
-    fun `canSubmit is false while preparing files or working`() {
+    fun `canSubmit is false while preparing files, working or before the terms are accepted`() {
         assertEquals(true, complete.canSubmit)
         assertEquals(false, complete.copy(isPreparingFiles = true).canSubmit)
         assertEquals(false, complete.copy(isWorking = true).canSubmit)
+        assertEquals(false, complete.copy(termsAccepted = false).canSubmit)
     }
 
     @Test

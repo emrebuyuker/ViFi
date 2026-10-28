@@ -186,6 +186,11 @@
     <string name="about_contact_button">Bize Ulaş</string>
     <string name="about_contact_footer">Görüş, öneri ve sorularını bize e-posta ile iletebilirsin.</string>
 
+    <!-- Added in 3.1.0 — About: links to the terms of use and the privacy policy -->
+    <string name="about_legal_header">Yasal</string>
+    <string name="about_terms">Kullanım Koşulları</string>
+    <string name="about_privacy">Gizlilik Politikası</string>
+
     <!-- Added in 2.5 — home screen: hero, add-exam call and recently viewed shelf (iOS HomeView copy) -->
     <string name="home_hero_title">Sınav Arşivi</string>
     <string name="home_hero_subtitle">Üniversitelerin geçmiş sınavlarına hızlıca ulaş.</string>

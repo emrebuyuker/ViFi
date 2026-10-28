@@ -178,6 +178,8 @@ class AddExamViewModel @AssistedInject constructor(
         refreshEstimate()
     }
 
+    fun onTermsAcceptedChange(accepted: Boolean) = edit { it.copy(termsAccepted = accepted) }
+
     /** Switching the kind clears the already-picked files, which belong to the other kind. */
     fun onKindSelected(kind: ExamKind) {
         val state = _uiState.value

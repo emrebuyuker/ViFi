@@ -39,6 +39,10 @@
     <string name="add_exam_coin_note_flat">Onaylanırsa %1$s coin kazanırsın; coinlerin hesabına yüklenir.</string>
     <string name="add_exam_coin_note_generic">Eklediğin sınav incelenip onaylandığında coin kazanırsın; coinlerin hesabına yüklenir.</string>
 
+    <!-- Added in 3.1.0 — terms of use acceptance before submitting (Play user-generated content policy) -->
+    <string name="add_exam_terms_accept">Kullanım Koşulları\'nı okudum ve kabul ediyorum.</string>
+    <string name="add_exam_terms_open">Kullanım Koşulları\'nı oku</string>
+
     <!-- Lesson picker -->
     <string name="add_exam_lesson_search">Ders ara</string>
     <string name="add_exam_lesson_existing">Mevcut Dersler</string>

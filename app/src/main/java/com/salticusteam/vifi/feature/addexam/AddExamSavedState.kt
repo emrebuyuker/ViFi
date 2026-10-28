@@ -25,6 +25,7 @@ internal data class AddExamSavedForm(
     /** The open picker's `AddExamPicker.name`, `null` while the form itself is shown. */
     val picker: String? = null,
     val submissionId: String? = null,
+    val termsAccepted: Boolean = false,
 ) {
     /** [state] (a fresh form) with the saved picks; a value the form no longer offers is left as it was. */
     fun applyTo(state: AddExamUiState): AddExamUiState = state.copy(
@@ -36,6 +37,7 @@ internal data class AddExamSavedForm(
         year = year.takeIf { it in state.yearOptions } ?: state.year,
         kind = ExamKind.fromRaw(kind) ?: state.kind,
         picker = picker?.let { name -> AddExamPicker.entries.firstOrNull { it.name == name } },
+        termsAccepted = termsAccepted,
     )
 
     fun encode(): String = json.encodeToString(serializer(), this)
@@ -54,6 +56,7 @@ internal data class AddExamSavedForm(
             kind = state.kind.raw,
             picker = state.picker?.name,
             submissionId = submissionId,
+            termsAccepted = state.termsAccepted,
         )
 
         /** The saved form, or `null` when there is none or it cannot be read (e.g. written by another version). */

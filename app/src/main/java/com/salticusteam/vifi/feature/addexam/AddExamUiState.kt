@@ -49,11 +49,13 @@ data class AddExamUiState(
     val rewards: RewardsConfig? = null,
     /** The novelty tier estimated for the current placement, `null` while incomplete or unresolved. */
     val estimatedTier: SubmissionTier? = null,
+    /** Whether the user ticked the terms of use; a submission is only sent once they accepted them. */
+    val termsAccepted: Boolean = false,
 ) {
     /** The validated submission, or `null` while any field is missing or invalid. */
     val builtSubmission: ExamSubmission? get() = AddExamValidation.build(this)
 
-    val canSubmit: Boolean get() = !isWorking && !isPreparingFiles && builtSubmission != null
+    val canSubmit: Boolean get() = !isWorking && !isPreparingFiles && termsAccepted && builtSubmission != null
 
     /** Whether the user may edit the form (nothing is being sent). */
     val isEditable: Boolean get() = !isWorking

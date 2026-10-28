@@ -106,11 +106,11 @@ ViFi yenilendi: yeni tasarım, telefon numarasıyla giriş, coin ile kilitli sı
 
 ## 5. Açık kararlar ve riskler
 
-- **Kullanıcı içeriği (UGC) politikası:** Play, kullanıcıların içerik yüklediği uygulamalarda yüklemeden önce kullanım
-  koşullarının kabul edilmesini, uygunsuz içeriğin tanımlanmasını ve uygulama içi şikâyet yolunu ister. ViFi'de
-  gönderimler yayından önce yönetici onayından geçiyor (MOD-*). Sınav görüntüleyicideki "Bize Ulaş" düğmesi sınavın
-  konumunu dolduran bir e-posta açıyor; bu bir şikâyet yolu sayılabilir. **Eksik:** Sınav Ekle'de kullanım koşullarını
-  kabul adımı ve yayınlanmış bir kullanım koşulları sayfası yok (iOS'ta da yok). Karar ürün sahibinde.
+- **Kullanıcı içeriği (UGC) politikası:** ✔️ 28 Ekim 2026'da çözüldü. Kullanım koşulları
+  `https://vifi-831a8.web.app/kullanim-kosullari` adresinde yayında (kaynak `ViFi-iOS/firebase/hosting/`). Sınav Ekle'de
+  zorunlu onay kutusu var; işaretlenmeden Gönder açılmaz. Hakkında'da Kullanım Koşulları ve Gizlilik Politikası
+  bağlantıları var. Gönderimler yayından önce yönetici onayından geçiyor; görüntüleyicideki "Bize Ulaş" şikâyet yolu.
+  **Kalan:** aynı onay kutusu iOS'ta yok (parite işi).
 - **Hedef kitle:** §2'deki yaş grubu seçimi.
 - **"Bağımsız uygulama" cümlesi:** Tam açıklamadaki üniversitelerle resmi bağlantı olmadığı cümlesinin doğruluğunu ürün
   sahibi teyit etmeli; üniversite adları geçtiği için yanıltıcı içerik politikası açısından önerilir.

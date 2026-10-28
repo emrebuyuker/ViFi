@@ -20,6 +20,8 @@ class AboutContentTest {
 
     private var replayClicks = 0
     private var contactClicks = 0
+    private var termsClicks = 0
+    private var privacyClicks = 0
     private var backClicks = 0
 
     private fun setContent() {
@@ -30,6 +32,8 @@ class AboutContentTest {
                     versionCode = "16",
                     onReplayTour = { replayClicks++ },
                     onContact = { contactClicks++ },
+                    onOpenTerms = { termsClicks++ },
+                    onOpenPrivacy = { privacyClicks++ },
                     onBack = { backClicks++ },
                 )
             }
@@ -67,6 +71,18 @@ class AboutContentTest {
         composeRule.onNodeWithTag("about.contact").assertIsDisplayed().performClick()
 
         assertEquals(1, contactClicks)
+    }
+
+    @Test
+    fun about_legalRowsOpenTheTermsAndThePrivacyPolicy() {
+        setContent()
+        scrollTo("about.terms")
+        composeRule.onNodeWithTag("about.terms").assertIsDisplayed().performClick()
+        scrollTo("about.privacy")
+        composeRule.onNodeWithTag("about.privacy").assertIsDisplayed().performClick()
+
+        assertEquals(1, termsClicks)
+        assertEquals(1, privacyClicks)
     }
 
     @Test

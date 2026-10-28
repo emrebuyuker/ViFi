@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,9 +54,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -72,6 +77,7 @@ import com.salticusteam.vifi.core.model.ExamSubmission
 import com.salticusteam.vifi.core.model.SubmissionFile
 import com.salticusteam.vifi.core.model.SubmissionTier
 import com.salticusteam.vifi.core.model.UserProfile
+import com.salticusteam.vifi.core.util.LegalLinks
 import com.salticusteam.vifi.feature.profile.CatalogPicker
 
 /**
@@ -91,6 +97,7 @@ fun AddExamScreen(
     },
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.onScreenShown()
@@ -131,6 +138,8 @@ fun AddExamScreen(
             },
             onPickPdf = { pdfPicker.launch(arrayOf(PDF_MIME_TYPE)) },
             onClearFiles = viewModel::onClearFiles,
+            onTermsAcceptedChange = viewModel::onTermsAcceptedChange,
+            onOpenTerms = { LegalLinks.open(context, LegalLinks.TERMS_URL) },
         )
         AddExamPicker.LESSON -> LessonPicker(
             university = state.university.name,
@@ -163,6 +172,8 @@ internal fun AddExamContent(
     onPickImages: () -> Unit,
     onPickPdf: () -> Unit,
     onClearFiles: () -> Unit,
+    onTermsAcceptedChange: (Boolean) -> Unit,
+    onOpenTerms: () -> Unit,
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -247,6 +258,9 @@ internal fun AddExamContent(
                 }
                 item(key = "coinNote") {
                     CoinNoteRow(state.coinNote)
+                }
+                item(key = "terms") {
+                    TermsRow(state.termsAccepted, state.isEditable, onTermsAcceptedChange, onOpenTerms)
                 }
                 state.error?.let { message ->
                     item(key = "error") {
@@ -512,6 +526,41 @@ private fun CoinNoteRow(note: CoinNote) {
     }
 }
 
+/** The terms of use: the checkbox "Gönder" waits for, and a link that reads them in the browser. */
+@Composable
+private fun TermsRow(
+    accepted: Boolean,
+    enabled: Boolean,
+    onAcceptedChange: (Boolean) -> Unit,
+    onOpenTerms: () -> Unit,
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .toggleable(value = accepted, enabled = enabled, role = Role.Checkbox, onValueChange = onAcceptedChange)
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .testTag("addExam.termsCheckbox"),
+        ) {
+            // The row is the toggle (with its label), so the box itself takes no clicks.
+            Checkbox(checked = accepted, onCheckedChange = null, enabled = enabled)
+            Text(text = stringResource(R.string.add_exam_terms_accept), style = MaterialTheme.typography.bodyMedium)
+        }
+        // Lines the link's text up with the checkbox label (the button adds 12dp of its own padding).
+        TextButton(
+            onClick = onOpenTerms,
+            modifier = Modifier
+                .padding(start = 40.dp)
+                .testTag("addExam.termsLink"),
+        ) {
+            Text(stringResource(R.string.add_exam_terms_open))
+        }
+    }
+}
+
 /** The Turkish label of [ExamKind] in the kind selector. */
 private fun ExamKind.labelResId(): Int = when (this) {
     ExamKind.IMAGES -> R.string.add_exam_kind_images
@@ -534,6 +583,7 @@ private fun AddExamContentPreview() {
                 yearOptions = (2000..2026).reversed().toList(),
                 files = listOf(SubmissionFile(byteArrayOf(1), order = 1), SubmissionFile(byteArrayOf(2), order = 2)),
                 estimatedTier = SubmissionTier.NEW_COURSE,
+                termsAccepted = true,
             ),
             onClose = {},
             onSubmit = {},
@@ -543,6 +593,8 @@ private fun AddExamContentPreview() {
             onPickImages = {},
             onPickPdf = {},
             onClearFiles = {},
+            onTermsAcceptedChange = {},
+            onOpenTerms = {},
         )
     }
 }
