@@ -5,12 +5,18 @@ import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.model.PurchaseResult
 import com.salticusteam.vifi.core.model.StoreProductIds
 import com.salticusteam.vifi.core.model.SubscriptionError
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PlayBillingExamPurchaseServiceTest {
 
     private val calls = mutableListOf<String>()
@@ -18,7 +24,11 @@ class PlayBillingExamPurchaseServiceTest {
     private val backend = FakeExamPurchaseBackend(calls)
     private val pending = FakePendingExamUnlockStore()
     private val auth = FakeAuthService()
-    private val sut = PlayBillingExamPurchaseService(billing, backend, pending, auth)
+
+    // The background consume runs as soon as the purchase lets go of the lock, so tests read its effect directly.
+    private val sut = PlayBillingExamPurchaseService(
+        billing, backend, pending, auth, CoroutineScope(UnconfinedTestDispatcher()),
+    )
 
     private fun paid(token: String = "t1", examId: String? = "exam-1") =
         PlayPurchaseUpdate(PlayBillingResponse.OK, listOf(examUnlock(token, examId)))
@@ -55,12 +65,29 @@ class PlayBillingExamPurchaseServiceTest {
     }
 
     @Test
-    fun `purchaseUnlock when consuming fails still succeeds once recorded`() = runTest {
+    fun `purchaseUnlock when consuming fails still succeeds and keeps the exam for the next recovery`() = runTest {
         billing.sheetAnswer = paid()
         billing.consumeFailure = PlayBillingResponse.SERVICE_DISCONNECTED
 
         assertEquals(PurchaseResult.SUCCESS, sut.purchaseUnlock("exam-1"))
         assertEquals(listOf("launch", "record:t1:exam_unlock:exam-1", "consume:t1"), calls)
+        assertEquals("exam-1", pending.stored)
+    }
+
+    @Test
+    fun `purchaseUnlock opens the exam once recorded and consumes behind it`() = runTest {
+        val later = PlayBillingExamPurchaseService(
+            billing, backend, pending, auth, CoroutineScope(StandardTestDispatcher(testScheduler)),
+        )
+        billing.sheetAnswer = paid()
+
+        assertEquals(PurchaseResult.SUCCESS, later.purchaseUnlock("exam-1"))
+        assertEquals(listOf("launch", "record:t1:exam_unlock:exam-1"), calls)
+        assertEquals("exam-1", pending.stored)
+
+        advanceUntilIdle()
+        assertEquals(listOf("launch", "record:t1:exam_unlock:exam-1", "consume:t1"), calls)
+        assertNull(pending.stored)
     }
 
     @Test
@@ -139,6 +166,18 @@ class PlayBillingExamPurchaseServiceTest {
     }
 
     @Test
+    fun `purchaseUnlock while a recorded unlock cannot be consumed does not buy`() = runTest {
+        billing.purchases[PlayProductType.ONE_TIME] = listOf(examUnlock("old", "exam-0"))
+        pending.stored = "exam-0"
+        billing.consumeFailure = PlayBillingResponse.ERROR
+
+        assertEquals(SubscriptionError.StoreUnavailable, failureOf { sut.purchaseUnlock("exam-1") })
+        assertEquals(listOf("record:old:exam_unlock:exam-0", "consume:old"), calls)
+        assertTrue(billing.launched.isEmpty())
+        assertEquals("exam-0", pending.stored)
+    }
+
+    @Test
     fun `purchaseUnlock while an earlier payment is pending reports pending`() = runTest {
         billing.purchases[PlayProductType.ONE_TIME] = listOf(examUnlock("old", "exam-0", PlayPurchaseState.PENDING))
 
@@ -213,6 +252,34 @@ class PlayBillingExamPurchaseServiceTest {
 
         backend.failure = null
         assertEquals("exam-1", sut.recoverPendingUnlock())
+    }
+
+    @Test
+    fun `recoverPendingUnlock when consuming fails keeps the exam and retries next time`() = runTest {
+        billing.purchases[PlayProductType.ONE_TIME] = listOf(examUnlock("t1", "exam-1"))
+        pending.stored = "exam-1"
+        billing.consumeFailure = PlayBillingResponse.ERROR
+
+        assertEquals("exam-1", sut.recoverPendingUnlock())
+        assertEquals("exam-1", pending.stored)
+
+        billing.consumeFailure = null
+        assertEquals("exam-1", sut.recoverPendingUnlock())
+        assertEquals(
+            listOf("record:t1:exam_unlock:exam-1", "consume:t1", "record:t1:exam_unlock:exam-1", "consume:t1"),
+            calls,
+        )
+        assertNull(pending.stored)
+    }
+
+    @Test
+    fun `recoverPendingUnlock counts a purchase Play no longer owns as consumed`() = runTest {
+        billing.purchases[PlayProductType.ONE_TIME] = listOf(examUnlock("t1", "exam-1"))
+        pending.stored = "exam-1"
+        billing.consumeFailure = PlayBillingResponse.ITEM_NOT_OWNED
+
+        assertEquals("exam-1", sut.recoverPendingUnlock())
+        assertNull(pending.stored)
     }
 
     @Test

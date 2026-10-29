@@ -18,6 +18,7 @@ import com.salticusteam.vifi.core.util.ForegroundActivityHolder
 import com.salticusteam.vifi.core.util.LogCategory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -88,9 +89,9 @@ class BillingClientConnection internal constructor(
             )
             .build()
         val details = call { billing ->
-            suspendCancellableCoroutine { continuation ->
+            awaitAnswer { answer ->
                 billing.queryProductDetailsAsync(params) { result, details ->
-                    continuation.resume(result to details?.productDetailsList.orEmpty())
+                    answer(result to details?.productDetailsList.orEmpty())
                 }
             }
         }.firstOrNull { it.productId == productId } ?: return emptyList() // not sold (yet) in Play Console
@@ -101,9 +102,9 @@ class BillingClientConnection internal constructor(
     override suspend fun queryPurchases(type: PlayProductType): List<PlayPurchase> {
         val params = QueryPurchasesParams.newBuilder().setProductType(type.billingType).build()
         return call { billing ->
-            suspendCancellableCoroutine { continuation ->
+            awaitAnswer { answer ->
                 billing.queryPurchasesAsync(params) { result, purchases ->
-                    continuation.resume(result to purchases.orEmpty().map { it.toPlayPurchase() })
+                    answer(result to purchases.orEmpty().map { it.toPlayPurchase() })
                 }
             }
         }
@@ -140,22 +141,29 @@ class BillingClientConnection internal constructor(
     override suspend fun acknowledge(purchaseToken: String) {
         val params = AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchaseToken).build()
         call { billing ->
-            suspendCancellableCoroutine { continuation ->
-                billing.acknowledgePurchase(params) { result -> continuation.resume(result to Unit) }
-            }
+            awaitAnswer { answer -> billing.acknowledgePurchase(params) { result -> answer(result to Unit) } }
         }
     }
 
     override suspend fun consume(purchaseToken: String) {
         val params = ConsumeParams.newBuilder().setPurchaseToken(purchaseToken).build()
         call { billing ->
-            suspendCancellableCoroutine { continuation ->
-                billing.consumeAsync(params) { result, _ -> continuation.resume(result to Unit) }
-            }
+            awaitAnswer { answer -> billing.consumeAsync(params) { result, _ -> answer(result to Unit) } }
         }
     }
 
     // Helpers
+
+    /**
+     * Suspends until a Play callback answers and resumes with the first answer only. Billing can call back twice
+     * for one call — once with its own timeout ("Async task is taking too long") and again with the late result —
+     * and resuming a second time would throw.
+     */
+    private suspend inline fun <T> awaitAnswer(crossinline register: (answer: (T) -> Unit) -> Unit): T =
+        suspendCancellableCoroutine { continuation ->
+            val answered = AtomicBoolean(false)
+            register { value -> if (answered.compareAndSet(false, true)) continuation.resume(value) }
+        }
 
     /**
      * Connects, runs [operation] and returns its value when Play answers OK. A transient failure of either step is
