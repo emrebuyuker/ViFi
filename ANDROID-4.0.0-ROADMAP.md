@@ -141,7 +141,7 @@ Faz 4  RLS-01 → 02 → 03 → (04, 05, 06, 07) → 08 → 09 → 10   ·   RLS
 
 > Önem ve uygulama sırasıyla. P0 = yayın engeli, P1 = yayınla birlikte yapılmalı, P2 = isteğe bağlı. Ayrıntı §4'te.
 
-- [x] **`RLS-01`** `v-4.0.0` dallarının push'u _(P0·S)_ — ViFi-Android (yayın hazırlığı commit'leri) + ViFi-iOS (`a5819a1` = canlı `purchaseExamUnlock`'ın kodu). Bu Mac'te depolara yazma yetkili GitHub kimliği yok → ürün sahibi yapar. Yayınlanan derleme ve canlı function kodu uzak depoda güvende olmalı. ✅ _Tamamlandı (2026-10-29): push'u ürün sahibi yaptı; GitHub'da ViFi-Android `v-4.0.0` → `6c8e7a8`, ViFi-iOS `v-4.0.0` → `a5819a1` (`gh api` ile doğrulandı). Canlı `purchaseExamUnlock`'ın kodu artık uzak depoda; `ViFi-iOS` master'da Google Play dalı hâlâ yok (§6 uyarısı geçerli)._
+- [x] **`RLS-01`** `v-4.0.0` dallarının push'u _(P0·S)_ — ViFi-Android (yayın hazırlığı commit'leri) + ViFi-iOS (`a5819a1` = canlı `purchaseExamUnlock`'ın kodu). Bu Mac'te depolara yazma yetkili GitHub kimliği yok → ürün sahibi yapar. Yayınlanan derleme ve canlı function kodu uzak depoda güvende olmalı. ✅ _Tamamlandı (2026-10-29): push'u ürün sahibi yaptı; GitHub'da ViFi-Android `v-4.0.0` → `6c8e7a8`, ViFi-iOS `v-4.0.0` → `a5819a1` (`gh api` ile doğrulandı). Canlı `purchaseExamUnlock`'ın kodu artık uzak depoda; `ViFi-iOS` master'da `purchaseExamUnlock` hâlâ yok (§6 uyarısı geçerli)._
 - [ ] **`RLS-02`** Release AAB 19 (4.0.0) derle ve imzala _(P0·S)_ — `bundleLiveRelease` yükleme anahtarıyla; kontrol: versionCode 19 / 4.0.0, imza SHA-1 `75:61…`, `com.android.vending.BILLING`, dil bölmesi kapalı, R8 eşleme dosyası pakette. Dosya `play-store/ViFi-4.0.0-19.aab` (git dışı). **Yalnız bu adım için açık onayla.** ⟶ `RLS-01`
 - [ ] **`RLS-03`** Dahili teste yükle + Play'den kurulan sürümle duman testi _(P0·M)_ — 19'u dahili teste yükle ve yayınla (onayla); gerçek telefonda Play'den kur: giriş (Play Integrity / App Check), arşiv, sınav açma, aylık abonelik + tek sınav satın alma (lisans test hesabı, test kartı), geri yükleme, İngilizce telefonda Türkçe kilidi (LOC-01). PQA-01'de atlanan adım. ⟶ `RLS-02`
 - [ ] **`RLS-04`** Veri güvenliği formu: "Satın alma geçmişi" _(P0·S)_ — Finansal bilgiler → Satın alma geçmişi: toplanır, paylaşılmaz, isteğe bağlı, uygulama işlevi (`PLAY-DATA-SAFETY.md`). Kaydedilir, üretim sürümüyle incelemeye gider. ⟶ `LEG-02`
@@ -293,8 +293,10 @@ yayın işleri §3 Faz 4'e (`RLS-01`…`RLS-11`) taşındı.
 | Y5 | Mağaza girişi: 4.0.0 tam açıklama + sürüm notu; canlıdaki "Uygulamada satın alma yoktur" kalkar (`PLAY-STORE-LISTING.md` §3) | → `RLS-06`, `RLS-08` |
 | Y6 | Öneri: 19 önce dahili teste → Play'den kurulan imzalı sürümle duman testi (Play imzası + Play Integrity + R8 + satın alma; PQA'da atlanan adım) → üretim | → `RLS-03`, `RLS-08` |
 
-> ⚠️ `ViFi-iOS` master'da Google Play dalı yok: dal birleşene kadar functions deploy'u yalnız `v-4.0.0`'dan yapılır,
-> yoksa Android satın alma doğrulaması canlıda kaybolur.
+> ⚠️ `ViFi-iOS` master'da `purchaseExamUnlock` hiç yok (Premium commit'i `7639530` yalnız `v-4.0.0`'da). Master'dan
+> tüm functions deploy edilirse CLI canlıdaki `purchaseExamUnlock`'ı silmeyi önerir; kabul edilirse iOS ve Android'de
+> parayla sınav açma durur. Dal birleşene kadar functions deploy'u yalnız `v-4.0.0`'dan ya da tek fonksiyonla
+> (`--only functions:<ad>`) yapılır.
 
 ### 6.2 Bilgi notları (engel değil, tek tek kontrol edilecek)
 
