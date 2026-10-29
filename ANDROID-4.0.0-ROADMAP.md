@@ -11,7 +11,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **25'i tamam, 0'ı yarım, 2'si başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz), Faz 2 (entegrasyon + testler), backend (SRV-01…03, ortak depoda, `purchaseExamUnlock` Google Play dalıyla canlıda), Hat D (yasal metinler canlıda, veri güvenliği envanteri, mağaza metni) ve sunucunun Play erişimi (OPS-02) tamam; uygulama mock'ta uçtan uca çalışıyor. Play ürünleri etkin, 18 (4.0.0) dahili testte, lisans test listesi hazır (OPS-01). Kalan: gerçek ortam doğrulaması (PQA-01/02; dahili test kanalına test kullanıcısı eklenmeli).
+> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **25'i tamam, 1'i yarım, 1'i başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz), Faz 2 (entegrasyon + testler), backend (SRV-01…03, ortak depoda, `purchaseExamUnlock` Google Play dalıyla canlıda), Hat D (yasal metinler canlıda, veri güvenliği envanteri, mağaza metni) ve sunucunun Play erişimi (OPS-02) tamam; uygulama mock'ta uçtan uca çalışıyor. Play ürünleri etkin, 18 (4.0.0) dahili testte, lisans test listesi hazır (OPS-01). Yarım: PQA-01 (dahili test kullanıcıları ve katılım bağlantısı hazır; cihazda senaryolar bekliyor). Kalan: PQA-02.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -130,7 +130,7 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 
 ### Faz 3 — Gerçek Ortam Doğrulaması (yayın değildir)
 
-- [ ] **`PQA-01`** Lisans test hesabıyla satın alma senaryoları _(P0·M)_ — Abonelik al / yenile / iptal / süre dolumu, geri yükleme (yeniden kurulum), tek sınav satın al → sunucu kaydı → tüket, ağ kopunca kurtarma, bekleyen ödeme. Test kanalına yükleme **yalnız ürün sahibi onayıyla**. ⟶ `INT-03`, `SRV-03`, `OPS-01`
+- [ ] **`PQA-01`** Lisans test hesabıyla satın alma senaryoları _(P0·M)_ — Abonelik al / yenile / iptal / süre dolumu, geri yükleme (yeniden kurulum), tek sınav satın al → sunucu kaydı → tüket, ağ kopunca kurtarma, bekleyen ödeme. Test kanalına yükleme **yalnız ürün sahibi onayıyla**. ⟶ `INT-03`, `SRV-03`, `OPS-01` ⏳ _Yarım — hazırlık tamam (2026-10-29): 18 (4.0.0) dahili testte. Kanalın test kullanıcısı listesi, ürün sahibinin onayıyla, iki hesabı içeren "Lisans test kullanıcıları" e-posta listesi yapıldı; kanal Etkin. Katılım bağlantısı: `https://play.google.com/apps/internaltest/4697407634647288328` (yalnız listedeki hesaplar katılabilir). **Kalan:** telefonda teste katılıp Play'den kurmak, ardından senaryoları tek tek yürütmek._
 - [ ] **`PQA-02`** İade ve iptal etkisi _(P1·S)_ — İade/iptal sonrası abonelik hakkı düşer; tüketilmiş tek sınav kilidi kalır (iOS ile aynı kabul). ⟶ `PQA-01`
 
 ---
