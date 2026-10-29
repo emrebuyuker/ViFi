@@ -4,14 +4,14 @@
 > açma) Android'de birebir hayata geçirmek. iOS paritesinin ilk turu (223 kalem) [ANDROID-PARITY-ROADMAP.md](ANDROID-PARITY-ROADMAP.md)'de
 > tamamlandı; bu dosya 4.0.0'ın **tek** iş listesidir.
 >
-> **Dalda hazır olanlar (`v-4.0.0`):** sürüm 4.0.0 (versionCode 18), QA-01…QA-04 düzeltmeleri, ilk sürüm notları.
+> **Dalda hazır olanlar (`v-4.0.0`):** sürüm 4.0.0 (versionCode 19; 18 dahili testte), QA-01…QA-04 düzeltmeleri, sürüm notları.
 > **Yayın:** bu listedeki hiçbir kalem paketi canlıya göndermez; release yalnızca ürün sahibi "release çıkalım" dediğinde.
 
 ---
 
 ## 0. Durum Özeti
 
-> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **27'si tamam, 0'ı yarım, 0'ı başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz), Faz 2 (entegrasyon + testler), backend (SRV-01…03, ortak depoda, `purchaseExamUnlock` Google Play dalıyla canlıda), Hat D (yasal metinler canlıda, veri güvenliği envanteri, mağaza metni) ve sunucunun Play erişimi (OPS-02) tamam; uygulama mock'ta uçtan uca çalışıyor. Play ürünleri etkin, 18 (4.0.0) dahili testte, lisans test listesi hazır (OPS-01). Gerçek ortam doğrulaması (PQA-01) emülatörde lisans test hesabıyla yapıldı; 4 hata bulunup düzeltildi, telefon adımı ürün sahibinin kararıyla atlandı; iade/iptal etkisi (PQA-02) doğrulandı. 4.0.0 listesi tamam; yayın yalnız ürün sahibi "release çıkalım" dediğinde (son derleme versionCode 19+).
+> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **27'si tamam, 0'ı yarım, 0'ı başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz), Faz 2 (entegrasyon + testler), backend (SRV-01…03, ortak depoda, `purchaseExamUnlock` Google Play dalıyla canlıda), Hat D (yasal metinler canlıda, veri güvenliği envanteri, mağaza metni) ve sunucunun Play erişimi (OPS-02) tamam; uygulama mock'ta uçtan uca çalışıyor. Play ürünleri etkin, 18 (4.0.0) dahili testte, lisans test listesi hazır (OPS-01). Gerçek ortam doğrulaması (PQA-01) emülatörde lisans test hesabıyla yapıldı; 4 hata bulunup düzeltildi, telefon adımı ürün sahibinin kararıyla atlandı; iade/iptal etkisi (PQA-02) doğrulandı. 4.0.0 listesi tamam; yayın yalnız ürün sahibi "release çıkalım" dediğinde; son derleme versionCode 19 (dalda hazır). Yayın kontrol listesi §6'da.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -247,3 +247,32 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 3. **Ürün etkinleştirme sırası:** Play ürünleri, faturalandırma izni olan bir derleme yüklenmeden etkinleşmeyebilir (`OPS-01`) → test kanalına erken bir yükleme gerekebilir (ürün sahibi onayı).
 4. **Platformlar arası hak yok:** iOS'ta abone olan kullanıcı Android'de Premium görmez; destek metni/SSS buna hazır olmalı.
 5. **Fiyat teyidi:** iOS fiyatları yalnız yerel test dosyasından okunabildi (`DEC-02`).
+
+## 6. Yayın Kontrol Listesi (29 Ekim 2026 denetimi)
+
+Uçtan uca denetimde kod (derleme, lint, R8, birim + UI testleri), backend (3 function, Hosting, SHA'lar, güncelleme
+politikası) ve Play temeli (ürünler, dahili test, politika durumu) hazır bulundu. Aşağıdakiler §3'ün kalemi sayılmaz
+(27 kalem değişmez); ürün sahibiyle tek tek kapatılır. Yayın yine yalnız "release çıkalım" ile.
+
+### 6.1 Yayından önce
+
+| # | Ne | Durum |
+|---|---|---|
+| Y1 | `v-4.0.0` dallarının push'u: ViFi-Android + ViFi-iOS (canlı `purchaseExamUnlock`'ın kodu `ViFi-iOS` `a5819a1`) | ⏳ Commit'ler hazır; push ürün sahibinde (bu Mac'te depolara yazma yetkili GitHub kimliği yok) |
+| Y2 | versionCode 19 (18 dahili testte kullanıldı; PQA düzeltmeleri 18'de yok) | ✅ 29 Ekim |
+| Y3 | Veri güvenliği formu: "Finansal bilgiler → Satın alma geçmişi" eklenir (`PLAY-DATA-SAFETY.md`) | Yayın günü, Console |
+| Y4 | İçerik derecelendirme anketi: dijital satın alma "Evet" ile yeniden gönderilir (`PLAY-STORE-LISTING.md` §2) | Yayın günü, Console |
+| Y5 | Mağaza girişi: 4.0.0 tam açıklama + sürüm notu; canlıdaki "Uygulamada satın alma yoktur" kalkar (`PLAY-STORE-LISTING.md` §3) | Yayın günü, Console |
+| Y6 | Öneri: 19 önce dahili teste → Play'den kurulan imzalı sürümle duman testi (Play imzası + Play Integrity + R8 + satın alma; PQA'da atlanan adım) → üretim | Yayın günü |
+
+> ⚠️ `ViFi-iOS` master'da Google Play dalı yok: dal birleşene kadar functions deploy'u yalnız `v-4.0.0`'dan yapılır,
+> yoksa Android satın alma doğrulaması canlıda kaybolur.
+
+### 6.2 Bilgi notları (engel değil, tek tek kontrol edilecek)
+
+| # | Konu | Ne yapılacak | Ne zaman / kim | Durum |
+|---|---|---|---|---|
+| B1 | Güncelleme önerisi | `config/appUpdate/android` → `latestVersion: "4.0.0"` (3.1.0 kullanıcılarına kapatılabilir güncelleme önerisi); `minimumVersion` 3.1.0 kalır. Canlı RTDB yazımı → ayrıca açık onay. | 4.0.0 üretimde %100 görününce | Kontrol edildi (29 Ekim): canlıda `latestVersion` ve `minimumVersion` 3.1.0, `storeURL` Play sayfası; uygulama anahtarları doğru okuyor. Yazım yayından sonra. |
+| B2 | iOS sandbox satın alması | Gerçek iPhone + sandbox hesabıyla tek sınav satın alma → canlı `purchaseExamUnlock` (`00003-nih`) Apple yolu → `purchasedTransactions/<Apple işlem no>` (`store` alanı yok) + `unlocks` kaydı. Simülatörde olmaz (yerel `.storekit` işlemleri Apple imzalı değil). Önkoşul: iOS debug derlemesi için App Check debug anahtarı, sandbox hesabına girişi ürün sahibi yapar. Android'i etkilemez. | iOS 4.0.0 yayınından önce, iOS tarafı | Kod tarafı kontrol edildi (29 Ekim): iOS'ta sandbox testi 3.1.0 döneminde gerçek cihazda geçmişti; o günden beri `appStore.js` ve iOS istemcisi değişmedi (aynı kütüphane 3.1.0, önce Production sonra Sandbox → App Review işlemleri de doğrulanır); `index.js`'teki değişiklik Apple yolunu yalnız ayrı fonksiyona taşıdı, kayıt şekli aynı; satın alma testleri 31/31. Kalan: canlı revizyonda gerçek Apple işlemiyle tek deneme. |
+| B3 | Ödeme profili | Play Console → Hesabı yönetme → Ödeme profili: banka hesabı, vergi bilgileri, hizmet ücreti programı. Sözleşme kabulü ve vergi formu ürün sahibinin işidir. | Yayından önce, ürün sahibi | Kontrol edildi (29 Ekim): banka hesabı (TR) tanımlı, hesap türü Bireysel, ad ve adres doğrulanmış, ekstre adı ve destek e-postası dolu, uyarı yok. **Açık 1:** %15 hizmet ücreti programına kayıt yok (hesap grubu oluşturma + şartları kabul); kayıt olmazsa tek seferlik ürünlerde (`exam_unlock`) kesinti %30, abonelikler zaten %15. **Açık 2:** ABD vergi bilgisi (W-8BEN) boş; verilmezse yalnız ABD'li alıcılardan gelen kazançtan stopaj kesilebilir (giriş +90 olduğu için etkisi pratikte yok). Türkiye vergi bilgisi alanı Google hizmeti satın alırken istenir, satış için gerekmiyor. |
+| B4 | Lint uyarıları | 56 uyarı (0 hata) gözden geçirilir; gerçek sorun düzeltilir, sürüm yükseltmeleri 4.0.0 sonrasına. | Kod tarafı | Kontrol edildi (29 Ekim): 38'i kütüphane/Gradle sürüm bildirimi (Kotlin 2.0→2.4, Compose BoM, Firebase BoM 33→35, AGP 8→9, OkHttp 4→5 gibi büyük atlamalar) → 4.0.0 sonrasına ayrı yükseltme işi. **Gerçek sorun (1):** `AppBundleLocaleChanges` — App Bundle dile göre bölünüyor; kütüphanelerin Türkçe kaynakları `tr` parçasına gider ve Play onu yalnız dil listesinde Türkçe olan cihaza kurar → İngilizce cihazda LOC-01'in Türkçe kilidi Play kurulumunda kütüphane metinlerini Türkçe gösteremez (sideload/emülatör testleri bunu yakalamaz). Çözüm: `bundle { language { enableSplit = false } }` (yalnız `tr` paketlendiği için boyut etkisi yok). **Gerek yok:** `MissingKeepAnnotation` (`ExamKind` için `proguard-rules.pro`'da `-keepnames` zaten var), `PluralsCandidate` ×2 (Türkçede tekil/çoğul aynı), `UseKtx` ×7 (yazım tercihi), `IconDuplicates` ×5 (`icon.png` uygulama içi logo, zararsız), `ExifInterface` ×2 (minSdk 24'te platform sürümü yeterli; androidx'e geçiş yükseltme işiyle). |

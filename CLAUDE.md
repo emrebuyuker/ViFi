@@ -6,7 +6,7 @@
 > silindi, FM-23). **Phone Auth (+90)**, oturum + profil kapısı, **canlı arşiv** (isimli `vifi` Firestore), profil
 > tamamlama/düzenleme, Hesap ekranı (çıkış + hesap silme), sınav görüntüleyicileri, coin cüzdanı + sınav kilidi, bildirimler
 > (FCM + Inbox), onboarding, Hakkında, force update kapısı ve analytics hazır; ana akışlar canlıda emülatörde doğrulandı.
-> ViFi 3.1.0 (17) 28 Ekim 2026'dan beri Play'de üretimde; 4.0.0 (18) `v-4.0.0` dalında hazırlanıyor ve yalnızca
+> ViFi 3.1.0 (17) 28 Ekim 2026'dan beri Play'de üretimde; 4.0.0 (19; 18 dahili testte) `v-4.0.0` dalında hazır ve yalnızca
 > ürün sahibi "release çıkalım" dediğinde yayınlanır. Yol haritasının 223 kalemi tamam (29 Ekim 2026).
 > **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
 > **iOS v3.1.0 paritesi** hedefinde ilerleme ve kalan işler
@@ -80,7 +80,7 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
 | Konu | Değer |
 |---|---|
 | **Dil/UI** | Kotlin + Compose (eski Java/XML ekranlar FM-23'te silindi); tek `app/MainActivity` + `AppRoot` + `ViFiNavHost` |
-| **Uygulama** | `com.salticusteam.vifi`, `versionName 4.0.0` (iOS ile aynı seri), `versionCode 18`, `compileSdk/targetSdk 36`, `minSdk 24` |
+| **Uygulama** | `com.salticusteam.vifi`, `versionName 4.0.0` (iOS ile aynı seri), `versionCode 19`, `compileSdk/targetSdk 36`, `minSdk 24` |
 | **Flavor** | `live` (canlı vifi-831a8) · `mock` (örnek veri, Firebase başlamaz, yalnız debug) |
 | **Veri (arşiv)** | Live `FirestoreArchiveRepository` → named `vifi` Firestore `catalogNodes`/`exams` (`BE-15`); mock örnek veri |
 | **Sınav dosyaları** | `RemoteFileLoader` (OkHttp + ID token/App Check) → `cacheDir/ExamFiles` (Files + Coil Images); görsel pager + platform `PdfRenderer`; `FLAG_SECURE` ekran koruması; hesap silmede `purge()` |
