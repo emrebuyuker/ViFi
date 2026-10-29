@@ -56,6 +56,7 @@ class ExamUnlockViewModel @Inject constructor(
             combine(walletStore.wallet, unlocksStore.unlockedIds, subscriptionStore.isSubscribed, ::Triple)
                 .collect { (wallet, ids, isSubscribed) ->
                     _uiState.update { it.copy(balance = wallet.balance, unlockedIds = ids, isSubscribed = isSubscribed) }
+                    openCompletedPurchase(ids)
                 }
         }
     }
@@ -146,6 +147,21 @@ class ExamUnlockViewModel @Inject constructor(
     fun onSheetDismiss() {
         if (_uiState.value.isBusy) return
         _uiState.update { it.copy(examToUnlock = null, error = null, isPurchasePending = false) }
+    }
+
+    // Helpers
+
+    /**
+     * The payment the sheet is waiting on completed and its unlock was recovered (on returning to the app): the sheet
+     * closes and the exam opens, as its "onaylanınca sınav açılır" notice promised.
+     */
+    private suspend fun openCompletedPurchase(unlockedIds: Set<String>) {
+        val state = _uiState.value
+        val exam = state.examToUnlock ?: return
+        if (!state.isPurchasePending) return
+        if (exam.path.components.lastOrNull() !in unlockedIds) return
+        _uiState.update { it.copy(examToUnlock = null, isPurchasePending = false) }
+        _events.send(ExamUnlockEvent.Unlocked(exam))
     }
 
     private companion object {

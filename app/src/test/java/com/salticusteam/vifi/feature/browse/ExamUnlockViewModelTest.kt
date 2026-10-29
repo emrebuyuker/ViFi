@@ -294,6 +294,43 @@ class ExamUnlockViewModelTest {
     }
 
     @Test
+    fun `a pending purchase that completes closes the sheet and emits Unlocked`() = runTest {
+        val sut = makeSut(purchaseService = FakeExamPurchaseService(purchaseResult = PurchaseResult.PENDING))
+        settle()
+        sut.onLockedExamTap(locked)
+        sut.onPurchaseWithMoney()
+        settle()
+
+        sut.events.test {
+            // Recovery recorded the paid unlock when the user came back to the app.
+            unlocksStore.markUnlocked("e9")
+
+            assertEquals(ExamUnlockEvent.Unlocked(locked), awaitItem())
+            val state = sut.uiState.value
+            assertNull(state.examToUnlock)
+            assertFalse(state.isPurchasePending)
+        }
+    }
+
+    @Test
+    fun `another exam unlocking while a payment is pending keeps the sheet`() = runTest {
+        val sut = makeSut(purchaseService = FakeExamPurchaseService(purchaseResult = PurchaseResult.PENDING))
+        settle()
+        sut.onLockedExamTap(locked)
+        sut.onPurchaseWithMoney()
+        settle()
+
+        sut.events.test {
+            unlocksStore.markUnlocked("e7")
+            settle()
+
+            expectNoEvents()
+            assertEquals(locked, sut.uiState.value.examToUnlock)
+            assertTrue(sut.uiState.value.isPurchasePending)
+        }
+    }
+
+    @Test
     fun `onPurchaseWithMoney when Google Play fails shows its message`() = runTest {
         val sut = makeSut(purchaseService = FakeExamPurchaseService(failure = SubscriptionError.FailedVerification))
         settle()
