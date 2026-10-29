@@ -119,7 +119,7 @@ data class PlayPurchaseUpdate(
 
 /**
  * What to buy: [offerToken] picks the plan or buy option (blank for none); the obfuscated ids bind the purchase to
- * a hashed user and, for a paid unlock, the exam (each at most [MAX_OBFUSCATED_ID_LENGTH] characters).
+ * a hashed user and, for a paid unlock, the hashed exam (each at most [MAX_OBFUSCATED_ID_LENGTH] characters).
  */
 data class PlayPurchaseRequest(
     val productId: String,

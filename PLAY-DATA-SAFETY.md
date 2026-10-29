@@ -44,7 +44,7 @@
     sunucuda yukarıdaki "Satın alma geçmişi" tutulur.
   - *Ödeme bilgileri* (kart, banka) Google Play'de kalır, uygulamaya gelmez → "Finansal bilgiler → Ödeme bilgileri"
     beyan edilmez.
-  - Google Play'e `obfuscatedAccountId` olarak UID'nin SHA-256 özeti, `obfuscatedProfileId` olarak sınav kimliği
+  - Google Play'e `obfuscatedAccountId` olarak UID'nin SHA-256 özeti, `obfuscatedProfileId` olarak sınav kimliğinin SHA-256 özeti
     iletilir (dolandırıcılık sinyali ve sınav eşleşmesi). Google ödeme hizmet sağlayıcısı olduğundan paylaşım
     sayılmaz.
   - Satın alma için ayrı bir analytics olayı yok; yalnız paywall'ın `screen_view` (`Paywall`) kaydı var.

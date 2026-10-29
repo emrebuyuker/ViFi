@@ -87,8 +87,15 @@ class FakePlayBillingClient(
             acknowledged: Boolean = false,
         ) = PlayPurchase(listOf(StoreProductIds.PREMIUM), token, state, acknowledged)
 
+        /** A paid unlock bound to [examId] the way the app binds it (its digest), or to no exam when `null`. */
         fun examUnlock(token: String, examId: String?, state: PlayPurchaseState = PlayPurchaseState.PURCHASED) =
-            PlayPurchase(listOf(StoreProductIds.EXAM_UNLOCK), token, state, false, obfuscatedProfileId = examId)
+            PlayPurchase(
+                listOf(StoreProductIds.EXAM_UNLOCK),
+                token,
+                state,
+                false,
+                obfuscatedProfileId = examId?.let(PlayBillingExamPurchaseService::examBinding),
+            )
     }
 }
 

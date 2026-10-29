@@ -17,9 +17,11 @@ import kotlinx.coroutines.sync.withLock
  * Paid single-exam unlocks (`exam_unlock`) on Google Play Billing, recorded server-side (iOS
  * StoreKitExamPurchaseService, 4.0.0 DEC-04).
  *
- * The purchase is bound to its exam with `obfuscatedProfileId = examId`, which the server checks against Google Play,
- * and to the hashed user id with `obfuscatedAccountId` (Play's fraud signal); the exam is also kept on the device
- * until the purchase completes. The purchase is consumed only after the server has recorded the unlock, so a failed
+ * The purchase is bound to its exam with `obfuscatedProfileId` = [examBinding] (exam ids are longer than Play's
+ * 64-character limit, their digest is not), which the server checks against Google Play, and to the hashed user id
+ * with `obfuscatedAccountId` (Play's fraud signal). The digest cannot be turned back into an exam id, so the exam is
+ * kept on the device until the purchase completes, and a recovered purchase is recorded only for an exam the device
+ * knows whose binding it carries. The purchase is consumed only after the server has recorded the unlock, so a failed
  * call never loses a paid unlock: it stays unconsumed and [recoverPendingUnlock] finishes it later (one left
  * unconsumed for three days is refunded by Google). An unconsumed `exam_unlock` blocks buying another, so
  * [purchaseUnlock] finishes it first.
@@ -43,12 +45,8 @@ class PlayBillingExamPurchaseService @Inject constructor(
             LogCategory.APP.log.e("A paid exam unlock needs a signed-in user")
             throw SubscriptionError.Unknown
         }
-        if (examId.length > PlayPurchaseRequest.MAX_OBFUSCATED_ID_LENGTH) {
-            LogCategory.APP.log.e("The exam id is too long to bind to a Google Play purchase")
-            throw SubscriptionError.Unknown
-        }
         // A paid unlock still waiting for the server blocks buying exam_unlock again: finish it first.
-        val owned = finishOwnedPurchases()
+        val owned = finishOwnedPurchases(requestedExamId = examId)
         when {
             examId in owned.recorded -> return PurchaseResult.SUCCESS
             owned.failure != null -> throw owned.failure
@@ -65,7 +63,7 @@ class PlayBillingExamPurchaseService @Inject constructor(
                 type = PlayProductType.ONE_TIME,
                 offerToken = offer.offerToken,
                 obfuscatedAccountId = obfuscatedAccountId(uid),
-                obfuscatedProfileId = examId,
+                obfuscatedProfileId = examBinding(examId),
             ),
         )
         when (update.response) {
@@ -105,12 +103,14 @@ class PlayBillingExamPurchaseService @Inject constructor(
     // Helpers
 
     /**
-     * Finishes this Google account's unconsumed `exam_unlock` purchases: each paid one is recorded for the exam it
-     * names (or the remembered one), then consumed. A failure is reported after trying the others.
+     * Finishes this Google account's unconsumed `exam_unlock` purchases: each paid one is recorded for the exam it is
+     * bound to, then consumed. The exam is found among those this device knows ([requestedExamId] and the remembered
+     * one); a purchase bound to none of them is left alone, and Google refunds it if it is never consumed. A failure is
+     * reported after trying the others.
      *
      * @throws SubscriptionError when Google Play cannot be reached.
      */
-    private suspend fun finishOwnedPurchases(): OwnedUnlocks {
+    private suspend fun finishOwnedPurchases(requestedExamId: String? = null): OwnedUnlocks {
         val owned = billingCall { billing.queryPurchases(PlayProductType.ONE_TIME) }
             .filter { StoreProductIds.EXAM_UNLOCK in it.productIds }
         val rememberedExamId = pendingUnlock.examId()
@@ -120,12 +120,13 @@ class PlayBillingExamPurchaseService @Inject constructor(
             return OwnedUnlocks()
         }
 
+        val knownExamIds = listOfNotNull(requestedExamId, rememberedExamId).distinct()
         val recorded = mutableListOf<String>()
         var failure: SubscriptionError? = null
         for (purchase in owned.filter { it.state == PlayPurchaseState.PURCHASED }) {
-            val examId = purchase.obfuscatedProfileId ?: rememberedExamId
+            val examId = knownExamIds.firstOrNull { examBinding(it) == purchase.obfuscatedProfileId }
             if (examId == null) {
-                LogCategory.APP.log.e("A paid exam unlock names no exam; Google refunds it if never consumed")
+                LogCategory.APP.log.e("A paid exam unlock is bound to no exam this device knows; Google refunds it")
                 continue
             }
             try {
@@ -164,7 +165,15 @@ class PlayBillingExamPurchaseService @Inject constructor(
 
     internal companion object {
         /** The user id as Google Play may see it: a SHA-256 hex digest (64 characters, Play's limit). */
-        fun obfuscatedAccountId(uid: String): String =
-            MessageDigest.getInstance("SHA-256").digest(uid.toByteArray()).joinToString("") { "%02x".format(it) }
+        fun obfuscatedAccountId(uid: String): String = sha256Hex(uid)
+
+        /**
+         * How a purchase names its exam to Google Play: the SHA-256 hex digest of the exam id, 64 characters for any
+         * exam (the server's `examBindingFor` computes the same).
+         */
+        fun examBinding(examId: String): String = sha256Hex(examId)
+
+        private fun sha256Hex(value: String): String =
+            MessageDigest.getInstance("SHA-256").digest(value.toByteArray()).joinToString("") { "%02x".format(it) }
     }
 }

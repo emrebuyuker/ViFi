@@ -37,7 +37,7 @@ class PlayBillingExamPurchaseServiceTest {
         assertEquals(StoreProductIds.EXAM_UNLOCK, request.productId)
         assertEquals(PlayProductType.ONE_TIME, request.type)
         assertEquals("token-exam", request.offerToken)
-        assertEquals("exam-1", request.obfuscatedProfileId)
+        assertEquals(PlayBillingExamPurchaseService.examBinding("exam-1"), request.obfuscatedProfileId)
         val uid = checkNotNull(auth.currentUser).id
         assertEquals(PlayBillingExamPurchaseService.obfuscatedAccountId(uid), request.obfuscatedAccountId)
         assertEquals(listOf("launch", "record:t1:exam_unlock:exam-1", "consume:t1"), calls)
@@ -112,6 +112,7 @@ class PlayBillingExamPurchaseServiceTest {
     @Test
     fun `purchaseUnlock first finishes another exam's unlock, then buys`() = runTest {
         billing.purchases[PlayProductType.ONE_TIME] = listOf(examUnlock("old", "exam-0"))
+        pending.stored = "exam-0"
         billing.sheetAnswer = paid()
 
         assertEquals(PurchaseResult.SUCCESS, sut.purchaseUnlock("exam-1"))
@@ -130,6 +131,7 @@ class PlayBillingExamPurchaseServiceTest {
     @Test
     fun `purchaseUnlock when an earlier unlock cannot be recorded does not buy`() = runTest {
         billing.purchases[PlayProductType.ONE_TIME] = listOf(examUnlock("old", "exam-0"))
+        pending.stored = "exam-0"
         backend.failure = SubscriptionError.StoreUnavailable
 
         assertEquals(SubscriptionError.StoreUnavailable, failureOf { sut.purchaseUnlock("exam-1") })
@@ -145,11 +147,15 @@ class PlayBillingExamPurchaseServiceTest {
     }
 
     @Test
-    fun `purchaseUnlock when the exam id is too long to bind fails before paying`() = runTest {
-        val longId = "e".repeat(PlayPurchaseRequest.MAX_OBFUSCATED_ID_LENGTH + 1)
+    fun `purchaseUnlock binds a catalog-path exam id longer than Play allows through its digest`() = runTest {
+        val longId = "sakarya-universitesi__muhendislik-fakultesi__insaat-muhendisligi__" +
+            "betonarme-1__2009-yaz-okulu-vize"
+        billing.sheetAnswer = paid(examId = longId)
 
-        assertEquals(SubscriptionError.Unknown, failureOf { sut.purchaseUnlock(longId) })
-        assertTrue(billing.launched.isEmpty())
+        assertEquals(PurchaseResult.SUCCESS, sut.purchaseUnlock(longId))
+        val binding = checkNotNull(billing.launched.single().obfuscatedProfileId)
+        assertEquals(PlayPurchaseRequest.MAX_OBFUSCATED_ID_LENGTH, binding.length)
+        assertEquals(listOf("launch", "record:t1:exam_unlock:$longId", "consume:t1"), calls)
     }
 
     @Test
@@ -164,7 +170,7 @@ class PlayBillingExamPurchaseServiceTest {
     // --- recoverPendingUnlock ---
 
     @Test
-    fun `recoverPendingUnlock records then consumes the exam the purchase names`() = runTest {
+    fun `recoverPendingUnlock records then consumes the remembered exam the purchase is bound to`() = runTest {
         billing.purchases[PlayProductType.ONE_TIME] = listOf(examUnlock("t1", "exam-1"))
         pending.stored = "exam-1"
 
@@ -177,12 +183,22 @@ class PlayBillingExamPurchaseServiceTest {
     }
 
     @Test
-    fun `recoverPendingUnlock falls back to the remembered exam`() = runTest {
+    fun `recoverPendingUnlock leaves a purchase bound to an exam this device does not remember`() = runTest {
+        billing.purchases[PlayProductType.ONE_TIME] = listOf(examUnlock("t1", "exam-1"))
+        pending.stored = "exam-2"
+
+        assertNull(sut.recoverPendingUnlock())
+        assertTrue(calls.isEmpty())
+        assertEquals("exam-2", pending.stored)
+    }
+
+    @Test
+    fun `recoverPendingUnlock leaves a purchase bound to no exam`() = runTest {
         billing.purchases[PlayProductType.ONE_TIME] = listOf(examUnlock("t1", examId = null))
         pending.stored = "exam-2"
 
-        assertEquals("exam-2", sut.recoverPendingUnlock())
-        assertEquals(listOf("record:t1:exam_unlock:exam-2", "consume:t1"), calls)
+        assertNull(sut.recoverPendingUnlock())
+        assertTrue(calls.isEmpty())
     }
 
     @Test
@@ -236,7 +252,7 @@ class PlayBillingExamPurchaseServiceTest {
         assertEquals("exam-1", pending.stored)
     }
 
-    // --- obfuscatedAccountId ---
+    // --- obfuscated ids ---
 
     @Test
     fun `obfuscatedAccountId is a 64-character SHA-256 hex digest`() {
@@ -244,5 +260,14 @@ class PlayBillingExamPurchaseServiceTest {
 
         assertEquals("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", id)
         assertEquals(PlayPurchaseRequest.MAX_OBFUSCATED_ID_LENGTH, id.length)
+    }
+
+    @Test
+    fun `examBinding is the SHA-256 hex digest the server checks`() {
+        // The same digest the server's examBindingFor computes (googlePlay.test.mjs).
+        assertEquals(
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            PlayBillingExamPurchaseService.examBinding("abc"),
+        )
     }
 }
