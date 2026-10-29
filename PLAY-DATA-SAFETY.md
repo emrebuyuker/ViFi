@@ -3,6 +3,9 @@
 > **Durum:** Taslak envanter (FM-20). Formu Play Console'da doldurup göndermek ürün sahibinin işidir.
 > Kaynak: iOS `ViFi/Resources/PrivacyInfo.xcprivacy` (gizlilik etiketi) + Android hedef mimarisi (`core/model`).
 > Özellikler eklendikçe güncellenir; aşağıdaki "Android'e özgü" satırları Play'e özeldir.
+> **4.0.0 (LEG-02):** ViFi Premium ve parayla tek sınav açma ile "Finansal bilgiler → Satın alma geçmişi" eklendi
+> (iOS gizlilik manifestindeki "satın alma geçmişi"nin karşılığı). Console formu 4.0.0 sürümüyle birlikte, ürün
+> sahibince güncellenir; o zamana kadar canlıdaki 3.1.0 beyanı geçerlidir.
 
 ## Toplanan veriler
 
@@ -16,6 +19,7 @@
 | Uygulama etkinliği → Diğer kullanıcı içeriği | Kullanıcının yüklediği sınav görselleri/PDF'leri (moderasyon için) | Uygulama işlevi | Evet | Hayır (isteğe bağlı) |
 | Uygulama bilgileri ve performans → Tanılama | Giriş hatası tanılaması (`recordLoginDiagnostic`: hata kodu, aşama; numara yalnızca salted-hash + son 4) | Uygulama işlevi (destek) | Hayır | Hayır |
 | Cihaz veya diğer kimlikler | FCM kayıt token'ı (bildirim), App Check / Play Integrity, Analytics uygulama örneği kimliği | Uygulama işlevi, analiz | Evet | Evet |
+| Finansal bilgiler → Satın alma geçmişi _(4.0.0)_ | Parayla tek sınav açma: Google Play sipariş kimliği (yoksa satın alma jetonunun özeti) + UID + sınav kimliği, sunucuda `purchasedTransactions` ve `users/<uid>/unlocks` (`purchaseExamUnlock`) | Uygulama işlevi | Evet | Hayır (yalnız satın alan) |
 
 \* Analytics toplama kapatma seçeneği şu an yok; formda "isteğe bağlı değil" olarak işaretlenmeli ya da bir kapatma ayarı eklenmeli (karar ürün sahibinde).
 
@@ -29,7 +33,21 @@
 - **Paylaşım:** Veri üçüncü taraflarla paylaşılmıyor; Google (Firebase) hizmet sağlayıcı olarak işler (Play'de "paylaşım" sayılmaz).
 - **Aktarımda şifreleme:** Evet (Firebase, HTTPS/TLS).
 - **Silme talebi:** Uygulama içi hesap silme (iOS'ta var; Android'de Hesap alanı) — Play hesap silme URL'si de gerekli.
-- **Coin bakiyesi / açılmış sınavlar:** Uygulama içi durum; satın alma yok (abonelik kapsam dışı), finansal veri sayılmaz.
+  4.0.0 (ürün sahibi kararı, 2026-10-29): `purchasedTransactions` kayıtları tekrar kullanımı önlemek için hesap
+  silinince de saklanır, hesapla bağı (UID) en geç 30 gün içinde elle kaldırılır; hesap silme ve gizlilik sayfaları
+  bunu söyler (LEG-01).
+- **Coin bakiyesi / açılmış sınavlar:** Uygulama içi durum; coin parayla satın alınmaz, finansal veri sayılmaz.
+- **Satın almalar (4.0.0):**
+  - *ViFi Premium aboneliği* cihazda Google Play Billing ile doğrulanır; sunucuya yazılmaz, bizim tarafımızda
+    toplanmaz (iOS ile aynı, `DEC-03`).
+  - *Parayla tek sınav açma:* satın alma jetonu `purchaseExamUnlock`'a gider, Play Developer API ile doğrulanır;
+    sunucuda yukarıdaki "Satın alma geçmişi" tutulur.
+  - *Ödeme bilgileri* (kart, banka) Google Play'de kalır, uygulamaya gelmez → "Finansal bilgiler → Ödeme bilgileri"
+    beyan edilmez.
+  - Google Play'e `obfuscatedAccountId` olarak UID'nin SHA-256 özeti, `obfuscatedProfileId` olarak sınav kimliği
+    iletilir (dolandırıcılık sinyali ve sınav eşleşmesi). Google ödeme hizmet sağlayıcısı olduğundan paylaşım
+    sayılmaz.
+  - Satın alma için ayrı bir analytics olayı yok; yalnız paywall'ın `screen_view` (`Paywall`) kaydı var.
 
 ## Analytics envanteri (AN-04/05/07, AN-11)
 
@@ -39,7 +57,8 @@ iOS 3.1.0 ile aynı adlar; kaynak `core/model/AnalyticsEvent.kt` + `AnalyticsEve
   `earn_coins_tapped`, `exam_unlock`, `exam_unlock_failed`, `exam_submit`, `exam_submit_failed`,
   `login_code_requested`, `login_success`, `login_failed`, `onboarding_complete`, `profile_completed`,
   `profile_updated`, `search_used`, `sign_out`, `account_deleted`, `update_prompt_shown`, `update_action`,
-  `submission_approved`, `submission_rejected`. Parametreler yalnız düşük-kardinaliteli sabitler: ekran adı,
+  `submission_approved`, `submission_rejected` (4.0.0'da yeni olay yok; `screen_view` ekran adlarına `Paywall`
+  eklendi). Parametreler yalnız düşük-kardinaliteli sabitler: ekran adı,
   katalog seviyesi, dosya biçimi (PDF/JPG), dosya sayısı, coin miktarı, tier, sabit hata `reason`/`step`,
   bayraklar. **Arşiv/ders adı, telefon, isim veya serbest metin gönderilmez.**
 - **Kimlik:** `setUserId` = Firebase Auth UID (oturum açılınca; çıkışta `null`).

@@ -3,6 +3,9 @@
 > **Durum:** Metinler ürün sahibince onaylandı (REL-01, 2026-10-28); formları Play Console'da doldurup göndermek ürün
 > sahibinin işidir. Veri güvenliği formu için bkz. `PLAY-DATA-SAFETY.md`.
 > Görseller repo kökündeki `play-store/` klasöründe: canlı `vifi-831a8`, test hesabı, liveDebug, 28 Ekim 2026.
+> **4.0.0 (LEG-03, ürün sahibince onaylandı 2026-10-29):** tam açıklama, sürüm notu ve uygulama içeriği
+> cevapları Premium ve parayla tek sınav açma için güncellendi. Console'a **4.0.0 sürümüyle birlikte** girilir; o
+> zamana kadar canlıda 3.1.0 metni kalır (önceki metin: `git show 7343c53:PLAY-STORE-LISTING.md`).
 
 ## 1. Yayın öncesi sıra
 
@@ -23,13 +26,13 @@
 | Gizlilik politikası | `https://vifi-831a8.web.app/gizlilik` | Firebase Hosting'de yayında (kaynak `ViFi-iOS/firebase/hosting/`). |
 | Uygulama erişimi | "Bazı işlevler kısıtlı" → giriş talimatı ekle | Uygulamanın tamamı telefonla (+90) girişin arkasında. İnceleme için Firebase Console'daki **test numarasını ve sabit kodunu** yaz; numara bu dosyaya yazılmaz (sır kuralı). Test hesabının profili tamamlanmış olmalı. Önerilen talimat: _"Uygulama telefon numarasıyla giriş ister. Giriş ekranına \<numara\> yazıp Kod Gönder'e dokunun, kod alanına \<kod\> yazın. Bu bir test numarasıdır, SMS gönderilmez."_ |
 | Reklamlar | Hayır, reklam içermiyor | AdMob tamamen kaldırıldı (FM-08). |
-| İçerik derecelendirmesi | Kategori: Referans, Haber veya Eğitim. Şiddet, cinsellik, küfür, madde, kumar: Hayır. Kullanıcılar birbiriyle içerik paylaşabiliyor mu: **Evet** (sınav görselleri/PDF'leri; yayından önce incelenir). Konum paylaşımı: Hayır. Dijital satın alma: Hayır. | Coin gerçek parayla satın alınmaz ve paraya çevrilmez; kumar sayılmaz. |
+| İçerik derecelendirmesi | Kategori: Referans, Haber veya Eğitim. Şiddet, cinsellik, küfür, madde, kumar: Hayır. Kullanıcılar birbiriyle içerik paylaşabiliyor mu: **Evet** (sınav görselleri/PDF'leri; yayından önce incelenir). Konum paylaşımı: Hayır. Dijital satın alma: **Evet** _(4.0.0; 3.1.0'da Hayır)_. | 4.0.0: ViFi Premium aboneliği ve parayla tek sınav açma Google Play Billing ile. Coin gerçek parayla satın alınmaz ve paraya çevrilmez; kumar sayılmaz. Anket 4.0.0 sürümüyle yeniden gönderilir. |
 | Hedef kitle ve içerik | 18 yaş ve üstü; uygulama çocuklara hitap etmiyor | 28 Ekim'de Console'da doğrulandı (önceden kayıtlı). 13 yaş altı seçilmemeli (Aile politikası). |
 | Haber uygulaması | Hayır | |
 | Devlet uygulaması | Hayır | |
-| Finans özellikleri | Yok | 26 Ekim'de kaydedildi. |
+| Finans özellikleri | Yok | 26 Ekim'de kaydedildi. Uygulama içi satın alma (4.0.0) finans özelliği sayılmaz; değişmez. |
 | Sağlık | Yok | 26 Ekim'de kaydedildi. |
-| Veri güvenliği | `PLAY-DATA-SAFETY.md`; hesap silme adresi `https://vifi-831a8.web.app/hesap-silme` | 26 Ekim'de kaydedildi, incelemeye gönderilmedi. |
+| Veri güvenliği | `PLAY-DATA-SAFETY.md`; hesap silme adresi `https://vifi-831a8.web.app/hesap-silme` | 26 Ekim'de kaydedildi, incelemeye gönderilmedi. 4.0.0 ile "Finansal bilgiler → Satın alma geçmişi" eklenir (LEG-02). |
 | Reklam kimliği | Kullanılmıyor | `AD_ID` izinleri birleşik manifest'ten çıkarıldı. |
 
 ## 3. Mağaza girişi metinleri
@@ -44,7 +47,7 @@
 Üniversitelerin geçmiş vize ve final sınavları tek yerde. Ders seç, sınavı aç.
 ```
 
-**Tam açıklama** (en çok 4000 karakter):
+**Tam açıklama** (4.0.0, en çok 4000 karakter):
 
 ```
 ViFi, üniversitelerin geçmiş sınavlarını tek bir arşivde toplar. Üniversiteni, fakülteni, bölümünü ve dersini seç; önceki yılların vize, final ve bütünleme sınavlarını görsel ya da PDF olarak uygulama içinde incele.
@@ -62,7 +65,12 @@ RAHATÇA İNCELE
 COIN İLE KİLİT AÇ
 • Her derste en eski iki sınav ücretsizdir.
 • Diğer sınavlar 100 coin ile açılır ve hesabında kalıcı olarak açık kalır.
-• Uygulamada satın alma yoktur; coin'ler onaylanan sınav gönderimleriyle kazanılır.
+• Coin satın alınmaz; onaylanan sınav gönderimleriyle kazanılır.
+• İstersen bir sınavı coin yerine tek seferlik ödemeyle de açabilirsin; o sınav da hesabında kalıcı olarak açık kalır.
+
+ViFi PREMIUM
+• Aylık ya da yıllık abonelikle arşivdeki tüm sınavlar coin gerekmeden açılır.
+• Abonelik dönem sonunda otomatik olarak yenilenir; Google Play abonelik ayarlarından istediğin zaman iptal edebilirsin.
 
 SINAV EKLE, COIN KAZAN
 • Elindeki sınavları fotoğraf ya da PDF olarak gönder.
@@ -83,7 +91,7 @@ Görüş ve önerilerin için: buyukeryazilim@gmail.com
 **Sürüm notları** (4.0.0, en çok 500 karakter):
 
 ```
-Hata düzeltmeleri ve iyileştirmeler: tanıtım turundaki buton artık ekranın alt kısmındaki gezinme çubuğunun altında kalmıyor, arşivde bir ekrandan geri dönünce üstteki konum çubuğu bulunduğun yeri gösteriyor ve açık tema renkleri yenilendi.
+ViFi Premium geldi: aylık ya da yıllık abonelikle arşivdeki tüm sınavlar coin gerekmeden açık. İstersen tek bir sınavı coin yerine tek seferlik ödemeyle de açabilirsin. Ayrıca tanıtım turundaki buton artık gezinme çubuğunun altında kalmıyor, arşivde geri dönünce üstteki konum çubuğu bulunduğun yeri gösteriyor ve açık tema renkleri yenilendi.
 ```
 
 **Sürüm notları** (3.1.0, en çok 500 karakter):

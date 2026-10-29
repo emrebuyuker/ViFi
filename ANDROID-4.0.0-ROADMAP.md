@@ -11,7 +11,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **19'u tamam, 0'ı yarım, 8'i başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz), Faz 2 (entegrasyon + testler) ve backend kodu + testleri (SRV-01/02, ortak depoda, yayınlanmadı) tamam; uygulama mock'ta uçtan uca çalışıyor. Kalan: Play Console / Google Cloud hazırlığı (OPS-01/02), function yayını (SRV-03, onaylı), yasal/beyan (LEG-01…03), gerçek ortam doğrulaması (PQA-01/02). Canlıda tek sınav satın alma SRV-03 yayını ve OPS-02 erişimi olmadan doğrulanamaz.
+> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **21'i tamam, 1'i yarım, 5'i başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz), Faz 2 (entegrasyon + testler), backend kodu + testleri (SRV-01/02, ortak depoda, yayınlanmadı), veri güvenliği envanteri (LEG-02) ve mağaza metni (LEG-03) tamam; uygulama mock'ta uçtan uca çalışıyor. Yarım: LEG-01 (hosting metinleri depoda düzeltildi, yayın onay bekliyor). Kalan: Play Console / Google Cloud hazırlığı (OPS-01/02), function yayını (SRV-03, onaylı), gerçek ortam doğrulaması (PQA-01/02). Canlıda tek sınav satın alma SRV-03 yayını ve OPS-02 erişimi olmadan doğrulanamaz.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -118,9 +118,9 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 
 #### Hat D — Yasal metinler ve Play beyanları
 
-- [ ] **`LEG-01`** Hosting metinlerinin son kontrolü _(P2·S)_ — Kullanım koşulları + gizlilik zaten mağazadan bağımsız ve canlıda; paywall bağlantıları aynı adresler.
-- [ ] **`LEG-02`** Veri güvenliği beyanı _(P1·S)_ — "Satın alma geçmişi" (hesaba bağlı, uygulama işlevi, paylaşılmıyor): `PLAY-DATA-SAFETY.md` + Console formu (ürün sahibiyle). ⟶ `DEC-04`
-- [ ] **`LEG-03`** Mağaza girişi ve 4.0.0 sürüm notları _(P1·S)_ — Premium + parayla tek sınav açma; `PLAY-STORE-LISTING.md` (500 karakter). ⟶ `DEC-02`
+- [ ] **`LEG-01`** Hosting metinlerinin son kontrolü _(P2·S)_ — Kullanım koşulları + gizlilik zaten mağazadan bağımsız ve canlıda; paywall bağlantıları aynı adresler. ⏳ _Yarım — yalnız hosting yayını kaldı (2026-10-29): canlı `/gizlilik` ve `/kullanim-kosullari` depodaki `ViFi-iOS/firebase/hosting/` ile birebir aynıydı, ikisi de Google Play'i anıyor; paywall, Hakkında ve Sınav Ekle aynı `LegalLinks` adreslerini açıyor. İki bulgu ürün sahibinin kararıyla depoda düzeltildi: (1) kullanım koşulları Apple'ın "dönem bitiminden en az 24 saat önce" yenileme kuralını Google Play için de söylüyordu → platforma göre ayrıldı (Android: dönem bitmeden iptal edilmezse yenilenir, ücret yeni dönemin başında). (2) Hesap silme ve gizlilik sayfaları sunucudaki satın alma kayıtlarını (`purchasedTransactions`: UID + sınav) anmıyordu → kayıt tekrar kullanımı önlemek için saklanır, hesapla bağı en geç 30 gün içinde (elle) kaldırılır. Yürürlük/güncelleme tarihleri 29 Ekim 2026 (`ViFi-iOS` `8a1076e`). **Kalan:** `firebase deploy --only hosting` yalnız ürün sahibinin açık onayıyla (yayın günü farklıysa tarihler güncellenir)._
+- [x] **`LEG-02`** Veri güvenliği beyanı _(P1·S)_ — "Satın alma geçmişi" (hesaba bağlı, uygulama işlevi, paylaşılmıyor): `PLAY-DATA-SAFETY.md` + Console formu (ürün sahibiyle). ⟶ `DEC-04` ✅ _Tamamlandı (2026-10-29): envantere "Finansal bilgiler → Satın alma geçmişi" (zorunlu değil, yalnız satın alan) eklendi. Abonelik cihazda doğrulandığı için toplanmıyor, ödeme bilgisi Google Play'de kalıyor, Play'e giden `obfuscated*` kimlikler not edildi. 4.0.0'da yeni analytics olayı yok (yalnız `Paywall` ekran adı). Console formu 4.0.0 yayınıyla ürün sahibince; silme satırı LEG-01 bulgusu (2)'ye bağlı._
+- [x] **`LEG-03`** Mağaza girişi ve 4.0.0 sürüm notları _(P1·S)_ — Premium + parayla tek sınav açma; `PLAY-STORE-LISTING.md` (500 karakter). ⟶ `DEC-02` ✅ _Tamamlandı (2026-10-29, ürün sahibince onaylandı). Tam açıklamada "Uygulamada satın alma yoktur" cümlesi kaldırıldı; tek seferlik ödeme maddesi ve "ViFi PREMIUM" bölümü eklendi (fiyat yazılmadı; 1716/4000). 4.0.0 sürüm notu yazıldı (343/500). Uygulama içeriğinde dijital satın alma "Evet" oldu (içerik derecelendirme anketi yeniden gönderilir). Console'a 4.0.0 sürümüyle girilir._
 
 ### Faz 2 — Entegrasyon ve Testler
 
