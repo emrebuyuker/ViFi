@@ -11,7 +11,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **17'si tamam, 0'ı yarım, 10'u başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz) ve Faz 2 (entegrasyon + testler) tamam; uygulama mock'ta uçtan uca çalışıyor. Kalan: Play Console / Google Cloud hazırlığı (OPS-01/02), backend (SRV-01…03), yasal/beyan (LEG-01…03), gerçek ortam doğrulaması (PQA-01/02). Canlıda tek sınav satın alma SRV-01 yayınlanana kadar doğrulanamaz.
+> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **19'u tamam, 0'ı yarım, 8'i başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz), Faz 2 (entegrasyon + testler) ve backend kodu + testleri (SRV-01/02, ortak depoda, yayınlanmadı) tamam; uygulama mock'ta uçtan uca çalışıyor. Kalan: Play Console / Google Cloud hazırlığı (OPS-01/02), function yayını (SRV-03, onaylı), yasal/beyan (LEG-01…03), gerçek ortam doğrulaması (PQA-01/02). Canlıda tek sınav satın alma SRV-03 yayını ve OPS-02 erişimi olmadan doğrulanamaz.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -105,8 +105,8 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 
 #### Hat B — Backend (ortak depo `ViFi-iOS/firebase/`) ⚠️ ONAY
 
-- [ ] **`SRV-01`** `purchaseExamUnlock` Google Play dalı _(P0·M)_ — `platform: 'android'`, `purchaseToken`, `productId`; Play Developer API `purchases.products.get` (paket `com.salticusteam.vifi`, `purchaseState` = satın alındı, ürün kimliği, `obfuscatedExternalProfileId` = `examId`); replay anahtarı `orderId`; aynı `purchasedTransactions` + `unlocks` transaction'ı. iOS yolu değişmez. ⟶ `DEC-04`
-- [ ] **`SRV-02`** Backend testleri _(P0·S)_ — `googlePlay.test.mjs`: girdi korumaları, sahte doğrulayıcıyla durum/ürün/profil eşleşmesi, replay, iOS yolunun bozulmadığı; emülatör. ⟶ `SRV-01`
+- [x] **`SRV-01`** `purchaseExamUnlock` Google Play dalı _(P0·M)_ — `platform: 'android'`, `purchaseToken`, `productId`; Play Developer API `purchases.products.get` (paket `com.salticusteam.vifi`, `purchaseState` = satın alındı, ürün kimliği, `obfuscatedExternalProfileId` = `examId`); replay anahtarı `orderId`; aynı `purchasedTransactions` + `unlocks` transaction'ı. iOS yolu değişmez. ⟶ `DEC-04` ✅ _Tamamlandı (2026-10-29, ortak depo `ViFi-iOS` `v-4.0.0`, `f0a8b67`, yayınlanmadı): `functions/googlePlay.js` (Play API `google-auth-library` ile doğrudan REST, zaten kurulu 9.15.1 açık bağımlılık yapıldı; girdi korumaları API'den önce; `orderId` yoksa `play-token-<jeton SHA-256>`); kayıt transaction'ı `functions/purchaseUnlock.js`'e taşındı ve iki platformca paylaşılıyor (iOS kayıtları birebir aynı, Android'e `store: 'google_play'`); `platform` yoksa iOS. Hata kodları: geçersiz `failed-precondition`, Play'e ulaşılamıyor `unavailable`, API erişimi yok (OPS-02) `internal`._
+- [x] **`SRV-02`** Backend testleri _(P0·S)_ — `googlePlay.test.mjs`: girdi korumaları, sahte doğrulayıcıyla durum/ürün/profil eşleşmesi, replay, iOS yolunun bozulmadığı; emülatör. ⟶ `SRV-01` ✅ _Tamamlandı (2026-10-29): `tests/googlePlay.test.mjs` (15, ağsız) + `tests/purchaseExamUnlock.test.mjs` (12, Firestore emülatörü: iOS kayıt biçimi, Play etiketi, idempotent tekrar, başka sınav/kullanıcı için replay, coin'le açılmış sınav, callable'ın iki platform korumaları `onCall.run` ile); `npm test` 293 test, 0 başarısız (4 mevcut `todo`)._
 - [ ] **`SRV-03`** Function yayını _(P0·S)_ — `firebase deploy --only functions:purchaseExamUnlock`, **yalnız açık onayla**; ardından iOS satın almasının çalıştığı kontrol edilir. ⟶ `SRV-02`, `OPS-02`
 
 #### Hat C — Arayüz (BIL-01'deki Fake'lerle)
