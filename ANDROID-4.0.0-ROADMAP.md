@@ -5,13 +5,15 @@
 > tamamlandı; bu dosya 4.0.0'ın **tek** iş listesidir.
 >
 > **Dalda hazır olanlar (`v-4.0.0`):** sürüm 4.0.0 (versionCode 19; 18 dahili testte), QA-01…QA-04 düzeltmeleri, sürüm notları.
-> **Yayın:** bu listedeki hiçbir kalem paketi canlıya göndermez; release yalnızca ürün sahibi "release çıkalım" dediğinde.
+> **Yayın:** Faz 0–3 paketi canlıya göndermez. Yayın adımları **Faz 4**'tedir (`RLS-01`…`RLS-11`, 29 Ekim'de ürün
+> sahibinin isteğiyle eklendi) ve ürün sahibiyle sırayla yapılır; her dış adım (release derleme/imza, Play'e yükleme,
+> Console gönderimi, canlı veri yazımı) o adım için ayrıca onaylanır.
 
 ---
 
 ## 0. Durum Özeti
 
-> **İlerleme (29 Ekim 2026):** Toplam 27 kalemin **27'si tamam, 0'ı yarım, 0'ı başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz), Faz 2 (entegrasyon + testler), backend (SRV-01…03, ortak depoda, `purchaseExamUnlock` Google Play dalıyla canlıda), Hat D (yasal metinler canlıda, veri güvenliği envanteri, mağaza metni) ve sunucunun Play erişimi (OPS-02) tamam; uygulama mock'ta uçtan uca çalışıyor. Play ürünleri etkin, 18 (4.0.0) dahili testte, lisans test listesi hazır (OPS-01). Gerçek ortam doğrulaması (PQA-01) emülatörde lisans test hesabıyla yapıldı; 4 hata bulunup düzeltildi, telefon adımı ürün sahibinin kararıyla atlandı; iade/iptal etkisi (PQA-02) doğrulandı. 4.0.0 listesi tamam; yayın yalnız ürün sahibi "release çıkalım" dediğinde; son derleme versionCode 19 (dalda hazır). Yayın kontrol listesi §6'da.
+> **İlerleme (29 Ekim 2026):** Toplam 38 kalemin **27'si tamam, 0'ı yarım, 11'i başlanmadı.** Faz 0 kararları, Hat A (istemci billing), Hat C (arayüz), Faz 2 (entegrasyon + testler), backend (SRV-01…03, ortak depoda, `purchaseExamUnlock` Google Play dalıyla canlıda), Hat D (yasal metinler canlıda, veri güvenliği envanteri, mağaza metni) ve sunucunun Play erişimi (OPS-02) tamam; uygulama mock'ta uçtan uca çalışıyor. Play ürünleri etkin, 18 (4.0.0) dahili testte, lisans test listesi hazır (OPS-01). Gerçek ortam doğrulaması (PQA-01) emülatörde lisans test hesabıyla yapıldı; 4 hata bulunup düzeltildi, telefon adımı ürün sahibinin kararıyla atlandı; iade/iptal etkisi (PQA-02) doğrulandı. Geliştirme ve doğrulama (Faz 0–3, 27 kalem) tamam; son derleme versionCode 19 (dalda hazır). Kalan: Faz 4 yayın adımları (`RLS-01`…`RLS-11`), önem ve uygulama sırasıyla, ürün sahibiyle.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -19,6 +21,7 @@
 | **Faz 1** | Geliştirme | **4 paralel hat** (A istemci billing · B backend · C arayüz · D yasal/beyan) | 16 |
 | **Faz 2** | Entegrasyon + testler | A ve C bitince birleşir | 3 |
 | **Faz 3** | Gerçek ortam doğrulaması (lisans testi) | Sıralı; yükleme yalnız ürün sahibinin onayıyla | 2 |
+| **Faz 4** | Yayın: push, release AAB, dahili test, Console beyanları, üretim, yayın sonrası | Sıralı, ürün sahibiyle — ⚠️ her dış adım ayrı onay | 11 |
 
 ---
 
@@ -62,6 +65,7 @@ Faz 1  BIL-01 (sözleşme, ilk gün) ─┬─► Hat A: BIL-02..06        │  
 Faz 2  INT-01..03  ◄── Hat A + Hat C                                      │
        SRV-03 (deploy, onaylı) ◄── SRV-01..02 + OPS-02                     │
 Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────────────────────────┘
+Faz 4  RLS-01 → 02 → 03 → (04, 05, 06, 07) → 08 → 09 → 10   ·   RLS-11 bağımsız
 ```
 
 **Hat sahipliği (çakışma olmasın diye dosya sınırları):**
@@ -132,6 +136,22 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 
 - [x] **`PQA-01`** Lisans test hesabıyla satın alma senaryoları _(P0·M)_ — Abonelik al / yenile / iptal / süre dolumu, geri yükleme (yeniden kurulum), tek sınav satın al → sunucu kaydı → tüket, ağ kopunca kurtarma, bekleyen ödeme. Test kanalına yükleme **yalnız ürün sahibi onayıyla**. ⟶ `INT-03`, `SRV-03`, `OPS-01` ✅ _Tamamlandı (2026-10-29, gerçek cihaz adımı ürün sahibinin kararıyla atlandı): hazırlık — 18 (4.0.0) dahili testte. Kanalın test kullanıcısı listesi, ürün sahibinin onayıyla, iki hesabı içeren "Lisans test kullanıcıları" e-posta listesi yapıldı; kanal Etkin. Katılım bağlantısı: `https://play.google.com/apps/internaltest/4697407634647288328` (yalnız listedeki hesaplar katılabilir). Ürün sahibinin onayıyla emülatörde yürütülüyor (`Medium_Phone_API_37`, Play Store'da lisans test hesabı, sideload liveDebug — Google lisans test hesaplarına buna izin veriyor; App Check debug anahtarı "PQA emülatör 2026-10-29"). **Geçenler:** aylık abonelik satın alma (Play test kartı, ücretsiz) → Paywall kapanır, Hesap'ta Premium + "Aboneliği Yönet", coin rozeti ve kilitler kalkar; 5 dakikalık test yenilemesi gerçekleşti; "Aboneliği Yönet" Play abonelik sayfasını açıyor; iptal → dönem sonunda uygulama öne gelince Premium kapandı, kilitler ve coin geri geldi. **Bulgu 1:** tek sınav satın alma hiç başlamıyordu (`The exam id is too long to bind to a Google Play purchase`): sınav kimlikleri 64 karakterden uzun → istemci + sunucu SHA-256 bağına geçirildi (DEC-04 notu; `ViFi-iOS` `a5819a1`, onaylı yeniden yayın `purchaseexamunlock-00003-nih`). **Geçenler (düzeltmeden sonra):** tek sınav satın alma → Play API doğrulaması (OPS-02 erişimi çalışıyor) → `purchasedTransactions/GPA.…` + `users/<uid>/unlocks/<sınav>` (`store: google_play`) → sınav açıldı ve yeniden başlatmada da açık; yavaş test kartıyla bekleyen ödeme → "Satın alma onay bekliyor" → onaylanınca uygulama öne geldiğinde kurtarma kaydı yaptı, sınav açıldı. **Bulgu 2 (ürün sahibinin onayıyla düzeltildi):** Play tüketmeyi `ERROR (6)` ile reddedince (1) hatırlanan sınav siliniyordu → özet bağı yüzünden satın alma sahipsiz kalıyordu, (2) sınav tüketme denemeleri yüzünden ~85 sn geç açılıyordu, (3) `BillingClientConnection` aynı yanıtı iki kez `resume` ediyordu → sınav tüketilene kadar hatırlanır ve tüketilmemiş kilit varken yeni alım başlatılmaz, kayıttan sonra sınav hemen açılır ve tüketme arka planda yapılır, Play geri çağrıları tek sefer `resume` edilir. **Gözlemler:** emülatör ağı App Check token'ı alırken takılınca sunucu çağrısı ~90 sn gecikti (uygulama hatası değil); güncelleme sonrası sistemin "Updating…" ekranından dönülen listede açılmış sınav bir kez kilitli göründü, temiz açılışta tekrarlanmadı; bekleyen ödeme onaylanınca açık kalan kilit penceresi "onay bekliyor" yazmaya devam ediyordu → ürün sahibinin onayıyla düzeltildi: kurtarma sınavı açınca pencere kapanır ve sınav açılır (emülatörde yavaş test kartıyla doğrulandı). **Atlanan (ürün sahibi kararı, 29 Ekim):** Play'den kurulan imzalı sürümle telefonda duman testi; Play imzası + Play Integrity / App Check yolu bu turda denenmedi (aynı App Check kurulumu 3.1.0'da üretimde çalışıyor). Bu turdaki düzeltmeler dahili testteki 18'de yok; son 4.0.0 yayını 19+ ile derlenir._
 - [x] **`PQA-02`** İade ve iptal etkisi _(P1·S)_ — İade/iptal sonrası abonelik hakkı düşer; tüketilmiş tek sınav kilidi kalır (iOS ile aynı kabul). ⟶ `PQA-01` ✅ _Tamamlandı (2026-10-29, emülatörde, ürün sahibinin onayıyla Play Console sipariş yönetiminden): yeni aylık test aboneliği (`GPA.3361-…`) "iade + yararlanma hakkını kaldır" ile iade edildi → uygulama öne gelince Premium düştü (Hesap'ta "ViFi Premium'a Geç" + coin), satın alınmamış sınavlar yeniden kilitlendi; tüketilmiş tek sınav siparişi (`GPA.3385-…`, "2009 YAZ OKULU FİNAL") yalnız iade edildi → sınav açık kaldı (sunucu iadeyi dinlemiyor, kabul edilen davranış). İptal ve süre dolumu PQA-01'de görülmüştü._
+
+### Faz 4 — Yayın  ⚠️ (ürün sahibiyle · her dış adım ayrı onay)
+
+> Önem ve uygulama sırasıyla. P0 = yayın engeli, P1 = yayınla birlikte yapılmalı, P2 = isteğe bağlı. Ayrıntı §4'te.
+
+- [ ] **`RLS-01`** `v-4.0.0` dallarının push'u _(P0·S)_ — ViFi-Android (yayın hazırlığı commit'leri) + ViFi-iOS (`a5819a1` = canlı `purchaseExamUnlock`'ın kodu). Bu Mac'te depolara yazma yetkili GitHub kimliği yok → ürün sahibi yapar. Yayınlanan derleme ve canlı function kodu uzak depoda güvende olmalı.
+- [ ] **`RLS-02`** Release AAB 19 (4.0.0) derle ve imzala _(P0·S)_ — `bundleLiveRelease` yükleme anahtarıyla; kontrol: versionCode 19 / 4.0.0, imza SHA-1 `75:61…`, `com.android.vending.BILLING`, dil bölmesi kapalı, R8 eşleme dosyası pakette. Dosya `play-store/ViFi-4.0.0-19.aab` (git dışı). **Yalnız bu adım için açık onayla.** ⟶ `RLS-01`
+- [ ] **`RLS-03`** Dahili teste yükle + Play'den kurulan sürümle duman testi _(P0·M)_ — 19'u dahili teste yükle ve yayınla (onayla); gerçek telefonda Play'den kur: giriş (Play Integrity / App Check), arşiv, sınav açma, aylık abonelik + tek sınav satın alma (lisans test hesabı, test kartı), geri yükleme, İngilizce telefonda Türkçe kilidi (LOC-01). PQA-01'de atlanan adım. ⟶ `RLS-02`
+- [ ] **`RLS-04`** Veri güvenliği formu: "Satın alma geçmişi" _(P0·S)_ — Finansal bilgiler → Satın alma geçmişi: toplanır, paylaşılmaz, isteğe bağlı, uygulama işlevi (`PLAY-DATA-SAFETY.md`). Kaydedilir, üretim sürümüyle incelemeye gider. ⟶ `LEG-02`
+- [ ] **`RLS-05`** İçerik derecelendirme anketi _(P0·S)_ — "Dijital satın alma: Evet" ile yeniden doldurulup gönderilir (`PLAY-STORE-LISTING.md` §2). ⟶ `LEG-03`
+- [ ] **`RLS-06`** Mağaza girişi 4.0.0 _(P0·S)_ — Tam açıklama (Premium + parayla tek sınav; "Uygulamada satın alma yoktur" kalkar), gerekirse kısa açıklama (`PLAY-STORE-LISTING.md` §3). Sürüm notu `RLS-08`'de girilir. ⟶ `LEG-03`
+- [ ] **`RLS-07`** %15 hizmet ücreti programına kayıt _(P1·S)_ — Ödeme profili → hesap grubu oluştur + 15% hizmet ücreti şartlarını kabul et. Kayıt olmazsa `exam_unlock` satışlarında kesinti %30 (abonelikler zaten %15). Sözleşme kabulü → ürün sahibi. İlk satıştan önce.
+- [ ] **`RLS-08`** Üretime yayın + incelemeye gönder _(P0·S)_ — 19'u üretime al (%100; kademeli yayın yok), 4.0.0 sürüm notu (`PLAY-STORE-LISTING.md`), Yayın özeti'nden `RLS-04`…`RLS-06` ile birlikte incelemeye gönder; yönetilen yayınlama kapalı → onayda kendiliğinden yayında. **Onayla.** ⟶ `RLS-03`…`RLS-06`
+- [ ] **`RLS-09`** Yayın sonrası doğrulama _(P1·S)_ — İnceleme onayı; Play'den inen 4.0.0'da QA-01…QA-04 (REL-02) ve satın almanın göründüğü kontrol; Politika durumu, Android vitals (çökme/ANR), ilk gerçek siparişler ve `purchaseExamUnlock` hataları. ⟶ `RLS-08`
+- [ ] **`RLS-10`** Güncelleme önerisi _(P1·S)_ — `config/appUpdate/android` → `latestVersion: "4.0.0"` (3.1.0 kullanıcılarına kapatılabilir öneri; `minimumVersion` 3.1.0 kalır). Canlı RTDB yazımı → **onayla**, 4.0.0 üretimde %100 görününce. ⟶ `RLS-09`
+- [ ] **`RLS-11`** ABD vergi formu (W-8BEN) _(P2·S)_ — Ödeme profili → ABD vergi bilgileri. Verilmezse yalnız ABD'li alıcıların kazancından stopaj kesilebilir; giriş +90 olduğu için etkisi pratikte yok. Ürün sahibi; bağımsız.
 
 ---
 
@@ -238,6 +258,14 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 #### `PQA-01` / `PQA-02` — Gerçek ortam doğrulaması
 - Lisans test hesabında satın alma ücretsizdir ve abonelik yenilemeleri kısaltılmış sürelerle olur (ör. aylık plan dakikalar içinde yenilenir); Play'in test ödeme yöntemleriyle onay / ret / gecikmeli ödeme denenir. Test kanalına derleme yüklemek bir release adımıdır → **yalnız ürün sahibi açıkça istediğinde**.
 
+
+#### `RLS-01`…`RLS-11` — Yayın
+- **Sıra:** `RLS-01` → `RLS-02` → `RLS-03` → `RLS-04`…`RLS-07` (birbirinden bağımsız, Console'da) → `RLS-08` → `RLS-09` → `RLS-10`; `RLS-11` istendiği zaman.
+- **`RLS-02` kontrolleri:** `keytool -printcert -jarfile <aab>` ile yükleme anahtarı (SHA-1 `75:61…`); `aapt2`/bundle manifestinde versionCode 19, `BILLING` izni; `BundleConfig.pb`'de `LANGUAGE` bölmesi kapalı; derleme, lint ve testler temiz.
+- **`RLS-03` tuzağı:** Emülatör Play Integrity'nin cihaz bütünlüğü kontrolünü geçmez → App Check token'ı alınamaz, istekler 403 döner; duman testi gerçek telefonda yapılır. Telefondaki Google hesabı lisans test listesinde olmalı (yoksa satın alma gerçek ücretlenir). Telefonda ViFi 3.1.0 Play'den kuruluysa dahili test bağlantısıyla 19'a güncellenir.
+- **`RLS-04`…`RLS-06`:** Metinler ürün sahibince onaylı ve hazır (`PLAY-DATA-SAFETY.md`, `PLAY-STORE-LISTING.md`); Console'da kaydedilir, gönderim `RLS-08`'de tek seferde.
+- **`RLS-08`:** Üretimdeki 17 (3.1.0) yerine 19; 18 yalnız dahili testte kalır. İnceleme süresi belirsiz (3.1.0'da aynı akşam onaylandı).
+- **`RLS-10`:** Erken yazılırsa güncellemeyi Play'de henüz göremeyen kullanıcılara boşuna öneri çıkar.
 ---
 
 ## 5. Riskler ve Açık Noktalar
@@ -251,19 +279,19 @@ Faz 3  PQA-01..02  ◄── INT + SRV-03 + OPS-01 ◄────────�
 ## 6. Yayın Kontrol Listesi (29 Ekim 2026 denetimi)
 
 Uçtan uca denetimde kod (derleme, lint, R8, birim + UI testleri), backend (3 function, Hosting, SHA'lar, güncelleme
-politikası) ve Play temeli (ürünler, dahili test, politika durumu) hazır bulundu. Aşağıdakiler §3'ün kalemi sayılmaz
-(27 kalem değişmez); ürün sahibiyle tek tek kapatılır. Yayın yine yalnız "release çıkalım" ile.
+politikası) ve Play temeli (ürünler, dahili test, politika durumu) hazır bulundu. Bu bölüm denetim notlarıdır; yapılacak
+yayın işleri §3 Faz 4'e (`RLS-01`…`RLS-11`) taşındı.
 
 ### 6.1 Yayından önce
 
 | # | Ne | Durum |
 |---|---|---|
-| Y1 | `v-4.0.0` dallarının push'u: ViFi-Android + ViFi-iOS (canlı `purchaseExamUnlock`'ın kodu `ViFi-iOS` `a5819a1`) | ⏳ Commit'ler hazır; push ürün sahibinde (bu Mac'te depolara yazma yetkili GitHub kimliği yok) |
+| Y1 | `v-4.0.0` dallarının push'u: ViFi-Android + ViFi-iOS (canlı `purchaseExamUnlock`'ın kodu `ViFi-iOS` `a5819a1`) | → `RLS-01` |
 | Y2 | versionCode 19 (18 dahili testte kullanıldı; PQA düzeltmeleri 18'de yok) | ✅ 29 Ekim |
-| Y3 | Veri güvenliği formu: "Finansal bilgiler → Satın alma geçmişi" eklenir (`PLAY-DATA-SAFETY.md`) | Yayın günü, Console |
-| Y4 | İçerik derecelendirme anketi: dijital satın alma "Evet" ile yeniden gönderilir (`PLAY-STORE-LISTING.md` §2) | Yayın günü, Console |
-| Y5 | Mağaza girişi: 4.0.0 tam açıklama + sürüm notu; canlıdaki "Uygulamada satın alma yoktur" kalkar (`PLAY-STORE-LISTING.md` §3) | Yayın günü, Console |
-| Y6 | Öneri: 19 önce dahili teste → Play'den kurulan imzalı sürümle duman testi (Play imzası + Play Integrity + R8 + satın alma; PQA'da atlanan adım) → üretim | Yayın günü |
+| Y3 | Veri güvenliği formu: "Finansal bilgiler → Satın alma geçmişi" eklenir (`PLAY-DATA-SAFETY.md`) | → `RLS-04` |
+| Y4 | İçerik derecelendirme anketi: dijital satın alma "Evet" ile yeniden gönderilir (`PLAY-STORE-LISTING.md` §2) | → `RLS-05` |
+| Y5 | Mağaza girişi: 4.0.0 tam açıklama + sürüm notu; canlıdaki "Uygulamada satın alma yoktur" kalkar (`PLAY-STORE-LISTING.md` §3) | → `RLS-06`, `RLS-08` |
+| Y6 | Öneri: 19 önce dahili teste → Play'den kurulan imzalı sürümle duman testi (Play imzası + Play Integrity + R8 + satın alma; PQA'da atlanan adım) → üretim | → `RLS-03`, `RLS-08` |
 
 > ⚠️ `ViFi-iOS` master'da Google Play dalı yok: dal birleşene kadar functions deploy'u yalnız `v-4.0.0`'dan yapılır,
 > yoksa Android satın alma doğrulaması canlıda kaybolur.
@@ -272,7 +300,7 @@ politikası) ve Play temeli (ürünler, dahili test, politika durumu) hazır bul
 
 | # | Konu | Ne yapılacak | Ne zaman / kim | Durum |
 |---|---|---|---|---|
-| B1 | Güncelleme önerisi | `config/appUpdate/android` → `latestVersion: "4.0.0"` (3.1.0 kullanıcılarına kapatılabilir güncelleme önerisi); `minimumVersion` 3.1.0 kalır. Canlı RTDB yazımı → ayrıca açık onay. | 4.0.0 üretimde %100 görününce | Kontrol edildi (29 Ekim): canlıda `latestVersion` ve `minimumVersion` 3.1.0, `storeURL` Play sayfası; uygulama anahtarları doğru okuyor. Yazım yayından sonra. |
+| B1 | Güncelleme önerisi | `config/appUpdate/android` → `latestVersion: "4.0.0"` (3.1.0 kullanıcılarına kapatılabilir güncelleme önerisi); `minimumVersion` 3.1.0 kalır. Canlı RTDB yazımı → ayrıca açık onay. | 4.0.0 üretimde %100 görününce | → `RLS-10`. Kontrol edildi (29 Ekim): canlıda `latestVersion` ve `minimumVersion` 3.1.0, `storeURL` Play sayfası; uygulama anahtarları doğru okuyor. Yazım yayından sonra. |
 | B2 | iOS sandbox satın alması | Gerçek iPhone + sandbox hesabıyla tek sınav satın alma → canlı `purchaseExamUnlock` (`00003-nih`) Apple yolu → `purchasedTransactions/<Apple işlem no>` (`store` alanı yok) + `unlocks` kaydı. Simülatörde olmaz (yerel `.storekit` işlemleri Apple imzalı değil). Önkoşul: iOS debug derlemesi için App Check debug anahtarı, sandbox hesabına girişi ürün sahibi yapar. Android'i etkilemez. | iOS 4.0.0 yayınından önce, iOS tarafı | Kod tarafı kontrol edildi (29 Ekim): iOS'ta sandbox testi 3.1.0 döneminde gerçek cihazda geçmişti; o günden beri `appStore.js` ve iOS istemcisi değişmedi (aynı kütüphane 3.1.0, önce Production sonra Sandbox → App Review işlemleri de doğrulanır); `index.js`'teki değişiklik Apple yolunu yalnız ayrı fonksiyona taşıdı, kayıt şekli aynı; satın alma testleri 31/31. Kalan: canlı revizyonda gerçek Apple işlemiyle tek deneme. |
-| B3 | Ödeme profili | Play Console → Hesabı yönetme → Ödeme profili: banka hesabı, vergi bilgileri, hizmet ücreti programı. Sözleşme kabulü ve vergi formu ürün sahibinin işidir. | Yayından önce, ürün sahibi | Kontrol edildi (29 Ekim): banka hesabı (TR) tanımlı, hesap türü Bireysel, ad ve adres doğrulanmış, ekstre adı ve destek e-postası dolu, uyarı yok. **Açık 1:** %15 hizmet ücreti programına kayıt yok (hesap grubu oluşturma + şartları kabul); kayıt olmazsa tek seferlik ürünlerde (`exam_unlock`) kesinti %30, abonelikler zaten %15. **Açık 2:** ABD vergi bilgisi (W-8BEN) boş; verilmezse yalnız ABD'li alıcılardan gelen kazançtan stopaj kesilebilir (giriş +90 olduğu için etkisi pratikte yok). Türkiye vergi bilgisi alanı Google hizmeti satın alırken istenir, satış için gerekmiyor. |
+| B3 | Ödeme profili | Play Console → Hesabı yönetme → Ödeme profili: banka hesabı, vergi bilgileri, hizmet ücreti programı. Sözleşme kabulü ve vergi formu ürün sahibinin işidir. | Yayından önce, ürün sahibi | → `RLS-07`, `RLS-11`. Kontrol edildi (29 Ekim): banka hesabı (TR) tanımlı, hesap türü Bireysel, ad ve adres doğrulanmış, ekstre adı ve destek e-postası dolu, uyarı yok. **Açık 1:** %15 hizmet ücreti programına kayıt yok (hesap grubu oluşturma + şartları kabul); kayıt olmazsa tek seferlik ürünlerde (`exam_unlock`) kesinti %30, abonelikler zaten %15. **Açık 2:** ABD vergi bilgisi (W-8BEN) boş; verilmezse yalnız ABD'li alıcılardan gelen kazançtan stopaj kesilebilir (giriş +90 olduğu için etkisi pratikte yok). Türkiye vergi bilgisi alanı Google hizmeti satın alırken istenir, satış için gerekmiyor. |
 | B4 | Lint uyarıları | 56 uyarı (0 hata) gözden geçirilir; gerçek sorun düzeltilir, sürüm yükseltmeleri 4.0.0 sonrasına. | Kod tarafı | Kontrol edildi, 1 düzeltme (29 Ekim): 38'i kütüphane/Gradle sürüm bildirimi (Kotlin 2.0→2.4, Compose BoM, Firebase BoM 33→35, AGP 8→9, OkHttp 4→5 gibi büyük atlamalar) → 4.0.0 sonrasına ayrı yükseltme işi. **Gerçek sorun (1):** `AppBundleLocaleChanges` — App Bundle dile göre bölünüyor; kütüphanelerin Türkçe kaynakları `tr` parçasına gider ve Play onu yalnız dil listesinde Türkçe olan cihaza kurar → İngilizce cihazda LOC-01'in Türkçe kilidi Play kurulumunda kütüphane metinlerini Türkçe gösteremez (sideload/emülatör testleri bunu yakalamaz). **Düzeltildi (29 Ekim):** `app/build.gradle`'a `bundle { language { enableSplit = false } }` (yalnız `tr` paketlendiği için boyut etkisi yok); debug AAB'nin `BundleConfig.pb`'sinde `LANGUAGE` bölmesi kapalı (`negate`) doğrulandı. Lint uyarıyı vermeye devam ediyor (dedektör Groovy ayarını okumuyor; yanlış alarm). **Gerek yok:** `MissingKeepAnnotation` (`ExamKind` için `proguard-rules.pro`'da `-keepnames` zaten var), `PluralsCandidate` ×2 (Türkçede tekil/çoğul aynı), `UseKtx` ×7 (yazım tercihi), `IconDuplicates` ×5 (`icon.png` uygulama içi logo, zararsız), `ExifInterface` ×2 (minSdk 24'te platform sürümü yeterli; androidx'e geçiş yükseltme işiyle). |
