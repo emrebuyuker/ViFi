@@ -35,6 +35,7 @@ import com.salticusteam.vifi.feature.moderation.ModerationDetailScreen
 import com.salticusteam.vifi.feature.moderation.ModerationScreen
 import com.salticusteam.vifi.feature.moderation.SubmissionPreviewScreen
 import com.salticusteam.vifi.feature.onboarding.OnboardingGate
+import com.salticusteam.vifi.feature.premium.PaywallScreen
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
 import com.salticusteam.vifi.feature.update.AppUpdateGate
 
@@ -85,6 +86,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
     }
     NotificationPrompt()
     ArchivePrefetch()
+    PaidUnlockRecovery()
 
     ViFiNavHost(
         navController = navController,
@@ -108,6 +110,8 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
                 onHomeClick = { router.popToRoot() },
                 // The unlock sheet's "Sınav Ekle": earn coins by contributing an exam, pre-filled with its lesson.
                 onEarnCoins = { lesson -> router.push(ViFiRoute.AddExam(lesson)) },
+                // The unlock sheet's "Tek tek açmak yerine Premium'a geç".
+                onOpenPaywall = { router.push(ViFiRoute.Paywall) },
             )
         },
         exam = { path, kind ->
@@ -118,6 +122,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
                 onEditProfile = { router.push(ViFiRoute.EditProfile) },
                 onAbout = { router.push(ViFiRoute.About) },
                 onModeration = { router.push(ViFiRoute.Moderation) },
+                onOpenPaywall = { router.push(ViFiRoute.Paywall) },
                 onBack = { router.pop() },
             )
         },
@@ -132,6 +137,9 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         },
         addExam = { context ->
             AddExamScreen(ownerId = user.id, profile = profile, archiveContext = context, onClose = { router.pop() })
+        },
+        paywall = {
+            PaywallScreen(onClose = { router.pop() })
         },
         moderation = {
             ModerationScreen(
@@ -165,6 +173,15 @@ private fun ViFiRouter.open(item: ArchiveItem) {
 /** Warms the archive's offline cache once the signed-in user reaches it; cancelled on sign-out (ARCH-09). */
 @Composable
 private fun ArchivePrefetch(viewModel: ArchivePrefetchViewModel = hiltViewModel()) {
+    LaunchedEffect(viewModel) { viewModel.onArchiveShown() }
+}
+
+/**
+ * Finishes paid single-exam unlocks whose server record did not complete earlier, now and on every return to the
+ * foreground, while the signed-in archive is shown; a sign-out cancels it (iOS ProfileGate `recoverPendingUnlock`).
+ */
+@Composable
+private fun PaidUnlockRecovery(viewModel: PaidUnlockRecoveryViewModel = hiltViewModel()) {
     LaunchedEffect(viewModel) { viewModel.onArchiveShown() }
 }
 

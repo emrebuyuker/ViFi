@@ -68,6 +68,10 @@ sealed interface ViFiRoute {
         val context: ArchivePath? get() = ArchivePath(ids, names).takeUnless { it.isRoot }
     }
 
+    /** The ViFi Premium subscription screen (opened from a locked exam's sheet and from the account screen). */
+    @Serializable
+    data object Paywall : ViFiRoute
+
     /** The admin moderation queue (opened from the account screen, by an admin only). */
     @Serializable
     data object Moderation : ViFiRoute

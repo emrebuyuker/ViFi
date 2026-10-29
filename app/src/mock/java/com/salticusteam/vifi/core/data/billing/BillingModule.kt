@@ -28,4 +28,8 @@ object BillingModule {
     @Provides
     @Singleton
     fun provideExamPurchaseService(): ExamPurchaseService = FakeExamPurchaseService()
+
+    /** The real process lifecycle: it needs no Google Play, so the mock app re-reads on foregrounding too. */
+    @Provides
+    fun provideAppForegroundEvents(): AppForegroundEvents = ProcessForegroundEvents()
 }
