@@ -81,6 +81,14 @@ android {
             }
         }
     }
+
+    bundle {
+        // LOC-01 pins resources to Turkish on any device language. A Play language split would install the
+        // libraries' tr resources only on devices that list Turkish, so keep them in the base APK (only tr ships).
+        language {
+            enableSplit = false
+        }
+    }
 }
 
 androidComponents {
