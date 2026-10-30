@@ -62,7 +62,7 @@ class ViFiMessagingService : FirebaseMessagingService() {
         val pendingIntent = PendingIntent.getActivity(
             this, 0, openInbox, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        val notification = NotificationCompat.Builder(this, NotificationChannels.ANNOUNCEMENTS)
+        val notification = NotificationCompat.Builder(this, NotificationChannels.GENERAL)
             .setAutoCancel(true)
             .setContentTitle(content.title ?: getString(R.string.app_name))
             .setContentText(content.body)

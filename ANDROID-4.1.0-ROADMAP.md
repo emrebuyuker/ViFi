@@ -22,11 +22,11 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **6'sı tamam, 0'ı yarım, 44'ü başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **7'si tamam, 0'ı yarım, 43'ü başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
-> 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı
-> (`NOPS-01`, ürün sahibi).
+> 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A'da kanallar (`PSH-01`) tamam. Faz 0'da açık kalan
+> tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -276,9 +276,22 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 #### Hat A — Push altyapısı ve cihaz kaydı
 
-- [ ] **`PSH-01`** Bildirim kanalları + tepsi davranışı _(P0·S·Sonnet)_ — Kanallar `general` / `promo` / `system`
+- [x] **`PSH-01`** Bildirim kanalları + tepsi davranışı _(P0·S·Sonnet)_ — Kanallar `general` / `promo` / `system`
   (Türkçe adlarla). Eski `announcements` kanalı silinir; yerel `submissions` kalır. Manifest varsayılan kanalı `general`
-  olur. Rozet/tepsi `NDEC-04`'e göre. ⟶ `NCT-01`
+  olur. Rozet/tepsi `NDEC-04`'e göre. ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _`NotificationChannels`: `GENERAL`/`PROMO`/`SYSTEM` (kimlikler `NotificationKind.raw` ile aynı) + `SUBMISSIONS`;
+    `SPECS` listesi, `RETIRED = ["announcements"]` her `ensure`'da silinir. Hepsi `IMPORTANCE_DEFAULT`,
+    `setShowBadge(true)`; sayı yok._
+  - _Metinler yeni `strings_push.xml`'de, §4'teki ad önerileriyle; eski `notification_channel_general_*` anahtarları
+    `strings.xml`/`strings_notifications.xml`'den buraya taşındı (adları aynı, değerleri yeni)._
+  - _Manifest `default_notification_channel_id` → `general`. Ön plan push'u şimdilik `general`'a düşüyor; türe göre
+    seçim `PSH-02`'de. `NotificationBadge` KDoc'u `NDEC-04`'e göre düzeltildi (yerel gönderim bildirimlerini de
+    temizler)._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı derlendi. `lintLiveDebug`: 0 hata, 56 uyarı (değişen
+    dosyalarda yok). Birim testleri liveDebug 712 / mockDebug 705 / liveRelease 712, hepsi geçti (+3:
+    `NotificationChannelsTest`, kimliklerin sunucu türleriyle aynı olduğunu kilitler). Tablet emülatöründe
+    `NotificationChannelsDeviceTest` 2/2. NCT-01 derlemesinin `announcements` kanalı olan kurulumu yerinde
+    güncellenince `dumpsys`'te dört kanal Türkçe adlarıyla, önem 3 ve rozet açık; `announcements` silinmiş._
 - [ ] **`PSH-02`** `ViFiMessagingService` yeniden yazımı _(P0·M·Opus)_:
   - Ön planda kanal = `data.kind` (bilinmeyen → `general`).
   - Bildirim id'si `notificationId`'ye göre (artık her push öncekini silmez).

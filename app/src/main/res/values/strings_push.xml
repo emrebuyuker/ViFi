@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Added in 4.1.0 — push channels, one per notification kind (PSH-01). Ids never change; names may. -->
+    <string name="notification_channel_general_name">Duyurular</string>
+    <string name="notification_channel_general_description">Genel duyurular</string>
+    <string name="notification_channel_promo_name">Kampanyalar ve fırsatlar</string>
+    <string name="notification_channel_promo_description">Onay verdiğin öğrenci kampanyaları</string>
+    <string name="notification_channel_system_name">Sınav ve hesap bildirimleri</string>
+    <string name="notification_channel_system_description">Sınavının onayı, reddi ve bölümüne eklenen yeni sınavlar</string>
+</resources>

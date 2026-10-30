@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">ViFi</string>
-    <string name="notification_channel_general_name">Genel bildirimler</string>
 
     <!-- Added in 2.5 — design system (iOS DesignSystem copy, verbatim) -->
     <string name="common_loading">Yükleniyor…</string>

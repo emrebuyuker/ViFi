@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="notification_channel_general_description">Duyurular ve yeni sınav bildirimleri</string>
-
     <!-- Inbox -->
     <string name="inbox_title">Bildirimler</string>
     <string name="inbox_empty_title">Henüz bildirim yok</string>
