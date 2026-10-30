@@ -10,6 +10,7 @@ import com.salticusteam.vifi.core.model.NotificationExamTarget
 import com.salticusteam.vifi.core.model.NotificationImage
 import com.salticusteam.vifi.core.model.NotificationKind
 import com.salticusteam.vifi.core.model.NotificationLocation
+import com.salticusteam.vifi.core.util.StorageUrl
 import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,7 +79,13 @@ class FakeInboxReader(
         marker.value = now()
     }
 
+    /** A Storage-shaped URL; the mock flavor's file client answers it with a bundled sample image, offline. */
+    override fun imageUrl(storagePath: String): String? =
+        storagePath.takeIf(NotificationImage::isValidStoragePath)?.let { StorageUrl.canonical(it, MOCK_BUCKET) }
+
     companion object {
+        const val MOCK_BUCKET = "vifi-mock.appspot.com"
+
         /** Before every sample, so they all start unread. */
         val SAMPLE_READ_AT: Instant = Instant.ofEpochSecond(1_757_000_000)
 

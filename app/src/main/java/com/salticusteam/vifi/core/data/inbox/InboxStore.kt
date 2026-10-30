@@ -147,6 +147,9 @@ class InboxStore @Inject constructor(
         }
     }
 
+    /** The download URL of a notification image, re-checked against the images folder. */
+    fun imageUrl(storagePath: String): String? = reader.imageUrl(storagePath)
+
     /** Drops what expired since the last change (the inbox calls it when shown). */
     fun reevaluateExpiry() {
         expiryCheck.update { it + 1 }

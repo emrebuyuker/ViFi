@@ -2,9 +2,8 @@
 <resources>
     <!-- Inbox -->
     <string name="inbox_title">Bildirimler</string>
-    <string name="inbox_empty_title">Henüz bildirim yok</string>
-    <string name="inbox_empty_message">Yeni duyurular burada görünür.</string>
-    <string name="inbox_unread_badge">Yeni</string>
+    <string name="inbox_empty_title">Bildirim yok</string>
+    <string name="inbox_empty_message">Yeni bildirimler burada görünecek.</string>
     <string name="cd_inbox_open">Bildirimler</string>
     <plurals name="cd_inbox_open_unread">
         <item quantity="one">Bildirimler, %1$d okunmamış</item>

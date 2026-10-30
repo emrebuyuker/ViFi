@@ -6,12 +6,15 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.MetadataChanges
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
 import com.salticusteam.vifi.core.data.repository.InboxReader
 import com.salticusteam.vifi.core.model.InboxError
 import com.salticusteam.vifi.core.model.InboxItem
 import com.salticusteam.vifi.core.model.InboxSource
+import com.salticusteam.vifi.core.model.NotificationImage
 import com.salticusteam.vifi.core.model.NotificationPayloadParser
 import com.salticusteam.vifi.core.util.LogCategory
+import com.salticusteam.vifi.core.util.StorageUrl
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -31,7 +34,11 @@ import kotlinx.coroutines.tasks.await
  */
 class FirestoreInboxReader @Inject constructor(
     private val firestore: FirebaseFirestore,
+    storage: FirebaseStorage,
 ) : InboxReader {
+
+    /** The Storage bucket the image URLs are built for. */
+    private val bucket: String = storage.reference.bucket
 
     override fun broadcastChanges(): Flow<List<InboxItem>> =
         listChanges(firestore.collection(ANNOUNCEMENTS), BROADCAST_LIMIT, InboxSource.BROADCAST)
@@ -59,6 +66,10 @@ class FirestoreInboxReader @Inject constructor(
         // Exactly `{readAt: request.time}` (the shared rules), a full set.
         marker(uid).set(mapOf(READ_AT to FieldValue.serverTimestamp())).await()
     }
+
+    // Re-checked here, so only the notification images folder is ever fetched with the user's credentials.
+    override fun imageUrl(storagePath: String): String? =
+        storagePath.takeIf(NotificationImage::isValidStoragePath)?.let { StorageUrl.canonical(it, bucket) }
 
     // Helpers
     private fun listChanges(collection: Query, limit: Long, source: InboxSource): Flow<List<InboxItem>> =

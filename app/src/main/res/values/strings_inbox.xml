@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Added in 4.1.0 — the notifications inbox's cards, actions and states (INB-03, iOS InboxView verbatim). -->
+    <string name="inbox_partial_failure">Bazı bildirimler yüklenemedi.</string>
+    <string name="inbox_kind_promo">Kampanya</string>
+    <string name="inbox_action_exam">Sınava Git</string>
+    <string name="inbox_action_paywall">Premium\'a Göz At</string>
+    <string name="inbox_action_add_exam">Sınav Ekle</string>
+    <string name="inbox_action_url">Bağlantıyı Aç</string>
+    <string name="inbox_action_location">Konuma Git</string>
+    <string name="inbox_exam_error_title">Sınav açılamadı</string>
+    <string name="cd_inbox_unread">Okunmadı</string>
+    <string name="cd_inbox_image">Bildirim görseli</string>
+</resources>

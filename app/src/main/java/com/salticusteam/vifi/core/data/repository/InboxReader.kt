@@ -27,4 +27,10 @@ interface InboxReader {
 
     /** Records "the inbox was opened now" (a server timestamp), so every device's unread count follows. */
     suspend fun markRead(uid: String)
+
+    /**
+     * The download URL of a notification image at [storagePath] (`notificationImages/<id>.jpg`), loaded with the
+     * user's credentials like exam pages; `null` for a path outside that folder. Images are never public.
+     */
+    fun imageUrl(storagePath: String): String?
 }

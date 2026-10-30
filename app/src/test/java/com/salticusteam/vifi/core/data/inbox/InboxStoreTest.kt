@@ -459,6 +459,8 @@ class InboxStoreTest {
             markReadFailure?.let { throw it }
             if (echoMarkRead) markerEvents.tryEmit(Marker.At(clock.instant()))
         }
+
+        override fun imageUrl(storagePath: String): String? = null
     }
 
     private sealed interface Marker {

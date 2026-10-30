@@ -22,12 +22,12 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **12'si tamam, 0'ı yarım, 38'i başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **13'ü tamam, 0'ı yarım, 37'si başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
-> tamam; Hat B'de kutu deposu ve sınav kapısı (`INB-01`, `INB-02`) tamam. Faz 0'da açık kalan tek iş Google Cloud
-> Maps anahtarı (`NOPS-01`, ürün sahibi).
+> tamam; Hat B'de kutu deposu, sınav kapısı ve sayfa arayüzü (`INB-01`…`03`) tamam. Faz 0'da açık kalan tek iş
+> Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -447,13 +447,36 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     yok). Birim testleri liveDebug 798 / mockDebug 791 / liveRelease 798, hepsi geçti (`ExamAccessResolverTest` 9 —
     iOS'un 8'i + silinmiş ders —, `InboxExamGateTest` 8). Ekran davranışı olmadığı için emülatör adımı `INB-03`'e
     kaldı._
-- [ ] **`INB-03`** Bildirim sayfası arayüzü _(P0·M·Sonnet)_:
+- [x] **`INB-03`** Bildirim sayfası arayüzü _(P0·M·Sonnet)_:
   - Kart: tür ikonu, başlık, gövde, "Kampanya" etiketi, tarih, okunmadı noktası.
   - Kimlikli görsel; 5 aksiyon düğmesi (abone ise Premium gizli); düğme varsa kart/görsel dokunuşu aynı aksiyonu yapar.
   - Push vurgusu + kaydırma.
   - Kısmi hata şeridi, yeni boş durum metni; mevcut "izin kapalı" şeridi korunur.
 
-  ⟶ `INB-01`, `INB-02`
+  ⟶ `INB-01`, `INB-02` ✅ _Tamamlandı (2026-10-30, Opus — ürün sahibinin "doğruluk hızdan önce" tercihiyle Sonnet
+  yerine). Gelenler:_
+  - _**`InboxCard`** (yeni): tür rozeti (genel `Campaign`, kampanya `LocalOffer`, sistem `NotificationsActive`;
+    birincil renk %15 zemin), başlık, gövde, "Kampanya" + tarih ("30 Eki 2026", iOS'taki kısa ay), okunmadı noktası
+    (`inbox.unread.<id>`, "Okunmadı"). Görsel: `InboxReader.imageUrl` (klasör yeniden doğrulanır; live'da bucket
+    `FirebaseStorage`'tan, mock'ta örnek görsel) + mevcut kimlikli Coil yükleyici; yükseklik 160 dp × yazı ölçeği,
+    ≤ 280 dp; yer tutucu ve hata ikonu. Düğme turuncu zeminde siyah yazı, ikonlu, sınav kontrolünde ilerleme;
+    düğme varsa kart/görsel/düğme aynı eylem, yoksa kart etkisiz; vurgu `primary` %18 + `selected`._
+  - _**Ekran:** kısmi hata şeridi (`inbox.partialFailure`, `inbox.retry`), boş durum "Bildirim yok" / "Yeni
+    bildirimler burada görünecek.", izin şeridi korundu. Vurgu rota argümanıyla (`InboxScreen(highlightId)` →
+    `onHighlightRequested`; `launchSingleTop` argüman değişince de çalışır, `SavedStateHandle` güncellenmediği için
+    tercih edildi); yalnız listede çözülünce gösterilir ve karta ortalanarak kaydırılır._
+  - _**Eylemler** (`InboxEvent`): sınav → `InboxExamGate` → `ViFiRouter.openExam`; kilitliyse mevcut
+    `ExamUnlockSheet` + `ExamUnlockViewModel`, sonucu `onUnlockEvent` ile (aç / Sınav Ekle dersle / Paywall);
+    "Sınav açılamadı" diyaloğu. Paywall → `Paywall`; Sınav Ekle → `AddExam()`; bağlantı → tarayıcı
+    (`ACTION_VIEW`); konum → `ChooseMapsApp` olayı (alt sayfa `INB-04`'te; o zamana kadar düğme bir şey yapmıyor).
+    Abone için Premium kartı etkisiz._
+  - _"İstatistik" (`opened` / `actionTapped`) `INB-05`'te bağlanacak._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (eklenen bir `UseKtx`
+    uyarısı düzeltildi). Birim testleri liveDebug 803 / mockDebug 796 / liveRelease 803, hepsi geçti
+    (`InboxViewModelTest` 10). Tablet emülatöründe `InboxContentTest` 6/6 + `MockGraphTest` 3/3. Mock uygulamada:
+    kartlar/rozetler/etiket/görsel/düğmeler; `vifi_open_notification p-location` vurgusu; ücretsiz sınav açıldı,
+    Geri dersin listesine döndü; kilitli sınavda kilit sheet'i, coin ile açınca görüntüleyici; Premium → paywall;
+    `vifi_subscribed` ile Premium düğmesi yok, kilitli sınav doğrudan açıldı. ANR yok._
 - [ ] **`INB-04`** "Konuma Git" alt sayfası + harita bağlantıları _(P1·S·Sonnet)_ — `NDEC-03`: Google Haritalar
   (uygulama → web, `query_place_id`), sistem `geo:` seçicisi, Vazgeç. iOS `MapsLinks` sayı biçimi ve kodlama kuralları.
   ⟶ `NCT-01`

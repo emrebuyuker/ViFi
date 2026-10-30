@@ -121,8 +121,15 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         editProfile = {
             EditProfileScreen(user = user, existing = profile, onBack = { router.pop() })
         },
-        inbox = {
-            InboxScreen(onBack = { router.pop() })
+        inbox = { highlightId ->
+            InboxScreen(
+                highlightId = highlightId,
+                onBack = { router.pop() },
+                // The exam's whole hierarchy goes on the stack, so Back walks up the archive (iOS openExam).
+                onOpenExam = { path, kind -> router.openExam(path, kind) },
+                onOpenPaywall = { router.push(ViFiRoute.Paywall) },
+                onAddExam = { lesson -> router.push(ViFiRoute.AddExam(lesson)) },
+            )
         },
         about = {
             AboutScreen(onBack = { router.pop() })
