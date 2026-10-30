@@ -26,6 +26,8 @@
     </plurals>
     <string name="location_picker_address_loading">Adres alınıyor</string>
     <string name="location_picker_confirm">Bu konumu seç</string>
+    <!-- The mock flavor's picker (MockLocationPicker): a fixed place instead of a map. Unused in live, by design. -->
+    <string name="location_picker_mock_map" tools:ignore="UnusedResources">Örnek harita</string>
 
     <!-- Added in 4.1.0 — the composer's rows for a location action (iOS NotificationComposerLocationRows). -->
     <string name="location_picker_composer_pick">Konum seç</string>

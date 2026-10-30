@@ -737,8 +737,18 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     notu; seçiciyi kendisi açar. Metin anahtarları `location_picker_composer_*` (Hat D'nin dosyasıyla çakışmasın diye)._
   - _**Testler** (derlendi, cihazda koşturulmadı): `LocationPickerContentTest` 6, `NotificationComposerLocationRowsTest`
     5. Lint 0 hata / 56 uyarı (Türkçe metin dosyası `tools:locale="tr"`, sınır metinleri plurals)._
-- [ ] **`MAP-04`** Mock seçici _(P1·S·Sonnet)_ — Sabit yer ("ViFi Öğrenci Kafesi", 40.9903, 29.0290). Google SDK'sına ve
-  konuma dokunmaz; UI testleri için. ⟶ `NCT-01`
+- [x] **`MAP-04`** Mock seçici _(P1·S·Sonnet)_ — Sabit yer ("ViFi Öğrenci Kafesi", 40.9903, 29.0290). Google SDK'sına ve
+  konuma dokunmaz; UI testleri için. ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`MockLocationPicker`** (`app/src/mock/.../core/maps/`, `@Inject`): iOS `MockLocationPicker` birebir —
+    "Örnek harita", yer adı (`locationPicker.mock.name`), adres, "Bu konumu seç" (`locationPicker.confirm`), ✕ "İptal"
+    (`locationPicker.cancel`); `SAMPLE_LOCATION` = "ViFi Öğrenci Kafesi", 40.9903, 29.0290, "Caferağa, Kadıköy,
+    İstanbul", `placeId` yok; düzenlemede mevcut yeri sunar. Google SDK'sı ve konum yok (mock'ta bu bağımlılıklar
+    hiç yok). "Örnek harita" metni ana dosyada, live'da kullanılmadığı için gerekçeli `tools:ignore`._
+  - _**Bağlama `NIT-01`'de** (bu hatta bilerek yapılmadı): mock `NotificationsModule.provideLocationPicker()` →
+    `MockLocationPicker()`, live'da `GoogleLocationPicker` (Hilt `@Inject`); composer'da Hat D'nin `locationRows`
+    yuvasına `NotificationComposerLocationRows(location, enabled, onPick)`._
+  - _**Testler:** `MockLocationPickerTest` 3 (`androidTestMock`, derlendi; iOS `LocationCampaignUITests`'in composer
+    kısmı composer bağlanınca `NIT-03`'te)._
 
 #### Hat F — Yasal metinler ve Play beyanları
 
