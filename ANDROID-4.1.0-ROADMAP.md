@@ -639,12 +639,29 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     yeniden okuma, çift dokunma, kayıt sürerken değişiklik, başka cihazdaki değişiklik, ekran adı). Compose UI testleri
     yazıldı ve derlendi (`NotificationSettingsContentTest` 11, `AccountContentTest` +2); cihazda koşturma
     birleştirmede._
-- [ ] **`PRM-05`** Çıkış ve hesap silme kancası _(P0·S·Sonnet)_:
+- [x] **`PRM-05`** Çıkış ve hesap silme kancası _(P0·S·Sonnet)_:
   - Hesap'tan çıkışta, profil tamamlama ekranındaki çıkışta ve hesap silmede (`deleteProfile`'dan önce) önce
     `DeviceRegistration.unregister` çalışır (≤3 sn).
   - `signOut` askıya alınır ve çift dokunma koruması alır.
 
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**Hesap çıkışı** (`AccountViewModel.signOut`): önce `DeviceRegistration.unregister(uid)` (≤ 3 sn, asla
+    fırlatmaz), sonra `authService.signOut()` + `SignedOut`. Çıkış kancayı bekler (iOS `signOut() async`). Dizi
+    uygulama kapsamında koşar: temizlik sürerken Geri ile ekrandan çıkılsa da onaylanan çıkış iptal olmaz. Çift
+    dokunma koruması `AccountUiState.isSigningOut`; bu sürede "Çıkış Yap" ve "Hesabı Sil" pasif, silme de yok sayılır
+    (iOS yalnız ikinci çıkışı engelliyordu). Bekleme sırasında gösterge yok (iOS gibi)._
+  - _**Hesap silme:** `unregister` → `deleteProfile` → `deleteAccount`. Yeniden doğrulama iptal edilirse kayıt
+    silinmiş kalır; bir sonraki girişte yeniden yazılır._
+  - _**Profil tamamlama "Çıkış Yap":** aynı kanca `ProfileFormViewModel.signOut()`'ta (ekran onu çağırıyor;
+    `ProfileCompletionScreen` değişmedi), uygulama kapsamında ve çift dokunma korumalı. Çıkış mantığı
+    `ProfileFormViewModel.kt`'te olduğu için hat tablosundaki `ProfileCompletion*` yerine bu dosyaya (yalnız çıkışa)
+    dokunuldu; `feature/profile`'a başka hat yazmıyor._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda
+    yok). Birim testleri liveDebug 919 / mockDebug 912 / liveRelease 919, hepsi geçti (`AccountViewModelTest` +4:
+    `signOutRunsHookFirst`, `signOutIgnoresDoubleTap`, silmede kancanın profilden önce koşması, çıkış sürerken silme;
+    mevcut `signOut` ve `signOutWhileDeleting` karşılıkları kancayı da doğruluyor. iOS `signOutFailure`'ın karşılığı
+    yok: Android `signOut()` hata vermiyor. `ProfileFormViewModelTest` +2). Compose UI testi `AccountContentTest` +1
+    (çıkış sürerken satırlar pasif) yazıldı ve derlendi; cihazda koşturma birleştirmede._
 
 #### Hat D — Admin "Bildirim Gönder" + Geçmiş
 

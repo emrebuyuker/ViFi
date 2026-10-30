@@ -14,6 +14,8 @@ data class AccountUiState(
     val formattedPhoneNumber: String? = null,
     /** A deletion step is running; every control is disabled meanwhile. */
     val isWorking: Boolean = false,
+    /** Signing out: the push registration is removed first (at most 3 s); signing out and deleting wait for it. */
+    val isSigningOut: Boolean = false,
     /** The last failure's message, shown under the rows. */
     val error: String? = null,
     /** The number is being verified again before deletion (the code entry is shown). */

@@ -6,7 +6,9 @@ import com.salticusteam.vifi.core.data.catalog.CatalogSource
 import com.salticusteam.vifi.core.data.profile.ProfileStore
 import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.AuthService
+import com.salticusteam.vifi.core.data.repository.DeviceRegistration
 import com.salticusteam.vifi.core.data.repository.ProfileService
+import com.salticusteam.vifi.core.di.ApplicationScope
 import com.salticusteam.vifi.core.model.AnalyticsEvent
 import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.AuthUser
@@ -20,6 +22,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,6 +50,10 @@ class ProfileFormViewModel @AssistedInject constructor(
     private val authService: AuthService,
     private val analytics: AnalyticsTracker,
     private val catalogSource: CatalogSource,
+    /** This install's push registration, removed before signing out from the completion gate. */
+    private val deviceRegistration: DeviceRegistration,
+    /** Outlives the gate: a sign-out finishes even if the screen goes away during its cleanup. */
+    @ApplicationScope private val appScope: CoroutineScope,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -61,6 +68,10 @@ class ProfileFormViewModel @AssistedInject constructor(
     // One-shot events
     private val _events = Channel<ProfileFormEvent>(Channel.BUFFERED)
     val events: Flow<ProfileFormEvent> = _events.receiveAsFlow()
+
+    // Internal state
+    /** A sign-out is removing the push registration; a second tap is ignored. */
+    private var isSigningOut = false
 
     // Intents
     init {
@@ -121,10 +132,22 @@ class ProfileFormViewModel @AssistedInject constructor(
         }
     }
 
-    /** Signs out from the completion gate, so nobody is trapped on it. The session gate shows the login screen. */
+    /**
+     * Signs out from the completion gate, so nobody is trapped on it. This install's push registration is removed
+     * first, while the user can still write (iOS `beforeSignOut`, at most 3 s, never fails); the session gate then
+     * shows the login screen. Ignored while saving or while a sign-out runs.
+     */
     fun signOut() {
-        if (_uiState.value.isWorking) return
-        authService.signOut()
+        if (_uiState.value.isWorking || isSigningOut) return
+        isSigningOut = true
+        appScope.launch {
+            try {
+                deviceRegistration.unregister(user.id)
+                authService.signOut()
+            } finally {
+                isSigningOut = false
+            }
+        }
     }
 
     // Helpers

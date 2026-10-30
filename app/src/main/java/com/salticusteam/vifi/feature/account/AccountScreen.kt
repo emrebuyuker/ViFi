@@ -222,7 +222,9 @@ fun AccountContent(
                         leadingIconColor = MaterialTheme.colorScheme.error,
                     ),
                     modifier = Modifier
-                        .clickable(enabled = !state.isWorking, role = Role.Button) { isConfirmingSignOut = true }
+                        .clickable(enabled = !state.isWorking && !state.isSigningOut, role = Role.Button) {
+                            isConfirmingSignOut = true
+                        }
                         .testTag("account.signOut"),
                 )
                 HorizontalDivider()
@@ -230,7 +232,7 @@ fun AccountContent(
             item(key = "delete") {
                 DeleteAccountRow(
                     isWorking = state.isWorking && !state.isReverifying,
-                    enabled = !state.isWorking && !state.isReverifying,
+                    enabled = !state.isWorking && !state.isReverifying && !state.isSigningOut,
                     onClick = { isConfirmingDeletion = true },
                 )
             }

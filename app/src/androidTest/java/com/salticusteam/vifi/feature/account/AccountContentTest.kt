@@ -210,6 +210,15 @@ class AccountContentTest {
     }
 
     @Test
+    fun account_whileSigningOut_disablesSigningOutAndDeleting() {
+        setContent(AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67", isSigningOut = true))
+
+        composeRule.onNodeWithTag("account.signOut").assertIsNotEnabled()
+        composeRule.onNodeWithTag("account.delete").assertIsNotEnabled()
+        composeRule.onNodeWithTag("account.delete.progress").assertDoesNotExist()
+    }
+
+    @Test
     fun account_notificationSettings_opensTheSettings() {
         setContent()
 
