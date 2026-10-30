@@ -27,11 +27,16 @@ import com.salticusteam.vifi.feature.browse.BrowseScreen
 import com.salticusteam.vifi.feature.examviewer.ExamViewerScreen
 import com.salticusteam.vifi.feature.home.HomeScreen
 import com.salticusteam.vifi.feature.inbox.InboxScreen
-import com.salticusteam.vifi.feature.notifications.NotificationPromptHost
 import com.salticusteam.vifi.feature.login.LoginScreen
 import com.salticusteam.vifi.feature.moderation.ModerationDetailScreen
 import com.salticusteam.vifi.feature.moderation.ModerationScreen
 import com.salticusteam.vifi.feature.moderation.SubmissionPreviewScreen
+import com.salticusteam.vifi.feature.notificationcomposer.NotificationComposerScreen
+import com.salticusteam.vifi.feature.notificationcomposer.NotificationHistoryScreen
+import com.salticusteam.vifi.feature.notificationcomposer.locationpicker.NotificationComposerLocationRows
+import com.salticusteam.vifi.feature.notifications.NotificationPromptHost
+import com.salticusteam.vifi.feature.notifications.NotificationPromptViewModel
+import com.salticusteam.vifi.feature.notificationsettings.NotificationSettingsScreen
 import com.salticusteam.vifi.feature.onboarding.OnboardingGate
 import com.salticusteam.vifi.feature.premium.PaywallScreen
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
@@ -69,14 +74,20 @@ private fun SessionRoot(sessionViewModel: SessionViewModel = hiltViewModel()) {
 
 /** The archive navigation stack, shown once the user is signed in and has a profile. */
 @Composable
-private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
+private fun ArchiveHost(
+    user: AuthUser,
+    profile: UserProfile,
+    // The activity's: it outlives this host, so a sign-out still ends the flow it shows.
+    notificationPrompts: NotificationPromptViewModel = hiltViewModel(),
+) {
     val navController = rememberNavController()
     val router = rememberViFiRouter(navController)
 
     // A notification tap opens the inbox on that notification; a cold-start tap waits here until the signed-in host
     // exists, the tour is over and no modal is in the way.
     PushTapDelivery(router)
-    NotificationPromptHost()
+    // The notification permission and campaign consent flow, over whatever screen is up once nothing is in the way.
+    NotificationPromptHost(notificationPrompts)
     ArchivePrefetch()
     PaidUnlockRecovery()
 
@@ -114,7 +125,9 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
                 onEditProfile = { router.push(ViFiRoute.EditProfile) },
                 onAbout = { router.push(ViFiRoute.About) },
                 onModeration = { router.push(ViFiRoute.Moderation) },
+                onNotificationComposer = { router.push(ViFiRoute.NotificationComposer) },
                 onOpenPaywall = { router.push(ViFiRoute.Paywall) },
+                onNotificationSettings = { router.push(ViFiRoute.NotificationSettings) },
                 onBack = { router.pop() },
             )
         },
@@ -135,7 +148,17 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
             AboutScreen(onBack = { router.pop() })
         },
         addExam = { context ->
-            AddExamScreen(ownerId = user.id, profile = profile, archiveContext = context, onClose = { router.pop() })
+            AddExamScreen(
+                ownerId = user.id,
+                profile = profile,
+                archiveContext = context,
+                onClose = { router.pop() },
+                // Back where it came from first; the permission's re-ask (if due) then waits for nothing in the way.
+                onSubmitted = {
+                    router.pop()
+                    notificationPrompts.onExamSubmitted()
+                },
+            )
         },
         paywall = {
             PaywallScreen(onClose = { router.pop() })
@@ -156,6 +179,22 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
         },
         submissionPreview = { submissionId ->
             SubmissionPreviewScreen(submissionId = submissionId, onBack = { router.pop() })
+        },
+        notificationSettings = {
+            NotificationSettingsScreen(onBack = { router.pop() })
+        },
+        notificationComposer = {
+            NotificationComposerScreen(
+                onBack = { router.pop() },
+                onOpenHistory = { router.push(ViFiRoute.NotificationHistory) },
+                // The location picker's rows open the flavor's picker full screen themselves.
+                locationRows = { location, enabled, onLocationPicked ->
+                    NotificationComposerLocationRows(location, enabled, onLocationPicked)
+                },
+            )
+        },
+        notificationHistory = {
+            NotificationHistoryScreen(onBack = { router.pop() })
         },
     )
 }

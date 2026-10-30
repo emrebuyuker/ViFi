@@ -15,12 +15,16 @@ import com.salticusteam.vifi.core.model.NotificationAction
 import com.salticusteam.vifi.core.model.NotificationEvent
 import com.salticusteam.vifi.core.model.NotificationLocation
 import com.salticusteam.vifi.core.model.NotificationPermission
+import com.salticusteam.vifi.core.navigation.ModalPresence
 import com.salticusteam.vifi.core.util.trackScreen
 import com.salticusteam.vifi.feature.browse.ExamUnlockEvent
+import com.salticusteam.vifi.feature.notifications.NotificationPromptCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +32,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -36,7 +42,8 @@ import kotlinx.coroutines.launch
  * The inbox (iOS `InboxView`): the merged notifications newest first, unread ones marked live, each card's action,
  * and the tapped push's highlight. Opening it marks everything read in one server write, and so does anything that
  * arrives while it is open. Exam actions go through the archive's lock rule ([InboxExamGate]); opening from a push
- * and using an action are counted for the admin history ([NotificationEventTracker]).
+ * and using an action are counted for the admin history ([NotificationEventTracker]). Shortly after it shows, the
+ * campaign consent may be asked once more ([NotificationPromptCoordinator.inboxConsentReask]).
  */
 @HiltViewModel
 class InboxViewModel @Inject constructor(
@@ -47,6 +54,8 @@ class InboxViewModel @Inject constructor(
     private val sessionStore: SessionStore,
     private val eventTracker: NotificationEventTracker,
     private val analytics: AnalyticsTracker,
+    private val promptCoordinator: NotificationPromptCoordinator,
+    private val modalPresence: ModalPresence,
 ) : ViewModel() {
 
     // State
@@ -71,6 +80,7 @@ class InboxViewModel @Inject constructor(
 
     // Internal state
     private var marking: Job? = null
+    private var consentReask: Job? = null
 
     // Intents
     init {
@@ -97,6 +107,36 @@ class InboxViewModel @Inject constructor(
         marking = viewModelScope.launch {
             store.unreadCount.filter { it > 0 }.collect { store.markAllRead() }
         }
+    }
+
+    /**
+     * The page is in front again (opened, or back from what it opened): the campaign consent may be asked once more.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun onScreenResumed() {
+        // The consent's one re-ask (iOS `ConsentReaskPresenter`): the page shows first, and someone who tapped a push
+        // reads that notification undisturbed. It belongs over the page (iOS shows it from the inbox), so the page must
+        // stay up that long with nothing over it: a sheet it opened (an unlock, a maps choice) starts the wait over,
+        // as closing one may lead elsewhere (the exam it unlocked, the paywall), which ends the attempt. The coordinator
+        // decides whether it is due and queues it for the sheet.
+        consentReask?.cancel()
+        consentReask = viewModelScope.launch {
+            modalPresence.count
+                .mapLatest { open ->
+                    if (open == 0) delay(CONSENT_REASK_DELAY_MS)
+                    open == 0
+                }
+                .first { it }
+            if (requestedHighlight.value == null) promptCoordinator.inboxConsentReask()
+        }
+    }
+
+    /**
+     * The page is no longer in front (closed, covered by what it opened, the app left): a re-ask not made yet is not
+     * made; the next time it is in front tries again.
+     */
+    fun onScreenPaused() {
+        consentReask?.cancel()
     }
 
     /** The tapped push's notification (the route argument); `null` from the bell. */
@@ -176,4 +216,9 @@ class InboxViewModel @Inject constructor(
         action = item.action?.takeUnless { it == NotificationAction.Paywall && isSubscribed },
         imageUrl = item.imageStoragePath?.let(store::imageUrl),
     )
+
+    internal companion object {
+        /** How long the page shows, with nothing over it, before the consent re-ask may come (iOS 700 ms). */
+        const val CONSENT_REASK_DELAY_MS = 700L
+    }
 }

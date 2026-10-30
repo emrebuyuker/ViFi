@@ -59,6 +59,7 @@ import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.designsystem.theme.VifiSystemOrange
 import com.salticusteam.vifi.core.model.AnalyticsValues
+import com.salticusteam.vifi.core.navigation.RegisterModalPresence
 import kotlinx.coroutines.launch
 
 /**
@@ -75,6 +76,8 @@ fun OnboardingScreen(
     LaunchedEffect(Unit) {
         viewModel.onTourShown()
     }
+    // A tapped push and the notification flow wait for it (the first launch and a replay from Hakkında alike).
+    RegisterModalPresence()
 
     val finish: (String) -> Unit = { method ->
         viewModel.onTourFinished(method, source)

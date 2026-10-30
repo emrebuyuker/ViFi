@@ -37,7 +37,7 @@ import kotlinx.coroutines.tasks.await
  * Callable results and history documents are turned into models by the Firebase-free [NotificationPayloadParser];
  * an answer it cannot read is reported as [NotificationAdminError.UnexpectedResponse] rather than guessed at.
  *
- * Added in 4.1.0 — replaces the live flavor's `UnavailableNotificationAdminService` (bound in NIT-01).
+ * Added in 4.1.0 — the live flavor's admin notification service.
  */
 class FirebaseNotificationAdminService @Inject constructor(
     private val functions: FirebaseFunctions,

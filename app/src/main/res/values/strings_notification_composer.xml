@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Added in 4.1.0 — the admin "Bildirim Gönder" composer, its exam picker and the sending history (iOS verbatim). -->
 <resources>
+    <!-- Account row (admins only, next to Moderasyon) -->
+    <string name="notification_composer_account_row_title">Bildirim Gönder</string>
+    <string name="notification_composer_account_row_subtitle">Duyuru ve kampanya gönder</string>
+
     <!-- Composer -->
     <string name="notification_composer_title">Bildirim Gönder</string>
     <string name="notification_composer_history">Geçmiş</string>

@@ -14,6 +14,8 @@ import com.salticusteam.vifi.core.model.NotificationPromptSource
 import com.salticusteam.vifi.core.navigation.ModalPresence
 import com.salticusteam.vifi.core.notifications.NotificationRouter
 import com.salticusteam.vifi.testing.MainDispatcherRule
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -231,5 +233,39 @@ class NotificationPromptViewModelTest {
         advanceUntilIdle()
 
         assertNull(sut.flow.value)
+    }
+
+    // --- After an exam submission (NIT-01, iOS AddExamView.onSubmitted) ---
+
+    @Test
+    fun `a submission 30 days after a no asks for the permission once more`() = runTest(UnconfinedTestDispatcher()) {
+        history.primingOffered = true
+        history.permissionDeclinedAt = Instant.now().minus(31, ChronoUnit.DAYS)
+        val graph = graph()
+
+        graph.sut.onExamSubmitted()
+        advanceUntilIdle()
+
+        val shown = graph.sut.flow.value?.prompt
+        assertEquals(NotificationPrompt.Kind.PERMISSION, shown?.kind)
+        assertEquals(NotificationPromptSource.REASK, shown?.source)
+    }
+
+    @Test
+    fun `a submission asks nothing before the re-ask is due or once allowed`() = runTest(UnconfinedTestDispatcher()) {
+        history.primingOffered = true
+        history.permissionDeclinedAt = Instant.now().minus(10, ChronoUnit.DAYS)
+        val tooSoon = graph()
+        tooSoon.sut.onExamSubmitted()
+        advanceUntilIdle()
+        assertNull(tooSoon.sut.flow.value)
+        assertTrue(tooSoon.coordinator.isFree)
+
+        history.permissionDeclinedAt = Instant.now().minus(31, ChronoUnit.DAYS)
+        val allowed = graph(permission = NotificationPermission.AUTHORIZED)
+        allowed.sut.onExamSubmitted()
+        advanceUntilIdle()
+        assertNull(allowed.sut.flow.value)
+        assertTrue(allowed.coordinator.isFree)
     }
 }

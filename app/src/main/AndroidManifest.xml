@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Asked at runtime by the one-time prompt (NotificationPrompt) on Android 13+. -->
+    <!--
+        Asked at runtime on Android 13+ by the notification flow's step 1/2 (after the tour, and once more 30 days after
+        a "no") and by Hesap › Bildirim Ayarları. The admin location picker's permission lives in the live manifest.
+    -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- No ads: drop the advertising-ID permissions Firebase Analytics merges in (Play Data Safety). -->
     <uses-permission

@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.model.AppUpdate
+import com.salticusteam.vifi.core.navigation.RegisterModalPresence
 import com.salticusteam.vifi.core.util.StoreLauncher
 
 /**
@@ -95,6 +96,8 @@ private fun OptionalUpdateDialog(
     onSkip: () -> Unit,
     onLater: () -> Unit,
 ) {
+    // A tapped push and the notification flow wait until it is answered.
+    RegisterModalPresence()
     AlertDialog(
         onDismissRequest = onLater,
         modifier = Modifier.testTag("optionalUpdate.dialog"),

@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
 import com.salticusteam.vifi.R
@@ -79,6 +80,12 @@ fun InboxScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) { viewModel.onScreenShown() }
+    // While the page is the one in front: leaving it (closed, or covered by what it opened, even while the screens
+    // still cross-fade) drops a consent re-ask still waiting for its moment.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onScreenResumed()
+        onPauseOrDispose { viewModel.onScreenPaused() }
+    }
     // A newer tap on top of the open inbox only changes the argument.
     LaunchedEffect(highlightId) { viewModel.onHighlightRequested(highlightId) }
 

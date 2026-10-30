@@ -10,8 +10,10 @@ import com.salticusteam.vifi.core.data.repository.fake.FakeInboxReader
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationAdminService
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationEventReporter
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationSettingsService
+import com.salticusteam.vifi.core.maps.MockLocationPicker
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.notifications.DeviceRegistrationStore
+import com.salticusteam.vifi.feature.notificationcomposer.locationpicker.LocationPicker
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
@@ -38,6 +40,7 @@ class MockGraphTest {
     @Inject lateinit var notificationSettingsService: NotificationSettingsService
     @Inject lateinit var notificationEventReporter: NotificationEventReporter
     @Inject lateinit var notificationAdminService: NotificationAdminService
+    @Inject lateinit var locationPicker: LocationPicker
 
     @Before
     fun setUp() {
@@ -62,6 +65,8 @@ class MockGraphTest {
         assertTrue(notificationSettingsService is FakeNotificationSettingsService)
         assertTrue(notificationEventReporter is FakeNotificationEventReporter)
         assertTrue(notificationAdminService is FakeNotificationAdminService)
+        // The fixed-place picker: no Google SDK, no location.
+        assertTrue(locationPicker is MockLocationPicker)
     }
 
     @Test

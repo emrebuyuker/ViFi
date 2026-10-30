@@ -27,7 +27,8 @@ import kotlinx.coroutines.launch
  * Shows the notification flow the [NotificationPromptCoordinator] queues (iOS `NotificationPromptPresenter`): a
  * waiting run goes on screen once the tour is over and nothing is in the way (a registered modal, a tapped push still
  * on its way to the inbox), and leaves it when answered, closed, preempted by a tapped push or ended by a sign-out.
- * Hosted by the archive ([NotificationPromptHost]); it also makes the first offer there, after the tour.
+ * Hosted by the archive ([NotificationPromptHost]); it also makes the first offer there, after the tour, and the
+ * permission's re-ask after an exam submission (the archive host reports it).
  */
 @HiltViewModel
 class NotificationPromptViewModel @Inject constructor(
@@ -79,6 +80,14 @@ class NotificationPromptViewModel @Inject constructor(
             onboardingPreferences.state.first { it == OnboardingState.Hidden }
             coordinator.offerFirstRunIfNeeded()
         }
+    }
+
+    /**
+     * An exam submission went through and its form closed: after a "no" to notifications, the moment the user waits
+     * for the approval is the one to ask again (iOS `AddExamView.onSubmitted`).
+     */
+    fun onExamSubmitted() {
+        viewModelScope.launch { coordinator.examWasSubmitted() }
     }
 
     /** The sheet is on screen. */
