@@ -130,4 +130,29 @@
 
     <!-- Exam picker -->
     <string name="notification_composer_exam_picker_title">Sınav Seç</string>
+
+    <!-- History -->
+    <string name="notification_history_title">Gönderim Geçmişi</string>
+    <string name="notification_history_loading">Geçmiş yükleniyor…</string>
+    <string name="notification_history_empty_title">Henüz bildirim yok</string>
+    <string name="notification_history_empty_message">Gönderdiğin ve zamanladığın bildirimler burada görünür.</string>
+    <string name="notification_history_status_scheduled">Zamanlandı</string>
+    <string name="notification_history_status_sending">Gönderiliyor</string>
+    <string name="notification_history_status_sent">Gönderildi</string>
+    <string name="notification_history_status_failed">Başarısız</string>
+    <string name="notification_history_status_canceled">İptal edildi</string>
+    <string name="notification_history_badge_test">Test</string>
+    <string name="notification_history_badge_automatic">Otomatik</string>
+    <string name="notification_history_scheduled_at">%1$s için zamanlandı</string>
+    <string name="notification_history_scheduled_at_quiet_hours">%1$s için zamanlandı (sessiz saat)</string>
+    <plurals name="notification_history_delivery_stats">
+        <item quantity="one">%1$d alıcı · %2$d push gönderildi · %3$d başarısız</item>
+        <item quantity="other">%1$d alıcı · %2$d push gönderildi · %3$d başarısız</item>
+    </plurals>
+    <plurals name="notification_history_engagement_stats">
+        <item quantity="one">%1$d kişi açtı · %2$d kişi butona dokundu</item>
+        <item quantity="other">%1$d kişi açtı · %2$d kişi butona dokundu</item>
+    </plurals>
+    <string name="notification_history_cancel">İptal et</string>
+    <string name="cd_notification_history_actions">Diğer işlemler</string>
 </resources>

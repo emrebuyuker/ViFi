@@ -721,9 +721,24 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _**Testler:** `NotificationExamPickerTest` 6 (kök ve Türkçe arama, dosyasız sınav, boş seviye, sonuçsuz arama,
     satırın seçimi ve yolu, seçimsiz satır) — yalnız derlendi; sınav eyleminin VM kuralları ADM-02 testlerinde. Mock
     arşivde uçtan uca gezinti (iOS `testAdminLinksAnExamPickedFromTheArchive`) `NIT-03`'te._
-- [ ] **`ADM-06`** Gönderim Geçmişi _(P1·M·Sonnet)_ — Satırlarda durum / tür / Test / Otomatik rozetleri, kitle etiketi,
+- [x] **`ADM-06`** Gönderim Geçmişi _(P1·M·Sonnet)_ — Satırlarda durum / tür / Test / Otomatik rozetleri, kitle etiketi,
   zaman ("(sessiz saat)") ve sayılar. Zamanlanmışta "İptal et" (iOS gibi onaysız). Yenileme ve hata durumları;
-  `NotificationHistory` ekran adı. ⟶ `ADM-01`
+  `NotificationHistory` ekran adı. ⟶ `ADM-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationHistoryViewModel`** (iOS birebir): açılışta bir kez yükler; aşağı çekme ve hata ekranındaki
+    "Tekrar Dene" yeniler (yenileme sürerken ikinci çekme yok sayılır); başarısız yenileme satırları korur ve hatayı
+    üstte gösterir; "İptal et" yalnız zamanlanmışta ve tek seferde bir tane (`cancelingId`), başarıda listeyi yeniden
+    yükler, `NotCancelable`'da mesaj + yeniden yükleme, diğer hatada yalnız mesaj; `NotificationHistory` ekran adı._
+  - _**`NotificationHistoryScreen`** ("Gönderim Geçmişi"): yükleniyor ("Geçmiş yükleniyor…"), ilk yükleme hatası
+    (yeniden dene), boş ("Henüz bildirim yok" + açıklama), liste (`notificationComposer.history.list`): tür ikonu,
+    başlık, kitle etiketi, rozetler (durum, tür, Test, Otomatik; tema konteyner renkleri, sabit renk yok; büyük yazıda
+    alt satıra kayar), zaman satırı ("<zaman> için zamanlandı (sessiz saat)" / gönderim ya da oluşturma zamanı), gönderilmiş
+    olanlarda iki sayı satırı (plurals). Satır `…history.row.<id>`; iOS'un kaydırma eylemi + bağlam menüsü yerine
+    satırın menüsü (`.menu`) → "İptal et" (`.cancel`, onaysız)._
+  - _Composer'daki "Geçmiş" düğmesi `onOpenHistory` ile verilir; `ViFiNavHost`'un `notificationComposer` /
+    `notificationHistory` yuvalarına ve Hesap satırına bağlama `NIT-01`'de._
+  - _**Testler:** `NotificationHistoryViewModelTest` 9 (iOS'un 7'si + aşağı çekme koruması, ekran adı);
+    `NotificationHistoryContentTest` 7 (gönderilmiş satır, zamanlanmışın iptali, uçuştaki iptal, hata + satırlar, boş,
+    ilk yükleme hatası, yükleniyor) — yalnız derlendi._
 
 #### Hat E — Konum seçici (admin)
 

@@ -8,6 +8,7 @@ import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.model.Gender
 import com.salticusteam.vifi.core.model.NotificationDraft
 import com.salticusteam.vifi.core.model.NotificationKind
+import com.salticusteam.vifi.core.model.NotificationStatus
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -32,6 +33,16 @@ val NotificationKind.adminLabelRes: Int
         NotificationKind.GENERAL -> R.string.notification_composer_kind_general
         NotificationKind.PROMO -> R.string.notification_composer_kind_promo
         NotificationKind.SYSTEM -> R.string.notification_composer_kind_system
+    }
+
+@get:StringRes
+val NotificationStatus.adminLabelRes: Int
+    get() = when (this) {
+        NotificationStatus.SCHEDULED -> R.string.notification_history_status_scheduled
+        NotificationStatus.SENDING -> R.string.notification_history_status_sending
+        NotificationStatus.SENT -> R.string.notification_history_status_sent
+        NotificationStatus.FAILED -> R.string.notification_history_status_failed
+        NotificationStatus.CANCELED -> R.string.notification_history_status_canceled
     }
 
 @get:StringRes
