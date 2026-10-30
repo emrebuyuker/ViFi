@@ -27,8 +27,12 @@ class AccountContentTest {
     private var aboutClicks = 0
     private var upgradeClicks = 0
     private var manageClicks = 0
+    private var notificationSettingsClicks = 0
 
-    private fun setContent(state: AccountUiState = AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67")) {
+    private fun setContent(
+        state: AccountUiState = AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67"),
+        onNotificationSettings: (() -> Unit)? = { notificationSettingsClicks++ },
+    ) {
         composeRule.setContent {
             ViFiTheme {
                 AccountContent(
@@ -45,6 +49,7 @@ class AccountContentTest {
                     onAbout = { aboutClicks++ },
                     onUpgradePremium = { upgradeClicks++ },
                     onManageSubscription = { manageClicks++ },
+                    onNotificationSettings = onNotificationSettings,
                 )
             }
         }
@@ -200,6 +205,26 @@ class AccountContentTest {
         composeRule.onNodeWithTag("account.delete").assertIsNotEnabled()
         composeRule.onNodeWithTag("account.signOut").assertIsNotEnabled()
         composeRule.onNodeWithTag("account.editProfile").assertIsNotEnabled()
+        composeRule.onNodeWithTag("account.notificationSettings").assertIsNotEnabled()
         composeRule.onNodeWithTag("account.delete.progress").assertIsDisplayed()
+    }
+
+    @Test
+    fun account_notificationSettings_opensTheSettings() {
+        setContent()
+
+        composeRule.onNodeWithTag("account.notificationSettings")
+            .assert(hasText("Bildirim Ayarları"))
+            .assert(hasText("Bildirim izni ve kampanya tercihin"))
+            .performClick()
+
+        assertEquals(1, notificationSettingsClicks)
+    }
+
+    @Test
+    fun account_withoutTheSettingsDestination_hidesTheRow() {
+        setContent(onNotificationSettings = null)
+
+        composeRule.onNodeWithTag("account.notificationSettings").assertDoesNotExist()
     }
 }

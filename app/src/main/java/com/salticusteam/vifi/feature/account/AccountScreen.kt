@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -66,8 +67,8 @@ import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 /**
  * The signed-in account (iOS AccountView), opened from the home screen: the profile (opens the editor), ViFi Premium
  * (the upgrade row, or the active status with "Aboneliği Yönet"), the coin balance (hidden for a subscriber), the
- * verified phone number, signing out and deleting the account (with a re-verification of the number when Firebase
- * asks for a recent sign-in). An admin also gets the Moderasyon entry.
+ * verified phone number, Bildirim Ayarları, signing out and deleting the account (with a re-verification of the number
+ * when Firebase asks for a recent sign-in). An admin also gets the Moderasyon entry.
  */
 @Composable
 fun AccountScreen(
@@ -77,6 +78,8 @@ fun AccountScreen(
     onModeration: () -> Unit = {},
     /** Opens the Premium paywall from the upgrade row; `null` hides the row (the active status still shows). */
     onOpenPaywall: (() -> Unit)? = null,
+    /** Opens Bildirim Ayarları; `null` hides the row. */
+    onNotificationSettings: (() -> Unit)? = null,
     viewModel: AccountViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -112,6 +115,7 @@ fun AccountScreen(
         onUpgradePremium = onOpenPaywall,
         // Google Play's own subscription page: change the plan, update the payment method, or cancel.
         onManageSubscription = { LegalLinks.open(context, PremiumLinks.MANAGE_SUBSCRIPTIONS_URL) },
+        onNotificationSettings = onNotificationSettings,
     )
 }
 
@@ -133,6 +137,7 @@ fun AccountContent(
     onModeration: () -> Unit = {},
     onUpgradePremium: (() -> Unit)? = null,
     onManageSubscription: () -> Unit = {},
+    onNotificationSettings: (() -> Unit)? = null,
 ) {
     var isConfirmingSignOut by rememberSaveable { mutableStateOf(false) }
     var isConfirmingDeletion by rememberSaveable { mutableStateOf(false) }
@@ -186,6 +191,12 @@ fun AccountContent(
             if (state.isAdmin) {
                 item(key = "moderation") {
                     ModerationRow(enabled = !state.isWorking, onClick = onModeration)
+                    HorizontalDivider()
+                }
+            }
+            if (onNotificationSettings != null) {
+                item(key = "notificationSettings") {
+                    NotificationSettingsRow(enabled = !state.isWorking, onClick = onNotificationSettings)
                     HorizontalDivider()
                 }
             }
@@ -406,6 +417,23 @@ private fun ModerationRow(enabled: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .testTag("account.moderation"),
+    )
+}
+
+/** "Bildirim Ayarları": the permission and the campaign switch (iOS `NotificationSettingsEntrySection`). */
+@Composable
+private fun NotificationSettingsRow(enabled: Boolean, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = {
+            Text(text = stringResource(R.string.notification_settings_account_row_title), fontWeight = FontWeight.SemiBold)
+        },
+        supportingContent = { Text(stringResource(R.string.notification_settings_account_row_subtitle)) },
+        leadingContent = { IconBadge(icon = Icons.Filled.NotificationsActive) },
+        trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .testTag("account.notificationSettings"),
     )
 }
 

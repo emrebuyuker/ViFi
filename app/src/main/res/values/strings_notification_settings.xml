@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Added in 4.1.0 — Account › Bildirim Ayarları (iOS NotificationSettingsView) -->
+
+    <!-- Account row -->
+    <string name="notification_settings_account_row_title">Bildirim Ayarları</string>
+    <string name="notification_settings_account_row_subtitle">Bildirim izni ve kampanya tercihin</string>
+
+    <!-- Screen -->
+    <string name="notification_settings_title">Bildirim Ayarları</string>
+
+    <!-- The OS permission -->
+    <string name="notification_settings_permission_title">Bildirim izni</string>
+    <string name="notification_settings_permission_authorized">Açık</string>
+    <string name="notification_settings_permission_denied">Kapalı</string>
+    <string name="notification_settings_permission_not_determined">Sorulmadı</string>
+    <string name="notification_settings_permission_denied_note">Bildirimler kapalı. Açmak için Ayarlar\'a git.</string>
+    <string name="notification_settings_permission_not_determined_note">Bildirim izni henüz verilmedi.</string>
+    <string name="notification_settings_enable">Bildirimleri Aç</string>
+    <string name="notification_settings_open_settings">Ayarlar\'ı Aç</string>
+
+    <!-- The campaign switch -->
+    <string name="notification_settings_marketing_title">Kampanya ve fırsat bildirimleri</string>
+    <string name="notification_settings_marketing_footer">Kampüsüne yakın indirimler, öğrenciye özel kampanyalar ve Premium fırsatları. Gece 22:00–09:00 arası bildirim göndermeyiz. Kapalıyken kampanyaları ne bildirim olarak ne de Bildirimler sayfasında görürsün.</string>
+    <string name="notification_settings_marketing_unavailable">Tercihin şu an okunamıyor. Bağlantını kontrol edip bu sayfayı tekrar aç.</string>
+    <string name="notification_settings_save_error">Tercihin kaydedilemedi. Bağlantını kontrol edip tekrar dene.</string>
+</resources>
