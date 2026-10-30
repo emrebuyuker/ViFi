@@ -703,8 +703,24 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _Sürüm sayacı ve "hazırlanırken gönderim kapalı" ADM-02'nin VM testlerinde._
   - _**Testler:** cihazda `ContentResolverNotificationImageEncoderTest` 4 (2400×1200 → 1600×800 JPEG ≤ 1 MiB, küçük
     görsel büyütülmez, görsel olmayan veri, eksik dosya) ve `NotificationComposerImageSectionTest` 5 — yalnız derlendi._
-- [ ] **`ADM-05`** Arşivden sınav seçici _(P1·M·Sonnet)_ — Üniversite → fakülte → bölüm → ders → sınav gezinmesi
+- [x] **`ADM-05`** Arşivden sınav seçici _(P1·M·Sonnet)_ — Üniversite → fakülte → bölüm → ders → sınav gezinmesi
   (`ArchiveRepository`), Türkçe duyarsız arama. Gönderilen yalnız `examId`; dosyasız sınav seçilemez. ⟶ `ADM-02`
+  ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationExamPicker`**: iOS gibi arşivin kendi `BrowseViewModel`'iyle (yeni arşiv kodu yok) iç içe bir
+    NavHost'ta, uygulamanın `ViFiRoute.Home`/`Browse` hedefleriyle gezinir; seviyelerin VM'leri seçiciye ait bir
+    `ViewModelStore`'da yaşar, kapanınca temizlenir. Arama seçicide yerel tutulup `BrowseUiState`'in Türkçe
+    katlamasıyla süzülür (VM'in arşiv araması analytics olayı üretilmez; iOS'ta da seçici bu olayı göndermiyor).
+    Dosyasız sınav pasif; sınav seçilince kapanır, gönderilen yalnız `examId` (yolun son bileşeni)._
+  - _Sunum: iOS sheet'inin yerine formun yerini alan tam ekran katman (Sınav Ekle'deki seçiciler gibi); tam ekran
+    `Dialog`'un Android 15'te sistem çubuğu altına kaydığı projede kayıtlı. Kökte "✕" (`.exam.cancel`) ve Geri kapatır,
+    derinde Geri bir üst seviyeye döner (`.exam.back`); form kaydırma konumunu korur; `ModalPresence`'a kayıtlı.
+    Başlık düğümün adı ya da "Sınav Seç"; seviye arama istemleri, boş ve "… için sonuç yok" durumları arşivle ortak
+    metinler. Satırlar `notificationComposer.exam.row.<ad>`._
+  - _**Eylem satırı** (`ExamRow`): "Sınav" + seçilen sınavın adı ya da "Seç" (`.exam`), altında yol (`.examPath`,
+    "Üniv › Fakülte › Bölüm › Ders")._
+  - _**Testler:** `NotificationExamPickerTest` 6 (kök ve Türkçe arama, dosyasız sınav, boş seviye, sonuçsuz arama,
+    satırın seçimi ve yolu, seçimsiz satır) — yalnız derlendi; sınav eyleminin VM kuralları ADM-02 testlerinde. Mock
+    arşivde uçtan uca gezinti (iOS `testAdminLinksAnExamPickedFromTheArchive`) `NIT-03`'te._
 - [ ] **`ADM-06`** Gönderim Geçmişi _(P1·M·Sonnet)_ — Satırlarda durum / tür / Test / Otomatik rozetleri, kitle etiketi,
   zaman ("(sessiz saat)") ve sayılar. Zamanlanmışta "İptal et" (iOS gibi onaysız). Yenileme ve hata durumları;
   `NotificationHistory` ekran adı. ⟶ `ADM-01`

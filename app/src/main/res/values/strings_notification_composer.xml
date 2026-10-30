@@ -64,6 +64,7 @@
     <string name="notification_composer_action_exam">Sınav</string>
     <string name="notification_composer_action_location">Konum</string>
     <string name="notification_composer_url_placeholder">https://</string>
+    <string name="notification_composer_exam_label">Sınav</string>
     <string name="notification_composer_action_footer">Karta dokunulduğunda ya da butona basıldığında açılır. Bağlantı https ile başlamalı.</string>
 
     <!-- Image -->
@@ -126,4 +127,7 @@
     <string name="notification_composer_confirm_scheduled_at">Gönderim zamanı: %1$s</string>
     <string name="notification_composer_confirm_send">Gönder</string>
     <string name="notification_composer_confirm_schedule">Zamanla</string>
+
+    <!-- Exam picker -->
+    <string name="notification_composer_exam_picker_title">Sınav Seç</string>
 </resources>

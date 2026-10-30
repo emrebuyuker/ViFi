@@ -3,6 +3,7 @@ package com.salticusteam.vifi.feature.notificationcomposer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -21,7 +22,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -68,6 +72,7 @@ class NotificationComposerActions(
     val onLocationPicked: (NotificationLocation) -> Unit = {},
     val onPickImage: () -> Unit = {},
     val onRemoveImage: () -> Unit = {},
+    val onPickExam: () -> Unit = {},
     val onSchedulingToggle: (Boolean) -> Unit = {},
     val onScheduledAtChange: (Instant) -> Unit = {},
     val onExpiryToggle: (Boolean) -> Unit = {},
@@ -99,6 +104,10 @@ fun NotificationComposerScreen(
         uri?.let { viewModel.onImagePicked(it.toString()) }
     }
 
+    // The exam picker covers the form while it is open; the form keeps its scroll position underneath.
+    var isPickingExam by rememberSaveable { mutableStateOf(false) }
+    val formScroll = rememberScrollState()
+
     val actions = remember(viewModel, imagePicker) {
         NotificationComposerActions(
             onKindSelected = viewModel::onKindSelected,
@@ -117,6 +126,7 @@ fun NotificationComposerScreen(
                 imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             },
             onRemoveImage = viewModel::onImageRemoved,
+            onPickExam = { isPickingExam = true },
             onSchedulingToggle = viewModel::onSchedulingToggle,
             onScheduledAtChange = viewModel::onScheduledAtChange,
             onExpiryToggle = viewModel::onExpiryToggle,
@@ -128,13 +138,24 @@ fun NotificationComposerScreen(
         )
     }
 
-    NotificationComposerContent(
-        state = state,
-        actions = actions,
-        onBack = onBack,
-        onOpenHistory = onOpenHistory,
-        locationRows = locationRows,
-    )
+    if (isPickingExam) {
+        NotificationExamPicker(
+            onPick = { exam ->
+                viewModel.onExamPicked(exam)
+                isPickingExam = false
+            },
+            onDismiss = { isPickingExam = false },
+        )
+    } else {
+        NotificationComposerContent(
+            state = state,
+            actions = actions,
+            onBack = onBack,
+            onOpenHistory = onOpenHistory,
+            scrollState = formScroll,
+            locationRows = locationRows,
+        )
+    }
 }
 
 /** Stateless form; previews and UI tests drive this. */
@@ -145,6 +166,7 @@ fun NotificationComposerContent(
     onBack: () -> Unit,
     onOpenHistory: () -> Unit,
     modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState(),
     locationRows: ComposerLocationRows = { _, _, _ -> },
 ) {
     Scaffold(
@@ -170,7 +192,7 @@ fun NotificationComposerContent(
                 .fillMaxSize()
                 .padding(padding)
                 .imePadding()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(vertical = 8.dp)
                 .testTag("$COMPOSER_TAG.form"),
         ) {
@@ -191,7 +213,9 @@ fun NotificationComposerContent(
                 onUrlTextChange = actions.onUrlTextChange,
                 onLocationPicked = actions.onLocationPicked,
                 locationRows = locationRows,
-                examRow = {},
+                examRow = {
+                    ExamRow(selectedExam = state.selectedExam, enabled = !state.isWorking, onPickExam = actions.onPickExam)
+                },
             )
             ImageSection(state, onPickImage = actions.onPickImage, onRemoveImage = actions.onRemoveImage)
             TimingSection(
