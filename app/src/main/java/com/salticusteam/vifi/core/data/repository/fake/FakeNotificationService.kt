@@ -14,6 +14,13 @@ class FakeNotificationService(
     var requestCount = 0
         private set
 
+    /** Every subscribe call, repeated topics included. */
+    var subscribeCount = 0
+        private set
+
+    /** Thrown by the next subscribe calls while set. */
+    var subscribeFailure: Exception? = null
+
     override suspend fun permission(): NotificationPermission = current
 
     override suspend fun requestAuthorization(): Boolean {
@@ -25,6 +32,8 @@ class FakeNotificationService(
     override suspend fun token(): String? = "fake-token"
 
     override suspend fun subscribe(topic: String) {
+        subscribeCount++
+        subscribeFailure?.let { throw it }
         subscribedTopics += topic
     }
 

@@ -103,7 +103,7 @@ class SubmissionNotifier @Inject constructor(
     }
 
     private companion object {
-        /** Distinct from the announcement notification (id 0) and the per-draft outcome ids. */
+        /** Distinct from the per-draft outcome ids; pushes have their own tray tag ([NotificationContent.TRAY_TAG]). */
         const val PROGRESS_NOTIFICATION_ID = 0x5ab
     }
 }

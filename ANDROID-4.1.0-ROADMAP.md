@@ -22,11 +22,11 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **7'si tamam, 0'ı yarım, 43'ü başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **8'i tamam, 0'ı yarım, 42'si başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
-> 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A'da kanallar (`PSH-01`) tamam. Faz 0'da açık kalan
-> tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
+> 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A'da kanallar (`PSH-01`) ve push gösterimi (`PSH-02`)
+> tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -292,14 +292,36 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     `NotificationChannelsTest`, kimliklerin sunucu türleriyle aynı olduğunu kilitler). Tablet emülatöründe
     `NotificationChannelsDeviceTest` 2/2. NCT-01 derlemesinin `announcements` kanalı olan kurulumu yerinde
     güncellenince `dumpsys`'te dört kanal Türkçe adlarıyla, önem 3 ve rozet açık; `announcements` silinmiş._
-- [ ] **`PSH-02`** `ViFiMessagingService` yeniden yazımı _(P0·M·Opus)_:
+- [x] **`PSH-02`** `ViFiMessagingService` yeniden yazımı _(P0·M·Opus)_:
   - Ön planda kanal = `data.kind` (bilinmeyen → `general`).
   - Bildirim id'si `notificationId`'ye göre (artık her push öncekini silmez).
   - Görsel varsa kısa zaman aşımıyla indirilip BigPicture gösterilir; inmezse görselsiz.
   - Dokunuş `PendingIntent`'i `notificationId` taşır.
   - `onNewToken` → cihaz kaydı + `all` aboneliği.
 
-  ⟶ `PSH-01`
+  ⟶ `PSH-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationContent`** (saf): `notificationId` (sunucu desenine uymayan atılır), `kind`, `imageUrl` (yalnız
+    geçerli https, imzalı URL olduğu gibi). `channelId` (bilinmeyen/eksik → `general`), `trayId` (id'nin hash'i, yoksa
+    sayaç), `tapExtras()` (`notificationId`, `kind`; sistem tepsisinin başlatma intent'iyle aynı anahtarlar)._
+  - _**`PushNotifier`** (yeni): ön plan gösterimi servisten buraya ayrıldı (cihazda test edilebilsin diye). Kanal türe
+    göre; `TRAY_TAG = "vifi.push"` + bildirim başına id (gönderim bildirimlerinin id'leriyle çakışmaz); görsel inerse
+    `BigPictureStyle` + küçük resim (FCM'in arka plan düzeni), inmezse `BigTextStyle`; `PendingIntent` request code'u
+    bildirim başına, `open_inbox` + `tapExtras`. İzin yoksa (13+) ne gösterilir ne görsel indirilir._
+  - _**`NotificationImageLoader`** (yeni): kendi düz OkHttp istemcisi (kimlik/App Check başlığı yok), 8 sn toplam zaman
+    aşımı, https'ten düşürme yok, en çok 1 MiB (uzunluksuz gövde de sınırda kesilir), uzun kenar ≤ 1024 px'e
+    örnekleme; URL imza taşıdığı için loglanmaz._
+  - _**`PushTopicSubscription`** (yeni, `PushTopics` buraya taşındı): `all`'a her açılışta (`SessionViewModel`, oturumdan
+    bağımsız) ve her yeni token'da katılır; hata loglanır. `NotificationPromptViewModel` artık abone olmuyor._
+  - _Token hâlâ `PushTokenRegistration`'a gidiyor; `DeviceRegistrationStore`'a geçiş `PSH-04`'te. Dokunuşun okunması
+    (`notificationId` → vurgu) `PSH-03`'te; bugünkü `InboxDeepLink` sayfayı açmaya devam ediyor._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda
+    yok). Birim testleri liveDebug 728 / mockDebug 721 / liveRelease 728, hepsi geçti (+16: `NotificationContentTest`
+    10, `NotificationImageLoaderTest` 7 — MockWebServer ile kimliksiz istek, boyut sınırı, zaman aşımı —,
+    `PushTopicSubscriptionTest` 3; prompt testleri güncellendi). Tablet emülatöründe `PushNotifierDeviceTest` 4/4
+    (izinsiz gösterilmez → izinle `system` kanalında; görselli `promo` BigPicture ve istekte kimlik yok; görsel
+    inmezse metin; aynı id yalnız kendini değiştirir) + `NotificationChannelsDeviceTest` 2/2. Mock uygulama açıldı,
+    zil bildirim sayfasını açtı. Yeni açılan emülatör aşırı yüklüyken (yük 26) bir başlangıç ANR'ı görüldü; ana iş
+    parçacığı Compose ölçümünde CPU bekliyordu, yük düşünce tekrarlanmadı._
 - [ ] **`PSH-03`** `NotificationRouter` + dokunuş okuma _(P0·M·Opus)_ — `InboxDeepLink`'in yerine geçer:
   - `pending(notificationId?)`, vurgu, `sessionDidChange` kuralları.
   - `MainActivity` hem kendi intent'imizden hem sistem tepsisinin başlatma intent'inden `notificationId`'yi okur

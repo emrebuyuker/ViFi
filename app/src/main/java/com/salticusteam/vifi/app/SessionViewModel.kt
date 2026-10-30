@@ -6,14 +6,16 @@ import com.salticusteam.vifi.core.data.session.SessionState
 import com.salticusteam.vifi.core.data.session.SessionStore
 import com.salticusteam.vifi.core.data.session.SessionTeardown
 import com.salticusteam.vifi.core.notifications.PushTokenRegistration
+import com.salticusteam.vifi.core.notifications.PushTopicSubscription
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Exposes the app-wide session to [AppRoot]'s sign-in gate, and starts the app-wide sign-out teardown, analytics
- * identification and the signed-in user's push token registration. Started here rather than in the Application, so
- * the mock graph is built after MainActivity read its launch arguments.
+ * identification, the signed-in user's push token registration and the `all` topic subscription (every start, signed
+ * in or not). Started here rather than in the Application, so the mock graph is built after MainActivity read its
+ * launch arguments.
  */
 @HiltViewModel
 class SessionViewModel @Inject constructor(
@@ -21,6 +23,7 @@ class SessionViewModel @Inject constructor(
     sessionTeardown: SessionTeardown,
     analyticsIdentity: AnalyticsIdentity,
     pushTokenRegistration: PushTokenRegistration,
+    pushTopicSubscription: PushTopicSubscription,
 ) : ViewModel() {
 
     // State
@@ -31,5 +34,6 @@ class SessionViewModel @Inject constructor(
         sessionTeardown.start()
         analyticsIdentity.start()
         pushTokenRegistration.start()
+        pushTopicSubscription.start()
     }
 }

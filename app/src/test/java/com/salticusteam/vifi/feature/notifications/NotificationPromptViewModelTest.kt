@@ -24,23 +24,22 @@ class NotificationPromptViewModelTest {
     private val preferences = FakeUserPreferencesRepository()
 
     @Test
-    fun `undetermined and never prompted shows the prompt and joins the all topic`() = runTest(UnconfinedTestDispatcher()) {
+    fun `undetermined and never prompted shows the prompt`() = runTest(UnconfinedTestDispatcher()) {
         val service = FakeNotificationService(NotificationPermission.NOT_DETERMINED)
         val sut = NotificationPromptViewModel(service, preferences)
         advanceUntilIdle()
 
         assertTrue(sut.isVisible.value)
-        assertEquals(setOf("all"), service.subscribedTopics)
     }
 
     @Test
-    fun `already allowed shows no prompt but still subscribes`() = runTest(UnconfinedTestDispatcher()) {
+    fun `already allowed shows no prompt and leaves the all topic to PushTopicSubscription`() = runTest(UnconfinedTestDispatcher()) {
         val service = FakeNotificationService(NotificationPermission.AUTHORIZED)
         val sut = NotificationPromptViewModel(service, preferences)
         advanceUntilIdle()
 
         assertFalse(sut.isVisible.value)
-        assertEquals(setOf("all"), service.subscribedTopics)
+        assertEquals(0, service.subscribeCount)
     }
 
     @Test
