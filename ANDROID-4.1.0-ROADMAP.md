@@ -1027,8 +1027,32 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 - [ ] **`NIT-03`** UI testleri + emülatör _(P0·M·Sonnet)_ — iOS `InboxUITests` (13), `NotificationPermissionUITests` (9),
   `NotificationComposerUITests` (6) ve `LocationCampaignUITests` (6) karşılıkları. Mock'ta uçtan uca; açık/koyu tema;
   **API 33+ ve API ≤32** emülatörde izin eşlemesi. ⟶ `NIT-01`
-- [ ] **`NIT-04`** Belgeler _(P2·S·Haiku)_ — `CLAUDE.md` (durum, Bildirimler bölümü, LaunchArg tablosu, "Maps anahtarı
-  commit'lenmez") ve `README.md`. ⟶ `NIT-01`
+- [x] **`NIT-04`** Belgeler _(P2·S·Haiku)_ — `CLAUDE.md` (durum, Bildirimler bölümü, LaunchArg tablosu, "Maps anahtarı
+  commit'lenmez") ve `README.md`. ⟶ `NIT-01` ✅ _Tamamlandı (2026-10-31, Opus — ürün sahibinin "doğruluk hızdan önce"
+  tercihiyle Haiku yerine). Kod değişmedi; olgular koddan (`app/build.gradle`, `LaunchArgs.kt`, `libs.versions.toml`,
+  `feature/` paketleri, callable adları) ve bu belgeden doğrulandı. Gelenler:_
+  - _**`CLAUDE.md`:** Durum bloğu (31 Ekim): 4.1.0 (20) `v-4.1.0`'da, hedefli bildirim sistemi, `NIT-02`/`NIT-03`
+    sürüyor, Faz 3 `NOPS-01`'i bekliyor, yayın yalnız onayla; 4.0.0 satırı `RLS-08`'e göre düzeltildi (19 üretim
+    incelemesine gönderildi, `RLS-09`…`RLS-11` açık). "Mevcut durum" tablosu: sürüm 4.1.0 / 20; "Bildirim" satırı push
+    (kanallar, cihaz kaydı, tepsi, görsel, dokunuş → yönlendirici), bildirim sayfası (`announcements` ∪ `inbox`,
+    `readAt`, 5 aksiyon, istatistik), izin 1/2 → 2/2 + 30 gün, Bildirim Ayarları, admin composer + Geçmiş + konum
+    seçici; "Senaryo bayrakları" 15 LaunchArg'ın tamamı (metin değerli `vifi_open_notification <id>` dahil;
+    `vifi_admin` artık bağlı); "Kütüphane" live'a özel Maps/Places/location sürümleri; "❌ Yeni kodda yapma" Maps
+    anahtarı ve `ACCESS_FINE_LOCATION`. Kural 7'ye "Maps anahtarı commit'lenmez, yalnız `local.properties`". Firebase
+    tablosu: Bildirim satırı (broadcast/fanout, `promo` süzgeci, sessiz saat, Android'in okuduğu/yazdığı yollar) ve
+    Cloud Functions satırı (5 bildirim callable'ı; zamanlayıcı ve tetikleyiciler yalnız sunucuda). Proje Yapısı: tüm
+    `feature/` paketleri (yeni `inbox`, `notifications`, `notificationsettings`, `notificationcomposer` +
+    `locationpicker/`), `core/di`, güncel `res/`, `src/live` · `src/mock` ve Hat F belgeleri; shell komutlarına
+    `MAPS_API_KEY` notu; "Son güncelleme"._
+  - _Planın "Bildirimler bölümü" ve "LaunchArg tablosu" yeni başlık açılmadan mevcut "Bildirim" ve "Senaryo bayrakları"
+    satırlarına işlendi (dosyaların düzeni korundu)._
+  - _**`README.md`:** giriş ve bağlantılar (4.1.0 / 4.0.0 yol haritaları, Hat F belgeleri), SDK ve hedef API 36, isteğe
+    bağlı `MAPS_API_KEY` (`local.properties`; değer yazılmaz, anahtarsız derleme geçer), Android 13+ ile 12 ve altı izin
+    farkı, flavor tablosunda harita seçicisi ve tam senaryo listesi, `vifi_open_notification` örneği, Durum (özellikler,
+    4.1.0 bildirim sistemi, yayın durumu). Eski "Play geliştirici hesabı kaldırılmış" notu kalktı._
+  - _`NIT-02`/`NIT-03` test sayıları yazılmadı (birleştirmede eklenecek); §0 Durum Özeti'ne dokunulmadı._
+  - _**Kapsam dışı not:** `.claude/rules/architecture.md`'deki sürümlü doc comment kuralı "Bugünkü değer `4.0.0`"
+    diyor; `versionName` artık 4.1.0 (yeni eklemeler `Added in 4.1.0` alıyor). Kural dosyası bu kalemde değiştirilmedi._
 
 ### Faz 3 — Gerçek Ortam Doğrulaması (canlı backend; yayın değildir)
 
