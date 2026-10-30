@@ -728,8 +728,15 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _**Diğer:** 2/2 onay sayfası Play'in onay kurallarını karşılıyor. Ticari statü beyanı Kasım 2026'da Console'a
     geliyor (4.1.0'dan bağımsız). Türk mevzuatı (ticari elektronik ileti) kapsam dışı bırakıldı; hukuki görüş
     önerildi._
-- [ ] **`NLG-04`** Mağaza girişi + 4.1.0 sürüm notu _(P1·S·Sonnet)_ — `PLAY-STORE-LISTING.md`: tam açıklamaya bildirim
-  özellikleri, 4.1.0 sürüm notu (≤500).
+- [x] **`NLG-04`** Mağaza girişi + 4.1.0 sürüm notu _(P1·S·Sonnet)_ — `PLAY-STORE-LISTING.md`: tam açıklamaya bildirim
+  özellikleri, 4.1.0 sürüm notu (≤500). ✅ _Tamamlandı (2026-10-30, Opus). Metinler ürün sahibinin onayını bekliyor.
+  Gelenler:_
+  - _**Tam açıklama (4.1.0, 2188/4000):** yeni "BİLDİRİMLER" bölümü (sınav onayı ve bölüme yeni sınav; tek sayfa,
+    görsel ve düğmeler; cihazlar arası okundu; onaylı kampanyalar, 22:00–09:00 yok, Hesap › Bildirim Ayarları). "DİĞER"deki
+    bildirim maddesi buraya taşındı. Admin özellikleri mağaza metnine girmedi. 4.0.0 metni 4.0.0 yayını için duruyor._
+  - _**Sürüm notu (4.1.0, 426/500, Türkçe).**_
+  - _**Uygulama içeriği notları:** gizlilik (NLG-02), reklamlar (R1/R2), veri güvenliği (`NRL-05`). Açık konular:
+    isteğe bağlı dolu Bildirimler ekran görüntüsü (`NQA-01` sonrası). "Reklam yok." cümlesi R1/R2'ye bağlı._
 
 ### Faz 2 — Entegrasyon ve Testler
 
