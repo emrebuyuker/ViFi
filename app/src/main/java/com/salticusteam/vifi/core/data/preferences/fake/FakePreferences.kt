@@ -1,6 +1,6 @@
 package com.salticusteam.vifi.core.data.preferences.fake
 
-import com.salticusteam.vifi.core.data.preferences.AnnouncementReadPreferences
+import com.salticusteam.vifi.core.data.inbox.LegacyInboxReadState
 import com.salticusteam.vifi.core.data.preferences.OnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.RecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.UserPreferencesRepository
@@ -56,11 +56,16 @@ class FakeRecentExamsRepository(initial: List<RecentExam> = emptyList()) : Recen
     override suspend fun clear() { list.value = emptyList() }
 }
 
-/** In-memory read state of the announcements. */
-class FakeAnnouncementReadPreferences(initial: Set<String> = emptySet()) : AnnouncementReadPreferences {
-    private val ids = MutableStateFlow(initial)
+/** The pre-4.1.0 read ids in memory; [hasLegacyIds] turns false once cleared. */
+class FakeLegacyInboxReadState(hasLegacyIds: Boolean = false) : LegacyInboxReadState {
+    var hasLegacyIds = hasLegacyIds
+        private set
 
-    override val readIds: Flow<Set<String>> = ids
+    var clearCount = 0
+        private set
 
-    override suspend fun markRead(ids: Collection<String>) { this.ids.update { it + ids } }
+    override suspend fun clear() {
+        clearCount++
+        hasLegacyIds = false
+    }
 }

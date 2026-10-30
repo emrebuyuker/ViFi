@@ -1,15 +1,14 @@
 package com.salticusteam.vifi.core.data.repository
 
-import com.salticusteam.vifi.core.data.preferences.AnnouncementReadPreferences
+import com.salticusteam.vifi.core.data.inbox.LegacyInboxReadState
 import com.salticusteam.vifi.core.data.preferences.OnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.RecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.UserPreferencesRepository
-import com.salticusteam.vifi.core.data.preferences.fake.FakeAnnouncementReadPreferences
+import com.salticusteam.vifi.core.data.preferences.fake.FakeLegacyInboxReadState
 import com.salticusteam.vifi.core.data.preferences.fake.FakeOnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.fake.FakeRecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.fake.FakeUserPreferencesRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
-import com.salticusteam.vifi.core.data.repository.fake.FakeAnnouncementsReader
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationService
 import com.salticusteam.vifi.core.data.repository.fake.FakeAppUpdateChecker
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
@@ -96,11 +95,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideAnnouncementsReader(): AnnouncementsReader = FakeAnnouncementsReader()
-
-    @Provides
-    @Singleton
-    fun provideAnnouncementReadPreferences(): AnnouncementReadPreferences = FakeAnnouncementReadPreferences()
+    fun provideLegacyInboxReadState(): LegacyInboxReadState = FakeLegacyInboxReadState()
 
     /** Already allowed unless launched with `vifi_notifications_prompt`, which shows the permission prompt. */
     @Provides

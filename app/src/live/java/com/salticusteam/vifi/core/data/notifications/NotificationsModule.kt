@@ -1,6 +1,7 @@
 package com.salticusteam.vifi.core.data.notifications
 
 import com.salticusteam.vifi.core.data.firebase.FirestoreDeviceRegistrar
+import com.salticusteam.vifi.core.data.firebase.FirestoreInboxReader
 import com.salticusteam.vifi.core.data.repository.DeviceRegistrar
 import com.salticusteam.vifi.core.data.repository.DeviceRegistration
 import com.salticusteam.vifi.core.data.repository.InboxReader
@@ -19,8 +20,8 @@ import javax.inject.Singleton
 
 /**
  * Notification bindings of the live flavor (4.1.0 targeted notifications). Until each Firebase implementation lands,
- * a safe `Unavailable*` stand-in is bound and swapped for the real class here (device registration since PSH-04;
- * the rest in their items or NIT-01). The mock flavor's module mirrors this one with fakes.
+ * a safe `Unavailable*` stand-in is bound and swapped for the real class here (device registration since PSH-04, the inbox
+ * since INB-01; the rest in their items or NIT-01). The mock flavor's module mirrors this one with fakes.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -28,7 +29,7 @@ abstract class NotificationsModule {
 
     @Binds
     @Singleton
-    abstract fun bindInboxReader(impl: UnavailableInboxReader): InboxReader
+    abstract fun bindInboxReader(impl: FirestoreInboxReader): InboxReader
 
     @Binds
     @Singleton

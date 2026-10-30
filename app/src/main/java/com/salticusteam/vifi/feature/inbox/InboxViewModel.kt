@@ -2,9 +2,8 @@ package com.salticusteam.vifi.feature.inbox
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.salticusteam.vifi.core.data.announcements.AnnouncementsState
-import com.salticusteam.vifi.core.data.announcements.AnnouncementsStore
-import com.salticusteam.vifi.core.data.preferences.AnnouncementReadPreferences
+import com.salticusteam.vifi.core.data.inbox.InboxState
+import com.salticusteam.vifi.core.data.inbox.InboxStore
 import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.NotificationService
 import com.salticusteam.vifi.core.model.AnalyticsScreen
@@ -12,51 +11,54 @@ import com.salticusteam.vifi.core.model.NotificationPermission
 import com.salticusteam.vifi.core.util.trackScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * The announcements inbox (iOS InboxViewModel): newest first; opening it marks everything read, but the rows that
- * were unread on arrival keep their mark until the screen is left.
+ * The inbox (iOS `InboxView`): the merged notifications newest first, unread ones marked live. Opening it marks
+ * everything read in one server write, and so does anything that arrives while it is open.
  */
 @HiltViewModel
 class InboxViewModel @Inject constructor(
-    private val store: AnnouncementsStore,
-    private val readPreferences: AnnouncementReadPreferences,
+    private val store: InboxStore,
     private val notifications: NotificationService,
     private val analytics: AnalyticsTracker,
 ) : ViewModel() {
 
     // State
-    private val unreadOnArrival = MutableStateFlow<Set<String>?>(null)
     private val permissionOff = MutableStateFlow(false)
 
-    val uiState: StateFlow<InboxUiState> = combine(store.state, unreadOnArrival, permissionOff, ::uiState)
+    val uiState: StateFlow<InboxUiState> = combine(store.state, permissionOff, ::uiState)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InboxUiState())
+
+    // Internal state
+    private var marking: Job? = null
 
     // Intents
     fun onScreenShown() {
         analytics.trackScreen(AnalyticsScreen.INBOX)
+        store.reevaluateExpiry()
         viewModelScope.launch {
             permissionOff.value = notifications.permission() == NotificationPermission.DENIED
-            val read = readPreferences.readIds.first()
-            // Fix the "new" marks from the first list that arrives, then mark it all read.
-            val current = store.state.first { !it.isLoading }
-            unreadOnArrival.value = current.announcements.map { it.id }.filterNot { it in read }.toSet()
-            store.markAllRead()
+        }
+        // What is unread now, and again whenever more arrives or the marker turns up while the page is open.
+        marking?.cancel()
+        marking = viewModelScope.launch {
+            store.unreadCount.filter { it > 0 }.collect { store.markAllRead() }
         }
     }
 
     fun onRetry() = store.retry()
 
     // Helpers
-    private fun uiState(state: AnnouncementsState, unread: Set<String>?, permissionOff: Boolean) = InboxUiState(
-        items = state.announcements.map { InboxItem(it, isUnread = unread?.contains(it.id) == true) },
+    private fun uiState(state: InboxState, permissionOff: Boolean) = InboxUiState(
+        items = state.items.map { InboxEntry(it, isUnread = state.isUnread(it)) },
         isLoading = state.isLoading,
         error = state.error,
         showPermissionOffBanner = permissionOff,

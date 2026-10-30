@@ -41,10 +41,12 @@ import com.salticusteam.vifi.core.designsystem.component.LoadingView
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
-import com.salticusteam.vifi.core.model.Announcement
+import com.salticusteam.vifi.core.model.InboxItem
+import com.salticusteam.vifi.core.model.InboxSource
+import com.salticusteam.vifi.core.model.NotificationKind
 import java.time.Instant
 
-/** The announcements inbox, opened from the home toolbar's bell or a notification tap. */
+/** The notifications inbox, opened from the home toolbar's bell or a notification tap. */
 @Composable
 fun InboxScreen(
     onBack: () -> Unit,
@@ -88,7 +90,7 @@ internal fun InboxContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    items(items = state.items, key = { it.announcement.id }) { item -> InboxRow(item) }
+                    items(items = state.items, key = { it.item.id }) { entry -> InboxRow(entry) }
                 }
             }
         }
@@ -119,32 +121,32 @@ private fun PermissionOffBanner(onOpenSettings: () -> Unit) {
 }
 
 @Composable
-private fun InboxRow(item: InboxItem) {
-    val announcement = item.announcement
+private fun InboxRow(entry: InboxEntry) {
+    val item = entry.item
     Card(
-        modifier = Modifier.fillMaxWidth().testTag("inbox.row.${announcement.id}"),
+        modifier = Modifier.fillMaxWidth().testTag("inbox.row.${item.id}"),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = announcement.title,
+                    text = item.title,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f),
                 )
-                if (item.isUnread) {
+                if (entry.isUnread) {
                     Text(
                         text = stringResource(R.string.inbox_unread_badge),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.testTag("inbox.unread.${announcement.id}"),
+                        modifier = Modifier.testTag("inbox.unread.${item.id}"),
                     )
                 }
             }
-            if (announcement.body.isNotEmpty()) {
-                Text(text = announcement.body, style = MaterialTheme.typography.bodyMedium)
+            if (item.body.isNotEmpty()) {
+                Text(text = item.body, style = MaterialTheme.typography.bodyMedium)
             }
-            announcement.createdAt.toInboxDate()?.let { date ->
+            item.createdAt.toInboxDate()?.let { date ->
                 Text(
                     text = date,
                     style = MaterialTheme.typography.labelMedium,
@@ -174,11 +176,14 @@ private fun InboxContentPreview() {
                 isLoading = false,
                 showPermissionOffBanner = true,
                 items = listOf(
-                    InboxItem(Announcement("a1", "Yeni sınavlar eklendi", "Bu hafta 40 yeni sınav.", Instant.parse("2026-10-20T09:00:00Z")), true),
-                    InboxItem(Announcement("a0", "Hoş geldin", "Geçmiş sınavlara tek yerden ulaş.", null), false),
+                    InboxEntry(previewItem("a1", "Yeni sınavlar eklendi", "Bu hafta 40 yeni sınav.", Instant.parse("2026-10-20T09:00:00Z")), true),
+                    InboxEntry(previewItem("a0", "Hoş geldin", "Geçmiş sınavlara tek yerden ulaş.", null), false),
                 ),
             ),
             onRetry = {}, onOpenSettings = {}, onBack = {},
         )
     }
 }
+
+private fun previewItem(id: String, title: String, body: String, createdAt: Instant?) =
+    InboxItem(id, InboxSource.BROADCAST, NotificationKind.GENERAL, title, body, createdAt = createdAt)

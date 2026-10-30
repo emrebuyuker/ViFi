@@ -22,11 +22,12 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **10'u tamam, 0'ı yarım, 40'ı başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **11'i tamam, 0'ı yarım, 39'u başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
-> tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
+> tamam; Hat B'de kutu deposu (`INB-01`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`,
+> ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -389,14 +390,39 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 #### Hat B — Bildirim sayfası
 
-- [ ] **`INB-01`** `FirestoreInboxReader` + `InboxStore` _(P0·L·Opus)_:
+- [x] **`INB-01`** `FirestoreInboxReader` + `InboxStore` _(P0·L·Opus)_:
   - İki kaynak (50 + 100) + `readAt` dinleyicisi (`includeMetadataChanges`, yalnız önbellekteki "yok"u atla).
   - Birleştirme (aynı id'de kişisel kopya kazanır), süre dolumu, sıralama.
   - Yükleniyor / hata / kısmi hata durumları; yeniden dene.
   - Okunmamış = `createdAt > readAt`; sayfa açılınca tek yazım.
   - Yeni hesapta "şimdi" bir kez yazılır; eski yerel okundu kimlikleri temizlenir.
 
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). `PSH-03`/`PSH-04`'teki ürün sahibi kararlarıyla aynı yolda live
+  bağlama ve eski duyuru sınıflarının silinmesi de burada yapıldı (planda `NIT-01`'deydi). Gelenler:_
+  - _**`FirestoreInboxReader`** (`core/data/firebase`): `announcements` ve `users/<uid>/inbox`
+    `orderBy(createdAt desc)` + 50/100 (süreden önce), düz dinleyici; `Timestamp` → `Instant`; ayrışmayan belge
+    atılır; hata `InboxError.Unavailable` ile akışı bitirir. İşaret `settings/inbox` `MetadataChanges.INCLUDE`,
+    önbellekteki "yok" atlanır, `ServerTimestampBehavior.ESTIMATE`; `markRead` tam `{readAt: serverTimestamp}`._
+  - _**`InboxStore`** (`core/data/inbox`, ana iş parçacığına bağlı): `InboxState` (öğeler, `isLoading`, `error`,
+    `hasPartialFailure`, `ReadMarker` Unknown/Unavailable/Known; `isUnread`, `unreadCount`) + `unreadCount` akışı.
+    Birleştirme (kişisel kopya kazanır), süre filtresi (zamanlayıcı yok; `reevaluateExpiry()` sayfa açılınca),
+    yeniden ile eskiden sıralama, tarihsiz sonda, eşitlikte id. `start(sessions)` (oturum açılınca gözlem, profil
+    beklenmez; çıkışta sıfırlama; eski uid'nin geç teslimleri yok sayılır), `retry()` (tam yeniden başlatma),
+    `markAllRead()` (en yeni okunmamışa göre tekrar koruması, hatada sıfırlanır). Yeni hesapta (sunucu "yok" dedi)
+    gözlem başına bir kez cihaz saati + `markRead`; başarıda eski `announcements.readIds` silinir
+    (`LegacyInboxReadState`), hatada korunur; okuma hatasında ve bekleyen işarette asla yazılmaz._
+  - _**Ekran:** `InboxViewModel` artık "açılıştaki okunmamışları dondurmuyor" (nokta canlı); sayfa açılınca ve açıkken
+    okunmamış > 0 oldukça `markAllRead`. `InboxBadgeViewModel` → `InboxStore.unreadCount`. Satırlar şimdilik
+    başlık/metin/tarih (`InboxEntry`); görsel, eylem, vurgu ve kısmi hata bandı `INB-03`'te._
+  - _**Bağlama/silinenler:** live `InboxReader` → `FirestoreInboxReader` (`UnavailableInboxReader` silindi);
+    `LegacyInboxReadState` live'da DataStore, mock'ta sahte. Silinenler: `AnnouncementsStore`(+test),
+    `AnnouncementsReader`, `FirestoreAnnouncementsReader`, `FakeAnnouncementsReader`, `Announcement`,
+    `AnnouncementParser`(+test), `AnnouncementReadPreferences`(+DataStore/sahte). `SessionViewModel` deposu başlatıyor._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda
+    yok). Birim testleri liveDebug 781 / mockDebug 774 / liveRelease 781, hepsi geçti (`InboxStoreTest` 29 — iOS'un 29
+    durumu birebir —, `InboxViewModelTest` 5). Tablet emülatöründe `MockGraphTest` 3/3; mock uygulamada zil
+    "6 okunmamış", sayfa en yeniden eskiye 6 satır (süresi dolan gizli), geri dönünce sayı kalktı; ANR yok. Canlıya
+    yazım yapılmadı._
 - [ ] **`INB-02`** `ExamAccessResolver` + sınav kapısı _(P0·M·Opus)_ — Bildirimden açılan sınav arşivin kilit kuralından
   geçer:
   - Abone ya da daha önce açılmış → açık.
@@ -1048,9 +1074,9 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   `ExamUnlockSheet`, izin sheet'i, "Konuma Git" sheet'i, konum seçici.
 - **Hesap:** "Bildirim Ayarları" satırı herkese; "Bildirim Gönder" yalnız admin'e (Moderasyon'un yanında).
 - **`SessionTeardown`:** yönlendirici, inbox deposu ve onay deposu sıfırlanır; izin akışı kapatılır.
-- **Silinenler:** `AnnouncementsStore`/`Reader`/`Parser`, `AnnouncementReadPreferences`, `NotificationPrompt`(+VM) ve testleri;
-  yerlerine yenileri gelir. (`InboxDeepLink` `PSH-03`'te; `PushTokenRegistration`, `DeviceTokenStore`,
-  `FirestoreDeviceTokenStore` `PSH-04`'te silindi.)
+- **Silinenler:** `NotificationPrompt`(+VM) ve testleri; yerlerine yenileri gelir. (`InboxDeepLink` `PSH-03`'te;
+  `PushTokenRegistration`, `DeviceTokenStore`, `FirestoreDeviceTokenStore` `PSH-04`'te; `Announcement*`,
+  `AnnouncementReadPreferences` `INB-01`'de silindi.)
 
 #### `NIT-02` / `NIT-03` — Testler
 - iOS test adları ve kapsamları ekte (A.11, B.9, C.8); her biri Android karşılığıyla eşlenir.

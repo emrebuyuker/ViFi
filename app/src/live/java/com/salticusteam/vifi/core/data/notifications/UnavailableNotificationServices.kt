@@ -1,12 +1,9 @@
 package com.salticusteam.vifi.core.data.notifications
 
-import com.salticusteam.vifi.core.data.repository.InboxReader
 import com.salticusteam.vifi.core.data.repository.NotificationAdminService
 import com.salticusteam.vifi.core.data.repository.NotificationEventReporter
 import com.salticusteam.vifi.core.data.repository.NotificationSettingsService
 import com.salticusteam.vifi.core.model.AudienceFacets
-import com.salticusteam.vifi.core.model.InboxError
-import com.salticusteam.vifi.core.model.InboxItem
 import com.salticusteam.vifi.core.model.NotificationAdminError
 import com.salticusteam.vifi.core.model.NotificationAudience
 import com.salticusteam.vifi.core.model.NotificationConsent
@@ -18,7 +15,6 @@ import com.salticusteam.vifi.core.model.NotificationPreview
 import com.salticusteam.vifi.core.model.NotificationSendResult
 import com.salticusteam.vifi.core.model.NotificationSettingsError
 import com.salticusteam.vifi.core.model.SentNotification
-import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -26,14 +22,6 @@ import kotlinx.coroutines.flow.flow
 // Live-flavor stand-ins for the 4.1.0 notification services until their Firebase implementations land (4.1.0
 // PSH-04, INB-01, INB-05, PRM-01, ADM-01) and NIT-01 binds those instead. Each one fails safely the way its contract
 // allows, so a live build never shows fake data and never claims a write it did not make.
-
-/** Every source fails as unreadable (the screen shows its error, never an empty inbox). */
-class UnavailableInboxReader @Inject constructor() : InboxReader {
-    override fun broadcastChanges(): Flow<List<InboxItem>> = flow { throw InboxError.Unavailable }
-    override fun personalChanges(uid: String): Flow<List<InboxItem>> = flow { throw InboxError.Unavailable }
-    override fun readMarkerChanges(uid: String): Flow<Instant?> = flow { throw InboxError.Unavailable }
-    override suspend fun markRead(uid: String): Unit = throw InboxError.Unavailable
-}
 
 /** The consent record reads as unreadable and refuses writes, so no answer is ever reported as saved. */
 class UnavailableNotificationSettingsService @Inject constructor() : NotificationSettingsService {

@@ -9,16 +9,15 @@ import com.salticusteam.vifi.core.data.firebase.FirebaseModerationBackend
 import com.salticusteam.vifi.core.data.firebase.FirebaseNotificationService
 import com.salticusteam.vifi.core.data.firebase.FirebaseProfileService
 import com.salticusteam.vifi.core.data.firebase.FirebaseSubmissionBackend
-import com.salticusteam.vifi.core.data.firebase.FirestoreAnnouncementsReader
 import com.salticusteam.vifi.core.data.firebase.FirestoreArchiveRepository
 import com.salticusteam.vifi.core.data.firebase.FirestoreUnlocksReader
 import com.salticusteam.vifi.core.data.firebase.FirestoreWalletReader
 import com.salticusteam.vifi.core.data.firebase.RtdbAppConfigReader
 import com.salticusteam.vifi.core.data.firebase.RtdbRewardsConfigReader
 import com.salticusteam.vifi.core.data.moderation.AdminModerationService
+import com.salticusteam.vifi.core.data.inbox.DataStoreLegacyInboxReadState
+import com.salticusteam.vifi.core.data.inbox.LegacyInboxReadState
 import com.salticusteam.vifi.core.data.moderation.ModerationBackend
-import com.salticusteam.vifi.core.data.preferences.AnnouncementReadPreferences
-import com.salticusteam.vifi.core.data.preferences.DataStoreAnnouncementReadPreferences
 import com.salticusteam.vifi.core.data.preferences.DataStoreOnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.DataStoreRecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.DataStoreUserPreferencesRepository
@@ -116,11 +115,7 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindAnnouncementsReader(impl: FirestoreAnnouncementsReader): AnnouncementsReader
-
-    @Binds
-    @Singleton
-    abstract fun bindAnnouncementReadPreferences(impl: DataStoreAnnouncementReadPreferences): AnnouncementReadPreferences
+    abstract fun bindLegacyInboxReadState(impl: DataStoreLegacyInboxReadState): LegacyInboxReadState
 
     @Binds
     @Singleton
