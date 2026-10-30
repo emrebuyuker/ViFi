@@ -15,6 +15,13 @@
         tools:node="remove" />
 
     <application>
+        <!--
+            Places' own autocomplete screen. The picker has its own search, so without this entry R8 and the
+            resource shrinker drop the widget's code and layouts.
+        -->
+        <activity
+            android:name="com.google.android.libraries.places.widget.AutocompleteActivity"
+            tools:node="remove" />
         <!-- Maps SDK key from local.properties (MAPS_API_KEY); empty without one, and the picker then shows no map. -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"

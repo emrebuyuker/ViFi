@@ -1,8 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!-- Turkish, like every default resource here (LOC-01); tells lint not to spell-check it as English. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="tr">
     <!-- Added in 4.1.0 — the admin's location picker (MAP-01…04), iOS LocationPicker texts. -->
     <string name="location_picker_title">Konum Seç</string>
     <string name="location_picker_close">Kapat</string>
     <string name="location_picker_unavailable_title">Harita anahtarı yapılandırılmamış</string>
     <string name="location_picker_unavailable_message">Konum seçmek için bu sürümün Google Haritalar anahtarıyla derlenmiş olması gerekir. Geliştirici ekibe haber ver.</string>
+    <string name="location_picker_cancel">İptal</string>
+    <string name="location_picker_map_description">Harita. Konum, haritanın ortasındaki iğnenin gösterdiği yerdir.</string>
+    <string name="location_picker_search">Yer ara</string>
+    <string name="location_picker_search_clear">Aramayı temizle</string>
+    <string name="location_picker_searching">Aranıyor…</string>
+    <string name="location_picker_no_results">Sonuç bulunamadı.</string>
+    <string name="location_picker_coordinates_description">Koordinat: %1$s</string>
+    <string name="location_picker_location_denied">Konum izni kapalı; harita bulunduğun yere odaklanmaz.</string>
+    <string name="location_picker_name">Yer adı (zorunlu)</string>
+    <plurals name="location_picker_name_too_long">
+        <item quantity="one">Ad en fazla %1$d karakter olabilir.</item>
+        <item quantity="other">Ad en fazla %1$d karakter olabilir.</item>
+    </plurals>
+    <string name="location_picker_address">Adres (isteğe bağlı)</string>
+    <plurals name="location_picker_address_too_long">
+        <item quantity="one">Adres en fazla %1$d karakter olabilir.</item>
+        <item quantity="other">Adres en fazla %1$d karakter olabilir.</item>
+    </plurals>
+    <string name="location_picker_address_loading">Adres alınıyor</string>
+    <string name="location_picker_confirm">Bu konumu seç</string>
+
+    <!-- Added in 4.1.0 — the composer's rows for a location action (iOS NotificationComposerLocationRows). -->
+    <string name="location_picker_composer_pick">Konum seç</string>
+    <string name="location_picker_composer_change">Değiştir</string>
+    <string name="location_picker_composer_note">Konumlu bildirimler her zaman Kampanya olarak gider ve yalnızca kampanya bildirimlerini açmış kullanıcılara ulaşır.</string>
+    <string name="location_picker_composer_summary">Seçilen konum: %1$s</string>
+    <!-- The chosen place's name and address in the summary's spoken label. -->
+    <string name="location_picker_composer_place">%1$s, %2$s</string>
 </resources>

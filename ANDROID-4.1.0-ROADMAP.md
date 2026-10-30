@@ -678,7 +678,16 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     Play-services-maps `glEsVersion 2` özelliğini ve Google Haritalar paket sorgusunu ekliyor._
   - _**Doğrulama:** `assembleDebug` geçti (anahtarsız). `GoogleMapsConfigurationTest` 6/6 (iOS
     `GoogleMapsConfigurationTests` karşılığı; `keyName` yerine "uygulama derlemenin anahtarını okur ve yazdırmaz").
-    `LocationPickerUnavailableTest` derlendi. Boyut ölçümü seçici kodu gelince `MAP-03`'te._
+    `LocationPickerUnavailableTest` derlendi._
+  - _**R8 ve boyut** (`MAP-03` ile ölçüldü; unsigned liveRelease, anahtarsız): öncesi APK 4.318.909 / AAB 9.809.477
+    bayt. Bu dalda APK 5.459.438 (+1.140.529, ~%26) / AAB 11.726.756 (+1.917.279). Seçici composer'a bağlanınca
+    (geçici keep kuralıyla ölçüldü, commit'lenmedi) APK 5.541.602 (+1.222.693, ~+1,17 MiB, %28) / AAB 11.949.107
+    (+2.139.630). Farkın çoğu kullanılsın kullanılmasın gelir: Places 4.x–5.x'in kendi R8 kuralları tüm Places SDK'sını
+    (`-keep class com.google.android.libraries.places.**`) ve tüm public Kotlin stdlib'ini (`-keep public class kotlin.**`)
+    koruyor (Places 6.0.2 Kotlin kuralını kaldırmış ama yeni Kotlin istiyor); dex +811 KB, kaynaklar +270 KB. Places'in
+    kullanılmayan `AutocompleteActivity`'si live manifestinden çıkarıldı (etkisi ~0). R8 uyarıları: Places/location'ın
+    karartılmış Kotlin sınıflarında zararsız "companion object" uyarıları; seçici composer'a bağlanana kadar Hilt'in
+    `LocationPickerViewModel` kimlik dizesi uyarısı (VM erişilebilir olunca kayboluyor, doğrulandı)._
 - [x] **`MAP-02`** `LocationPickerViewModel` _(P0·M·Opus)_:
   - Arama: 3+ karakter, 350 ms bekleme, oturum jetonu yenileme, görünür alana göre bias, `TR`.
   - Öneri seçimi (yalnız 4 alan); POI dokunuşu (adres arkada gelir).
@@ -705,9 +714,29 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _**Testler:** `LocationPickerViewModelTest` 22 (iOS 17 + 5), `LocationPickerDeviceLocationTest` 16 (iOS 13 +
     3; `withoutLocator` → "konum istenmeden hiçbir şey sorulmaz"), `LocationPickerMapPlaceTest` 14 (iOS 14),
     `PlacesSessionTest` 3 (live); liveDebug ve mockDebug'da geçti._
-- [ ] **`MAP-03`** Seçici arayüzü + composer konum satırları _(P0·M·Sonnet)_ — Ortada sabit iğne, arama + öneriler,
+- [x] **`MAP-03`** Seçici arayüzü + composer konum satırları _(P0·M·Sonnet)_ — Ortada sabit iğne, arama + öneriler,
   ayrıntı kartı (koordinat, ad, adres), "Bu konumu seç" / "İptal", izin kapalı notu. `locationPicker.*` ve
-  `notificationComposer.location.*` testTag'leri. ⟶ `MAP-02`
+  `notificationComposer.location.*` testTag'leri. ⟶ `MAP-02` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`LocationPickerScreen`** (main): VM sunum başına (`rememberSaveable` anahtar + `hiltViewModel` assisted; döndürmede
+    korunur, yeniden açılışta sıfırdan), izin isteği `RequestMultiplePermissions` (FINE + COARSE; yaklaşık yeterli),
+    yetki `checkSelfPermission` + `shouldShowRequestPermissionRationale` (bir kez reddedilen bir daha sorulmaz),
+    Geri/✕ → `onDismissed` + iptal. **`LocationPickerContent`** (stateless): ✕ "İptal" üst çubuk, harita yuvası
+    (`LocationPickerMap`; TalkBack'e tek öğe "Harita. Konum, haritanın ortasındaki iğnenin gösterdiği yerdir."), ortada
+    sabit iğne (ucu merkezde), üstte arama paneli (Aranıyor…/Sonuç bulunamadı./hata/en çok 280 dp öneri listesi,
+    temizle düğmesi), altta ayrıntı kartı (`%.5f` koordinat + "Koordinat: …", izin kapalı notu, ad/adres alanları,
+    sınır hataları plurals, adres yükleniyor göstergesi, "Bu konumu seç"; klavyede `imePadding`)._
+  - _**Live** `GoogleLocationPicker` (anahtar yoksa `LocationPickerUnavailable`, SDK burada ilk kez başlar) +
+    `GoogleLocationMap` (maps-compose: pusula/döndürme/eğme kapalı, konum noktası ve düğmesi yalnız izinliyken, POI
+    dokunuşu, durunca merkez + zoom + görünür yarıçap, yalnız jest `GestureStarted`, kamera isteği kimlikle bir kez —
+    döndürmede tekrar oynamaz, simetrik dikey iç boşluk: kamera hedefi iğnenin altında kalır, konum düğmesi arama
+    alanının altında kalmaz, karanlık tema sistemle)._
+  - _**`LocationPickerDialog`**: `LocalLocationPicker`'ı tam ekran `Dialog`'da sunar, `RegisterModalPresence` ile
+    modal sayılır, Android 15+ kenardan kenara pencere (tanıtım turuyla aynı yöntem)._
+  - _**`NotificationComposerLocationRows(location, enabled, onLocationPicked)`**: Hat D'nin `ComposerLocationRows`
+    yuvasıyla aynı imza; özet ("Seçilen konum: ad, adres"), "Konum seç"/"Değiştir" (gönderim sürerken pasif), kampanya
+    notu; seçiciyi kendisi açar. Metin anahtarları `location_picker_composer_*` (Hat D'nin dosyasıyla çakışmasın diye)._
+  - _**Testler** (derlendi, cihazda koşturulmadı): `LocationPickerContentTest` 6, `NotificationComposerLocationRowsTest`
+    5. Lint 0 hata / 56 uyarı (Türkçe metin dosyası `tools:locale="tr"`, sınır metinleri plurals)._
 - [ ] **`MAP-04`** Mock seçici _(P1·S·Sonnet)_ — Sabit yer ("ViFi Öğrenci Kafesi", 40.9903, 29.0290). Google SDK'sına ve
   konuma dokunmaz; UI testleri için. ⟶ `NCT-01`
 
