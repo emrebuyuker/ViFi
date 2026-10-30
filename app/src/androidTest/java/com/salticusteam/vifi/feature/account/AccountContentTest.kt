@@ -4,10 +4,12 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import org.junit.Assert.assertEquals
@@ -28,6 +30,8 @@ class AccountContentTest {
     private var upgradeClicks = 0
     private var manageClicks = 0
     private var notificationSettingsClicks = 0
+    private var moderationClicks = 0
+    private var notificationComposerClicks = 0
 
     private fun setContent(
         state: AccountUiState = AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67"),
@@ -47,6 +51,8 @@ class AccountContentTest {
                     onCancelReverification = { cancelReverificationCalls++ },
                     onBack = {},
                     onAbout = { aboutClicks++ },
+                    onModeration = { moderationClicks++ },
+                    onNotificationComposer = { notificationComposerClicks++ },
                     onUpgradePremium = { upgradeClicks++ },
                     onManageSubscription = { manageClicks++ },
                     onNotificationSettings = onNotificationSettings,
@@ -235,5 +241,39 @@ class AccountContentTest {
         setContent(onNotificationSettings = null)
 
         composeRule.onNodeWithTag("account.notificationSettings").assertDoesNotExist()
+    }
+
+    @Test
+    fun account_admin_opensModerationAndTheNotificationComposer() {
+        setContent(AccountUiState("Ayşe Yılmaz", "+90 532 123 45 67", isAdmin = true))
+
+        composeRule.onNodeWithTag("account.list").performScrollToNode(hasTestTag("account.notificationComposer"))
+        composeRule.onNodeWithTag("account.notificationComposer")
+            .assert(hasText("Bildirim Gönder"))
+            .assert(hasText("Duyuru ve kampanya gönder"))
+            .performClick()
+        composeRule.onNodeWithTag("account.moderation").performClick()
+
+        assertEquals(1, notificationComposerClicks)
+        assertEquals(1, moderationClicks)
+    }
+
+    @Test
+    fun account_admin_whileWorking_disablesTheAdminRows() {
+        setContent(AccountUiState(formattedPhoneNumber = "+90 532 123 45 67", isAdmin = true, isWorking = true))
+
+        composeRule.onNodeWithTag("account.list").performScrollToNode(hasTestTag("account.notificationComposer"))
+        composeRule.onNodeWithTag("account.moderation").assertIsNotEnabled()
+        composeRule.onNodeWithTag("account.notificationComposer").assertIsNotEnabled()
+    }
+
+    @Test
+    fun account_notAdmin_hidesTheAdminRows() {
+        setContent()
+
+        composeRule.onNodeWithTag("account.moderation").assertDoesNotExist()
+        composeRule.onNodeWithTag("account.notificationComposer").assertDoesNotExist()
+        // Everyone gets the settings.
+        composeRule.onNodeWithTag("account.notificationSettings").assertIsDisplayed()
     }
 }

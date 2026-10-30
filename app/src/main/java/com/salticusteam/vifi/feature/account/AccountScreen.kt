@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
@@ -68,7 +69,7 @@ import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
  * The signed-in account (iOS AccountView), opened from the home screen: the profile (opens the editor), ViFi Premium
  * (the upgrade row, or the active status with "Aboneliği Yönet"), the coin balance (hidden for a subscriber), the
  * verified phone number, Bildirim Ayarları, signing out and deleting the account (with a re-verification of the number
- * when Firebase asks for a recent sign-in). An admin also gets the Moderasyon entry.
+ * when Firebase asks for a recent sign-in). An admin also gets the Moderasyon and Bildirim Gönder entries.
  */
 @Composable
 fun AccountScreen(
@@ -76,6 +77,8 @@ fun AccountScreen(
     onAbout: () -> Unit,
     onBack: () -> Unit,
     onModeration: () -> Unit = {},
+    /** Opens the admin's Bildirim Gönder form (its history is reached from there). */
+    onNotificationComposer: () -> Unit = {},
     /** Opens the Premium paywall from the upgrade row; `null` hides the row (the active status still shows). */
     onOpenPaywall: (() -> Unit)? = null,
     /** Opens Bildirim Ayarları; `null` hides the row. */
@@ -112,6 +115,7 @@ fun AccountScreen(
         onBack = onBack,
         onAbout = onAbout,
         onModeration = onModeration,
+        onNotificationComposer = onNotificationComposer,
         onUpgradePremium = onOpenPaywall,
         // Google Play's own subscription page: change the plan, update the payment method, or cancel.
         onManageSubscription = { LegalLinks.open(context, PremiumLinks.MANAGE_SUBSCRIPTIONS_URL) },
@@ -135,6 +139,7 @@ fun AccountContent(
     modifier: Modifier = Modifier,
     onAbout: () -> Unit = {},
     onModeration: () -> Unit = {},
+    onNotificationComposer: () -> Unit = {},
     onUpgradePremium: (() -> Unit)? = null,
     onManageSubscription: () -> Unit = {},
     onNotificationSettings: (() -> Unit)? = null,
@@ -191,6 +196,11 @@ fun AccountContent(
             if (state.isAdmin) {
                 item(key = "moderation") {
                     ModerationRow(enabled = !state.isWorking, onClick = onModeration)
+                    HorizontalDivider()
+                }
+                // Next to Moderasyon, in the admin's own group (iOS `moderationSection`).
+                item(key = "notificationComposer") {
+                    NotificationComposerRow(enabled = !state.isWorking, onClick = onNotificationComposer)
                     HorizontalDivider()
                 }
             }
@@ -419,6 +429,23 @@ private fun ModerationRow(enabled: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .testTag("account.moderation"),
+    )
+}
+
+/** "Bildirim Gönder": the admin's announcement and campaign composer (iOS `moderationSection`). */
+@Composable
+private fun NotificationComposerRow(enabled: Boolean, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = {
+            Text(text = stringResource(R.string.notification_composer_account_row_title), fontWeight = FontWeight.SemiBold)
+        },
+        supportingContent = { Text(stringResource(R.string.notification_composer_account_row_subtitle)) },
+        leadingContent = { IconBadge(icon = Icons.Filled.Campaign) },
+        trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .testTag("account.notificationComposer"),
     )
 }
 

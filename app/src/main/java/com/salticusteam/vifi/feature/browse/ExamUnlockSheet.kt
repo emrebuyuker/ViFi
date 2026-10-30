@@ -48,6 +48,7 @@ import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
 import com.salticusteam.vifi.core.model.ExamLock
 import com.salticusteam.vifi.core.model.ExamUnlockError
+import com.salticusteam.vifi.core.navigation.RegisterModalPresence
 
 /**
  * Shown when the user taps a locked exam (iOS ExamUnlockSheet): offers to unlock it with coins, or — when the
@@ -67,6 +68,8 @@ fun ExamUnlockSheet(
     onGoPremium: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
+    // It may hold a purchase: a tapped push and the notification flow wait for it, never close it (archive and inbox).
+    RegisterModalPresence()
     // The sheet state keeps the first lambda, so it reads the latest busy flag through this.
     val isBusy by rememberUpdatedState(state.isBusy)
     val sheetState = rememberModalBottomSheetState(

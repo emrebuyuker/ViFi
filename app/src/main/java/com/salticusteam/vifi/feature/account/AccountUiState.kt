@@ -24,7 +24,7 @@ data class AccountUiState(
     val codeText: String = "",
     /** When the cooldown after the last re-verification code ends; `null` when another may be sent now. */
     val resendAvailableAt: Instant? = null,
-    /** The user carries the `admin` claim: the Moderasyon entry is shown. */
+    /** The user carries the `admin` claim: the Moderasyon and Bildirim Gönder entries are shown. */
     val isAdmin: Boolean = false,
     /** The live spendable coin balance (`wallets/<uid>`), `0` until the wallet is read. */
     val coinBalance: Int = 0,

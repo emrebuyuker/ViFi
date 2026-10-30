@@ -26,8 +26,8 @@ interface LocationPicker {
 }
 
 /**
- * Stands in until the real pickers are bound (the Google one in live, a fixed-place stub in mock): it offers no
- * place and backs out at once, so a composer opening it simply keeps its current location.
+ * The picker where none is provided (previews, UI tests without one; the app always provides its flavor's): it
+ * offers no place and backs out at once, so a composer opening it simply keeps its current location.
  */
 object UnavailableLocationPicker : LocationPicker {
 

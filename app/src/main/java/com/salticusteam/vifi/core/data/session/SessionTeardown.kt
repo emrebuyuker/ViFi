@@ -19,7 +19,13 @@ import kotlinx.coroutines.launch
  *
  * The navigation half of iOS `router.popToRoot()` needs no code here: `AppRoot` drops the whole archive stack
  * on sign-out and keys the next one by user. Downloaded files are kept; only account deletion purges them
- * (`LocalDataCleaner`). Wallet, unlocks and announcements resets join here when their stores land.
+ * (`LocalDataCleaner`).
+ *
+ * The stores that follow the session reset themselves on sign-out, so nothing of theirs is repeated here: the coin
+ * wallet and the unlocks, and the notification stores `SessionViewModel` starts — the push-tap router (a waiting tap
+ * is dropped), the inbox, the campaign consent (iOS RootView's `notificationSettings.reset()`) and this install's
+ * device registration. The notification flow on screen is ended by its presenter (`NotificationPromptViewModel`,
+ * iOS `notificationPrompts.dismiss()`); the device-wide prompt history stays, as on iOS.
  */
 @Singleton
 class SessionTeardown @Inject constructor(

@@ -19,9 +19,6 @@ sealed class NotificationAdminError(val userMessage: String) : Exception(userMes
     /** The server answered with something the app cannot read. */
     data object UnexpectedResponse : NotificationAdminError("Sunucudan beklenmeyen bir yanıt alındı.")
 
-    /** The service is not available in this build yet. */
-    data object Unavailable : NotificationAdminError("Bildirim gönderme henüz kullanılamıyor.")
-
     /** Any other failure; never carries the server's or the SDK's technical (English) message. */
     data object Unknown : NotificationAdminError(GENERIC_ERROR_MESSAGE)
 }

@@ -85,9 +85,9 @@ import com.salticusteam.vifi.feature.profile.CatalogPicker
  * The "Sınav Ekle" flow (iOS AddExamView): pick the school (pre-filled from the profile, list-only), the lesson
  * (archive or typed), the exam name / year / kind, attach image pages or a PDF, and submit it for moderation.
  * Opened from the home screen and from the unlock sheet's "Sınav Ekle", which passes the locked exam's lesson as
- * [archiveContext] to pre-fill the school and lesson rows; [onClose] returns to where it came from,
- * also after a successful submit. Back and close are disabled while the submit is being queued; once it uploads in
- * the background the form may be closed (the upload goes on and its outcome is notified).
+ * [archiveContext] to pre-fill the school and lesson rows; [onClose] returns to where it came from, and so does
+ * [onSubmitted] after a successful submit. Back and close are disabled while the submit is being queued; once it
+ * uploads in the background the form may be closed (the upload goes on and its outcome is notified).
  */
 @Composable
 fun AddExamScreen(
@@ -95,6 +95,8 @@ fun AddExamScreen(
     profile: UserProfile?,
     archiveContext: ArchivePath?,
     onClose: () -> Unit,
+    /** The submission was stored: closes the form like [onClose], and may follow up (the notification re-ask). */
+    onSubmitted: () -> Unit = onClose,
     viewModel: AddExamViewModel = hiltViewModel<AddExamViewModel, AddExamViewModel.Factory> { factory ->
         factory.create(ownerId, profile, archiveContext)
     },
@@ -109,7 +111,7 @@ fun AddExamScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                AddExamEvent.Submitted -> onClose()
+                AddExamEvent.Submitted -> onSubmitted()
             }
         }
     }

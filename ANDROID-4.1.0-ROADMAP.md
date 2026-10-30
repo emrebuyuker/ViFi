@@ -22,13 +22,14 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **34'ü tamam, 0'ı yarım, 16'sı başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **35'i tamam, 0'ı yarım, 15'i başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
 > tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam; Hat C (`PRM-01`…`05`) tamam. Hat C'nin kalanı, D
 > (`ADM-01`…`06`), E (`MAP-01`…`04`) ve F (`NLG-01`…`04`) 30 Ekim'de ayrı oturumlarda paralel yapıldı ve `v-4.1.0`'a
-> birleştirildi; senkron noktası 2 açıldı, sıradaki iş `NIT-01`. Birleştirmede hatların yeni UI testleri tablet
+> birleştirildi; senkron noktası 2 açıldı. `NIT-01` (canlı bağlama) 31 Ekim'de tamamlandı; sıradaki iş `NIT-02`,
+> `NIT-03` ve `NIT-04` (paralel). Birleştirmede hatların yeni UI testleri tablet
 > emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
@@ -964,7 +965,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 ### Faz 2 — Entegrasyon ve Testler
 
-- [ ] **`NIT-01`** Canlı bağlama _(P0·M·Opus)_:
+- [x] **`NIT-01`** Canlı bağlama _(P0·M·Opus)_:
   - ~~`AppRoot`/`ViFiNavHost`: yönlendirici → kapılardan sonra ve modal yokken Inbox (`launchSingleTop`).~~ `PSH-03`'te
     yapıldı (30 Ekim, ürün sahibi kararı).
   - İzin akışı sunucusu `ArchiveHost`'ta (turdan sonra). Bildirim sayfasında onay tekrarı (700 ms, vurgu yoksa).
@@ -972,7 +973,55 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - Mevcut modalların `ModalPresence`'a kaydı. `SessionTeardown` sıfırlamaları.
   - Live DI'da `Unavailable*` → gerçek sınıf; eski sınıfların silinmesi (cihaz kaydı `PSH-04`'te yapıldı).
 
-  ⟶ Hat A…E
+  ⟶ Hat A…E ✅ _Tamamlandı (2026-10-31, Opus). Gelenler:_
+  - _**Önceden yapılmış olanlar (tekrarlanmadı):** `SessionViewModel` cihaz kaydını (`PSH-04`), inbox'ı (`INB-01`) ve
+    onay deposunu (`PRM-01`) oturumla başlatıyor; izin akışı sunucusu `ArchiveHost`'ta (`PRM-03`). Çıkışta
+    yönlendirici, inbox ve onay deposu kendi oturum takipleriyle sıfırlanıyor, akışı sunucu kapatıyor (testleri
+    hatlarda). Bunlar `SessionTeardown`'a ikinci kez eklenmedi; KDoc'u bu düzeni anlatıyor (cüzdan ve kilitler de
+    aynı desende)._
+  - _**Bildirim sayfasında onay tekrarı:** sayfa öne her gelişinde (`LifecycleResumeEffect`) `InboxViewModel`, sayfa
+    **üstünde kayıtlı modal yokken 700 ms** öndeyse ve push vurgusu yoksa `inboxConsentReask()` çağırır (vade ve
+    kampanya kontrolü koordinatörde). Sayfa duraklayınca (kapanınca, açtığı ekranın altında kalınca, uygulama arka
+    plana gidince) deneme iptal olur. Android farkı: iOS tekrarı bildirim sayfasının üstünde gösteriyor; burada ortak
+    sunucu gösterdiği için, sayfanın açtığı bir sheet (kilit, harita seçimi) bekleme süresini baştan başlatır.
+    Emülatörde görülen hata bununla çözüldü: kilit sheet'inden Premium'a geçilince tekrar paywall'un üstüne
+    çıkıyordu. Sebep, NavHost'un 700 ms'lik solma geçişinde sayfanın kompozisyonda kalmasıydı. Gösterilmeyen tekrar
+    kullanılmış sayılmaz, sayfa yeniden öne gelince sunulur._
+  - _**Sınav Ekle:** `AddExamScreen(onSubmitted)` eklendi (varsayılanı `onClose`). `AppRoot` önce formu kapatır, sonra
+    `NotificationPromptViewModel.onExamSubmitted()` → `examWasSubmitted()` çağırır (iOS `AddExamView.onSubmitted`:
+    `dismiss()` + Task). Sunucunun Activity kapsamlı VM'i `ArchiveHost`'ta bir kez alınıp iki yere veriliyor._
+  - _**`ModalPresence` kayıtları:** tanıtım turu (`OnboardingScreen`; ilk açılış ve Hakkında'dan tekrar), isteğe bağlı
+    güncelleme diyaloğu ve `ExamUnlockSheet` (Arşiv ve bildirim sayfası). Konum seçici `MAP-03`'te
+    (`LocationPickerDialog`) zaten kayıtlıydı._
+  - _**Hesap:** admin'e Moderasyon'un hemen altında "Bildirim Gönder" / "Duyuru ve kampanya gönder"
+    (`account.notificationComposer`, megafon ikonu, silme sürerken pasif); "Bildirim Ayarları" herkese. Gönderim
+    Geçmişi composer'daki "Geçmiş" düğmesiyle açılır (iOS'ta da Hesap'ta ayrı satırı yok)._
+  - _**`ViFiNavHost` yuvaları:** `notificationSettings` → `NotificationSettingsScreen`; `notificationComposer` →
+    `NotificationComposerScreen` ("Geçmiş" → `NotificationHistory`, Konum satırları
+    `NotificationComposerLocationRows`); `notificationHistory` → `NotificationHistoryScreen`._
+  - _**Live DI:** `NotificationAdminService` → `FirebaseNotificationAdminService`, `LocationPicker` →
+    `GoogleLocationPicker` (`@Binds`). Silinenler: `UnavailableNotificationServices.kt` ve yalnız ona hizmet eden
+    `NotificationAdminError.Unavailable` (iOS'ta da kullanılmıyor). `UnavailableLocationPicker` sağlayıcısız
+    önizleme ve testlerin varsayılanı olarak kaldı. Mock'ta `LocationPicker` → `MockLocationPicker`, diğerleri Fake
+    (`MockGraphTest` buna göre genişletildi)._
+  - _**Manifest:** ana manifestte Hat A'nın FCM meta-data'sı ve servisi var; konum izni ve Maps anahtarı yalnız live
+    manifestinde. Birleşik manifestler kontrol edildi: live'da yalnız `ACCESS_COARSE_LOCATION` (FINE ve
+    `ACCESS_WIFI_STATE` yok), `geo.API_KEY` ve FCM satırları var. Mock'ta konum izni, anahtar ve Firebase başlatıcısı
+    yok. `POST_NOTIFICATIONS` açıklaması güncellendi._
+  - _**Kapsam dışı:** `ADM-04`'ün isteğe bağlı AndroidX `ExifInterface` notu (yeni bağımlılık gerektiriyor)._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda
+    yok). Birim testleri liveDebug 1080 / mockDebug 1064 / liveRelease 1080, hepsi geçti (+7:
+    `InboxViewModelTest` +5 — 700 ms, vurgu, sayfadan çıkış, üstteki sheet, vade/kampanya —,
+    `NotificationPromptViewModelTest` +2 — gönderim sonrası tekrar ve vadesizlik). Tablet emülatöründe (API 37) tam
+    enstrümanlı paket mock 187/187, live 182/182 (`AccountContentTest` +3 admin satırları, `MockGraphTest` mock
+    seçiciyi doğruluyor); son değişiklikten sonra bildirim sayfası/Hesap/graf sınıfları mock'ta 30/30. Mock
+    uygulamada: tur + `vifi_notifications_prompt` (tur açıkken sayfa yok, atlanınca 1/2); `vifi_optional_update`
+    (diyalog açıkken sayfa bekledi, "Daha Sonra" ile geldi); `vifi_consent_reask` (sayfa açılınca 2/2; push vurgusuyla
+    açılışta gelmedi; kilit sheet'i açıkken bekledi, ✕ ile kapanınca geldi; sheet'ten Premium'a geçince paywall'da
+    gelmedi, dönüşte geldi); `vifi_admin` (Hesap'ta Moderasyon › Bildirim Gönder › Bildirim Ayarları; composer, Konum
+    → mock seçici → seçilen yer, Geçmiş, Bildirim Ayarları açıldı); `vifi_notifications_reask` + PDF'li gerçek
+    gönderim (form kapandı, "Onaylanınca haber verelim mi?" geldi). Canlıya yazım yapılmadı; live derleme Maps
+    anahtarsız (seçici "yapılandırılmamış" der; `NOPS-01`)._
 - [ ] **`NIT-02`** Birim testleri _(P0·M·Sonnet)_ — Hatların testleri + iOS test listelerinin (ek) tam karşılığı.
   `AnalyticsLimitsTest` (6 olay, ekran sayısı 15 → 18). Üç variant'ta tam paket. ⟶ `NIT-01`
 - [ ] **`NIT-03`** UI testleri + emülatör _(P0·M·Sonnet)_ — iOS `InboxUITests` (13), `NotificationPermissionUITests` (9),
@@ -1485,7 +1534,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   `ExamUnlockSheet`, konum seçici. (İzin sheet'i `PRM-03`'te, "Konuma Git" sheet'i `INB-04`'te kaydedildi.)
 - **Hesap:** "Bildirim Ayarları" satırı herkese; "Bildirim Gönder" yalnız admin'e (Moderasyon'un yanında).
 - **`SessionTeardown`:** yönlendirici, inbox deposu ve onay deposu sıfırlanır; izin akışı kapatılır (sunucu çıkışta
-  zaten kapatıyor, `PRM-03`).
+  zaten kapatıyor, `PRM-03`). _NIT-01'de doğrulandı: depolar kendi oturum takipleriyle sıfırlanıyor; tekrar
+  eklenmedi._
 - **Silinenler:** — (`NotificationPrompt` AlertDialog'u `PRM-03`'te silindi, VM'i sunucuya dönüştü; `InboxDeepLink` `PSH-03`'te;
   `PushTokenRegistration`, `DeviceTokenStore`, `FirestoreDeviceTokenStore` `PSH-04`'te; `Announcement*`,
   `AnnouncementReadPreferences` `INB-01`'de silindi.)

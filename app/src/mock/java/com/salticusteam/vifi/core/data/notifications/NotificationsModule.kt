@@ -13,12 +13,12 @@ import com.salticusteam.vifi.core.data.repository.fake.FakeInboxReader
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationAdminService
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationEventReporter
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationSettingsService
+import com.salticusteam.vifi.core.maps.MockLocationPicker
 import com.salticusteam.vifi.core.model.NotificationConsent
 import com.salticusteam.vifi.core.notifications.DeviceRegistrationStore
 import com.salticusteam.vifi.core.util.LaunchArg
 import com.salticusteam.vifi.core.util.LaunchArgs
 import com.salticusteam.vifi.feature.notificationcomposer.locationpicker.LocationPicker
-import com.salticusteam.vifi.feature.notificationcomposer.locationpicker.UnavailableLocationPicker
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -85,8 +85,8 @@ object NotificationsModule {
     @Singleton
     fun provideNotificationAdminService(): NotificationAdminService = FakeNotificationAdminService()
 
-    /** The fixed-place mock picker replaces this with MAP-04; the Google SDKs never start in the mock flavor. */
+    /** One fixed place, no map and no location read; the Google SDKs are not even in the mock flavor. */
     @Provides
     @Singleton
-    fun provideLocationPicker(): LocationPicker = UnavailableLocationPicker
+    fun provideLocationPicker(): LocationPicker = MockLocationPicker()
 }

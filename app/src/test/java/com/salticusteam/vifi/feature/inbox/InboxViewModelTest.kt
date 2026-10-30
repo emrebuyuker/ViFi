@@ -7,13 +7,16 @@ import com.salticusteam.vifi.core.data.billing.SubscriptionStore
 import com.salticusteam.vifi.core.data.coins.ExamUnlocksStore
 import com.salticusteam.vifi.core.data.inbox.InboxStore
 import com.salticusteam.vifi.core.data.notifications.NotificationEventTracker
+import com.salticusteam.vifi.core.data.notifications.settings.NotificationSettingsStore
 import com.salticusteam.vifi.core.data.preferences.fake.FakeLegacyInboxReadState
+import com.salticusteam.vifi.core.data.preferences.fake.FakeNotificationPromptHistory
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.data.repository.fake.FakeInboxReader
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationEventReporter
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationService
+import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationSettingsService
 import com.salticusteam.vifi.core.data.repository.fake.FakeSubscriptionService
 import com.salticusteam.vifi.core.data.repository.fake.FakeUnlocksReader
 import com.salticusteam.vifi.core.data.session.SessionState
@@ -24,14 +27,20 @@ import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.InboxItem
 import com.salticusteam.vifi.core.model.InboxSource
 import com.salticusteam.vifi.core.model.NotificationAction
+import com.salticusteam.vifi.core.model.NotificationConsent
 import com.salticusteam.vifi.core.model.NotificationEvent
 import com.salticusteam.vifi.core.model.NotificationKind
 import com.salticusteam.vifi.core.model.NotificationPermission
+import com.salticusteam.vifi.core.model.NotificationPromptSource
+import com.salticusteam.vifi.core.navigation.ModalPresence
 import com.salticusteam.vifi.feature.browse.ExamUnlockEvent
+import com.salticusteam.vifi.feature.notifications.NotificationPrompt
+import com.salticusteam.vifi.feature.notifications.NotificationPromptCoordinator
 import com.salticusteam.vifi.testing.MainDispatcherRule
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import kotlin.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,6 +49,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -66,6 +76,10 @@ class InboxViewModelTest {
     // When the fake server stamps a marker write.
     private var serverNow = now
     private val reader = FakeInboxReader(now = { serverNow })
+    // The device-wide prompt history, on the real clock (a re-ask is due 30 days after a "no").
+    private val promptHistory = FakeNotificationPromptHistory()
+    private lateinit var prompts: NotificationPromptCoordinator
+    private val modals = ModalPresence()
 
     @Test
     fun `opening reports the screen and marks everything read in one write`() = runTest(UnconfinedTestDispatcher()) {
@@ -287,6 +301,92 @@ class InboxViewModelTest {
             assertEquals(listOf(NotificationEvent.ACTION_TAPPED to "p-exam-locked"), events.reports)
         }
 
+    // --- Consent re-ask (NIT-01, iOS ConsentReaskPresenter) ---
+
+    @Test
+    fun `the consent is asked again 700 ms after the page shows, once due`() = runTest(UnconfinedTestDispatcher()) {
+        promptHistory.consentDeclinedAt = Instant.now().minus(31, ChronoUnit.DAYS)
+        val (sut, _) = create(consent = NotificationConsent(marketing = false))
+        sut.uiState.onEach { }.launchIn(backgroundScope)
+
+        sut.onScreenResumed()
+        advanceTimeBy(InboxViewModel.CONSENT_REASK_DELAY_MS - 1)
+        assertNull(prompts.pending.value)
+
+        advanceUntilIdle()
+        assertEquals(NotificationPrompt.Kind.CONSENT, prompts.pending.value?.kind)
+        assertEquals(NotificationPromptSource.REASK, prompts.pending.value?.source)
+    }
+
+    @Test
+    fun `someone reading a tapped push is not asked`() = runTest(UnconfinedTestDispatcher()) {
+        promptHistory.consentDeclinedAt = Instant.now().minus(31, ChronoUnit.DAYS)
+        val (sut, _) = create(consent = NotificationConsent(marketing = false))
+        sut.uiState.onEach { }.launchIn(backgroundScope)
+
+        sut.onHighlightRequested("p-paywall")
+        sut.onScreenResumed()
+        advanceUntilIdle()
+
+        assertTrue(prompts.isFree)
+    }
+
+    @Test
+    fun `leaving the page before its moment drops the re-ask, the next showing offers it`() =
+        runTest(UnconfinedTestDispatcher()) {
+            promptHistory.consentDeclinedAt = Instant.now().minus(31, ChronoUnit.DAYS)
+            val (sut, _) = create(consent = NotificationConsent(marketing = false))
+            sut.uiState.onEach { }.launchIn(backgroundScope)
+
+            sut.onScreenResumed()
+            advanceTimeBy(InboxViewModel.CONSENT_REASK_DELAY_MS / 2)
+            sut.onScreenPaused()
+            advanceUntilIdle()
+            assertTrue(prompts.isFree)
+
+            sut.onScreenResumed()
+            advanceUntilIdle()
+            assertEquals(NotificationPrompt.Kind.CONSENT, prompts.pending.value?.kind)
+        }
+
+    @Test
+    fun `a sheet over the page holds the re-ask until the page has been clear for 700 ms`() =
+        runTest(UnconfinedTestDispatcher()) {
+            promptHistory.consentDeclinedAt = Instant.now().minus(31, ChronoUnit.DAYS)
+            val (sut, _) = create(consent = NotificationConsent(marketing = false))
+            sut.uiState.onEach { }.launchIn(backgroundScope)
+
+            sut.onScreenResumed()
+            advanceTimeBy(InboxViewModel.CONSENT_REASK_DELAY_MS / 2)
+            // The unlock sheet opens before the moment comes, and stays a while.
+            modals.opened()
+            advanceTimeBy(InboxViewModel.CONSENT_REASK_DELAY_MS * 3)
+            assertTrue(prompts.isFree)
+
+            // Closed: the wait starts over, so leaving right after it (the exam it unlocked) asks nothing.
+            modals.closed()
+            advanceTimeBy(InboxViewModel.CONSENT_REASK_DELAY_MS - 1)
+            assertTrue(prompts.isFree)
+
+            advanceUntilIdle()
+            assertEquals(NotificationPrompt.Kind.CONSENT, prompts.pending.value?.kind)
+        }
+
+    @Test
+    fun `nothing is asked again before 30 days or with campaigns on`() = runTest(UnconfinedTestDispatcher()) {
+        promptHistory.consentDeclinedAt = Instant.now().minus(10, ChronoUnit.DAYS)
+        val (tooSoon, _) = create(consent = NotificationConsent(marketing = false))
+        tooSoon.onScreenResumed()
+        advanceUntilIdle()
+        assertTrue(prompts.isFree)
+
+        promptHistory.consentDeclinedAt = Instant.now().minus(31, ChronoUnit.DAYS)
+        val (campaignsOn, _) = create(consent = NotificationConsent(marketing = true))
+        campaignsOn.onScreenResumed()
+        advanceUntilIdle()
+        assertTrue(prompts.isFree)
+    }
+
     private fun InboxUiState.entry(id: String): InboxEntry = items.first { it.item.id == id }
 
     private fun personal(id: String, action: NotificationAction) = InboxItem(
@@ -296,6 +396,7 @@ class InboxViewModelTest {
     private fun TestScope.create(
         permission: NotificationPermission = NotificationPermission.AUTHORIZED,
         subscribed: Boolean = false,
+        consent: NotificationConsent? = null,
     ): Pair<InboxViewModel, InboxStore> {
         val scope = backgroundScope
         val store = InboxStore(reader, FakeLegacyInboxReadState(), Clock.fixed(now, ZoneOffset.UTC), scope)
@@ -310,6 +411,11 @@ class InboxViewModelTest {
         )
         val tracker = NotificationEventTracker(events, dataStore, scope)
         val session = SessionStore(FakeAuthService(), scope)
-        return InboxViewModel(store, FakeNotificationService(permission), subscription, gate, session, tracker, analytics) to store
+        val notifications = FakeNotificationService(permission)
+        val settings = NotificationSettingsStore(FakeNotificationSettingsService(consent), scope)
+            .apply { start(MutableStateFlow(SessionState.SignedIn(FakeAuthService.DEFAULT_USER))) }
+        prompts = NotificationPromptCoordinator(notifications, settings, promptHistory)
+        val sut = InboxViewModel(store, notifications, subscription, gate, session, tracker, analytics, prompts, modals)
+        return sut to store
     }
 }
