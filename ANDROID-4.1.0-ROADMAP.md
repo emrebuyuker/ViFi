@@ -643,14 +643,32 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _**Testler:** `FirebaseNotificationAdminServiceTest` 22 (iOS'un 8'i + 5 Android eşleme + 9 MockK'li çağrı
     testi: zaman aşımı, payload, sorgu şekli, görselin üzerine yazılmaması); cihazda koşacak
     `FirebaseNotificationAdminErrorMappingTest` 3 (kod adı köprüsü; yalnız derlendi)._
-- [ ] **`ADM-02`** Composer ViewModel + taslak kuralları _(P0·L·Opus)_:
+- [x] **`ADM-02`** Composer ViewModel + taslak kuralları _(P0·L·Opus)_:
   - Doğrulama sırası ve mesajları; karakterler **kod noktasıyla** sayılır (sunucu gibi).
   - Konumda Tür kilidi; kademeli kitle; tahmini kişi sayısı.
   - "Sessiz düşürme yok" kuralı (aksiyon seçildiyse geçerli olmalı).
   - Zamanlama +1 sa / geçerlilik +7 gün.
   - Önizleme → onay → gönder; test gönderimi; taslak id ömrü; görsel-id kuralı; sonuç işleme; çift dokunma.
 
-  ⟶ `ADM-01`
+  ⟶ `ADM-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationComposerUiState`** (`feature/notificationcomposer`): formun alanları + türetilmiş değerler (taslak,
+    `issue`/`visibleIssue`, `canSend`/`canSendTest`, sayaçlar `trim` + kod noktası, Türkçe sıralı seçici listeleri,
+    tahmini kitle, Tür kilidi/`effectiveKind`, test taslağı). Zaman kontrolleri durumdaki `now`'a göre; her
+    değişiklikte ve Gönder/test dokunuşunda yenilenir (bekleyen form geçmişe kayan zamanı dokunuşta yakalar).
+    Geri bildirim metin değil tip: `ComposerError` (`Message(userMessage)` / `SendFailed`) ve `ComposerSuccess`
+    (`Sent(n)` / `Scheduled(at)` / `TestSent`); metinleri ve tarih biçimi arayüzde (`ADM-03`)._
+  - _**`NotificationComposerViewModel`**: iOS akışı birebir — facets açılışta bir kez (hata → "Tekrar dene"),
+    kademeli kitle sıfırlaması, onay kaydı ayrı (`confirmation` + `isConfirming`), görsel yalnız onaydan sonra taslağın
+    kendi id'siyle yüklenir, sonuç işleme (`sent`/`sending` → sıfırla; `scheduled` → sayısız mesaj + sıfırla;
+    `failed`/`canceled` → yeni id, form kalır; hata → aynı id), test her dokunuşta yeni id + eksik segment "herkes",
+    görsel-id kuralı, çift dokunma koruması, `NotificationComposer` ekran adı. Sessiz saat istemcide hesaplanmaz._
+  - _**Görsel kodlayıcı** (`core/data/notifications/admin`): `NotificationImageEncoder` + `ContentResolverNotificationImageEncoder`
+    (`SubmissionJpegEncoder` kuralları, 1600 px, ≤ 1 MiB, EXIF, IO'da; okunamadı/kullanılamıyor ayrımı) +
+    iki flavor'ın ortak `NotificationAdminModule`'ü. VM'in Hilt grafiği için burada geldi; seçici arayüzü `ADM-04`'te._
+  - _**Testler** (iOS karşılıkları + Android ekleri): `NotificationComposerViewModelTest` 13 (10 + kod noktası,
+    zamanlamanın geçerliliği taşıması, ekran adı), `…SendFlowTest` 16 (15 + geçmişe kayan zaman),
+    `…AttachmentTest` 16 (13 + eski kodlamanın yenisini ezmemesi, hazırlanırken gönderim kapalı, okunamayan görsel),
+    `…KindLockTest` 7, `…LocationTest` 8; iOS `StubNotificationAdminService` karşılığı test çifti._
 - [ ] **`ADM-03`** Composer arayüzü _(P0·M·Sonnet)_ — Bölümler: Tür, İçerik, Hedef kitle, Eylem, Görsel, Zamanlama,
   geri bildirim, Gönder / Bana test gönder. Onay diyaloğu; `notificationComposer.*` testTag'leri; `NotificationComposer`
   ekran adı. ⟶ `ADM-02`
