@@ -162,7 +162,7 @@ class InboxViewModelTest {
     }
 
     @Test
-    fun `Premium, link and place actions lead there`() = runTest(UnconfinedTestDispatcher()) {
+    fun `Premium, add-exam and link actions lead there`() = runTest(UnconfinedTestDispatcher()) {
         reader.setPersonal(
             listOf(
                 personal("p-add", NotificationAction.AddExam),
@@ -180,11 +180,27 @@ class InboxViewModelTest {
             assertEquals(InboxEvent.OpenAddExam(lesson = null), awaitItem())
             sut.onAction(sut.uiState.value.entry("p-url"))
             assertEquals(InboxEvent.OpenUrl("https://vifi.app/kampanya"), awaitItem())
-            sut.onAction(sut.uiState.value.entry("p-location"))
-            assertEquals("ViFi Öğrenci Kafesi", (awaitItem() as InboxEvent.ChooseMapsApp).location.name)
             sut.onAction(sut.uiState.value.entry("a1"))
             expectNoEvents()
         }
+    }
+
+    @Test
+    fun `a place action offers the maps app choice until one is picked or declined`() = runTest(UnconfinedTestDispatcher()) {
+        val (sut, _) = create()
+        sut.uiState.onEach { }.launchIn(backgroundScope)
+        advanceUntilIdle()
+
+        sut.events.test {
+            sut.onAction(sut.uiState.value.entry("p-location"))
+            advanceUntilIdle()
+            expectNoEvents()
+        }
+        assertEquals("ViFi Öğrenci Kafesi", sut.uiState.value.locationChoice?.name)
+
+        sut.onLocationChoiceDismissed()
+        advanceUntilIdle()
+        assertNull(sut.uiState.value.locationChoice)
     }
 
     @Test

@@ -22,12 +22,12 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **13'ü tamam, 0'ı yarım, 37'si başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **14'ü tamam, 0'ı yarım, 36'sı başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
-> tamam; Hat B'de kutu deposu, sınav kapısı ve sayfa arayüzü (`INB-01`…`03`) tamam. Faz 0'da açık kalan tek iş
-> Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
+> tamam; Hat B'de `INB-01`…`04` (kutu deposu, sınav kapısı, sayfa arayüzü, "Konuma Git") tamam. Faz 0'da açık
+> kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -477,9 +477,26 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     kartlar/rozetler/etiket/görsel/düğmeler; `vifi_open_notification p-location` vurgusu; ücretsiz sınav açıldı,
     Geri dersin listesine döndü; kilitli sınavda kilit sheet'i, coin ile açınca görüntüleyici; Premium → paywall;
     `vifi_subscribed` ile Premium düğmesi yok, kilitli sınav doğrudan açıldı. ANR yok._
-- [ ] **`INB-04`** "Konuma Git" alt sayfası + harita bağlantıları _(P1·S·Sonnet)_ — `NDEC-03`: Google Haritalar
+- [x] **`INB-04`** "Konuma Git" alt sayfası + harita bağlantıları _(P1·S·Sonnet)_ — `NDEC-03`: Google Haritalar
   (uygulama → web, `query_place_id`), sistem `geo:` seçicisi, Vazgeç. iOS `MapsLinks` sayı biçimi ve kodlama kuralları.
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`MapsLinks`** (saf): Google Haritalar `https://www.google.com/maps/search/?api=1&query=<lat>%2C<lng>`
+    (+ `&query_place_id=<kodlu id>`), `geo:<lat>,<lng>?q=<lat>,<lng>(<kodlu ad>)`; sayılar 6 ondalık, sondaki
+    sıfır/nokta atılır, `-0` → `0`, `Locale.ROOT`; kodlama yalnız `A-Za-z0-9-._~`'yi korur._
+  - _**`LocationChoiceSheet`**: "Konumu hangi uygulamada açmak istersin?", ad (+ adres ikinci satırda), "Google
+    Haritalar" (birincil), "Başka bir harita uygulaması", "Vazgeç" (`inbox.location.google|other|cancel`). Seçim
+    sheet'i kapatır, "Vazgeç" sayfayı açık bırakır; `RegisterModalPresence` ile sayılır. Seçim ViewModel durumunda
+    (`locationChoice`), ekran dönünce kaybolmaz._
+  - _**Açılış:** Google → `setPackage("com.google.android.apps.maps")`, yoksa aynı URL tarayıcıda. Diğer →
+    `geo:` + `Intent.createChooser`; işleyen uygulama yoksa Google web. Manifest `<queries>`'e `geo:` eklendi
+    (Android 11+ paket görünürlüğü)._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı. Birim testleri
+    liveDebug 813 / mockDebug 806 / liveRelease 813, hepsi geçti (`MapsLinksTest` 9 — iOS'un 9'u, Apple yerine
+    `geo:` —, `InboxViewModelTest` +1). Tablet emülatöründe `LocationChoiceContentTest` 2/2 + `InboxContentTest`
+    6/6. Mock uygulamada "Konuma Git" sheet'i açıldı, "Vazgeç" kapattı; "Google Haritalar" Maps uygulamasını
+    açtı; "Başka bir harita uygulaması" `geo:` ile (tek işleyen Maps olduğu için seçici atlandı) iğneyi doğru
+    yere ve Türkçe adla koydu._
+
 - [ ] **`INB-05`** `NotificationEventTracker` + `trackNotificationEvent` _(P1·S·Sonnet)_:
   - `opened` yalnız push vurgusu listede çözülünce; `actionTapped` her aksiyon dokunuşunda.
   - Kullanıcı + olay + id başına bir kez (kalıcı, en çok 500). Gönder ve unut; başarısızlık hatırlanmaz.

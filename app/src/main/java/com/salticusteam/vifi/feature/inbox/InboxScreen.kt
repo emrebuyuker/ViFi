@@ -61,7 +61,8 @@ import java.time.Instant
 
 /**
  * The notifications inbox, opened from the home toolbar's bell or a notification tap ([highlightId], the route
- * argument). Card actions open an exam (through its lock), the paywall, the add-exam form, a link or a place.
+ * argument). Card actions open an exam (through its lock), the paywall, the add-exam form, a link or a place (in the
+ * maps app the user picks).
  */
 @Composable
 fun InboxScreen(
@@ -88,8 +89,6 @@ fun InboxScreen(
                 InboxEvent.OpenPaywall -> onOpenPaywall()
                 is InboxEvent.OpenAddExam -> onAddExam(event.lesson)
                 is InboxEvent.OpenUrl -> context.openUrl(event.url)
-                // The maps choice sheet arrives with INB-04.
-                is InboxEvent.ChooseMapsApp -> Unit
             }
         }
     }
@@ -122,6 +121,21 @@ fun InboxScreen(
                     viewModel.onUnlockSheetDismissed()
                 }
             },
+        )
+    }
+
+    state.locationChoice?.let { location ->
+        LocationChoiceSheet(
+            location = location,
+            onGoogleMaps = {
+                viewModel.onLocationChoiceDismissed()
+                context.openInGoogleMaps(location)
+            },
+            onOtherMapsApp = {
+                viewModel.onLocationChoiceDismissed()
+                context.openInOtherMapsApp(location)
+            },
+            onDismiss = viewModel::onLocationChoiceDismissed,
         )
     }
 

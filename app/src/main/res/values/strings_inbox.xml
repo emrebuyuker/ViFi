@@ -11,4 +11,10 @@
     <string name="inbox_exam_error_title">Sınav açılamadı</string>
     <string name="cd_inbox_unread">Okunmadı</string>
     <string name="cd_inbox_image">Bildirim görseli</string>
+
+    <!-- Added in 4.1.0 — "Konuma Git": which maps app opens the campaign's place (INB-04, NDEC-03). -->
+    <string name="inbox_location_title">Konumu hangi uygulamada açmak istersin?</string>
+    <string name="inbox_location_google">Google Haritalar</string>
+    <string name="inbox_location_other">Başka bir harita uygulaması</string>
+    <string name="inbox_location_cancel">Vazgeç</string>
 </resources>

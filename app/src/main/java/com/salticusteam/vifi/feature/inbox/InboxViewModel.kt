@@ -10,6 +10,7 @@ import com.salticusteam.vifi.core.data.repository.NotificationService
 import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.InboxItem
 import com.salticusteam.vifi.core.model.NotificationAction
+import com.salticusteam.vifi.core.model.NotificationLocation
 import com.salticusteam.vifi.core.model.NotificationPermission
 import com.salticusteam.vifi.core.util.trackScreen
 import com.salticusteam.vifi.feature.browse.ExamUnlockEvent
@@ -43,6 +44,7 @@ class InboxViewModel @Inject constructor(
     // State
     private val permissionOff = MutableStateFlow(false)
     private val requestedHighlight = MutableStateFlow<String?>(null)
+    private val locationChoice = MutableStateFlow<NotificationLocation?>(null)
 
     val uiState: StateFlow<InboxUiState> = combine(
         store.state,
@@ -52,7 +54,8 @@ class InboxViewModel @Inject constructor(
         gate.state,
     ) { state, isSubscribed, permissionOff, highlight, gate ->
         uiState(state, isSubscribed, permissionOff, highlight, gate)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InboxUiState())
+    }.combine(locationChoice) { state, location -> state.copy(locationChoice = location) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InboxUiState())
 
     // One-shot events
     private val _events = Channel<InboxEvent>(Channel.BUFFERED)
@@ -91,7 +94,7 @@ class InboxViewModel @Inject constructor(
             NotificationAction.Paywall -> send(InboxEvent.OpenPaywall)
             NotificationAction.AddExam -> send(InboxEvent.OpenAddExam(lesson = null))
             is NotificationAction.Url -> send(InboxEvent.OpenUrl(action.url))
-            is NotificationAction.Location -> send(InboxEvent.ChooseMapsApp(action.location))
+            is NotificationAction.Location -> locationChoice.value = action.location
         }
     }
 
@@ -107,6 +110,11 @@ class InboxViewModel @Inject constructor(
     fun onUnlockSheetDismissed() = gate.onSheetDismissed()
 
     fun onExamErrorShown() = gate.onErrorShown()
+
+    /** A maps app was picked or "Vazgeç" tapped: the choice closes, the inbox stays. */
+    fun onLocationChoiceDismissed() {
+        locationChoice.value = null
+    }
 
     // Helpers
     private fun send(event: InboxEvent) {

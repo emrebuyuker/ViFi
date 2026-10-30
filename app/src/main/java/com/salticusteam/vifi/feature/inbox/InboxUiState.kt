@@ -36,6 +36,8 @@ data class InboxUiState(
     val lockedExam: ArchiveItem? = null,
     /** Why an exam could not open, under "Sınav açılamadı". */
     val examError: String? = null,
+    /** "Konuma Git": the place whose maps app choice is shown. */
+    val locationChoice: NotificationLocation? = null,
 )
 
 /** Where a card's action leads, once it may (one-shot). */
@@ -49,7 +51,4 @@ sealed interface InboxEvent {
 
     /** An https link, opened in the browser. */
     data class OpenUrl(val url: String) : InboxEvent
-
-    /** "Konuma Git": which maps app to open the place in. */
-    data class ChooseMapsApp(val location: NotificationLocation) : InboxEvent
 }
