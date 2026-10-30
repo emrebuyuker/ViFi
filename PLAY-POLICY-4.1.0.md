@@ -12,7 +12,7 @@
 |---|---|---|
 | Onaylı ve kapatılabilir kampanya bildirimleri Play kurallarına uygun mu? | **Evet, bir koşulla.** Onay, kapatma ve sessiz saat kuralları Play'in spam ve onay beklentisini karşılıyor. Ancak Play sistem bildirimlerini yalnız uygulamanın **kendi özellikleri** için kullanmaya izin veriyor; örnekleri havayolunun fırsat bildirimi ve oyun içi promosyon. Bildirimle **reklam sunmak** açıkça ihlal örneği. | **R1** |
 | "Reklam içeriyor" beyanı gerekiyor mu? | **R1'e bağlı.** Premium ve uygulama içi satın alma teklifleri beyan kapsamında değil. Ücretli ya da sponsorlu bir işletme kampanyası, bildirim akışında "native reklam" sayılır → "Evet". Karşılıksız öğrenci fırsatları için beyan gerekmez görünüyor. | **R2** |
-| Yalnız ön plan konum izni beyan gerektiriyor mu? | **Bugün hayır, ama yeni kural geliyor.** Arka plan konum beyanı yalnız `ACCESS_BACKGROUND_LOCATION` içindir; biz istemiyoruz. Yeni "en dar kapsam" kuralına göre ise `ACCESS_FINE_LOCATION` isteyen her uygulama Console'da beyan verecek: beyan Kasım 2026'da açılıyor, 27 Ocak 2027'den itibaren zorunlu. Yalnız `ACCESS_COARSE_LOCATION` istenirse beyan gerekmez. | **K1** |
+| Yalnız ön plan konum izni beyan gerektiriyor mu? | **Bugün hayır, ama yeni kural geliyor.** Arka plan konum beyanı yalnız `ACCESS_BACKGROUND_LOCATION` içindir; biz istemiyoruz. Yeni "en dar kapsam" kuralına göre ise `ACCESS_FINE_LOCATION` isteyen her uygulama Console'da beyan verecek: beyan Kasım 2026'da açılıyor, 27 Ocak 2027'den itibaren zorunlu. Yalnız `ACCESS_COARSE_LOCATION` istenirse beyan gerekmez. | **K1 ✅** yalnız COARSE (uygulandı) |
 
 ## 2. Kampanya bildirimleri
 
@@ -98,9 +98,10 @@ Play Console'un "Uygulamayı incelemeye hazırlama → Reklamlar" sayfası ([Rek
   - Yaklaşık konumun yettiği örnekler arasında mağaza bulucu gibi "yakındakini göster" kullanımları var.
 - **Değerlendirme:** Haritayı odaklamak için yaklaşık konum yeter. `MAP-02` doğruluk 1000 m'den kötüyse zaten 12
   yakınlaştırmasını kullanıyor. Kesin konum, "neden yetmedi" sorusuna iyi bir cevap bulamaz.
-- **Öneri (K1):** Hat E manifeste yalnız `ACCESS_COARSE_LOCATION` koysun. Böylece Console beyanı gerekmez, Veri
-  güvenliğinde de en çok "yaklaşık konum" söz konusu olur (`PLAY-DATA-SAFETY.md` K1-A/B). Plan şu an iki izni de
-  içeriyor (`MAP-01`); değişiklik ürün sahibinin onayıyla Hat E'de yapılır.
+- **K1 — ✅ karar ve uygulama:** Ürün sahibi 30 Ekim 2026'da onayladı. Hat E `7c74b21`'de manifeste yalnız
+  `ACCESS_COARSE_LOCATION` koydu (`ACCESS_FINE_LOCATION` ve `ACCESS_WIFI_STATE` `tools:node="remove"`). Bias da yalnız
+  admin haritayı yerleştirdikten sonra gidiyor. Sonuç: ince konum beyanı gerekmez; Veri güvenliğinde konum beyan edilmez
+  (`PLAY-DATA-SAFETY.md` K1). `NRL-03`'te release AAB'nin izin listesi yeniden kontrol edilir.
 - **Belirgin açıklama:** Admin'in haritayı açması bağlamı belli, ama Android diyaloğu amaç göstermiyor. Diyalogdan
   önce iOS'un amaç metni kısa bir not olarak gösterilmeli (`PRIVACY-POLICY-4.1.0.md` §4).
 - **İçerik derecelendirmesi:** "Kullanıcıların fiziksel konumunu başka kullanıcılarla paylaşma" sorusunun cevabı "Hayır"
@@ -132,7 +133,7 @@ Play'in Kullanıcı Verileri politikasındaki onay kuralları ([Politika][ddp]) 
 - **R1:** Kampanya bildirimleri ücretli ya da sponsorlu bir işletme tanıtımı içerecek mi? Öneri: hayır. Bildirimde
   yalnız ViFi'nin kendi teklifleri ve karşılıksız öğrenci fırsatları olsun; alkol, tütün, kumar içeriği olmasın.
 - **R2:** "Reklam içeriyor" beyanı. Öneri: R1 "hayır" ise bugünkü "Hayır" kalsın.
-- **K1:** Konum izni yalnız `ACCESS_COARSE_LOCATION` olsun mu? Öneri: evet (Hat E, `MAP-01`).
+- ~~**K1:**~~ ✅ Yalnız `ACCESS_COARSE_LOCATION`; ürün sahibi onayladı, Hat E uyguladı (`7c74b21`).
 - **R3 (bilgi):** Ticari statü beyanı Kasım 2026'da Console'a geliyor; 4.1.0'dan bağımsız.
 - **Kapsam dışı:** Kampanya push'larının Türk mevzuatındaki ticari elektronik ileti ve onay kuralları karşısındaki
   durumu bu belgede değerlendirilmedi; hukuki görüş önerilir.

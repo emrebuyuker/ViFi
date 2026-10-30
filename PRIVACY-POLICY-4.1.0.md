@@ -41,7 +41,7 @@ güncellenmeli (`NRL-06`). iOS 4.1.0 da aynı sayfalara bağlı olduğundan, gü
 
 ## 3. Önerilen metin
 
-Köşeli parantezli `[…]` kısımlar ürün sahibinin kararlarına bağlıdır (R1, K1, K3). Biçim, sayfaların bugünkü
+Köşeli parantezli `[…]` kısımlar ürün sahibinin kararlarına bağlıdır (R1, K3; K1 karara bağlandı). Biçim, sayfaların bugünkü
 "sen" diliyle aynıdır.
 
 ### 3.1 `gizlilik.html` — "Toplanan veriler" tablosu
@@ -79,7 +79,7 @@ Köşeli parantezli `[…]` kısımlar ürün sahibinin kararlarına bağlıdır
 ### 3.3 `gizlilik.html` — yeni bölüm "Yöneticilerin harita ekranı"
 
 > ViFi yöneticileri bir bildirime yer eklerken Google Haritalar ve Google Places hizmetlerini kullanır. Bu ekran
-> yalnızca yöneticilere açıktır. Yönetici izin verirse harita, cihazının [K1-A/B: yaklaşık] konumuna odaklanır. Bu
+> yalnızca yöneticilere açıktır. Yönetici izin verirse harita, cihazının konumuna (Android'de yaklaşık konumuna) odaklanır. Bu
 > konum ViFi tarafından saklanmaz ve sunucularımıza gönderilmez. Harita ve yer araması sırasında Google; cihaz
 > bilgilerini, IP adresini, arama metnini ve haritada gösterilen bölgeyi kendi gizlilik politikasına göre işler
 > (https://policies.google.com/privacy). Bildirime eklenen yer, örneğin bir kafenin adı ve adresi, bildirimi alanlara
@@ -137,7 +137,7 @@ Bu `MAP-02`/`MAP-03` kapsamındadır; Hat F kod yazmaz.
 
 ## 5. Yayın sırası (öneri)
 
-1. Ürün sahibi R1, K1 ve K3'ü karara bağlar ve metni onaylar.
+1. Ürün sahibi R1 ve K3'ü karara bağlar ve metni onaylar (K1 verildi: yalnız yaklaşık konum).
 2. iOS tarafı `ViFi-iOS/firebase/hosting/` altındaki üç dosyayı günceller.
 3. Hosting yayını ayrı onayla yapılır: `firebase deploy --only hosting`.
 4. Android 4.1.0 incelemeye gitmeden önce canlı sayfa yeniden salt okunur ve bu belgeyle karşılaştırılır (`NRL-06`).
@@ -148,7 +148,7 @@ Bu `MAP-02`/`MAP-03` kapsamındadır; Hat F kod yazmaz.
 - **P2:** Kullanım koşullarına Google Haritalar maddesi eklensin mi? Öneri: evet; şartların gereği ve iOS'u da kapsıyor.
 - **P3:** Sayfalar iOS 4.1.0 yayına girmeden mi güncellensin, yoksa Android 4.1.0 incelemesinden önce mi? Öneri: en erken
   fırsatta. iOS 4.1.0 da kampanya bildirimi ve harita içeriyor.
-- R1, K1 ve K3 için [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md) ile [`PLAY-DATA-SAFETY.md`](PLAY-DATA-SAFETY.md) §4.1.0'a bakın.
+- R1 ve K3 için [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md) ile [`PLAY-DATA-SAFETY.md`](PLAY-DATA-SAFETY.md) §4.1.0'a bakın.
 
 [ddp]: https://support.google.com/googleplay/android-developer/answer/18258653
 [gmp]: https://cloud.google.com/maps-platform/terms

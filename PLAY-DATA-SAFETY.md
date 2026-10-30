@@ -9,7 +9,8 @@
 > **4.1.0 (NLG-01, 30 Ekim 2026, ürün sahibinin onayını bekliyor):** Hedefli bildirim sistemi için tabloya "Geliştirici
 > iletişimleri" ve "Reklam veya pazarlama" amaçları, kampanya onayı kaydı, okundu işareti, açılma/aksiyon istatistiği ve
 > kurulum kimliği eklendi. _(4.1.0)_ işaretli hücreler yenidir. Admin harita seçicisinin (Google Maps + Places SDK) ve
-> konumun etkisi §4.1.0'dadır; oradaki açık kararlar (K1…K4) verilmeden form doldurulmaz. Console formu 4.1.0 sürümüyle
+> konumun etkisi §4.1.0'dadır. K1 (konum) karara bağlandı ve uygulandı; kalan açık kararlar (K2…K4) verilmeden form
+> doldurulmaz. Console formu 4.1.0 sürümüyle
 > girilir (`NRL-05`); o zamana kadar yayındaki sürümün beyanı geçerlidir.
 
 ## Toplanan veriler
@@ -29,8 +30,8 @@
 
 \* Analytics toplama kapatma seçeneği şu an yok; formda "isteğe bağlı değil" olarak işaretlenmeli ya da bir kapatma ayarı eklenmeli (karar ürün sahibinde). 4.1.0'ın okundu işareti ve istatistiği de otomatiktir, kapatılamaz.
 
-Admin harita seçicisinden gelebilecek satırlar (kilitlenme günlükleri, tanılama, uygulama içi arama geçmişi, konum)
-karara bağlıdır; bkz. §4.1.0 → K1, K2.
+Admin harita seçicisinden gelebilecek satırlar (kilitlenme günlükleri, tanılama, uygulama içi arama geçmişi) K2'ye
+bağlıdır. Konum beyan edilmez (K1, uygulandı); bkz. §4.1.0.
 
 ## Android'e özgü notlar
 
@@ -170,20 +171,23 @@ safety][ds]).
 | Harita etkileşimleri | Uygulama etkileşimleri | Var | Değişmez |
 | Places arama metni | Uygulama etkinliği → Uygulama içi arama geçmişi | Hayır | Ekle: toplanıyor, paylaşılmıyor, isteğe bağlı, Uygulama işlevi |
 | IP adresi | Play'de ayrı tür yok; yalnız konum çıkarmak için kullanılırsa konum sayılır | — | Google kullanım ölçümü için aldığını yazıyor → ayrı beyan yok |
-| Enlem-boylam sınırları (bias) | Konum | Hayır | K1'e bağlı |
+| Enlem-boylam sınırları (bias) | Konum | Hayır | Beyan yok: bias yalnız admin'in yerleştirdiği alanı taşır, cihaz konumunu değil (K1 uygulandı) |
 
 "İsteğe bağlı" gerekçesi: normal kullanıcıdan hiç toplanmaz; admin de bildirime konum eklemeden gönderebilir. iOS
 etiketinde Maps SDK'nın kilitlenme ve performans verisi beyanlı, arama metni beyansız.
 
 ### Konum
 
-**Ne oluyor** (`MAP-01`/`MAP-02` planı; iOS'la aynı davranış):
+**Ne oluyor** (K1-A uygulandıktan sonraki hâli; Hat E `7c74b21`):
 
-1. **Cihaz konumu** yalnız admin seçiciyi açınca, ön planda, bir kez sorulur. Okunan değer yalnız haritayı odaklar;
-   bizim kodumuz onu saklamaz, loglamaz, sunucuya göndermez. Tek başına bu, cihazda işleme sayılır ve beyan gerekmez.
-2. **Ama Places araması** görünür harita alanını (0–50 km) bias olarak Google'a gönderir. Harita cihaz konumuna
-   otomatik odaklandıysa ve admin onu henüz kaydırmadıysa bu alanın merkezi cihaz konumudur. Böylece cihaz konumu
-   dolaylı olarak cihazdan çıkar. Google'ın Places sayfası "enlem-boylam sınırları"nı toplanan veri olarak sayıyor.
+1. **Cihaz konumu** yalnız admin seçiciyi açınca, ön planda, bir kez ve yalnız **yaklaşık** olarak
+   (`ACCESS_COARSE_LOCATION`) sorulur. Okunan değer yalnız haritayı semt düzeyinde odaklar; bizim kodumuz onu saklamaz,
+   loglamaz, sunucuya göndermez. Bu, cihazda işleme sayılır ve beyan gerekmez.
+2. **Places araması** görünür harita alanını (0–50 km) bias olarak Google'a gönderir. Google'ın Places sayfası
+   "enlem-boylam sınırları"nı toplanan veri olarak sayıyor. Ancak bias yalnız admin haritayı **kendisi**
+   yerleştirdikten sonra gider: sürükleme, seçilen öneri, POI dokunuşu ya da mevcut konumu düzenleme. Harita cihaz
+   konumuna otomatik odaklıyken arama yalnız `regionCode TR` taşır. Böylece cihaz konumu dolaylı yoldan da cihazdan
+   çıkmaz. Admin'in yerleştirdiği alan, kişinin fiziksel konumu değil, aradığı bölgedir.
 3. **Seçilen yer** (koordinat, ad, adres, place id) bildirimin içeriğidir, bir işletmenin ya da yerin konumudur. Sunucuya
    ve alıcılara gider. Cihaz konumu değildir; admin kendi bulunduğu noktayı bilerek seçerse bu, kullanıcının başlattığı
    bir içeriktir.
@@ -192,14 +196,22 @@ etiketinde Maps SDK'nın kilitlenme ve performans verisi beyanlı, arama metni b
 
 Play'in tanımları ([Data safety][ds]): yaklaşık konum 3 km² ve üstü alandır ve `ACCESS_COARSE_LOCATION`'ın verdiğidir.
 Kesin konum 3 km²'den küçük alandır ve `ACCESS_FINE_LOCATION`'ın verdiğidir. Geçici işlenen veri de forma girilir, yalnız
-mağazada gösterilmez. iOS cihaz konumunu beyan etmedi (ürün sahibi kararı, 30 Ekim 2026); bias o kararda ayrıca ele
-alınmamış görünüyor.
+mağazada gösterilmez. iOS cihaz konumunu beyan etmedi (ürün sahibi kararı, 30 Ekim 2026).
 
-**K1 — seçenekler:**
+**K1 — ✅ karar: A (ürün sahibi, 30 Ekim 2026; Hat E oturumunda onaylandı).** Hat E `7c74b21` commit'inde uyguladı
+(dal `claude/4-1-0-hat-e-map-4ba310`, henüz `v-4.1.0`'da değil). Live manifestte yalnız `ACCESS_COARSE_LOCATION` var.
+`ACCESS_FINE_LOCATION` ve Places'ın eklediği `ACCESS_WIFI_STATE` `tools:node="remove"` ile dışarıda; Hat E'ye göre
+birleşik live debug/release manifestlerinde yalnız COARSE var. Sonuç: **"Konum" beyan edilmez.** `NRL-03`'te release
+AAB'nin izin listesinde FINE ve `ACCESS_WIFI_STATE` olmadığı yeniden kontrol edilir.
+
+**iOS farkı:** iOS otomatik odakta da görünür alanı bias olarak gönderiyor ve App Store etiketinde konum yok. Bu,
+iOS tarafında ayrıca değerlendirilmeli; Android'in kapsamı dışında.
+
+Değerlendirilen seçenekler (kayıt için):
 
 | | Yapılacak | Veri güvenliği sonucu | Diğer etki |
 |---|---|---|---|
-| **A (öneri)** | Hat E yalnız `ACCESS_COARSE_LOCATION` ister. Bias yalnız admin haritayı kendisi yerleştirdikten sonra gönderilir; otomatik odakta yalnız `regionCode TR` gider | Cihaz konumu hiçbir yolla cihazdan çıkmaz → "Konum" beyan edilmez (iOS'la aynı sonuç, savunulabilir gerekçeyle) | `MAP-02`'de küçük değişiklik; ince konum beyanı gerekmez (NLG-03) |
+| **A (seçildi)** | Hat E yalnız `ACCESS_COARSE_LOCATION` ister. Bias yalnız admin haritayı kendisi yerleştirdikten sonra gönderilir; otomatik odakta yalnız `regionCode TR` gider | Cihaz konumu hiçbir yolla cihazdan çıkmaz → "Konum" beyan edilmez (iOS'la aynı sonuç, savunulabilir gerekçeyle) | `MAP-02`'de küçük değişiklik; ince konum beyanı gerekmez (NLG-03) |
 | B | Yalnız `ACCESS_COARSE_LOCATION`, bias plandaki gibi | "Konum → Yaklaşık konum": toplanıyor, paylaşılmıyor, isteğe bağlı, Uygulama işlevi | Mağaza sayfasında "Konum" görünür (yalnız admin'den toplansa da) |
 | C | Plandaki gibi `COARSE` + `FINE`, bias plandaki gibi | "Konum → Kesin konum" (ve yaklaşık) beyanı | `ACCESS_FINE_LOCATION` için Play Console beyanı gerekir (Kasım 2026'da açılıyor, 27 Ocak 2027'den itibaren zorunlu) |
 | D | Plandaki gibi, beyan yok (iOS gibi) | — | Önerilmez: Google'ın kendi sayfası bias'ı toplanan veri sayıyor, geliştirici "tam ve doğru" beyandan sorumlu |
@@ -223,12 +235,12 @@ Play'deki "kullanıcılar verilerinin silinmesini isteyebilir" cevabı her iki d
 4. Uygulama etkileşimleri: + Uygulama işlevi.
 5. Diğer işlemler (yeni): toplanıyor, paylaşılmıyor, geçici değil, isteğe bağlı; Uygulama işlevi + Reklam veya pazarlama.
 6. K2'ye göre: Kilitlenme günlükleri (yeni), Tanılama (+ Analiz), Uygulama içi arama geçmişi (yeni).
-7. K1'e göre: Konum yok (A) ya da Yaklaşık/Kesin konum.
+7. Konum: beyan yok (K1-A uygulandı). Release AAB'de yalnız `ACCESS_COARSE_LOCATION` olduğu `NRL-03`'te doğrulanır.
 8. Değişmeyenler: paylaşım yok, aktarımda şifreleme var, silme isteği var, reklam kimliği yok.
 
 ### Açık kararlar (ürün sahibi)
 
-- **K1 Konum:** A / B / C / D (yukarıda). Öneri A; Hat E'nin `MAP-01`/`MAP-02`'sine dokunur.
+- ~~**K1 Konum**~~ ✅ A seçildi ve Hat E'de uygulandı (`7c74b21`); konum beyan edilmez.
 - **K2 Admin harita SDK'sının verileri:** Öneri, kilitlenme günlükleri + tanılama + uygulama içi arama geçmişi
   "isteğe bağlı" beyan edilsin. Alternatif: yalnız kilitlenme/tanılama (iOS'la aynı). Alternatif: hiçbiri; gerekçe
   "admin'ler geliştirici ekibi". Bu alternatif riskli, çünkü admin de uygulamanın bir kullanıcısıdır.

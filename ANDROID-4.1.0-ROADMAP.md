@@ -681,7 +681,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - Maps/Places SDK'nın Google'ca yayımlanan beyanları.
   - Konumun toplanmadığının gerekçesi (Places bias'ı dahil değerlendirilir).
 
-  ⟶ `NDEC-02` ✅ _Tamamlandı (2026-10-30, Opus). Form ürün sahibinin kararlarından (K1…K4) sonra doldurulur. Gelenler:_
+  ⟶ `NDEC-02` ✅ _Tamamlandı (2026-10-30, Opus). Form ürün sahibinin kararlarından (K2…K4) sonra doldurulur. Gelenler:_
   - _**Tablo:** UID, profil segmentleri ve cihaz kimliklerine "geliştirici iletişimleri" + "reklam veya pazarlama";
     uygulama etkileşimlerine "uygulama işlevi"; yeni satır "Diğer işlemler" (onay kaydı, isteğe bağlı). Kurulum kimliği,
     okundu işareti, istatistik, 6 olay + 3 ekran adı (29 olay, 18 ekran) işlendi. "Segmentasyon Analytics audience'la"
@@ -692,8 +692,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _**Bulgular:** (1) Places bias'ı otomatik cihaz odağında cihaz konumunu dolaylı olarak Google'a gönderiyor; Google
     "enlem-boylam sınırları"nı toplanan veri sayıyor. (2) Kişi başı istatistik işaretleri
     (`notifications/<id>/events/<uid>_<olay>`) hesap silmede silinmiyor._
-  - _**Açık kararlar:** K1 konum (öneri: yalnız `COARSE` + bias yalnız admin haritayı yerleştirince → konum beyanı
-    yok), K2 admin SDK verileri (öneri: kilitlenme + tanılama + arama geçmişi, isteğe bağlı), K3 istatistik
+  - _**Kararlar:** K1 konum ✅ (ürün sahibi 30 Ekim: yalnız `COARSE` + bias yalnız admin haritayı yerleştirince; Hat E
+    `7c74b21`'de uyguladı → konum beyanı yok). Açık: K2 admin SDK verileri (öneri: kilitlenme + tanılama + arama geçmişi, isteğe bağlı), K3 istatistik
     işaretlerinin silinmesi (öneri: ortak backend), K4 "geliştirici iletişimleri" amacı (öneri: evet)._
 - [x] **`NLG-02`** Gizlilik politikası kontrolü _(P1·S·Sonnet)_ — Canlı `/gizlilik` kampanya bildirimlerini, onay
   kaydını, cihaz kaydını ve admin harita konumunu anıyor mu? Eksikse metin ortak depoda (`ViFi-iOS/firebase/hosting/`)
@@ -723,8 +723,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _**"Reklam içeriyor":** Premium ve satın alma teklifleri kapsam dışı. Sponsorlu kampanya akış içi native reklam
     sayılır. Öneri (R2): R1 kabul edilirse cevap "Hayır" kalır._
   - _**Konum:** arka plan beyanı gerekmez. Ancak yeni "en dar kapsam" kuralıyla `ACCESS_FINE_LOCATION` için Console
-    beyanı Kasım 2026'da açılıyor, 27 Ocak 2027'de zorunlu oluyor. Öneri (K1): yalnız `ACCESS_COARSE_LOCATION`
-    (`MAP-01`, Hat E'ye ortak not klasöründen haber verildi). Konum düğmesi zorunluluğu `targetSdk 37+`._
+    beyanı Kasım 2026'da açılıyor, 27 Ocak 2027'de zorunlu oluyor. K1 ✅: yalnız `ACCESS_COARSE_LOCATION` (ürün sahibi
+    onayı; Hat E `7c74b21`) → beyan gerekmez. Konum düğmesi zorunluluğu `targetSdk 37+`._
   - _**Diğer:** 2/2 onay sayfası Play'in onay kurallarını karşılıyor. Ticari statü beyanı Kasım 2026'da Console'a
     geliyor (4.1.0'dan bağımsız). Türk mevzuatı (ticari elektronik ileti) kapsam dışı bırakıldı; hukuki görüş
     önerildi._
