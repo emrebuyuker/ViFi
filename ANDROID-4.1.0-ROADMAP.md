@@ -623,13 +623,26 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 #### Hat D — Admin "Bildirim Gönder" + Geçmiş
 
-- [ ] **`ADM-01`** `FirebaseNotificationAdminService` _(P0·M·Opus)_:
+- [x] **`ADM-01`** `FirebaseNotificationAdminService` _(P0·M·Opus)_:
   - 4 callable; `sendNotification` zaman aşımı 300 sn (istemci varsayılanı 70 sn).
   - Geçmiş: `notifications` koleksiyonu, `createdAt` azalan, en çok 50.
   - Görsel yükleme: önce `getMetadata`, yoksa `putBytes` (`image/jpeg`).
   - iOS ile aynı hata eşleme tablosu; facets / sonuç / geçmiş ayrıştırıcıları.
 
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`FirebaseNotificationAdminService`** (`core/data/notifications/admin`): 4 callable (yalnız `sendNotification`
+    `withTimeout(300 s)`), `audience` veri göndermeden çağrılır, `preview` kitle şeklini taslağın payload'ından alır;
+    geçmiş `notifications` `createdAt` azalan, 50, `Timestamp` → `Instant`; görsel yüklemesi önce kimlik/boyut
+    denetimi, sonra `getMetadata` (varsa yeniden kullanılır), yalnız `OBJECT_NOT_FOUND`'da `putBytes` (`image/jpeg`).
+    Ayrıştırıcılar NCT-01'deki `NotificationPayloadParser`'dan; okunamayan yanıt `UnexpectedResponse`._
+  - _**Hata eşleme** iOS tablosuyla aynı; SDK kod enum'ları JVM'de yüklenemediği için ad üzerinden ortak
+    `FirebaseStatus`'a indirilip birim testleniyor. Android ekleri: Functions'ın ağ hatası (`INTERNAL` + `IOException`)
+    ve Storage'ın `ERROR_UNKNOWN` + `IOException`'ı çevrimdışı sayılır; mesajsız ret ve diğerleri genel mesaja düşer
+    (ham İngilizce mesaj gösterilmez)._
+  - _Live DI'daki `UnavailableNotificationAdminService` → bu sınıf değişimi `NIT-01`'de. Canlı callable çağrılmadı._
+  - _**Testler:** `FirebaseNotificationAdminServiceTest` 22 (iOS'un 8'i + 5 Android eşleme + 9 MockK'li çağrı
+    testi: zaman aşımı, payload, sorgu şekli, görselin üzerine yazılmaması); cihazda koşacak
+    `FirebaseNotificationAdminErrorMappingTest` 3 (kod adı köprüsü; yalnız derlendi)._
 - [ ] **`ADM-02`** Composer ViewModel + taslak kuralları _(P0·L·Opus)_:
   - Doğrulama sırası ve mesajları; karakterler **kod noktasıyla** sayılır (sunucu gibi).
   - Konumda Tür kilidi; kademeli kitle; tahmini kişi sayısı.
