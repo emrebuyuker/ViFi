@@ -14,9 +14,23 @@
     <string name="inbox_permission_off_message">Bildirimler kapalı. Yeni duyuruları kaçırmamak için aç.</string>
     <string name="inbox_permission_open_settings">Ayarlar</string>
 
-    <!-- One-time permission prompt -->
-    <string name="notification_prompt_title">Bildirimleri aç</string>
-    <string name="notification_prompt_message">Yeni sınavlar ve duyurulardan ilk sen haberdar ol. İstediğin zaman kapatabilirsin.</string>
-    <string name="notification_prompt_allow">İzin Ver</string>
-    <string name="notification_prompt_later">Şimdi Değil</string>
+    <!-- Notification permission flow, step 1/2 (the permission) -->
+    <string name="notification_prompt_priming_title">Hiçbir şeyi kaçırma</string>
+    <string name="notification_prompt_priming_reask_title">Onaylanınca haber verelim mi?</string>
+    <string name="notification_prompt_priming_benefit_exams">Bölümüne yeni sınav gelince ilk sen haberdar ol</string>
+    <string name="notification_prompt_priming_benefit_coins">Gönderdiğin sınav onaylanınca coin\'in yüklendiğini gör</string>
+    <string name="notification_prompt_priming_benefit_announcements">Önemli duyurular</string>
+    <string name="notification_prompt_priming_denied_note">Bildirimler şu an kapalı. Ayarlar\'dan açabilirsin.</string>
+    <string name="notification_prompt_priming_enable">Bildirimleri Aç</string>
+    <string name="notification_prompt_priming_open_settings">Ayarlar\'ı Aç</string>
+    <string name="notification_prompt_priming_not_now">Şimdi Değil</string>
+
+    <!-- Notification permission flow, step 2/2 (the campaign consent) -->
+    <string name="notification_prompt_consent_title">Öğrenci fırsatları</string>
+    <string name="notification_prompt_consent_message">Kampüsüne yakın indirimler, öğrenciye özel kampanyalar ve Premium fırsatları.</string>
+    <string name="notification_prompt_consent_quiet_hours">Gece 22:00–09:00 arası asla.</string>
+    <string name="notification_prompt_consent_turn_off">İstediğin an Hesap\'tan kapat.</string>
+    <string name="notification_prompt_consent_error">Tercihin kaydedilemedi. Bağlantını kontrol edip tekrar dene.</string>
+    <string name="notification_prompt_consent_accept">Evet, fırsatları bildir</string>
+    <string name="notification_prompt_consent_decline">Hayır, teşekkürler</string>
 </resources>

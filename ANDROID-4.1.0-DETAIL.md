@@ -816,7 +816,7 @@ Summary of the rules:
 - Body (`.body`, `fixedSize`): "Kampüsüne yakın indirimler, öğrenciye özel kampanyalar ve Premium fırsatları."
 - Benefit rows:
   - `moon.zzz.fill`: "Gece 22:00–09:00 arası asla." (en dash)
-  - `gearshape.fill`: "İstediğin an Hesap'dan kapat."
+  - `gearshape.fill`: "İstediğin an Hesap'tan kapat."
 - On `saveFailed`, a red footnote Label with `exclamationmark.circle.fill`: "Tercihin kaydedilemedi. Bağlantını kontrol edip tekrar dene." (id `notifications.consent.error`)
 - Buttons:
   - "Evet, fırsatları bildir" (id `notifications.consent.accept`), the same orange primary button with spinner.

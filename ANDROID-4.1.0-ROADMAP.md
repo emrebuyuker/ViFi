@@ -22,12 +22,12 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **17'si tamam, 0'ı yarım, 33'ü başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **18'i tamam, 0'ı yarım, 32'si başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
-> tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam; Hat C'de onay deposu ve izin koordinatörü (`PRM-01`,
-> `PRM-02`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
+> tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam; Hat C'de onay deposu, izin koordinatörü ve izin/onay
+> sayfaları (`PRM-01`…`03`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -574,12 +574,40 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     "sessiz istek yok" ve "kayıt 5 sn'de gelmezse sonraya kalır" ile değişti). Tablet emülatöründe `MockGraphTest`
     3/3; dört senaryo açılışı çökmesiz ve ANR'sız._
 
-- [ ] **`PRM-03`** İzin/onay sayfaları _(P0·M·Sonnet)_ — AlertDialog'un yerine iki adımlı alt sayfa:
+- [x] **`PRM-03`** İzin/onay sayfaları _(P0·M·Sonnet)_ — AlertDialog'un yerine iki adımlı alt sayfa:
   - 1/2 "Hiçbir şeyi kaçırma" / tekrarda "Onaylanınca haber verelim mi?"; 2/2 "Öğrenci fırsatları".
   - Onay sayfası kaydırılarak kapatılamaz (kayıt hatası hariç); yükseklik içeriğe göre; turuncu üstünde siyah metin.
   - 6 analytics olayı (`source`).
 
-  ⟶ `PRM-02`
+  ⟶ `PRM-02` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationPermissionFlow`** (`feature/notifications`, iOS `NotificationPermissionFlowModel`): sayfa
+    PERMISSION|CONSENT, `start()` (1/2'de "sunuldu" ya da "tekrar gösterildi", 2/2'de `consentDidAppear`), "Bildirimleri
+    Aç" (sistem diyaloğu → ret "hayır" + bitiş; izin + başka cihazda cevaplanmış → bitiş; değilse 2/2), "Ayarlar'ı Aç"
+    (kabul sayılır), "Şimdi Değil", iki cevap da kayıt yazar (`source: prompt`), kayıt hatası sayfayı açık tutar ve
+    olay göndermez, cevapsız kapanış "hayır" sayılır (onay yazılmaz). "Ayarlar'ı Aç" düğmesi `!canRequestPermission()`
+    ile açılır (NDEC-01). Android ekleri: sistem diyaloğu açıkken akış kapanırsa 2/2'ye geçilmez; kaydedilen cevabın
+    kendi düğmesi ilerleme gösterir (iOS yalnız "Evet"te gösteriyordu)._
+  - _**Sayfalar** (`NotificationPromptPages.kt`): tek `ModalBottomSheet`'te iki sayfa (geçişte solma), yükseklik
+    içeriğe göre; mesaj yalnız sığmazsa kayar, düğmeler altta sabit (en fazla 440 dp). Metinler iOS'la birebir
+    (`strings_notifications.xml`, `notification_prompt_*`); "İstediğin an Hesap'tan kapat." iOS kaynağındaki gibi
+    (bu belgede ve ekte "Hesap'dan" yazıyordu, düzeltildi). Tag'ler `notifications.priming(.enable|.openSettings|
+    .dismiss|.deniedNote)`, `notifications.consent(.accept|.decline|.error)`._
+  - _**Kapatma:** 1/2 kaydırma, perde dokunuşu ve Geri ile kapanır; 2/2 hiçbiriyle kapanmaz (kayıt hatası sonrası
+    açılır). Material3 1.3.1 sheet'in Geri davranışını açıldığı anda sabitliyor (Android 13+): 1/2'de açık olan Geri
+    2/2'de de kapatıyordu (emülatörde görüldü). Sheet'in kendi Geri'si kapalı tutulup sayfaya bağlı `BackHandler`
+    kullanıldı; perde ve kaydırma `confirmValueChange` ile kapalı._
+  - _**Sunucu** (`NotificationPromptViewModel` yeniden yazıldı + `NotificationPromptHost`): kuyruktaki akış tur
+    bitince, kayıtlı modal yokken, yoldaki push dokunuşu teslim edilince ve oturum açıkken ekrana gelir; push dokunuşu
+    ve çıkış akışı kapatır (cevapsız sayfa "hayır"). İlk teklif arşiv açılınca turdan sonra yapılır. `AppRoot`'ta
+    `NotificationPrompt()` → `NotificationPromptHost()`; eski AlertDialog, `notificationPrompt.*` tag'leri ve
+    `notification_prompt_title/message/allow/later` silindi. PSH-03/04 emsaliyle bağlama şimdi yapıldı; bildirim
+    sayfasındaki onay tekrarı ve Sınav Ekle sonrası izin tekrarı tetikleyicileri `NIT-01`'de._
+  - _**Doğrulama:** `assembleDebug` (iki flavor); `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda yok). Birim
+    testleri liveDebug 899 / mockDebug 892 / liveRelease 899, hepsi geçti (`NotificationPermissionFlowTest` 18 —
+    iOS'un 15'i + 3 Android —, `NotificationPromptViewModelTest` 11, `NotificationPromptCoordinatorTest` 21). Tablet
+    emülatöründe `NotificationPromptContentTest` 7/7. Mock'ta `vifi_notifications_prompt`: 1/2 → "Bildirimleri Aç"
+    → 2/2; 2/2 Geri, perde ve kaydırmayla kapanmadı, "Hayır, teşekkürler" kapattı; 1/2 Geri, kaydırma ve "Şimdi
+    Değil" ile kapandı; `vifi_notifications_denied` ve varsayılan açılışta sayfa çıkmadı; koyu tema kontrol edildi._
 - [ ] **`PRM-04`** Hesap › Bildirim Ayarları _(P0·M·Sonnet)_:
   - Satır + ekran: izin durumu (Açık / Kapalı / Sorulmadı) + "Bildirimleri Aç" ya da "Ayarlar'ı Aç".
   - "Kampanya ve fırsat bildirimleri" anahtarı; okunamıyor/hata durumları.
@@ -1045,7 +1073,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     - Düğmeler "Bildirimleri Aç" / "Ayarlar'ı Aç" ve "Şimdi Değil".
     - Kaydırarak kapatma "hayır" sayılır; analytics gönderilmez.
   - **2/2:**
-    - Başlık "Öğrenci fırsatları"; gövde ve iki satır ("Gece 22:00–09:00 arası asla.", "İstediğin an Hesap'dan kapat.").
+    - Başlık "Öğrenci fırsatları"; gövde ve iki satır ("Gece 22:00–09:00 arası asla.", "İstediğin an Hesap'tan kapat.").
     - Düğmeler: "Evet, fırsatları bildir" / "Hayır, teşekkürler". Hiçbiri önceden seçili değildir ve iki cevap da kayıt
       yazar.
     - Kaydırma ve geri tuşuyla kapatma **kapalı** (`skipPartiallyExpanded`, `confirmValueChange = false`,
@@ -1175,15 +1203,16 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 - **`AppRoot`:**
   - `SessionViewModel` cihaz kaydını ve inbox/onay gözlemini oturumla başlatır.
   - `ArchiveHost` izin akışı sunucusunu (turdan sonra, `ModalPresence` boşken) barındırır; yönlendirici teslimi
-    (`PushTapDelivery`) `PSH-03`'te bağlandı.
-  - Inbox'a onay tekrarı sunucusu eklenir.
+    (`PushTapDelivery`) `PSH-03`'te, sunucu (`NotificationPromptHost`; push dokunuşu ve çıkış akışı kapatır, izin
+    sheet'i `ModalPresence`'a kayıtlı) `PRM-03`'te bağlandı.
+  - Inbox'a onay tekrarı tetikleyicisi eklenir (700 ms sonra, vurgu yokken `coordinator.inboxConsentReask()`).
   - Sınav Ekle başarısı → `coordinator.examWasSubmitted()`.
-  - Push dokunuşu izin sheet'ini kapatır.
 - **Mevcut modalların `ModalPresence` kaydı:** tanıtım turu `Dialog`'u, isteğe bağlı güncelleme diyaloğu,
-  `ExamUnlockSheet`, izin sheet'i, "Konuma Git" sheet'i, konum seçici.
+  `ExamUnlockSheet`, konum seçici. (İzin sheet'i `PRM-03`'te, "Konuma Git" sheet'i `INB-04`'te kaydedildi.)
 - **Hesap:** "Bildirim Ayarları" satırı herkese; "Bildirim Gönder" yalnız admin'e (Moderasyon'un yanında).
-- **`SessionTeardown`:** yönlendirici, inbox deposu ve onay deposu sıfırlanır; izin akışı kapatılır.
-- **Silinenler:** `NotificationPrompt`(+VM) ve testleri; yerlerine yenileri gelir. (`InboxDeepLink` `PSH-03`'te;
+- **`SessionTeardown`:** yönlendirici, inbox deposu ve onay deposu sıfırlanır; izin akışı kapatılır (sunucu çıkışta
+  zaten kapatıyor, `PRM-03`).
+- **Silinenler:** — (`NotificationPrompt` AlertDialog'u `PRM-03`'te silindi, VM'i sunucuya dönüştü; `InboxDeepLink` `PSH-03`'te;
   `PushTokenRegistration`, `DeviceTokenStore`, `FirestoreDeviceTokenStore` `PSH-04`'te; `Announcement*`,
   `AnnouncementReadPreferences` `INB-01`'de silindi.)
 

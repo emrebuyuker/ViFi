@@ -27,7 +27,7 @@ import com.salticusteam.vifi.feature.browse.BrowseScreen
 import com.salticusteam.vifi.feature.examviewer.ExamViewerScreen
 import com.salticusteam.vifi.feature.home.HomeScreen
 import com.salticusteam.vifi.feature.inbox.InboxScreen
-import com.salticusteam.vifi.feature.notifications.NotificationPrompt
+import com.salticusteam.vifi.feature.notifications.NotificationPromptHost
 import com.salticusteam.vifi.feature.login.LoginScreen
 import com.salticusteam.vifi.feature.moderation.ModerationDetailScreen
 import com.salticusteam.vifi.feature.moderation.ModerationScreen
@@ -76,7 +76,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
     // A notification tap opens the inbox on that notification; a cold-start tap waits here until the signed-in host
     // exists, the tour is over and no modal is in the way.
     PushTapDelivery(router)
-    NotificationPrompt()
+    NotificationPromptHost()
     ArchivePrefetch()
     PaidUnlockRecovery()
 
