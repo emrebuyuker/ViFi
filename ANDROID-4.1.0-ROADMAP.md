@@ -22,12 +22,12 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **15'i tamam, 0'ı yarım, 35'i başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **16'sı tamam, 0'ı yarım, 34'ü başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
-> tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı
-> (`NOPS-01`, ürün sahibi).
+> tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam; Hat C'de onay deposu (`PRM-01`) tamam. Faz 0'da açık kalan
+> tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -518,13 +518,29 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 #### Hat C — İzin, kampanya onayı, Bildirim Ayarları
 
-- [ ] **`PRM-01`** `NotificationSettingsStore` + `FirestoreNotificationSettingsService` _(P0·M·Opus)_:
+- [x] **`PRM-01`** `NotificationSettingsStore` + `FirestoreNotificationSettingsService` _(P0·M·Opus)_:
   - Onay dokümanının canlı dinleyicisi; yükleniyor / hazır / okunamıyor durumları.
   - Kayıt yoksa "cevaplanmadı", kampanyalar kapalı. `waitUntilLoaded`.
   - `setMarketing`: iyimser güncelleme, 4 sn'de onay gelmezse "kuyrukta" sayılır, hata gelirse eski değere döner.
   - Kullanıcı değişince temizlenir; eski kullanıcıdan gelen değer yok sayılır.
 
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`FirestoreNotificationSettingsService`** (`core/data/firebase`): `settings/notifications` canlı dinleyici
+    (`ESTIMATE`, `includeMetadataChanges` yok); yalnız boolean `marketing` cevap sayılır; hata
+    `NotificationSettingsError.Unavailable` ile akışı bitirir. Yazım merge'siz tam
+    `{marketing, source, version: 1, updatedAt: serverTimestamp}`. Live'da yer tutucunun yerine bağlandı._
+  - _**`NotificationSettingsStore`** (`core/data/notifications/settings`): `NotificationSettingsState`
+    (LOADING / READY / UNAVAILABLE + `consent`; `isLoaded`, `hasAnswered`, `marketingEnabled`), `start(sessions)`
+    (oturum açılınca gözlem, profil beklenmez; başka kullanıcı baştan; çıkışta sıfırlama; eski uid'nin geç değer ve
+    hataları yok sayılır), `waitUntilLoaded(5 sn)`, `setMarketing` (iyimser, ret → eski değer + `false`, 4 sn'de onay
+    yoksa kuyrukta sayılır + `true`, kullanıcı yoksa `false`). `SessionViewModel` başlatıyor._
+  - _Live'daki yer tutucu dosyası artık yalnız admin servisini (`ADM-01`) içeriyor; önceki kaldırmalardan kalan sahipsiz
+    açıklamalar ve importlar temizlendi._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı. Birim testleri
+    liveDebug 845 / mockDebug 838 / liveRelease 845, hepsi geçti (`NotificationSettingsStoreTest` 15,
+    `FirestoreNotificationSettingsServiceTest` 4 — iOS'un 15 + 4'ü). Mock uygulama ana ekrana açıldı (görülen
+    "yanıt vermiyor" penceresi emülatörün System UI'ına aitti). Depoyu kullanan ekranlar `PRM-02`…`04`'te; canlı
+    yazım `NQA-01`'de (onayla)._
 - [ ] **`PRM-02`** `NotificationPromptHistory` + `NotificationPromptCoordinator` _(P0·M·Opus)_:
   - Cihaz başı geçmiş (DataStore), 30 gün kuralı, "ilk hayır kazanır".
   - Eski `notifications.prompted` → "1/2 sunuldu" eşlemesi.
