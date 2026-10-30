@@ -41,9 +41,12 @@ sealed interface ViFiRoute {
     @Serializable
     data object Account : ViFiRoute
 
-    /** The announcements inbox (opened from the home toolbar's bell or a notification tap). */
+    /**
+     * The notification inbox, opened from the home toolbar's bell or a notification tap. [highlightId] is the tapped
+     * push's notification, highlighted once the list shows it (`null` from the bell).
+     */
     @Serializable
-    data object Inbox : ViFiRoute
+    data class Inbox(val highlightId: String? = null) : ViFiRoute
 
     /** App information: version, highlights, tour replay, "Bize Ulaş" (opened from the account screen). */
     @Serializable
@@ -83,4 +86,16 @@ sealed interface ViFiRoute {
     /** The pending files of the submission [submissionId], previewed before approving. */
     @Serializable
     data class SubmissionPreview(val submissionId: String) : ViFiRoute
+
+    /** Account › Bildirim Ayarları: the system permission and the campaign-notification switch. */
+    @Serializable
+    data object NotificationSettings : ViFiRoute
+
+    /** The admin "Bildirim Gönder" composer (opened from the account screen, by an admin only). */
+    @Serializable
+    data object NotificationComposer : ViFiRoute
+
+    /** The admin's sent and scheduled notifications (opened from the composer). */
+    @Serializable
+    data object NotificationHistory : ViFiRoute
 }

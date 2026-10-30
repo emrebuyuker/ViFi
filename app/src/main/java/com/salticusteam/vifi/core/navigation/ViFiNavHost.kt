@@ -23,12 +23,15 @@ fun ViFiNavHost(
     editProfile: @Composable () -> Unit,
     about: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    inbox: @Composable () -> Unit = {},
+    inbox: @Composable (highlightId: String?) -> Unit = {},
     addExam: @Composable (context: ArchivePath?) -> Unit = {},
     paywall: @Composable () -> Unit = {},
     moderation: @Composable () -> Unit = {},
     moderationDetail: @Composable (submissionId: String) -> Unit = {},
     submissionPreview: @Composable (submissionId: String) -> Unit = {},
+    notificationSettings: @Composable () -> Unit = {},
+    notificationComposer: @Composable () -> Unit = {},
+    notificationHistory: @Composable () -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -51,8 +54,8 @@ fun ViFiNavHost(
         composable<ViFiRoute.EditProfile> {
             editProfile()
         }
-        composable<ViFiRoute.Inbox> {
-            inbox()
+        composable<ViFiRoute.Inbox> { entry ->
+            inbox(entry.toRoute<ViFiRoute.Inbox>().highlightId)
         }
         composable<ViFiRoute.About> {
             about()
@@ -71,6 +74,15 @@ fun ViFiNavHost(
         }
         composable<ViFiRoute.SubmissionPreview> { entry ->
             submissionPreview(entry.toRoute<ViFiRoute.SubmissionPreview>().submissionId)
+        }
+        composable<ViFiRoute.NotificationSettings> {
+            notificationSettings()
+        }
+        composable<ViFiRoute.NotificationComposer> {
+            notificationComposer()
+        }
+        composable<ViFiRoute.NotificationHistory> {
+            notificationHistory()
         }
     }
 }

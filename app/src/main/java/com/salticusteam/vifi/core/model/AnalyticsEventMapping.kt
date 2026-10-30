@@ -27,6 +27,12 @@ val AnalyticsEvent.firebaseName: String
         is AnalyticsEvent.UpdateAction -> "update_action"
         is AnalyticsEvent.SubmissionApproved -> "submission_approved"
         AnalyticsEvent.SubmissionRejected -> "submission_rejected"
+        is AnalyticsEvent.NotificationPrimingShown -> "notification_priming_shown"
+        is AnalyticsEvent.NotificationPrimingAccepted -> "notification_priming_accepted"
+        is AnalyticsEvent.NotificationPrimingDeclined -> "notification_priming_declined"
+        is AnalyticsEvent.MarketingConsentShown -> "marketing_consent_shown"
+        is AnalyticsEvent.MarketingConsentAccepted -> "marketing_consent_accepted"
+        is AnalyticsEvent.MarketingConsentDeclined -> "marketing_consent_declined"
     }
 
 /** Parameters as sent to Analytics (values are `String`, `Long` or `Boolean`), or `null` when the event has none. */
@@ -55,6 +61,12 @@ val AnalyticsEvent.firebaseParameters: Map<String, Any>?
         is AnalyticsEvent.LoginFailed -> mapOf("reason" to reason, "step" to step)
         is AnalyticsEvent.ExamUnlockFailed -> mapOf("reason" to reason)
         is AnalyticsEvent.ExamSubmitFailed -> mapOf("reason" to reason)
+        is AnalyticsEvent.NotificationPrimingShown -> mapOf("source" to source.raw)
+        is AnalyticsEvent.NotificationPrimingAccepted -> mapOf("source" to source.raw)
+        is AnalyticsEvent.NotificationPrimingDeclined -> mapOf("source" to source.raw)
+        is AnalyticsEvent.MarketingConsentShown -> mapOf("source" to source.raw)
+        is AnalyticsEvent.MarketingConsentAccepted -> mapOf("source" to source.raw)
+        is AnalyticsEvent.MarketingConsentDeclined -> mapOf("source" to source.raw)
         AnalyticsEvent.RecentExamOpened,
         AnalyticsEvent.EarnCoinsTapped,
         AnalyticsEvent.LoginSucceeded,
@@ -101,6 +113,15 @@ object AnalyticsScreen {
 
     // Added in 4.0.0 — the ViFi Premium paywall (iOS `screenView(name: "Paywall")`).
     const val PAYWALL = "Paywall"
+
+    // Added in 4.1.0 — Account › Bildirim Ayarları (iOS `screenView(name: "NotificationSettings")`).
+    const val NOTIFICATION_SETTINGS = "NotificationSettings"
+
+    // Added in 4.1.0 — the admin "Bildirim Gönder" composer (iOS `screenView(name: "NotificationComposer")`).
+    const val NOTIFICATION_COMPOSER = "NotificationComposer"
+
+    // Added in 4.1.0 — the admin notification history (iOS `screenView(name: "NotificationHistory")`).
+    const val NOTIFICATION_HISTORY = "NotificationHistory"
 }
 
 // Added in 2.5 — fixed values of event parameters that iOS reports as plain strings.

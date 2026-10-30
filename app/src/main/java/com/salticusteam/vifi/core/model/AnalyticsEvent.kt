@@ -53,6 +53,26 @@ sealed interface AnalyticsEvent {
     data class SubmissionApproved(val tier: SubmissionTier) : AnalyticsEvent
 
     data object SubmissionRejected : AnalyticsEvent
+
+    // Notification permission (step 1/2) and campaign consent (step 2/2, or Account's switch); iOS names.
+
+    // Added in 4.1.0 — the permission step was shown.
+    data class NotificationPrimingShown(val source: NotificationPromptSource) : AnalyticsEvent
+
+    // Added in 4.1.0 — "Bildirimleri Aç" (before the system dialog, whatever it answers) or "Ayarlar'ı Aç" was tapped.
+    data class NotificationPrimingAccepted(val source: NotificationPromptSource) : AnalyticsEvent
+
+    // Added in 4.1.0 — "Şimdi Değil" was tapped (closing the sheet is not reported).
+    data class NotificationPrimingDeclined(val source: NotificationPromptSource) : AnalyticsEvent
+
+    // Added in 4.1.0 — the campaign consent step was shown.
+    data class MarketingConsentShown(val source: NotificationPromptSource) : AnalyticsEvent
+
+    // Added in 4.1.0 — campaigns were turned on and the answer was saved.
+    data class MarketingConsentAccepted(val source: NotificationPromptSource) : AnalyticsEvent
+
+    // Added in 4.1.0 — campaigns were turned off (or refused) and the answer was saved.
+    data class MarketingConsentDeclined(val source: NotificationPromptSource) : AnalyticsEvent
 }
 
 // Added in 2.5 — the signed-in user's analytics identity: a stable id plus low-cardinality segment properties.

@@ -7,7 +7,7 @@ import org.junit.Test
 class AnalyticsEventMappingTest {
 
     @Test
-    fun `firebaseName matches the iOS event names for all 23 events`() {
+    fun `firebaseName matches the iOS event names for all 29 events`() {
         val expected = mapOf(
             AnalyticsEvent.ScreenView("Home") to "screen_view",
             AnalyticsEvent.Browse(ArchiveLevel.FACULTY) to "browse_level",
@@ -32,9 +32,15 @@ class AnalyticsEventMappingTest {
             AnalyticsEvent.UpdateAction("later") to "update_action",
             AnalyticsEvent.SubmissionApproved(SubmissionTier.NEW_COURSE) to "submission_approved",
             AnalyticsEvent.SubmissionRejected to "submission_rejected",
+            AnalyticsEvent.NotificationPrimingShown(NotificationPromptSource.PROMPT) to "notification_priming_shown",
+            AnalyticsEvent.NotificationPrimingAccepted(NotificationPromptSource.PROMPT) to "notification_priming_accepted",
+            AnalyticsEvent.NotificationPrimingDeclined(NotificationPromptSource.PROMPT) to "notification_priming_declined",
+            AnalyticsEvent.MarketingConsentShown(NotificationPromptSource.PROMPT) to "marketing_consent_shown",
+            AnalyticsEvent.MarketingConsentAccepted(NotificationPromptSource.PROMPT) to "marketing_consent_accepted",
+            AnalyticsEvent.MarketingConsentDeclined(NotificationPromptSource.PROMPT) to "marketing_consent_declined",
         )
 
-        assertEquals(23, expected.size)
+        assertEquals(29, expected.size)
         expected.forEach { (event, name) -> assertEquals(name, event.firebaseName) }
     }
 
@@ -98,6 +104,24 @@ class AnalyticsEventMappingTest {
         )
         assertEquals(mapOf("action" to "skip"), AnalyticsEvent.UpdateAction("skip").firebaseParameters)
         assertEquals(mapOf("tier" to "duplicate"), AnalyticsEvent.SubmissionApproved(SubmissionTier.DUPLICATE).firebaseParameters)
+    }
+
+    @Test
+    fun `notification prompt events carry only their source, as iOS`() {
+        assertEquals(
+            mapOf("source" to "reask"),
+            AnalyticsEvent.NotificationPrimingShown(NotificationPromptSource.REASK).firebaseParameters,
+        )
+        assertEquals(
+            mapOf("source" to "settings"),
+            AnalyticsEvent.MarketingConsentDeclined(NotificationPromptSource.SETTINGS).firebaseParameters,
+        )
+        listOf(
+            AnalyticsEvent.NotificationPrimingAccepted(NotificationPromptSource.PROMPT),
+            AnalyticsEvent.NotificationPrimingDeclined(NotificationPromptSource.PROMPT),
+            AnalyticsEvent.MarketingConsentShown(NotificationPromptSource.PROMPT),
+            AnalyticsEvent.MarketingConsentAccepted(NotificationPromptSource.PROMPT),
+        ).forEach { assertEquals(mapOf("source" to "prompt"), it.firebaseParameters) }
     }
 
     @Test

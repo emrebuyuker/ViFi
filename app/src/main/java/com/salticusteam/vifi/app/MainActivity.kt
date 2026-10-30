@@ -8,12 +8,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.CompositionLocalProvider
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.core.navigation.LocalModalPresence
+import com.salticusteam.vifi.core.navigation.ModalPresence
 import com.salticusteam.vifi.core.notifications.InboxDeepLink
 import com.salticusteam.vifi.core.util.AppLocale
 import com.salticusteam.vifi.core.notifications.NotificationPermissionRequester
 import com.salticusteam.vifi.core.util.ForegroundActivityHolder
 import com.salticusteam.vifi.core.util.LaunchArgs
+import com.salticusteam.vifi.feature.notificationcomposer.locationpicker.LocalLocationPicker
+import com.salticusteam.vifi.feature.notificationcomposer.locationpicker.LocationPicker
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -27,6 +32,8 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var activityHolder: ForegroundActivityHolder
     @Inject lateinit var permissionRequester: NotificationPermissionRequester
     @Inject lateinit var inboxDeepLink: InboxDeepLink
+    @Inject lateinit var modalPresence: ModalPresence
+    @Inject lateinit var locationPicker: LocationPicker
 
     // Registered before STARTED (a result launcher cannot be registered later); the prompt itself is started
     // through [permissionRequester] by the notification service.
@@ -53,9 +60,15 @@ class MainActivity : ComponentActivity() {
         // versions see the branded AppSwitcherCover the content lays over itself once paused.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) setRecentsScreenshotEnabled(false)
         setContent {
-            ViFiTheme {
-                AppSwitcherCover {
-                    AppRoot()
+            // App-wide composition services: which modal is on screen, and the flavor's admin location picker.
+            CompositionLocalProvider(
+                LocalModalPresence provides modalPresence,
+                LocalLocationPicker provides locationPicker,
+            ) {
+                ViFiTheme {
+                    AppSwitcherCover {
+                        AppRoot()
+                    }
                 }
             }
         }

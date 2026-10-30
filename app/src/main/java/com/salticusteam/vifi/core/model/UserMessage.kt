@@ -16,6 +16,9 @@ val Throwable.userMessage: String
         is ExamUnlockError -> userMessage
         is ExamFileError -> userMessage
         is SubscriptionError -> userMessage
+        is InboxError -> userMessage
+        is NotificationSettingsError -> userMessage
+        is NotificationAdminError -> userMessage
         else -> GENERIC_ERROR_MESSAGE
     }
 

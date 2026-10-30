@@ -35,6 +35,12 @@ class AnalyticsLimitsTest {
         AnalyticsEvent.UpdateAction(AnalyticsValues.UPDATE_ACTION_LATER),
         AnalyticsEvent.SubmissionApproved(SubmissionTier.NEW_DEPARTMENT),
         AnalyticsEvent.SubmissionRejected,
+        AnalyticsEvent.NotificationPrimingShown(NotificationPromptSource.PROMPT),
+        AnalyticsEvent.NotificationPrimingAccepted(NotificationPromptSource.REASK),
+        AnalyticsEvent.NotificationPrimingDeclined(NotificationPromptSource.PROMPT),
+        AnalyticsEvent.MarketingConsentShown(NotificationPromptSource.REASK),
+        AnalyticsEvent.MarketingConsentAccepted(NotificationPromptSource.SETTINGS),
+        AnalyticsEvent.MarketingConsentDeclined(NotificationPromptSource.SETTINGS),
     )
 
     private fun kindIndex(event: AnalyticsEvent): Int = when (event) {
@@ -61,11 +67,17 @@ class AnalyticsLimitsTest {
         is AnalyticsEvent.UpdateAction -> 20
         is AnalyticsEvent.SubmissionApproved -> 21
         AnalyticsEvent.SubmissionRejected -> 22
+        is AnalyticsEvent.NotificationPrimingShown -> 23
+        is AnalyticsEvent.NotificationPrimingAccepted -> 24
+        is AnalyticsEvent.NotificationPrimingDeclined -> 25
+        is AnalyticsEvent.MarketingConsentShown -> 26
+        is AnalyticsEvent.MarketingConsentAccepted -> 27
+        is AnalyticsEvent.MarketingConsentDeclined -> 28
     }
 
     @Test
     fun `samples cover every event exactly once`() {
-        assertEquals((0..22).toList(), samples.map(::kindIndex).sorted())
+        assertEquals((0..28).toList(), samples.map(::kindIndex).sorted())
     }
 
     @Test
@@ -100,9 +112,10 @@ class AnalyticsLimitsTest {
             AnalyticsScreen.PROFILE_COMPLETION, AnalyticsScreen.EDIT_PROFILE, AnalyticsScreen.ADD_EXAM,
             AnalyticsScreen.EXAM_VIEWER, AnalyticsScreen.EXAM_PDF, AnalyticsScreen.EXAM_IMAGES, AnalyticsScreen.INBOX,
             AnalyticsScreen.MODERATION, AnalyticsScreen.ABOUT, AnalyticsScreen.ACCOUNT, AnalyticsScreen.PAYWALL,
+            AnalyticsScreen.NOTIFICATION_SETTINGS, AnalyticsScreen.NOTIFICATION_COMPOSER, AnalyticsScreen.NOTIFICATION_HISTORY,
         )
 
-        assertEquals(15, screens.toSet().size)
+        assertEquals(18, screens.toSet().size)
         screens.forEach { assertTrue(it.length <= PARAM_VALUE_MAX) }
     }
 

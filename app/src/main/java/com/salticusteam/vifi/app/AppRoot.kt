@@ -80,7 +80,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
     val inboxRequested by inboxDeepLink.pending.collectAsStateWithLifecycle()
     LaunchedEffect(inboxRequested) {
         if (inboxRequested) {
-            router.push(ViFiRoute.Inbox)
+            router.push(ViFiRoute.Inbox())
             inboxDeepLink.consume()
         }
     }
@@ -98,7 +98,7 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
                 onRecentClick = { router.openExam(it.path, it.kind) },
                 onAddExamClick = { router.push(ViFiRoute.AddExam()) },
                 onAccountClick = { router.push(ViFiRoute.Account) },
-                onInboxClick = { router.push(ViFiRoute.Inbox) },
+                onInboxClick = { router.push(ViFiRoute.Inbox()) },
                 onAboutClick = { router.push(ViFiRoute.About) },
             )
         },

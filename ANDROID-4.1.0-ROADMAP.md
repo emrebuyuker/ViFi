@@ -22,8 +22,11 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **4'ü tamam, 0'ı yarım, 46'sı başlanmadı.** Faz 0'ın dört kararı
-> (`NDEC-01`…`04`) ürün sahibince verildi. Geliştirme başlamadı.
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **6'sı tamam, 0'ı yarım, 44'ü başlanmadı.** Faz 0'ın dört kararı
+> (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
+> indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
+> 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı
+> (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -217,18 +220,57 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   ("Places API (New)" iOS için zaten açık). Yeni anahtar, `com.salticusteam.vifi` + üç SHA-1 (debug, yükleme, Play
   uygulama imzalama) ve bu iki API ile kısıtlı. Places kotası + bütçe uyarısı mevcut ayara eklenir. Anahtar yalnız yerel
   `local.properties`'e girer (git dışı). ⟶ `NDEC-02`
-- [ ] **`NOPS-02`** Canlı durumun salt okuma denetimi _(P1·S·Opus)_ — 13 function'ın ve kuralların canlıdaki hâli,
+- [x] **`NOPS-02`** Canlı durumun salt okuma denetimi _(P1·S·Opus)_ — 13 function'ın ve kuralların canlıdaki hâli,
   `devices` kuralında `platform: 'android'`, FCM'in Android yapılandırması (`google-services.json`), emülatör için App
-  Check debug anahtarı ve eski `devices/<token>` dokümanlarının sayısı. **Yazım yok.**
+  Check debug anahtarı ve eski `devices/<token>` dokümanlarının sayısı. **Yazım yok.** ✅ _Tamamlandı (2026-10-30). Okuma
+  yalnız proje sahibi hesabıyla (`emrebykr66`) Firebase CLI üzerinden, `GET` ve sorgu olarak yapıldı; hiçbir şey
+  yazılmadı, token ya da doküman adı yazdırılmadı. Bulgular:_
+  - _**Function'lar:** canlıda 13 function var, liste beklenenle birebir. Hepsi `europe-west1` / `nodejs22`; 12'si v2,
+    `onAccountDeleted` v1._
+  - _**Kurallar:** Firestore (`cloud.firestore/vifi`) ve Storage yayınları 30 Ekim 07:49 UTC. İçerikleri `ViFi-iOS`
+    `v-4.1.0`'daki `firestore.rules` / `storage.rules` ile birebir aynı. `devices` kuralı
+    `platform in ['ios', 'android']` istiyor._
+  - _**İndeksler:** `notifications (status, scheduledAt)` ve `devices.token` collection-group istisnası canlıda; depo
+    dosyasıyla aynı. Canlıda depoda olmayan tek ayar `loginDiagnostics.expireAt` TTL'i (60 günlük tanılama süresi, depo
+    dışında açılmış). ⚠️ `firestore:indexes` depodan yayınlanırsa CLI bu TTL'i kaldırmayı önerebilir. Bu, ortak
+    backend'i yayınlayan iOS tarafı için bir not; Android yayın yapmaz._
+  - _**App Check:** Firestore, Storage, Realtime Database ve Authentication'ın dördü de `ENFORCED`._
+  - _**Android debug anahtarları:** 4 tane var ("Emre – Medium_Phone_API_37 emülatör"…"emülatör4", 23 Ekim). 4.0.0
+    PQA notundaki "PQA emülatör 2026-10-29" listede yok. `NQA-01`'de emülatörün anahtarı Logcat'ten kontrol edilir;
+    eksikse eklenmesi (App Check ayarı) onay ister._
+  - _**`google-services.json`:** proje numarası 441043948320 (FCM gönderici), paket `com.salticusteam.vifi`. Değişiklik
+    gerekmiyor._
+  - _**`config/appUpdate/android`:** `latestVersion` ve `minimumVersion` 3.1.0 (4.0.0'ın `RLS-10` adımı bekliyor)._
+  - _**Cihaz kayıtları:** toplam 8 doküman. 5'i iOS ve yeni biçimde. 3'ü Android ve eski biçimde (`token`/`appVersion`
+    yok, id = FCM token). Sunucu bu üçünü atlıyor; yalnız broadcast'in "kayıtlı cihaz" sayısını 3 şişiriyor. `PSH-04`
+    her cihazın kendi eski kaydını siler; kalanlar zararsız._
 
 ### Faz 1 — Sözleşme (ilk gün, tek oturum)
 
-- [ ] **`NCT-01`** Sözleşme: modeller, ayrıştırıcı, arayüzler, Fake'ler, DI, rotalar, LaunchArg, analytics, sürüm
+- [x] **`NCT-01`** Sözleşme: modeller, ayrıştırıcı, arayüzler, Fake'ler, DI, rotalar, LaunchArg, analytics, sürüm
   _(P0·M·Opus)_ — `schema.js` ile alan alan aynı modeller ve saf ayrıştırıcı. Arayüzler ve Fake'ler: `InboxReader`,
   `DeviceRegistrar`, `NotificationSettingsService`, `NotificationEventReporter`, `NotificationAdminService`,
   `LocationPicker`. Mock'ta Fake, live'da `Unavailable*` bağlanır. Ayrıca yeni rotalar + boş yuvalar, `ModalPresence`,
   metin değerli LaunchArg + 4 yeni senaryo, 6 analytics olayı + 3 ekran adı, `versionName 4.1.0` / `versionCode 20`.
-  ⟶ `NDEC-01…04`
+  ⟶ `NDEC-01…04` ✅ _Tamamlandı (2026-10-30). Gelenler:_
+  - _**Modeller** (`core/model/`): `AppNotification.kt`, `NotificationAdmin.kt`, `NotificationConsent.kt`; hata tipleri
+    `InboxError`, `NotificationSettingsError`, `NotificationAdminError` (`Throwable.userMessage`'a bağlı);
+    `NotificationPayloadParser`._
+  - _**Arayüzler ve Fake'ler** (`core/data/repository/` + `fake/`): yukarıdaki arayüzlere `DeviceRegistration`
+    eklendi (çıkış kancası). Fake'ler iOS mock verisini taşıyor; örnek sınav aksiyonları Android mock arşivine
+    uyarlandı._
+  - _**Bağlama:** live `core/data/notifications/NotificationsModule` + `Unavailable*`; mock'ta aynı adlı modül + Fake'ler._
+  - _**Navigasyon:** rotalar ve `ViFiNavHost` yuvaları; `core/navigation/ModalPresence`._
+  - _**Diğer:** `LaunchArgs.value` + 4 senaryo, 6 olay + 3 ekran adı, sürüm 4.1.0 (20)._
+  - _**Doğrulama:** `assembleDebug` geçti. `lintLiveDebug`: 0 hata, 56 uyarı (4.0.0 ile aynı; değişen dosyalarda uyarı
+    yok). Birim testleri liveDebug 709 / mockDebug 702 / liveRelease 709, hepsi geçti (her variant'ta +55; iOS
+    `NotificationPayloadParserTests` ve `NotificationDraftTests` birebir taşındı). `MockGraphTest` emülatörde 3/3
+    (bildirim bağlamalarının Fake olduğu eklendi). Mock uygulama açıldı, zil Inbox'ı yeni rotayla açtı._
+  - _**Not:** ilk denemede `lintAnalyze…UnitTest/AndroidTest` görevleri, aynı derlemedeki `test` görevi KSP
+    dosyalarını yeniden üretirken lint'in çökmesiyle düştü; lint tek başına çalışınca temiz geçti._
+  - _**Hatların bilmesi gereken kararlar** (§4'e işlendi): `Issue` metinleri modelde değil `ADM-03`'ün string
+    kaynaklarında; vurgu rota argümanı (`ViFiRoute.Inbox(highlightId)`); harita seçici `LocalLocationPicker` ile
+    sağlanıyor; mock izin geçmişi tohumlaması `PRM-02`'de._
 
 ### Faz 1 — Geliştirme (5 paralel kod hattı + belge hattı)
 
@@ -545,7 +587,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - `DeviceRegistrar`: `register(uid, token)`, `unregister(uid)`. `DeviceRegistration` arayüzü (`unregister(uid)`) Hat C
     içindir.
   - `NotificationSettingsService`: `consentChanges(uid)`, `setMarketing(uid, enabled, source)`.
-  - `NotificationEventReporter`: `report(notificationId, event)`.
+  - `NotificationEventReporter`: `report(event, notificationId)`.
   - `NotificationAdminService`: `audience()`, `preview(kind, audience)`, `send(draft)`, `cancel(id)`, `history()`,
     `uploadImage(jpeg, notificationId)`.
   - `LocationPicker`: `@Composable fun Content(initial, onPick, onCancel)`; flavor başına bağlanır, mock Google'a
@@ -560,7 +602,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - `LaunchArgs.value(arg): String?` (metin extra'sı) + `OPEN_NOTIFICATION("vifi_open_notification")`.
   - Yeni boolean'lar: `NOTIFICATIONS_DENIED`, `NOTIFICATIONS_REASK`, `CONSENT_REASK`.
   - `NOTIFICATIONS_PROMPT` anlamı "taze kurulum" olur (izin sorulmamış + boş geçmiş).
-  - Mock'ta geçmiş 31 gün önceki retle tohumlanır; öncelik iOS'taki gibi Prompt > Denied > Reask.
+  - Bayraklar burada tanımlanır; izin geçmişinin 31 gün önceki retle tohumlanması ve izin durumu önceliği
+    (Prompt > Denied > Reask) geçmişin ve `NotificationService`'in sahibi olan `PRM-02`'de bağlanır.
 - **Analytics:**
   - Olaylar: `notification_priming_shown|accepted|declined`, `marketing_consent_shown|accepted|declined`; tek parametre
     `source`.
@@ -568,6 +611,27 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - `AnalyticsEventMapping` (exhaustive `when`) ve `AnalyticsLimitsTest` (indeksler, 18 ekran) birlikte güncellenir.
 - **Metinler:** her hat kendi `strings_*.xml` dosyasını açar (§2). `NCT-01` metin eklemez.
 - **Kabul:** her şey derlenir; hatlar Fake'lerle ekran yazabilir; `test` + `lintLiveDebug` + `MockGraphTest` geçer.
+- **Uygulanan kararlar (2026-10-30; hatlar buna göre çalışır):**
+  - **`NotificationDraft.Issue`** yalnız bir enum'dur. Türkçe metinler (iOS `Issue.message`) `ADM-03`'te
+    `strings_notification_composer.xml`'e girer; sınır sayıları `%1$d` ile verilir. Yerelleştirme kuralı gereği:
+    kullanıcı metni yalnız `*Error.userMessage`'ta koda gömülebilir.
+  - **Akışlar:** Kotlin `Flow` hata durumunda iOS'taki `Result.failure` yerine `InboxError` /
+    `NotificationSettingsError` fırlatır ve biter (mevcut `AnnouncementsReader` deseni). `readMarkerChanges`'te `null`
+    yalnız sunucunun onayladığı "işaret yok" demektir.
+  - **Vurgu:** vurgulanacak bildirim rota argümanıyla taşınır: `ViFiRoute.Inbox(highlightId: String? = null)`;
+    `ViFiNavHost`'un `inbox` yuvası `highlightId` alır (mimari kural: alt durum olayla değil, nav arg ile). Mevcut
+    çağrılar `Inbox()` oldu.
+  - **Harita seçici:** `LocationPicker` (`@Composable Content`) Hilt'le bağlanır ve `MainActivity` tarafından
+    `LocalLocationPicker` olarak sağlanır. İki flavor'da şimdilik `UnavailableLocationPicker` var (hemen iptal eder);
+    `MAP-01…04` gerçek seçicileri bağlar.
+  - **`ModalPresence`:** `MainActivity` tarafından `LocalModalPresence` olarak sağlanır. Bir modal
+    `RegisterModalPresence()` çağırarak sayılır; `awaitNoModal()` sunumu bekletir. `NIT-01`'de mevcut modallar
+    kaydolur.
+  - **`DeviceRegistration`** (`unregister`, asla fırlatmaz) live'da şimdilik no-op'tur (bugün de kayıt silinmiyor);
+    `PSH-04`'ün deposu bunu uygular.
+  - **Analytics:** `NotificationPromptSource` (`prompt|reask|settings`) parametreli 6 ayrı olay.
+  - **Değişmeyenler:** mevcut `NotificationService`, `FakeNotificationService` ve `notifications.prompted` mock
+    davranışı `PRM-02`'ye kadar aynen kalıyor; yeni başlatma bayrakları yalnız tanımlı.
 
 #### `PSH-01` — Kanallar + tepsi
 - **Kanallar** (ad önerisi; `NIT-03`'te ürün sahibine gösterilir):
@@ -610,8 +674,9 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - `→ SignedOut`: hepsi sıfırlanır.
   - `SignedOut → SignedIn`: bekleyen atılır (oturum yokken yapılan dokunuş hiçbir hesaba ait değildir).
   - `Unknown → SignedIn`: korunur (soğuk başlatma).
-- **Teslim:** `ArchiveHost` var + tanıtım turu kapalı + `ModalPresence` boş → `Inbox` rotası (`launchSingleTop`). Inbox
-  zaten üstteyse yalnız vurgu taşınır. İzin akışı sayfası açıksa kapatılır (yanıtsız sayfa "hayır" sayılır); diğer
+- **Teslim:** `ArchiveHost` var + tanıtım turu kapalı + `ModalPresence.awaitNoModal()` →
+  `ViFiRoute.Inbox(highlightId = notificationId)` (`launchSingleTop`). Inbox zaten üstteyse yalnız vurgu taşınır:
+  aynı hedefin yeni argümanla tek üst girdiye dönüştüğü emülatörde doğrulanır, gerekirse giriş değiştirilir. İzin akışı sayfası açıksa kapatılır (yanıtsız sayfa "hayır" sayılır); diğer
   modallar (kilit sheet'i, güncelleme diyaloğu) **kapatılmaz**, beklenir.
 - **`MainActivity`:**
   - `onCreate` (`savedInstanceState == null`) ve `onNewIntent`'te `NotificationPayloadParser.notificationId(extras)`;
@@ -701,8 +766,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - Düğme turuncu zeminde **siyah** metin (kontrast).
   - Düğme varsa kart, görsel ve düğme aynı aksiyonu yapar; yoksa kart etkisizdir. Abone için Premium düğmesi gizlenir ve
     kart etkisizleşir.
-- **Vurgu:** `highlightedId` listede çözülürse satır arka planı `primary` %18, `animateScrollToItem` ile ortalanır,
-  `opened` bildirilir.
+- **Vurgu:** `highlightId` rota argümanından gelir (`ViFiRoute.Inbox`, ViewModel'de `SavedStateHandle`). Listede
+  çözülürse satır arka planı `primary` %18 olur, `animateScrollToItem` ile ortalanır ve `opened` bildirilir.
 - **Aksiyonlar:** `paywall` → `Paywall` rotası; `addExam` → `AddExam` rotası (profilden ön-dolu); `url` → dış tarayıcı
   (`ACTION_VIEW`); `location` → `INB-04`; `exam` → `INB-02`.
 - **Korunur:** mevcut "Bildirimler kapalı" izin şeridi (`inbox.permissionBanner`) ve zildeki sayı.
