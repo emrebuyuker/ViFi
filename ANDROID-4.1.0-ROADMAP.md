@@ -1066,15 +1066,24 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     "Sorulmadı" ve ilk açılışta 1/2, uygulamanın sorusundan sonra → "Kapalı", izinli → "Açık" ve yalnız 2/2. ≤12:
     bildirimler açıkken "Açık", sistem hiç sorulmaz, 1/2 atlanır, yalnız 2/2 (iOS "consent catch-up"). Her test yalnız
     kendi API düzeyinde koşar; "hiç sorulmamış" testi izni hiç verilmemiş cihaz ister (koşudan önce `adb shell pm revoke
-    com.salticusteam.vifi android.permission.POST_NOTIFICATIONS`; test içinden geri almak süreci öldürür)._
+    com.salticusteam.vifi android.permission.POST_NOTIFICATIONS`; test içinden geri almak süreci öldürür). NIT-02'nin
+    cihaza bıraktığı izin kalemi bununla karşılandı; cihazda kapatılamadığı için ≤12'de "bildirimler kapalı → Kapalı" ve
+    gerçek sistem diyaloğundaki ikinci sorma (`shouldShowRequestPermissionRationale`) cihaz testi dışında kaldı._
+  - _**"Konuma Git" seçenekleri cihazda** (NIT-02'nin cihaza bıraktığı ikinci kalem, iOS `MapsLinksTests.googleChoice`):
+    `MapsLaunchDeviceTest` (`androidTest`, iki flavor'da, 4). Başlatmalar dışarı çıkarken yakalanır, hiçbir şey açılmaz.
+    Google Haritalar uygulamada açılır; uygulama yoksa (sistemin "böyle bir uygulama yok" cevabı canlandırılır) aynı
+    bağlantı tarayıcıda; başka uygulama seçeneği `geo:` alan uygulamalara seçici açar, hiçbiri yoksa Google Haritalar
+    web. Son dal cihaza bağlı (`assume`): tablette Haritalar kurulu olduğu için atlanır; bir kez Haritalar geçici olarak
+    devre dışı bırakılarak (`pm disable-user`, sonra `pm enable`) koşturuldu ve geçti._
   - _**Uygulama kodu değişmedi;** testler gerçek bir hata bulmadı. `testTag` eklenmedi ya da değiştirilmedi._
   - _**Doğrulama:** tablet emülatöründe (API 37) tam enstrümanlı paket mock 223/223 (187 + 36), live 185 (182 + 3; 184
     geçti, ≤12 testi API 37'de atlandı; "hiç sorulmamış" testi izin geri alınarak koştu ve geçti). Yeni 36 test koyu
     temada (`cmd uimode night yes`) 36/36 ve telefon yerleşiminde (1080×2400, geçici API 37 AVD; mevcut
     `Medium_Phone`'da Play'den kurulu 4.0.0 (19) olduğu için ona dokunulmadı) 36/36. `assembleDebug` + iki androidTest
-    APK'sı derlendi; `lintLiveDebug` 0 hata, 56 uyarı. Birim testlerine dokunulmadı. PSH-01'in kanal adları cihazda
-    Türkçe görüldü ve ürün sahibine gösterildi: Duyurular, Kampanyalar ve fırsatlar, Sınav ve hesap bildirimleri (+
-    yerel Sınav gönderimleri)._
+    APK'sı derlendi; `lintLiveDebug` 0 hata, 56 uyarı. NIT-02 notundan sonra eklenen `MapsLaunchDeviceTest` ayrıca
+    koşturuldu: mock 4 (3 geçti, 1 atlandı), Haritalar kapalıyken live 4 (3 geçti, 1 atlandı); tam paketlerde beklenen
+    sayı mock 227, live 189. Birim testlerine dokunulmadı. PSH-01'in kanal adları cihazda Türkçe görüldü ve ürün
+    sahibine gösterildi: Duyurular, Kampanyalar ve fırsatlar, Sınav ve hesap bildirimleri (+ yerel Sınav gönderimleri)._
   - _**Açık — API ≤32:** bu Mac'te yalnız `android-37.0` imajı var, `cmdline-tools` (`sdkmanager`) da yok. ≤12 testi
     yazıldı, API 37'de atlanıyor; API 32 emülatöründe koşturulması ürün sahibinin indirme onayını bekliyor
     (`system-images;android-32;google_apis;arm64-v8a`, Google `sdkmanager`, ~1,5 GB)._
