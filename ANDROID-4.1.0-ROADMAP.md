@@ -711,9 +711,23 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     (`MAP-02`/`MAP-03`)._
   - _**Ürün sahibine:** metin onayı (P1), Google Maps maddesi (P2), yayın zamanı (P3; iOS 4.1.0 da aynı sayfalara
     bağlı)._
-- [ ] **`NLG-03`** Play politikası kontrolü _(P1·S·Opus)_ — Onaylı kampanya bildirimlerinin Play kurallarına uygunluğu
+- [x] **`NLG-03`** Play politikası kontrolü _(P1·S·Opus)_ — Onaylı kampanya bildirimlerinin Play kurallarına uygunluğu
   (bildirimle tanıtım, "Reklam içeriyor" beyanı gerekiyor mu?) ve yalnız ön plan konum izninin beyan gerektirip
-  gerektirmediği. Sonuç ürün sahibine sorulur.
+  gerektirmediği. Sonuç ürün sahibine sorulur. ✅ _Tamamlandı (2026-10-30, Opus). Ayrıntı
+  [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md)'de (29 Ekim 2026 yürürlüklü politika ve Console yardım sayfaları).
+  Gelenler:_
+  - _**Kampanya bildirimleri:** onay, kapatma ve sessiz saat Play'e uygun. Ancak Play sistem bildirimlerini yalnız
+    uygulamanın kendi özellikleri için kabul ediyor (havayolu fırsatı, oyun içi promosyon); bildirimle reklam sunmak
+    ihlal örneği. Öneri (R1): bildirimde yalnız ViFi'nin kendi teklifleri ve karşılıksız öğrenci fırsatları; ücretli
+    ya da sponsorlu işletme tanıtımı ve içerik derecelendirmesine aykırı kampanya (alkol, tütün, kumar) yok._
+  - _**"Reklam içeriyor":** Premium ve satın alma teklifleri kapsam dışı. Sponsorlu kampanya akış içi native reklam
+    sayılır. Öneri (R2): R1 kabul edilirse cevap "Hayır" kalır._
+  - _**Konum:** arka plan beyanı gerekmez. Ancak yeni "en dar kapsam" kuralıyla `ACCESS_FINE_LOCATION` için Console
+    beyanı Kasım 2026'da açılıyor, 27 Ocak 2027'de zorunlu oluyor. Öneri (K1): yalnız `ACCESS_COARSE_LOCATION`
+    (`MAP-01`, Hat E'ye ortak not klasöründen haber verildi). Konum düğmesi zorunluluğu `targetSdk 37+`._
+  - _**Diğer:** 2/2 onay sayfası Play'in onay kurallarını karşılıyor. Ticari statü beyanı Kasım 2026'da Console'a
+    geliyor (4.1.0'dan bağımsız). Türk mevzuatı (ticari elektronik ileti) kapsam dışı bırakıldı; hukuki görüş
+    önerildi._
 - [ ] **`NLG-04`** Mağaza girişi + 4.1.0 sürüm notu _(P1·S·Sonnet)_ — `PLAY-STORE-LISTING.md`: tam açıklamaya bildirim
   özellikleri, 4.1.0 sürüm notu (≤500).
 
