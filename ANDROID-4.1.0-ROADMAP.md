@@ -665,32 +665,122 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 #### Hat D — Admin "Bildirim Gönder" + Geçmiş
 
-- [ ] **`ADM-01`** `FirebaseNotificationAdminService` _(P0·M·Opus)_:
+- [x] **`ADM-01`** `FirebaseNotificationAdminService` _(P0·M·Opus)_:
   - 4 callable; `sendNotification` zaman aşımı 300 sn (istemci varsayılanı 70 sn).
   - Geçmiş: `notifications` koleksiyonu, `createdAt` azalan, en çok 50.
   - Görsel yükleme: önce `getMetadata`, yoksa `putBytes` (`image/jpeg`).
   - iOS ile aynı hata eşleme tablosu; facets / sonuç / geçmiş ayrıştırıcıları.
 
-  ⟶ `NCT-01`
-- [ ] **`ADM-02`** Composer ViewModel + taslak kuralları _(P0·L·Opus)_:
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`FirebaseNotificationAdminService`** (`core/data/notifications/admin`): 4 callable (yalnız `sendNotification`
+    `withTimeout(300 s)`), `audience` veri göndermeden çağrılır, `preview` kitle şeklini taslağın payload'ından alır;
+    geçmiş `notifications` `createdAt` azalan, 50, `Timestamp` → `Instant`; görsel yüklemesi önce kimlik/boyut
+    denetimi, sonra `getMetadata` (varsa yeniden kullanılır), yalnız `OBJECT_NOT_FOUND`'da `putBytes` (`image/jpeg`).
+    Ayrıştırıcılar NCT-01'deki `NotificationPayloadParser`'dan; okunamayan yanıt `UnexpectedResponse`._
+  - _**Hata eşleme** iOS tablosuyla aynı; SDK kod enum'ları JVM'de yüklenemediği için ad üzerinden ortak
+    `FirebaseStatus`'a indirilip birim testleniyor. Android ekleri: Functions'ın ağ hatası (`INTERNAL` + `IOException`)
+    ve Storage'ın `ERROR_UNKNOWN` + `IOException`'ı çevrimdışı sayılır; mesajsız ret ve diğerleri genel mesaja düşer
+    (ham İngilizce mesaj gösterilmez)._
+  - _Live DI'daki `UnavailableNotificationAdminService` → bu sınıf değişimi `NIT-01`'de. Canlı callable çağrılmadı._
+  - _**Testler:** `FirebaseNotificationAdminServiceTest` 22 (iOS'un 8'i + 5 Android eşleme + 9 MockK'li çağrı
+    testi: zaman aşımı, payload, sorgu şekli, görselin üzerine yazılmaması); cihazda koşacak
+    `FirebaseNotificationAdminErrorMappingTest` 3 (kod adı köprüsü; yalnız derlendi)._
+- [x] **`ADM-02`** Composer ViewModel + taslak kuralları _(P0·L·Opus)_:
   - Doğrulama sırası ve mesajları; karakterler **kod noktasıyla** sayılır (sunucu gibi).
   - Konumda Tür kilidi; kademeli kitle; tahmini kişi sayısı.
   - "Sessiz düşürme yok" kuralı (aksiyon seçildiyse geçerli olmalı).
   - Zamanlama +1 sa / geçerlilik +7 gün.
   - Önizleme → onay → gönder; test gönderimi; taslak id ömrü; görsel-id kuralı; sonuç işleme; çift dokunma.
 
-  ⟶ `ADM-01`
-- [ ] **`ADM-03`** Composer arayüzü _(P0·M·Sonnet)_ — Bölümler: Tür, İçerik, Hedef kitle, Eylem, Görsel, Zamanlama,
+  ⟶ `ADM-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationComposerUiState`** (`feature/notificationcomposer`): formun alanları + türetilmiş değerler (taslak,
+    `issue`/`visibleIssue`, `canSend`/`canSendTest`, sayaçlar `trim` + kod noktası, Türkçe sıralı seçici listeleri,
+    tahmini kitle, Tür kilidi/`effectiveKind`, test taslağı). Zaman kontrolleri durumdaki `now`'a göre; her
+    değişiklikte ve Gönder/test dokunuşunda yenilenir (bekleyen form geçmişe kayan zamanı dokunuşta yakalar).
+    Geri bildirim metin değil tip: `ComposerError` (`Message(userMessage)` / `SendFailed`) ve `ComposerSuccess`
+    (`Sent(n)` / `Scheduled(at)` / `TestSent`); metinleri ve tarih biçimi arayüzde (`ADM-03`)._
+  - _**`NotificationComposerViewModel`**: iOS akışı birebir — facets açılışta bir kez (hata → "Tekrar dene"),
+    kademeli kitle sıfırlaması, onay kaydı ayrı (`confirmation` + `isConfirming`), görsel yalnız onaydan sonra taslağın
+    kendi id'siyle yüklenir, sonuç işleme (`sent`/`sending` → sıfırla; `scheduled` → sayısız mesaj + sıfırla;
+    `failed`/`canceled` → yeni id, form kalır; hata → aynı id), test her dokunuşta yeni id + eksik segment "herkes",
+    görsel-id kuralı, çift dokunma koruması, `NotificationComposer` ekran adı. Sessiz saat istemcide hesaplanmaz._
+  - _**Görsel kodlayıcı** (`core/data/notifications/admin`): `NotificationImageEncoder` + `ContentResolverNotificationImageEncoder`
+    (`SubmissionJpegEncoder` kuralları, 1600 px, ≤ 1 MiB, EXIF, IO'da; okunamadı/kullanılamıyor ayrımı) +
+    iki flavor'ın ortak `NotificationAdminModule`'ü. VM'in Hilt grafiği için burada geldi; seçici arayüzü `ADM-04`'te._
+  - _**Testler** (iOS karşılıkları + Android ekleri): `NotificationComposerViewModelTest` 13 (10 + kod noktası,
+    zamanlamanın geçerliliği taşıması, ekran adı), `…SendFlowTest` 16 (15 + geçmişe kayan zaman),
+    `…AttachmentTest` 16 (13 + eski kodlamanın yenisini ezmemesi, hazırlanırken gönderim kapalı, okunamayan görsel),
+    `…KindLockTest` 7, `…LocationTest` 8; iOS `StubNotificationAdminService` karşılığı test çifti._
+- [x] **`ADM-03`** Composer arayüzü _(P0·M·Sonnet)_ — Bölümler: Tür, İçerik, Hedef kitle, Eylem, Görsel, Zamanlama,
   geri bildirim, Gönder / Bana test gönder. Onay diyaloğu; `notificationComposer.*` testTag'leri; `NotificationComposer`
-  ekran adı. ⟶ `ADM-02`
-- [ ] **`ADM-04`** Görsel hazırlama _(P1·S·Sonnet)_ — Foto seçici (izinsiz `PickVisualMedia`). `SubmissionJpegEncoder`
+  ekran adı. ⟶ `ADM-02` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationComposerScreen`** (durumlu; `onBack`, `onOpenHistory`, `locationRows`) + durumsuz
+    `NotificationComposerContent(state, actions: NotificationComposerActions, …)`; üst çubukta "Geçmiş"
+    (`notificationComposer.history`). Form iOS sırasıyla kart bölümler hâlinde: Tür (segment; Konum'da kilit + kilit
+    notu), İçerik (sayaçlar, sınır aşılınca hata rengi), Hedef kitle (segment, yükleniyor/hata + "Tekrar dene",
+    Üniversite/Fakülte/Bölüm açılır menüleri "<ad> · <n> kişi", Cinsiyet, "≈ N kişi", iki dipnot), Eylem (Buton menüsü,
+    https alanı), Zamanlama (anahtarlar + gün → saat seçicileri, cihaz saat dilimi), geri bildirim (hata / başarı /
+    neden), Gönder + "Bana test gönder". Onay `AlertDialog`'u ("…gönderilsin mi?" / "…zamanlansın mı?", "N kişiye…",
+    zamanlıysa saat) `ModalPresence`'a kayıtlı. Metinler `strings_notification_composer.xml`'de iOS'la birebir
+    (`Issue` metinleri dahil, sınırlar `%1$d`); tarih "30 Eki 2026 14:30" (iOS kısaltılmış tarih + kısa saat)._
+  - _**Konum yuvası:** Konum seçiliyken Eylem bölümü `ComposerLocationRows(location, enabled, onLocationPicked)` çizer;
+    satırlar ve seçicinin sunumu Hat E'nin (`MAP-03`), bağlama `NIT-01`'de (not: ortak not klasöründe
+    `hat-d-adm-notes.md`). Görsel bölümü `ADM-04`'te, sınav satırı `ADM-05`'te eklendi._
+  - _Tag'ler iOS kimlikleri + Android alt kimlikleri: segmentler `.kind.general|promo`,
+    `.audience.everyone|segment`, `.gender.all|female|male`; menüler `<menü>.field` ve `<menü>.option.<id|ad>`._
+  - _**Testler:** `NotificationComposerContentTest` 7 (gerçek VM + Fake servis: dokunulmamış form, kademeli kitle
+    64 → 40 → 28 → 17 → 24 → 9, onaydan sonra gönderim, vazgeçince gönderilmemesi, Konum'da Tür kilidi; durumsuz:
+    sayaç/neden, zamanlı onay diyaloğu) — yalnız derlendi; cihazda `NIT-03`'te._
+- [x] **`ADM-04`** Görsel hazırlama _(P1·S·Sonnet)_ — Foto seçici (izinsiz `PickVisualMedia`). `SubmissionJpegEncoder`
   yeniden kullanılır: en uzun kenar 1600 px, ≤ 1 MiB, EXIF yönü. Ana iş parçacığı dışında çalışır; sürüm sayacıyla eski
-  kodlama yeni seçimin üstüne yazılmaz. ⟶ `ADM-02`
-- [ ] **`ADM-05`** Arşivden sınav seçici _(P1·M·Sonnet)_ — Üniversite → fakülte → bölüm → ders → sınav gezinmesi
+  kodlama yeni seçimin üstüne yazılmaz. ⟶ `ADM-02` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**"Görsel" bölümü** (`NotificationComposerImageSection`): sistem Photo Picker'ı (`PickVisualMedia.ImageOnly`,
+    izin yok), önizleme (Coil, 160 dp, 12 dp köşe), "Görsel Seç"/"Görseli Değiştir", hazırlanırken ilerleme ("Görsel
+    hazırlanıyor"), "Görseli Kaldır", hata satırı (okunamadı / kullanılamıyor); iOS tag'leri `.imagePicker`,
+    `.imagePreview`, `.imageRemove`, `.imageError` + Android `.imagePreparing`._
+  - _Kodlayıcı (`ContentResolverNotificationImageEncoder`, ADM-02'de geldi) lint'e göre düzeltildi: `toUri()` /
+    `Bitmap.scale()`. EXIF yönü, Sınav Ekle'nin kodlayıcısı gibi platform `ExifInterface`'iyle okunuyor; AndroidX
+    `exifinterface` uygulamanın bağımlılığı değil, uyarı yalnız o fonksiyonda gerekçeyle susturuldu (iki kodlayıcıyı
+    AndroidX'e geçirmek bir derleme değişikliği; `NIT-01`'e not)._
+  - _Sürüm sayacı ve "hazırlanırken gönderim kapalı" ADM-02'nin VM testlerinde._
+  - _**Testler:** cihazda `ContentResolverNotificationImageEncoderTest` 4 (2400×1200 → 1600×800 JPEG ≤ 1 MiB, küçük
+    görsel büyütülmez, görsel olmayan veri, eksik dosya) ve `NotificationComposerImageSectionTest` 5 — yalnız derlendi._
+- [x] **`ADM-05`** Arşivden sınav seçici _(P1·M·Sonnet)_ — Üniversite → fakülte → bölüm → ders → sınav gezinmesi
   (`ArchiveRepository`), Türkçe duyarsız arama. Gönderilen yalnız `examId`; dosyasız sınav seçilemez. ⟶ `ADM-02`
-- [ ] **`ADM-06`** Gönderim Geçmişi _(P1·M·Sonnet)_ — Satırlarda durum / tür / Test / Otomatik rozetleri, kitle etiketi,
+  ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationExamPicker`**: iOS gibi arşivin kendi `BrowseViewModel`'iyle (yeni arşiv kodu yok) iç içe bir
+    NavHost'ta, uygulamanın `ViFiRoute.Home`/`Browse` hedefleriyle gezinir; seviyelerin VM'leri seçiciye ait bir
+    `ViewModelStore`'da yaşar, kapanınca temizlenir. Arama seçicide yerel tutulup `BrowseUiState`'in Türkçe
+    katlamasıyla süzülür (VM'in arşiv araması analytics olayı üretilmez; iOS'ta da seçici bu olayı göndermiyor).
+    Dosyasız sınav pasif; sınav seçilince kapanır, gönderilen yalnız `examId` (yolun son bileşeni)._
+  - _Sunum: iOS sheet'inin yerine formun yerini alan tam ekran katman (Sınav Ekle'deki seçiciler gibi); tam ekran
+    `Dialog`'un Android 15'te sistem çubuğu altına kaydığı projede kayıtlı. Kökte "✕" (`.exam.cancel`) ve Geri kapatır,
+    derinde Geri bir üst seviyeye döner (`.exam.back`); form kaydırma konumunu korur; `ModalPresence`'a kayıtlı.
+    Başlık düğümün adı ya da "Sınav Seç"; seviye arama istemleri, boş ve "… için sonuç yok" durumları arşivle ortak
+    metinler. Satırlar `notificationComposer.exam.row.<ad>`._
+  - _**Eylem satırı** (`ExamRow`): "Sınav" + seçilen sınavın adı ya da "Seç" (`.exam`), altında yol (`.examPath`,
+    "Üniv › Fakülte › Bölüm › Ders")._
+  - _**Testler:** `NotificationExamPickerTest` 6 (kök ve Türkçe arama, dosyasız sınav, boş seviye, sonuçsuz arama,
+    satırın seçimi ve yolu, seçimsiz satır) — yalnız derlendi; sınav eyleminin VM kuralları ADM-02 testlerinde. Mock
+    arşivde uçtan uca gezinti (iOS `testAdminLinksAnExamPickedFromTheArchive`) `NIT-03`'te._
+- [x] **`ADM-06`** Gönderim Geçmişi _(P1·M·Sonnet)_ — Satırlarda durum / tür / Test / Otomatik rozetleri, kitle etiketi,
   zaman ("(sessiz saat)") ve sayılar. Zamanlanmışta "İptal et" (iOS gibi onaysız). Yenileme ve hata durumları;
-  `NotificationHistory` ekran adı. ⟶ `ADM-01`
+  `NotificationHistory` ekran adı. ⟶ `ADM-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationHistoryViewModel`** (iOS birebir): açılışta bir kez yükler; aşağı çekme ve hata ekranındaki
+    "Tekrar Dene" yeniler (yenileme sürerken ikinci çekme yok sayılır); başarısız yenileme satırları korur ve hatayı
+    üstte gösterir; "İptal et" yalnız zamanlanmışta ve tek seferde bir tane (`cancelingId`), başarıda listeyi yeniden
+    yükler, `NotCancelable`'da mesaj + yeniden yükleme, diğer hatada yalnız mesaj; `NotificationHistory` ekran adı._
+  - _**`NotificationHistoryScreen`** ("Gönderim Geçmişi"): yükleniyor ("Geçmiş yükleniyor…"), ilk yükleme hatası
+    (yeniden dene), boş ("Henüz bildirim yok" + açıklama), liste (`notificationComposer.history.list`): tür ikonu,
+    başlık, kitle etiketi, rozetler (durum, tür, Test, Otomatik; tema konteyner renkleri, sabit renk yok; büyük yazıda
+    alt satıra kayar), zaman satırı ("<zaman> için zamanlandı (sessiz saat)" / gönderim ya da oluşturma zamanı), gönderilmiş
+    olanlarda iki sayı satırı (plurals). Satır `…history.row.<id>`; iOS'un kaydırma eylemi + bağlam menüsü yerine
+    satırın menüsü (`.menu`) → "İptal et" (`.cancel`, onaysız)._
+  - _Composer'daki "Geçmiş" düğmesi `onOpenHistory` ile verilir; `ViFiNavHost`'un `notificationComposer` /
+    `notificationHistory` yuvalarına ve Hesap satırına bağlama `NIT-01`'de._
+  - _**Testler:** `NotificationHistoryViewModelTest` 9 (iOS'un 7'si + aşağı çekme koruması, ekran adı);
+    `NotificationHistoryContentTest` 7 (gönderilmiş satır, zamanlanmışın iptali, uçuştaki iptal, hata + satırlar, boş,
+    ilk yükleme hatası, yükleniyor) — yalnız derlendi._
 
 #### Hat E — Konum seçici (admin)
 
