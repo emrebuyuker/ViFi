@@ -1024,9 +1024,60 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     anahtarsız (seçici "yapılandırılmamış" der; `NOPS-01`)._
 - [ ] **`NIT-02`** Birim testleri _(P0·M·Sonnet)_ — Hatların testleri + iOS test listelerinin (ek) tam karşılığı.
   `AnalyticsLimitsTest` (6 olay, ekran sayısı 15 → 18). Üç variant'ta tam paket. ⟶ `NIT-01`
-- [ ] **`NIT-03`** UI testleri + emülatör _(P0·M·Sonnet)_ — iOS `InboxUITests` (13), `NotificationPermissionUITests` (9),
-  `NotificationComposerUITests` (6) ve `LocationCampaignUITests` (6) karşılıkları. Mock'ta uçtan uca; açık/koyu tema;
-  **API 33+ ve API ≤32** emülatörde izin eşlemesi. ⟶ `NIT-01`
+- [x] **`NIT-03`** UI testleri + emülatör _(P0·M·Sonnet)_ — iOS `InboxUITests` (13), `NotificationPermissionUITests`
+  (9), `NotificationComposerUITests` (6) ve `LocationCampaignUITests` (6) karşılıkları. Mock'ta uçtan uca; açık/koyu
+  tema; **API 33+ ve API ≤32** emülatörde izin eşlemesi. ⟶ `NIT-01` ✅ _Tamamlandı (2026-10-31, Opus). Gelenler:_
+  - _**iOS'un 34 UI testi birebir, mock'ta uçtan uca** (`androidTestMock`; `MainActivity` başlatma argümanlarıyla
+    açılır, düğümler `testTag` ile bulunur, metinler string kaynağından doğrulanır). Mevcut içerik testleri
+    (`InboxContentTest`, `NotificationComposerContentTest` …) durumsuz katmanı sürüyordu; bunlar gerçek NavHost,
+    ViewModel ve mock grafiği üstünde aynı senaryoları koşar:_
+    - _`InboxUiTest` 13 = `InboxUITests`. Sıra `a1`, `p-exam`, `p-paywall`, `p-exam-locked`, `a2`, `p-location`
+      (listenin kendi anahtar → sıra eşlemesiyle), `a-expired` yok, `a1`'de düğme yok; sınav düğmesi ve kart sınavı
+      açar; Premium; abone için Premium düğmesi yok (kart da tepkisiz); kilitli sınav kilit sheet'iyle açılır, coin
+      yoksa "Sınav Ekle" dersiyle açılır, abone doğrudan açar; görsel yalnız `p-exam-locked`'ta; push `p-paywall`'u
+      seçili açar, `does-not-exist` yalnız sayfayı açar; push'la açılan sayfa kapanınca Ana Sayfa, tekrar açılmaz.
+      Android karşılıkları: `inbox.done` → üst çubuğun geri oku, `home.list` → `browse.list`; "sayfa kapanır" = sınav
+      arşiv hiyerarşisinin üstünde açılır, geri arşivde yürür (`openExam`)._
+    - _`NotificationPermissionUiTest` 9 + 2 = `NotificationPermissionUITests` (1/2 → 2/2 kabul ve ret → Bildirim
+      Ayarları'nda "Açık" + anahtar; "Şimdi Değil"; 1/2 tur bitene kadar bekler; 2/2 ne kaydırmayla ne Geri ile kapanır;
+      kampanya anahtarı ekrandan çıkıp girince korunur; reddedilmiş izinde "Ayarlar'ı Aç" var, "Bildirimleri Aç" yok;
+      bildirim sayfasında onay tekrarı ret → bir daha sorulmaz, kabul → anahtar açık). `NDEC-01` farkı: "Şimdi Değil"den
+      sonra iOS'taki "Sessiz" yerine "Sorulmadı" + "Bildirimleri Aç". NIT-01'de elle denenen iki akış da artık test:
+      push vurgusuyla açılan sayfada onay tekrarı çıkmaz; `vifi_notifications_reask` + PDF'li gerçek gönderim → form
+      kapanır, "Onaylanınca haber verelim mi?" (1/2) gelir._
+    - _`NotificationComposerUiTest` 6 = `NotificationComposerUITests` (admin olmayana Bildirim Gönder ve Moderasyon yok;
+      kitle 64 → 40 → 28 → 17 → Sakarya 24 → Kadın 9; onaylı gönderim Geçmiş'te "Gönderildi"; vazgeçince gönderim yok;
+      zamanlanmış "Zamanlandı", satır menüsünden iptal → "İptal edildi" (iOS'taki kaydırma Android'de menü, `ADM-06`);
+      sınav mock arşivde İTÜ › Mühendislik › Bilgisayar Mühendisliği › BLG 101 › 2020 Final yürünerek bağlanır)._
+    - _`LocationCampaignUiTest` 6 = `LocationCampaignUITests` ("Konuma Git" ve kartın kendisi iki seçenek açar: Google
+      Haritalar + başka harita uygulaması, `NDEC-03`; vazgeçince sayfa kalır; mock seçiciden yer → gönder ancak yer
+      seçilince açılır, Geçmiş'te "Kampanya" + "Gönderildi"; Konum türü Kampanya'ya kilitler, başka eylem çözer; seçici
+      iptalinde yer yok). NIT-01'in elle denenen Hesap › Bildirim Gönder › Konum › mock seçici › Geçmiş yolu bu paketin
+      ilk composer testidir._
+  - _**Test altyapısı** (`androidTestMock/.../testing/`, yeni bağımlılık yok): `MockApp.launch(…)` (argümanlar +
+    `LaunchArgs` sıfırlama); `TestWorkManager` (test uygulaması Hilt'in `HiltTestApplication`'ı olduğu için
+    WorkManager'ı kimse kurmuyordu ve Sınav Ekle açılamıyordu; süreç başına bir kez, her testin kendi Hilt işçi
+    fabrikasıyla kurulur); `answerDocumentPicker` (belge seçiciye `Instrumentation.ActivityMonitor` ile örnek PDF
+    döndürür, Espresso-Intents gerekmez); `assertNeverAppears` (gecikmeli bir şeyin çıkmadığını kör bekleme yerine
+    yoklayarak doğrular)._
+  - _**İzin eşlemesi (`NDEC-01`) cihazda:** `NotificationPermissionMappingDeviceTest` (`androidTestLive`, 3). Mock'ta
+    izin sahte servisle simüle edildiği için eşleme yalnız live'daki gerçek `FirebaseNotificationService` +
+    koordinatörle doğrulanabiliyor; onay kaydı ve sunum geçmişi bellekte, Firebase'e yazım yok. 13+: hiç sorulmamış →
+    "Sorulmadı" ve ilk açılışta 1/2, uygulamanın sorusundan sonra → "Kapalı", izinli → "Açık" ve yalnız 2/2. ≤12:
+    bildirimler açıkken "Açık", sistem hiç sorulmaz, 1/2 atlanır, yalnız 2/2 (iOS "consent catch-up"). Her test yalnız
+    kendi API düzeyinde koşar; "hiç sorulmamış" testi izni hiç verilmemiş cihaz ister (koşudan önce `adb shell pm revoke
+    com.salticusteam.vifi android.permission.POST_NOTIFICATIONS`; test içinden geri almak süreci öldürür)._
+  - _**Uygulama kodu değişmedi;** testler gerçek bir hata bulmadı. `testTag` eklenmedi ya da değiştirilmedi._
+  - _**Doğrulama:** tablet emülatöründe (API 37) tam enstrümanlı paket mock 223/223 (187 + 36), live 185 (182 + 3; 184
+    geçti, ≤12 testi API 37'de atlandı; "hiç sorulmamış" testi izin geri alınarak koştu ve geçti). Yeni 36 test koyu
+    temada (`cmd uimode night yes`) 36/36 ve telefon yerleşiminde (1080×2400, geçici API 37 AVD; mevcut
+    `Medium_Phone`'da Play'den kurulu 4.0.0 (19) olduğu için ona dokunulmadı) 36/36. `assembleDebug` + iki androidTest
+    APK'sı derlendi; `lintLiveDebug` 0 hata, 56 uyarı. Birim testlerine dokunulmadı. PSH-01'in kanal adları cihazda
+    Türkçe görüldü ve ürün sahibine gösterildi: Duyurular, Kampanyalar ve fırsatlar, Sınav ve hesap bildirimleri (+
+    yerel Sınav gönderimleri)._
+  - _**Açık — API ≤32:** bu Mac'te yalnız `android-37.0` imajı var, `cmdline-tools` (`sdkmanager`) da yok. ≤12 testi
+    yazıldı, API 37'de atlanıyor; API 32 emülatöründe koşturulması ürün sahibinin indirme onayını bekliyor
+    (`system-images;android-32;google_apis;arm64-v8a`, Google `sdkmanager`, ~1,5 GB)._
 - [ ] **`NIT-04`** Belgeler _(P2·S·Haiku)_ — `CLAUDE.md` (durum, Bildirimler bölümü, LaunchArg tablosu, "Maps anahtarı
   commit'lenmez") ve `README.md`. ⟶ `NIT-01`
 
