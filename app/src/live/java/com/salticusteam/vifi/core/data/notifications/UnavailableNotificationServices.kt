@@ -1,7 +1,5 @@
 package com.salticusteam.vifi.core.data.notifications
 
-import com.salticusteam.vifi.core.data.repository.DeviceRegistrar
-import com.salticusteam.vifi.core.data.repository.DeviceRegistration
 import com.salticusteam.vifi.core.data.repository.InboxReader
 import com.salticusteam.vifi.core.data.repository.NotificationAdminService
 import com.salticusteam.vifi.core.data.repository.NotificationEventReporter
@@ -35,19 +33,6 @@ class UnavailableInboxReader @Inject constructor() : InboxReader {
     override fun personalChanges(uid: String): Flow<List<InboxItem>> = flow { throw InboxError.Unavailable }
     override fun readMarkerChanges(uid: String): Flow<Instant?> = flow { throw InboxError.Unavailable }
     override suspend fun markRead(uid: String): Unit = throw InboxError.Unavailable
-}
-
-/** Registration fails (callers log and retry later); nothing is written. */
-class UnavailableDeviceRegistrar @Inject constructor() : DeviceRegistrar {
-    override suspend fun register(uid: String, token: String): Unit = throw unavailable()
-    override suspend fun unregister(uid: String): Unit = throw unavailable()
-
-    private fun unavailable() = UnsupportedOperationException("Device registration is not wired in this build yet")
-}
-
-/** Nothing to remove: no registration was written (the contract never throws). */
-class UnavailableDeviceRegistration @Inject constructor() : DeviceRegistration {
-    override suspend fun unregister(uid: String) = Unit
 }
 
 /** The consent record reads as unreadable and refuses writes, so no answer is ever reported as saved. */

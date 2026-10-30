@@ -18,7 +18,7 @@ class ViFiMessagingService : FirebaseMessagingService() {
 
     @Inject lateinit var pushNotifier: PushNotifier
 
-    @Inject lateinit var pushTokenRegistration: PushTokenRegistration
+    @Inject lateinit var deviceRegistration: DeviceRegistrationStore
 
     @Inject lateinit var pushTopicSubscription: PushTopicSubscription
 
@@ -34,9 +34,9 @@ class ViFiMessagingService : FirebaseMessagingService() {
         if (!content.isEmpty) pushNotifier.show(content)
     }
 
-    /** Re-join `all` (a new token has no topics) and store the token for the signed-in user (N11). */
+    /** Re-join `all` (a new token has no topics) and register the new token for the signed-in user. */
     override fun onNewToken(token: String) {
         pushTopicSubscription.refresh()
-        pushTokenRegistration.onNewToken(token)
+        deviceRegistration.tokenDidChange(token)
     }
 }

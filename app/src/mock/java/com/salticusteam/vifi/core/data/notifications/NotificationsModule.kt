@@ -7,12 +7,12 @@ import com.salticusteam.vifi.core.data.repository.NotificationAdminService
 import com.salticusteam.vifi.core.data.repository.NotificationEventReporter
 import com.salticusteam.vifi.core.data.repository.NotificationSettingsService
 import com.salticusteam.vifi.core.data.repository.fake.FakeDeviceRegistrar
-import com.salticusteam.vifi.core.data.repository.fake.FakeDeviceRegistration
 import com.salticusteam.vifi.core.data.repository.fake.FakeInboxReader
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationAdminService
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationEventReporter
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationSettingsService
 import com.salticusteam.vifi.core.model.NotificationConsent
+import com.salticusteam.vifi.core.notifications.DeviceRegistrationStore
 import com.salticusteam.vifi.core.util.LaunchArg
 import com.salticusteam.vifi.core.util.LaunchArgs
 import com.salticusteam.vifi.feature.notificationcomposer.locationpicker.LocationPicker
@@ -40,9 +40,10 @@ object NotificationsModule {
     @Singleton
     fun provideDeviceRegistrar(): DeviceRegistrar = FakeDeviceRegistrar()
 
+    /** The app's own store (its writes land in the fake registrar above). */
     @Provides
     @Singleton
-    fun provideDeviceRegistration(): DeviceRegistration = FakeDeviceRegistration()
+    fun provideDeviceRegistration(store: DeviceRegistrationStore): DeviceRegistration = store
 
     /**
      * Never answered, so campaigns start off; `vifi_consent_reask` starts with a "no" (campaigns off), for the inbox

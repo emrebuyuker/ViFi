@@ -22,12 +22,11 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **9'u tamam, 0'ı yarım, 41'i başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **10'u tamam, 0'ı yarım, 40'ı başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
-> 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A'da kanallar (`PSH-01`), push gösterimi (`PSH-02`) ve
-> dokunuş yönlendirmesi (`PSH-03`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün
-> sahibi).
+> 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
+> tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -356,14 +355,37 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     açılmaz) — hepsi beklendiği gibi; uygulamada ANR yok (emülatörün System UI'ı bir kez ANR verdi)._
   - _Vurgunun ekranda gösterilmesi `INB-03`'te (bugün `InboxScreen` argümanı okumuyor). Mevcut modalların
     `ModalPresence` kaydı ve izin akışının kapatılması `NIT-01`'de kalır._
-- [ ] **`PSH-04`** `DeviceRegistrationStore` + `FirestoreDeviceRegistrar` _(P0·M·Opus)_ — `PushTokenRegistration` /
+- [x] **`PSH-04`** `DeviceRegistrationStore` + `FirestoreDeviceRegistrar` _(P0·M·Opus)_ — `PushTokenRegistration` /
   `FirestoreDeviceTokenStore`'un yerine geçer:
   - Kurulum başı UUID; `users/<uid>/devices/<kurulumId>` = `{token, platform: 'android', appVersion, updatedAt}`.
   - Token ve oturum birlikte olunca yazar; tekrar koruması kullanıcı değişince ya da çıkışta sıfırlanır.
   - `unregister(uid)`: en çok 3 sn, asla hata fırlatmaz.
   - Eski `devices/<token>` dokümanını bir kez siler.
 
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Ürün sahibinin kararıyla (30 Ekim) live bağlama da burada yapıldı
+  (planda `NIT-01`'deydi). Gelenler:_
+  - _**`DeviceInstallation`** (`core/data/preferences`, DataStore): `notifications.installationId.v1` = küçük harf
+    UUID, desene (`^[A-Za-z0-9_-]{1,128}$`) uymayan değer yenilenir; `notifications.legacyDeviceRemoved.v1` bayrağı.
+    Çıkışta silinmez (kurulum boyunca sabit)._
+  - _**`FirestoreDeviceRegistrar`** (`core/data/firebase`): `set` (merge yok) tam 4 alan; `appVersion` ≤ 32;
+    `updatedAt` sunucu zamanı. İlk başarılı kayıttan sonra eski `devices/<token>` bir kez silinir (kural sahibine
+    silme izni veriyor; hata sessiz, sonraki kayıtta yeniden denenir). `unregister` kurulum dokümanını siler._
+  - _**`DeviceRegistrationStore`** (`core/notifications`, `DeviceRegistration`'ı uygular): iOS kuralları (son gelen
+    tetikler; aynı çift süreç başına bir kez; başka kullanıcı sıfırlar; çıkış yalnız bellekte sıfırlar; hata loglanır,
+    sonraki tetikleyicide yeniden). `start(sessions)` açılışta token'ı okur ve oturumu izler (`SessionViewModel`);
+    `onNewToken` → `tokenDidChange`. `unregister`: önce durumu sıfırlar, uçuştaki yazımı bekler (silmeden sonra
+    belge yeniden oluşmasın), sonra siler; hepsi 3 sn içinde, asla fırlatmaz. Durum kilitle korunur (FCM token'ı
+    kendi iş parçacığından bildirir)._
+  - _**Bağlama:** live `DeviceRegistrar` → `FirestoreDeviceRegistrar`, iki flavor'da `DeviceRegistration` →
+    `DeviceRegistrationStore` (mock'ta yazımlar `FakeDeviceRegistrar`'a). Silinenler: `PushTokenRegistration`(+test),
+    `DeviceTokenStore`, `FirestoreDeviceTokenStore`, `FakeDeviceTokenStore`, `UnavailableDeviceRegistrar`/`…Registration`.
+    Çıkış/hesap silmede `unregister` çağrısı `PRM-05`'te._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda
+    yok). Birim testleri liveDebug 759 / mockDebug 752 / liveRelease 759, hepsi geçti (−5 eski, +20:
+    `DeviceRegistrationStoreTest` 13 — iOS'un 11'i + açılış/oturum ve uçuştaki yazımı bekleme —,
+    `DeviceInstallationTest` 5, `FirestoreDeviceRegistrarTest` 2). Tablet emülatöründe `MockGraphTest` 3/3 (depo +
+    sahte yazıcı, Firebase hiç başlamıyor) ve `ViFiRouterTest` 9/9; mock uygulama açıldı, dokunuş sayfayı açtı.
+    Canlıya yazım yapılmadı; gerçek belge yazımı `NQA-01`'de (onayla)._
 
 #### Hat B — Bildirim sayfası
 
@@ -514,7 +536,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - İzin akışı sunucusu `ArchiveHost`'ta (turdan sonra). Bildirim sayfasında onay tekrarı (700 ms, vurgu yoksa).
   - Sınav Ekle başarısından sonra `examWasSubmitted`. Hesap satırları ("Bildirim Ayarları", admin'e "Bildirim Gönder").
   - Mevcut modalların `ModalPresence`'a kaydı. `SessionTeardown` sıfırlamaları.
-  - Live DI'da `Unavailable*` → gerçek sınıf; eski sınıfların silinmesi.
+  - Live DI'da `Unavailable*` → gerçek sınıf; eski sınıfların silinmesi (cihaz kaydı `PSH-04`'te yapıldı).
 
   ⟶ Hat A…E
 - [ ] **`NIT-02`** Birim testleri _(P0·M·Sonnet)_ — Hatların testleri + iOS test listelerinin (ek) tam karşılığı.
@@ -1026,9 +1048,9 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   `ExamUnlockSheet`, izin sheet'i, "Konuma Git" sheet'i, konum seçici.
 - **Hesap:** "Bildirim Ayarları" satırı herkese; "Bildirim Gönder" yalnız admin'e (Moderasyon'un yanında).
 - **`SessionTeardown`:** yönlendirici, inbox deposu ve onay deposu sıfırlanır; izin akışı kapatılır.
-- **Silinenler:** `PushTokenRegistration`, `FirestoreDeviceTokenStore`, `DeviceTokenStore`,
-  `AnnouncementsStore`/`Reader`/`Parser`, `AnnouncementReadPreferences`, `NotificationPrompt`(+VM) ve testleri;
-  yerlerine yenileri gelir.
+- **Silinenler:** `AnnouncementsStore`/`Reader`/`Parser`, `AnnouncementReadPreferences`, `NotificationPrompt`(+VM) ve testleri;
+  yerlerine yenileri gelir. (`InboxDeepLink` `PSH-03`'te; `PushTokenRegistration`, `DeviceTokenStore`,
+  `FirestoreDeviceTokenStore` `PSH-04`'te silindi.)
 
 #### `NIT-02` / `NIT-03` — Testler
 - iOS test adları ve kapsamları ekte (A.11, B.9, C.8); her biri Android karşılığıyla eşlenir.
