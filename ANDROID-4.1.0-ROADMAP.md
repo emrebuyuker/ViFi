@@ -892,22 +892,69 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 #### Hat F — Yasal metinler ve Play beyanları
 
-- [ ] **`NLG-01`** Veri güvenliği envanteri _(P0·S·Sonnet)_ — `PLAY-DATA-SAFETY.md`:
+- [x] **`NLG-01`** Veri güvenliği envanteri _(P0·S·Sonnet)_ — `PLAY-DATA-SAFETY.md`:
   - Cihaz kimlikleri (FCM token + kurulum id'si), kullanıcı kimliği ve profil segmentleri + onay kaydı için "Reklam veya
     pazarlama" amacı.
   - Uygulama etkinliği (okundu işareti, açılma/aksiyon istatistiği).
   - Maps/Places SDK'nın Google'ca yayımlanan beyanları.
   - Konumun toplanmadığının gerekçesi (Places bias'ı dahil değerlendirilir).
 
-  ⟶ `NDEC-02`
-- [ ] **`NLG-02`** Gizlilik politikası kontrolü _(P1·S·Sonnet)_ — Canlı `/gizlilik` kampanya bildirimlerini, onay
+  ⟶ `NDEC-02` ✅ _Tamamlandı (2026-10-30, Opus). Form ürün sahibinin kararlarından (K2…K4) sonra doldurulur. Gelenler:_
+  - _**Tablo:** UID, profil segmentleri ve cihaz kimliklerine "geliştirici iletişimleri" + "reklam veya pazarlama";
+    uygulama etkileşimlerine "uygulama işlevi"; yeni satır "Diğer işlemler" (onay kaydı, isteğe bağlı). Kurulum kimliği,
+    okundu işareti, istatistik, 6 olay + 3 ekran adı (29 olay, 18 ekran) işlendi. "Segmentasyon Analytics audience'la"
+    notu düzeltildi: hedefleme sunucuda RTDB profilleriyle._
+  - _**§4.1.0:** amaçların Play tanımlarına göre gerekçesi; bildirim verilerinin yer/yazım/okuma/silme envanteri;
+    Maps ve Places SDK'nın Google beyanları (ikisi de 28 Ekim 2026 güncel) ve Play türlerine eşlemesi; konum analizi;
+    Console kontrol listesi (`NRL-05`)._
+  - _**Bulgular:** (1) Places bias'ı otomatik cihaz odağında cihaz konumunu dolaylı olarak Google'a gönderiyor; Google
+    "enlem-boylam sınırları"nı toplanan veri sayıyor. (2) Kişi başı istatistik işaretleri
+    (`notifications/<id>/events/<uid>_<olay>`) hesap silmede silinmiyor._
+  - _**Kararlar:** K1 konum ✅ (ürün sahibi 30 Ekim: yalnız `COARSE` + bias yalnız admin haritayı yerleştirince; Hat E
+    `7c74b21`'de uyguladı → konum beyanı yok). Açık: K2 admin SDK verileri (öneri: kilitlenme + tanılama + arama geçmişi, isteğe bağlı), K3 istatistik
+    işaretlerinin silinmesi (öneri: ortak backend), K4 "geliştirici iletişimleri" amacı (öneri: evet)._
+- [x] **`NLG-02`** Gizlilik politikası kontrolü _(P1·S·Sonnet)_ — Canlı `/gizlilik` kampanya bildirimlerini, onay
   kaydını, cihaz kaydını ve admin harita konumunu anıyor mu? Eksikse metin ortak depoda (`ViFi-iOS/firebase/hosting/`)
-  önerilir; hosting yayını ayrıca onay ister. ⟶ `NLG-01`
-- [ ] **`NLG-03`** Play politikası kontrolü _(P1·S·Opus)_ — Onaylı kampanya bildirimlerinin Play kurallarına uygunluğu
+  önerilir; hosting yayını ayrıca onay ister. ⟶ `NLG-01` ✅ _Tamamlandı (2026-10-30, Opus). Öneri metni bu dalda
+  [`PRIVACY-POLICY-4.1.0.md`](PRIVACY-POLICY-4.1.0.md)'de; ortak depoya ve hosting'e dokunulmadı. Gelenler:_
+  - _**Kontrol:** `/gizlilik`, `/hesap-silme`, `/kullanim-kosullari` salt okundu (HTTP 200, `Last-Modified` 29 Ekim
+    06:26 GMT). Üçü de `ViFi-iOS` `v-4.1.0`'daki dosyalarla bayt bayt aynı; 4.1.0 için değişiklik yok._
+  - _**Eksikler:** kampanya bildirimleri ve onay kaydı yok; cihaz kaydı kısmen var; segment hedeflemesi, okundu
+    işareti ve istatistik yok; admin harita ekranı ve Google Maps Platform yok. "Reklam göstermez" cümlesi kampanyalarla
+    çelişebilir. Hesap silme sayfası bildirim verilerini anmıyor. Kullanım koşullarında Google Maps Platform şartlarının
+    (§3.2.2) istediği Google Maps maddesi yok; bu iOS 4.1.0'ı da ilgilendiriyor._
+  - _**Önerilen metin:** gizlilik tablosu (2 değişen, 3 yeni satır), "Bildirimler" ve "Yöneticilerin harita ekranı"
+    bölümleri, reklam cümlesinin iki biçimi (R1'e bağlı), aktarım/saklama cümleleri, hesap silme satırları (K3'e bağlı),
+    kullanım koşullarına Google Haritalar maddesi. Ek öneri: Android konum diyaloğundan önce iOS'un amaç metni
+    (`MAP-02`/`MAP-03`)._
+  - _**Ürün sahibine:** metin onayı (P1), Google Maps maddesi (P2), yayın zamanı (P3; iOS 4.1.0 da aynı sayfalara
+    bağlı)._
+- [x] **`NLG-03`** Play politikası kontrolü _(P1·S·Opus)_ — Onaylı kampanya bildirimlerinin Play kurallarına uygunluğu
   (bildirimle tanıtım, "Reklam içeriyor" beyanı gerekiyor mu?) ve yalnız ön plan konum izninin beyan gerektirip
-  gerektirmediği. Sonuç ürün sahibine sorulur.
-- [ ] **`NLG-04`** Mağaza girişi + 4.1.0 sürüm notu _(P1·S·Sonnet)_ — `PLAY-STORE-LISTING.md`: tam açıklamaya bildirim
-  özellikleri, 4.1.0 sürüm notu (≤500).
+  gerektirmediği. Sonuç ürün sahibine sorulur. ✅ _Tamamlandı (2026-10-30, Opus). Ayrıntı
+  [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md)'de (29 Ekim 2026 yürürlüklü politika ve Console yardım sayfaları).
+  Gelenler:_
+  - _**Kampanya bildirimleri:** onay, kapatma ve sessiz saat Play'e uygun. Ancak Play sistem bildirimlerini yalnız
+    uygulamanın kendi özellikleri için kabul ediyor (havayolu fırsatı, oyun içi promosyon); bildirimle reklam sunmak
+    ihlal örneği. Öneri (R1): bildirimde yalnız ViFi'nin kendi teklifleri ve karşılıksız öğrenci fırsatları; ücretli
+    ya da sponsorlu işletme tanıtımı ve içerik derecelendirmesine aykırı kampanya (alkol, tütün, kumar) yok._
+  - _**"Reklam içeriyor":** Premium ve satın alma teklifleri kapsam dışı. Sponsorlu kampanya akış içi native reklam
+    sayılır. Öneri (R2): R1 kabul edilirse cevap "Hayır" kalır._
+  - _**Konum:** arka plan beyanı gerekmez. Ancak yeni "en dar kapsam" kuralıyla `ACCESS_FINE_LOCATION` için Console
+    beyanı Kasım 2026'da açılıyor, 27 Ocak 2027'de zorunlu oluyor. K1 ✅: yalnız `ACCESS_COARSE_LOCATION` (ürün sahibi
+    onayı; Hat E `7c74b21`) → beyan gerekmez. Konum düğmesi zorunluluğu `targetSdk 37+`._
+  - _**Diğer:** 2/2 onay sayfası Play'in onay kurallarını karşılıyor. Ticari statü beyanı Kasım 2026'da Console'a
+    geliyor (4.1.0'dan bağımsız). Türk mevzuatı (ticari elektronik ileti) kapsam dışı bırakıldı; hukuki görüş
+    önerildi._
+- [x] **`NLG-04`** Mağaza girişi + 4.1.0 sürüm notu _(P1·S·Sonnet)_ — `PLAY-STORE-LISTING.md`: tam açıklamaya bildirim
+  özellikleri, 4.1.0 sürüm notu (≤500). ✅ _Tamamlandı (2026-10-30, Opus). Metinler ürün sahibinin onayını bekliyor.
+  Gelenler:_
+  - _**Tam açıklama (4.1.0, 2188/4000):** yeni "BİLDİRİMLER" bölümü (sınav onayı ve bölüme yeni sınav; tek sayfa,
+    görsel ve düğmeler; cihazlar arası okundu; onaylı kampanyalar, 22:00–09:00 yok, Hesap › Bildirim Ayarları). "DİĞER"deki
+    bildirim maddesi buraya taşındı. Admin özellikleri mağaza metnine girmedi. 4.0.0 metni 4.0.0 yayını için duruyor._
+  - _**Sürüm notu (4.1.0, 426/500, Türkçe).**_
+  - _**Uygulama içeriği notları:** gizlilik (NLG-02), reklamlar (R1/R2), veri güvenliği (`NRL-05`). Açık konular:
+    isteğe bağlı dolu Bildirimler ekran görüntüsü (`NQA-01` sonrası). "Reklam yok." cümlesi R1/R2'ye bağlı._
 
 ### Faz 2 — Entegrasyon ve Testler
 

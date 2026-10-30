@@ -6,6 +6,10 @@
 > **4.0.0 (LEG-03, ürün sahibince onaylandı 2026-10-29):** tam açıklama, sürüm notu ve uygulama içeriği
 > cevapları Premium ve parayla tek sınav açma için güncellendi. Console'a **4.0.0 sürümüyle birlikte** girilir; o
 > zamana kadar canlıda 3.1.0 metni kalır (önceki metin: `git show 7343c53:PLAY-STORE-LISTING.md`).
+> **4.1.0 (NLG-04, 30 Ekim 2026, ürün sahibinin onayını bekliyor):** Tam açıklamaya "BİLDİRİMLER" bölümü ve 4.1.0
+> sürüm notu eklendi. Uygulama içeriği satırlarına 4.1.0 notları düşüldü. Console'a **4.1.0 sürümüyle** girilir
+> (`NRL-06`); 4.0.0 yayınlanırken 4.0.0 metni kullanılır. "Reklam yok." cümlesi ve reklam beyanı
+> [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md)'deki R1/R2 kararına bağlıdır.
 
 ## 1. Yayın öncesi sıra
 
@@ -23,16 +27,16 @@
 
 | Form | Cevap | Not |
 |---|---|---|
-| Gizlilik politikası | `https://vifi-831a8.web.app/gizlilik` | Firebase Hosting'de yayında (kaynak `ViFi-iOS/firebase/hosting/`). |
+| Gizlilik politikası | `https://vifi-831a8.web.app/gizlilik` | Firebase Hosting'de yayında (kaynak `ViFi-iOS/firebase/hosting/`). 4.1.0: bildirim, onay ve harita metinleri eksik; öneri [`PRIVACY-POLICY-4.1.0.md`](PRIVACY-POLICY-4.1.0.md) (NLG-02), sürümden önce yayınlanmalı. |
 | Uygulama erişimi | "Bazı işlevler kısıtlı" → giriş talimatı ekle | Uygulamanın tamamı telefonla (+90) girişin arkasında. İnceleme için Firebase Console'daki **test numarasını ve sabit kodunu** yaz; numara bu dosyaya yazılmaz (sır kuralı). Test hesabının profili tamamlanmış olmalı. Önerilen talimat: _"Uygulama telefon numarasıyla giriş ister. Giriş ekranına \<numara\> yazıp Kod Gönder'e dokunun, kod alanına \<kod\> yazın. Bu bir test numarasıdır, SMS gönderilmez."_ |
-| Reklamlar | Hayır, reklam içermiyor | AdMob tamamen kaldırıldı (FM-08). |
+| Reklamlar | Hayır, reklam içermiyor | AdMob tamamen kaldırıldı (FM-08). 4.1.0: kampanya bildirimleri ücretli/sponsorlu tanıtım içermezse cevap değişmez (NLG-03, R1/R2). |
 | İçerik derecelendirmesi | Kategori: Referans, Haber veya Eğitim. Şiddet, cinsellik, küfür, madde, kumar: Hayır. Kullanıcılar birbiriyle içerik paylaşabiliyor mu: **Evet** (sınav görselleri/PDF'leri; yayından önce incelenir). Konum paylaşımı: Hayır. Dijital satın alma: **Evet** _(4.0.0; 3.1.0'da Hayır)_. | 4.0.0: ViFi Premium aboneliği ve parayla tek sınav açma Google Play Billing ile. Coin gerçek parayla satın alınmaz ve paraya çevrilmez; kumar sayılmaz. Anket 4.0.0 sürümüyle yeniden gönderilir. |
 | Hedef kitle ve içerik | 18 yaş ve üstü; uygulama çocuklara hitap etmiyor | 28 Ekim'de Console'da doğrulandı (önceden kayıtlı). 13 yaş altı seçilmemeli (Aile politikası). |
 | Haber uygulaması | Hayır | |
 | Devlet uygulaması | Hayır | |
 | Finans özellikleri | Yok | 26 Ekim'de kaydedildi. Uygulama içi satın alma (4.0.0) finans özelliği sayılmaz; değişmez. |
 | Sağlık | Yok | 26 Ekim'de kaydedildi. |
-| Veri güvenliği | `PLAY-DATA-SAFETY.md`; hesap silme adresi `https://vifi-831a8.web.app/hesap-silme` | 26 Ekim'de kaydedildi, incelemeye gönderilmedi. 4.0.0 ile "Finansal bilgiler → Satın alma geçmişi" eklenir (LEG-02). |
+| Veri güvenliği | `PLAY-DATA-SAFETY.md`; hesap silme adresi `https://vifi-831a8.web.app/hesap-silme` | 26 Ekim'de kaydedildi, incelemeye gönderilmedi. 4.0.0 ile "Finansal bilgiler → Satın alma geçmişi" eklenir (LEG-02). 4.1.0: §4.1.0'daki kontrol listesi (NLG-01, `NRL-05`). |
 | Reklam kimliği | Kullanılmıyor | `AD_ID` izinleri birleşik manifest'ten çıkarıldı. |
 
 ## 3. Mağaza girişi metinleri
@@ -47,7 +51,55 @@
 Üniversitelerin geçmiş vize ve final sınavları tek yerde. Ders seç, sınavı aç.
 ```
 
-**Tam açıklama** (4.0.0, en çok 4000 karakter):
+**Tam açıklama** (4.1.0, en çok 4000 karakter; 2188 karakter). 4.0.0 metnine göre fark: "BİLDİRİMLER"
+bölümü eklendi, "DİĞER"deki bildirim maddesi oraya taşındı. Yalnız admin'e açık özellikler (Bildirim Gönder, harita
+seçicisi) mağaza metnine girmez.
+
+```
+ViFi, üniversitelerin geçmiş sınavlarını tek bir arşivde toplar. Üniversiteni, fakülteni, bölümünü ve dersini seç; önceki yılların vize, final ve bütünleme sınavlarını görsel ya da PDF olarak uygulama içinde incele.
+
+SINAVLARI BUL
+• Üniversite, fakülte, bölüm ve ders adımlarıyla aradığın sınava kolayca ulaş.
+• Her listede arama yaparak sonuçları daralt.
+• Son görüntülediğin sınavlara ana sayfadan tek dokunuşla dön.
+
+RAHATÇA İNCELE
+• Görsel ve PDF sınavlar tek yerde.
+• Sayfaları yakınlaştırarak ayrıntılı incele.
+• Açtığın sınavlar cihazında önbelleğe alınır; tekrar açtığında daha hızlı yüklenir.
+
+COIN İLE KİLİT AÇ
+• Her derste en eski iki sınav ücretsizdir.
+• Diğer sınavlar 100 coin ile açılır ve hesabında kalıcı olarak açık kalır.
+• Coin satın alınmaz; onaylanan sınav gönderimleriyle kazanılır.
+• İstersen bir sınavı coin yerine tek seferlik ödemeyle de açabilirsin; o sınav da hesabında kalıcı olarak açık kalır.
+
+ViFi PREMIUM
+• Aylık ya da yıllık abonelikle arşivdeki tüm sınavlar coin gerekmeden açılır.
+• Abonelik dönem sonunda otomatik olarak yenilenir; Google Play abonelik ayarlarından istediğin zaman iptal edebilirsin.
+
+SINAV EKLE, COIN KAZAN
+• Elindeki sınavları fotoğraf ya da PDF olarak gönder.
+• Gönderimler yayınlanmadan önce incelenir; onaylandığında coin'lerin hesabına yüklenir.
+• Gönderim arka planda sürer; sonucu bildirimle öğrenirsin.
+
+BİLDİRİMLER
+• Gönderdiğin sınav onaylandığında ya da bölümüne yeni sınav eklendiğinde haberin olsun.
+• Tüm bildirimlerin tek sayfada. Bildirimler görsel ve düğme içerebilir: tek dokunuşla sınava, Premium'a ya da Sınav Ekle'ye geç, paylaşılan bir konumu haritada aç.
+• Okuduğun bildirimler, aynı hesapla girdiğin tüm cihazlarında okundu görünür.
+• Öğrenci fırsatları ve kampanya bildirimleri yalnızca onay verirsen gelir; gece 22:00–09:00 arasında gönderilmez. Tercihini Hesap › Bildirim Ayarları'ndan istediğin an değiştirebilirsin.
+
+DİĞER
+• Telefon numaranla (+90) giriş.
+• Reklam yok.
+• Açık ve koyu tema desteği.
+
+ViFi bağımsız bir uygulamadır; listelenen üniversitelerle resmi bir bağlantısı yoktur. Sınav belgelerini görüntülemek için internet bağlantısı gerekir.
+
+Görüş ve önerilerin için: buyukeryazilim@gmail.com
+```
+
+**Tam açıklama** (4.0.0, en çok 4000 karakter; 4.0.0 yayınında kullanılır, 4.1.0 ile yukarıdaki metin yerini alır):
 
 ```
 ViFi, üniversitelerin geçmiş sınavlarını tek bir arşivde toplar. Üniversiteni, fakülteni, bölümünü ve dersini seç; önceki yılların vize, final ve bütünleme sınavlarını görsel ya da PDF olarak uygulama içinde incele.
@@ -88,6 +140,12 @@ ViFi bağımsız bir uygulamadır; listelenen üniversitelerle resmi bir bağlan
 Görüş ve önerilerin için: buyukeryazilim@gmail.com
 ```
 
+**Sürüm notları** (4.1.0, en çok 500 karakter; 426 karakter):
+
+```
+Bildirimler yenilendi: gönderdiğin sınav onaylandığında ya da bölümüne yeni sınav eklendiğinde haber al. Bildirimler artık görsel ve düğme içerebiliyor; tek dokunuşla sınava ya da Premium'a geçebilir, paylaşılan bir konumu haritada açabilirsin. Okuduğun bildirimler tüm cihazlarında okundu görünür. Öğrenci fırsatlarını bildirim olarak almak istersen onay verebilir, Hesap › Bildirim Ayarları'ndan istediğin an kapatabilirsin.
+```
+
 **Sürüm notları** (4.0.0, en çok 500 karakter):
 
 ```
@@ -126,5 +184,9 @@ ViFi yenilendi: yeni tasarım, telefon numarasıyla giriş, coin ile kilitli sı
   zorunlu onay kutusu var; işaretlenmeden Gönder açılmaz. Hakkında'da Kullanım Koşulları ve Gizlilik Politikası
   bağlantıları var. Gönderimler yayından önce yönetici onayından geçiyor; görüntüleyicideki "Bize Ulaş" şikâyet yolu.
   **Kalan:** aynı onay kutusu iOS'ta yok (parite işi).
+- **4.1.0 ekran görüntüsü (isteğe bağlı):** Bildirimler sayfası canlıda boş olduğu için listede yoktu. `NQA-01`'deki
+  test bildirimiyle (görsel + düğme) canlıda dolu bir sayfa çekilebilir; test hesabının telefonu görünmemeli.
+- **4.1.0 metinleri:** Tam açıklama ve sürüm notu ürün sahibinin onayını bekliyor. "Hesap › Bildirim Ayarları"
+  (`PRM-04`) ve bildirim düğmeleri 4.1.0'da hazır olmalı; olmazsa ilgili cümle çıkarılır.
 - **"Bağımsız uygulama" cümlesi:** Tam açıklamadaki üniversitelerle resmi bağlantı olmadığı cümlesinin doğruluğunu ürün
   sahibi teyit etmeli; üniversite adları geçtiği için yanıltıcı içerik politikası açısından önerilir.
