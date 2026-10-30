@@ -20,6 +20,13 @@ interface NotificationService {
      */
     suspend fun requestAuthorization(): Boolean
 
+    /**
+     * Whether the system permission dialog can still be shown (Android 13+: never asked yet, or asked once and the
+     * system still offers it again). `false` when already allowed, below Android 13, or after "don't ask again":
+     * the way left is the app's notification settings (NDEC-01, iOS `needsSettingsApp`).
+     */
+    suspend fun canRequestPermission(): Boolean
+
     /** The current push registration token, or `null` when it is not available. */
     suspend fun token(): String?
 

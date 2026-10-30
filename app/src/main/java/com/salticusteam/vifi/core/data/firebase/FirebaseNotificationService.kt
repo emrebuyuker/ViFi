@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessaging
@@ -11,6 +12,7 @@ import com.salticusteam.vifi.core.data.preferences.UserPreferencesRepository
 import com.salticusteam.vifi.core.data.repository.NotificationService
 import com.salticusteam.vifi.core.model.NotificationPermission
 import com.salticusteam.vifi.core.notifications.NotificationPermissionRequester
+import com.salticusteam.vifi.core.util.ForegroundActivityHolder
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -24,6 +26,7 @@ class FirebaseNotificationService @Inject constructor(
     private val messaging: FirebaseMessaging,
     private val requester: NotificationPermissionRequester,
     private val preferences: UserPreferencesRepository,
+    private val activityHolder: ForegroundActivityHolder,
 ) : NotificationService {
 
     override suspend fun permission(): NotificationPermission = when {
@@ -41,6 +44,14 @@ class FirebaseNotificationService @Inject constructor(
         val granted = requester.request(Manifest.permission.POST_NOTIFICATIONS)
         preferences.setNotificationsPrompted(true)
         return granted
+    }
+
+    override suspend fun canRequestPermission(): Boolean {
+        if (isGranted() || Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
+        if (!preferences.notificationsPrompted.first()) return true
+        // After one "no" the system shows the dialog once more and says so through the rationale flag.
+        val activity = activityHolder.activity ?: return false
+        return ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS)
     }
 
     override suspend fun token(): String? = try {

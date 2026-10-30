@@ -1,6 +1,7 @@
 package com.salticusteam.vifi.core.data.preferences.fake
 
 import com.salticusteam.vifi.core.data.inbox.LegacyInboxReadState
+import com.salticusteam.vifi.core.data.preferences.NotificationPromptHistory
 import com.salticusteam.vifi.core.data.preferences.OnboardingPreferences
 import com.salticusteam.vifi.core.data.preferences.RecentExamsRepository
 import com.salticusteam.vifi.core.data.preferences.UserPreferencesRepository
@@ -8,6 +9,7 @@ import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.OnboardingState
 import com.salticusteam.vifi.core.model.RecentExam
+import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -68,4 +70,30 @@ class FakeLegacyInboxReadState(hasLegacyIds: Boolean = false) : LegacyInboxReadS
         clearCount++
         hasLegacyIds = false
     }
+}
+
+/**
+ * The notification prompt history in memory (mock flavor, tests; iOS mock suite wiped at each launch): the mock
+ * flavor seeds it per launch argument, so a scenario never depends on what an earlier run left on the device.
+ */
+class FakeNotificationPromptHistory(private val now: () -> Instant = Instant::now) : NotificationPromptHistory {
+    var primingOffered = false
+    var consentOffered = false
+    var permissionDeclinedAt: Instant? = null
+    var consentDeclinedAt: Instant? = null
+    var permissionReaskShown = false
+    var consentReaskShown = false
+
+    override suspend fun hasOfferedPriming() = primingOffered
+    override suspend fun hasOfferedConsent() = consentOffered
+    override suspend fun markPrimingOffered() { primingOffered = true }
+    override suspend fun markConsentOffered() { consentOffered = true }
+    override suspend fun markPermissionReaskShown() { permissionReaskShown = true }
+    override suspend fun markConsentReaskShown() { consentReaskShown = true }
+    override suspend fun recordPermissionDeclined() { if (permissionDeclinedAt == null) permissionDeclinedAt = now() }
+    override suspend fun recordConsentDeclined() { if (consentDeclinedAt == null) consentDeclinedAt = now() }
+    override suspend fun shouldReaskPermission() =
+        NotificationPromptHistory.isReaskDue(permissionReaskShown, permissionDeclinedAt, now())
+    override suspend fun shouldReaskConsent() =
+        NotificationPromptHistory.isReaskDue(consentReaskShown, consentDeclinedAt, now())
 }

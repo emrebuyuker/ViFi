@@ -4,6 +4,8 @@ import com.salticusteam.vifi.core.data.firebase.FirestoreDeviceRegistrar
 import com.salticusteam.vifi.core.data.firebase.FirebaseNotificationEventReporter
 import com.salticusteam.vifi.core.data.firebase.FirestoreInboxReader
 import com.salticusteam.vifi.core.data.firebase.FirestoreNotificationSettingsService
+import com.salticusteam.vifi.core.data.preferences.DataStoreNotificationPromptHistory
+import com.salticusteam.vifi.core.data.preferences.NotificationPromptHistory
 import com.salticusteam.vifi.core.data.repository.DeviceRegistrar
 import com.salticusteam.vifi.core.data.repository.DeviceRegistration
 import com.salticusteam.vifi.core.data.repository.InboxReader
@@ -48,6 +50,10 @@ abstract class NotificationsModule {
     @Binds
     @Singleton
     abstract fun bindNotificationEventReporter(impl: FirebaseNotificationEventReporter): NotificationEventReporter
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationPromptHistory(impl: DataStoreNotificationPromptHistory): NotificationPromptHistory
 
     @Binds
     @Singleton

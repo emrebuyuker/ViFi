@@ -97,16 +97,21 @@ object RepositoryModule {
     @Singleton
     fun provideLegacyInboxReadState(): LegacyInboxReadState = FakeLegacyInboxReadState()
 
-    /** Already allowed unless launched with `vifi_notifications_prompt`, which shows the permission prompt. */
+    /**
+     * Already allowed, unless (in this order, iOS's precedence) `vifi_notifications_prompt` (never asked: the
+     * permission step), `vifi_notifications_denied` (the system will not ask again: "Ayarlar'ı Aç") or
+     * `vifi_notifications_reask` (said no once, the system may still ask) is set.
+     */
     @Provides
     @Singleton
-    fun provideNotificationService(): NotificationService = FakeNotificationService(
-        initial = if (LaunchArgs.isSet(LaunchArg.NOTIFICATIONS_PROMPT)) {
-            NotificationPermission.NOT_DETERMINED
-        } else {
-            NotificationPermission.AUTHORIZED
-        },
-    )
+    fun provideNotificationService(): NotificationService = when {
+        LaunchArgs.isSet(LaunchArg.NOTIFICATIONS_PROMPT) -> FakeNotificationService(NotificationPermission.NOT_DETERMINED)
+        LaunchArgs.isSet(LaunchArg.NOTIFICATIONS_DENIED) ->
+            FakeNotificationService(NotificationPermission.DENIED, canRequest = false)
+        LaunchArgs.isSet(LaunchArg.NOTIFICATIONS_REASK) ->
+            FakeNotificationService(NotificationPermission.DENIED, canRequest = true)
+        else -> FakeNotificationService(NotificationPermission.AUTHORIZED)
+    }
 
     /**
      * Seeded with a sample profile for the mock user, so the gate opens straight into the archive; empty when

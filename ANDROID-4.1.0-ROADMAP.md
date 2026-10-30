@@ -22,12 +22,12 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **16'sı tamam, 0'ı yarım, 34'ü başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **17'si tamam, 0'ı yarım, 33'ü başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
-> tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam; Hat C'de onay deposu (`PRM-01`) tamam. Faz 0'da açık kalan
-> tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
+> tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam; Hat C'de onay deposu ve izin koordinatörü (`PRM-01`,
+> `PRM-02`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -541,14 +541,39 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     `FirestoreNotificationSettingsServiceTest` 4 — iOS'un 15 + 4'ü). Mock uygulama ana ekrana açıldı (görülen
     "yanıt vermiyor" penceresi emülatörün System UI'ına aitti). Depoyu kullanan ekranlar `PRM-02`…`04`'te; canlı
     yazım `NQA-01`'de (onayla)._
-- [ ] **`PRM-02`** `NotificationPromptHistory` + `NotificationPromptCoordinator` _(P0·M·Opus)_:
+- [x] **`PRM-02`** `NotificationPromptHistory` + `NotificationPromptCoordinator` _(P0·M·Opus)_:
   - Cihaz başı geçmiş (DataStore), 30 gün kuralı, "ilk hayır kazanır".
   - Eski `notifications.prompted` → "1/2 sunuldu" eşlemesi.
   - Tetikleyiciler: ilk sunum (turdan sonra), onay yakalama (izinli ama kayıtsız; 12 ve altı dahil), sınav
     gönderiminden sonra izin tekrarı, bildirim sayfasında onay tekrarı.
   - Tek yuvalı kuyruk, modal yokken sunum. Android izin durumu + "sistem diyaloğu gösterilebilir mi".
 
-  ⟶ `PRM-01`
+  ⟶ `PRM-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationPromptHistory`** (`core/data/preferences`): arayüz + `DataStoreNotificationPromptHistory`
+    (iOS anahtarları; ret zamanı epoch ms; yalnız ilk "hayır"; 30 gün; vadesi gelen gösterilene kadar kalır; 4.0.0'ın
+    `notifications.prompted`'ı 1/2 sunuldu sayılır) + `FakeNotificationPromptHistory` (mock'ta her açılışta
+    LaunchArg'a göre tohumlanır, iOS mock paketi gibi)._
+  - _**`NotificationPromptCoordinator`** (`feature/notifications`): `NotificationPrompt(kind PERMISSION|CONSENT, source,
+    permission, id)`, tek yuva `pending`/`presented`, `present()`, `dismiss()`. `offerFirstRunIfNeeded()` (eski
+    gösterimde izin yoksa "hayır" kaydı; sorulmadıysa 1/2; izinliyse ve onay kaydı 5 sn içinde "cevaplanmadı" ise 2/2
+    bir kez; reddedildiyse hiçbir şey), `examWasSubmitted()` (vadesi gelmiş + izin yok), `inboxConsentReask()`
+    (vadesi gelmiş + 2 sn içinde yüklendi + kampanya kapalı; Android'de de tek sunucu kuyruğuna girer). iOS'un sessiz
+    provisional izninin karşılığı yok (`prepare()` yazılmadı)._
+  - _**`NotificationService.canRequestPermission()`**: 13+'ta hiç sorulmadıysa ya da sistem gerekçe bayrağıyla bir
+    kez daha sorabiliyorsa `true`; izinli, 12 ve altı ya da "bir daha sorma" → `false` ("Ayarlar'ı Aç").
+    `FirebaseNotificationService` `ForegroundActivityHolder` ile, sahte servis yapılandırılabilir; sahte servis
+    artık sistem gibi davranıyor (soramıyorsa istek bir şey değiştirmiyor)._
+  - _**Mock senaryoları:** `vifi_notifications_prompt` (sorulmadı, boş geçmiş), `vifi_notifications_denied` (reddedildi,
+    sorulamaz), `vifi_notifications_reask` (reddedildi, sorulabilir; 31 gün önce "hayır"), `vifi_consent_reask`
+    (31 gün önce onay "hayır"); varsayılan izinli, iki adım da sunulmuş._
+  - _Koordinatörü kullanan sayfa ve sunucu `PRM-03`'te; Sınav Ekle / bildirim sayfası tetikleyicileri ve çıkışta
+    `dismiss` `NIT-01`'de._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı. Birim testleri
+    liveDebug 875 / mockDebug 868 / liveRelease 875, hepsi geçti (`NotificationPromptHistoryTest` 9 — iOS'un 8'i +
+    4.0.0 bayrağı —, `NotificationPromptCoordinatorTest` 21 — Android izin modeline uyarlandı, provisional testleri
+    "sessiz istek yok" ve "kayıt 5 sn'de gelmezse sonraya kalır" ile değişti). Tablet emülatöründe `MockGraphTest`
+    3/3; dört senaryo açılışı çökmesiz ve ANR'sız._
+
 - [ ] **`PRM-03`** İzin/onay sayfaları _(P0·M·Sonnet)_ — AlertDialog'un yerine iki adımlı alt sayfa:
   - 1/2 "Hiçbir şeyi kaçırma" / tekrarda "Onaylanınca haber verelim mi?"; 2/2 "Öğrenci fırsatları".
   - Onay sayfası kaydırılarak kapatılamaz (kayıt hatası hariç); yükseklik içeriğe göre; turuncu üstünde siyah metin.

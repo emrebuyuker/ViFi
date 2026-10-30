@@ -1,5 +1,7 @@
 package com.salticusteam.vifi.core.data.notifications
 
+import com.salticusteam.vifi.core.data.preferences.NotificationPromptHistory
+import com.salticusteam.vifi.core.data.preferences.fake.FakeNotificationPromptHistory
 import com.salticusteam.vifi.core.data.repository.DeviceRegistrar
 import com.salticusteam.vifi.core.data.repository.DeviceRegistration
 import com.salticusteam.vifi.core.data.repository.InboxReader
@@ -21,6 +23,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import java.time.Duration
+import java.time.Instant
 import javax.inject.Singleton
 
 /**
@@ -58,6 +62,23 @@ object NotificationsModule {
     @Provides
     @Singleton
     fun provideNotificationEventReporter(): NotificationEventReporter = FakeNotificationEventReporter()
+
+    /**
+     * In memory and seeded per launch (iOS's mock suite is wiped at each launch), like iOS's launch arguments: a
+     * fresh install with `vifi_notifications_prompt`; both steps already offered otherwise, plus a "no" 31 days ago
+     * with `vifi_notifications_reask` (the permission, re-asked after the next submission) or `vifi_consent_reask`
+     * (the consent, re-asked when the inbox opens).
+     */
+    @Provides
+    @Singleton
+    fun provideNotificationPromptHistory(): NotificationPromptHistory = FakeNotificationPromptHistory().apply {
+        if (LaunchArgs.isSet(LaunchArg.NOTIFICATIONS_PROMPT)) return@apply
+        primingOffered = true
+        consentOffered = true
+        val monthAgo = Instant.now().minus(Duration.ofDays(31))
+        if (LaunchArgs.isSet(LaunchArg.NOTIFICATIONS_REASK)) permissionDeclinedAt = monthAgo
+        if (LaunchArgs.isSet(LaunchArg.CONSENT_REASK)) consentDeclinedAt = monthAgo
+    }
 
     /** Sample audience and history; sends stay on the device. Reached only with `vifi_admin`. */
     @Provides
