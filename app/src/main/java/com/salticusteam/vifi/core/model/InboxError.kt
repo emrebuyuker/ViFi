@@ -5,4 +5,7 @@ package com.salticusteam.vifi.core.model
 sealed class InboxError(val userMessage: String) : Exception(userMessage) {
 
     data object Unavailable : InboxError("Bildirimler yüklenemedi. Bağlantını kontrol edip tekrar dene.")
+
+    /** A notification's exam is no longer in the archive, or has no files (iOS `InboxExamGate`). */
+    data object ExamMissing : InboxError("Bu sınav artık arşivde bulunmuyor.")
 }

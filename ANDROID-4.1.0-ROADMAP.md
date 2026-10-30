@@ -22,12 +22,12 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **11'i tamam, 0'ı yarım, 39'u başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **12'si tamam, 0'ı yarım, 38'i başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
-> tamam; Hat B'de kutu deposu (`INB-01`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`,
-> ürün sahibi).
+> tamam; Hat B'de kutu deposu ve sınav kapısı (`INB-01`, `INB-02`) tamam. Faz 0'da açık kalan tek iş Google Cloud
+> Maps anahtarı (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -423,7 +423,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     durumu birebir —, `InboxViewModelTest` 5). Tablet emülatöründe `MockGraphTest` 3/3; mock uygulamada zil
     "6 okunmamış", sayfa en yeniden eskiye 6 satır (süresi dolan gizli), geri dönünce sayı kalktı; ANR yok. Canlıya
     yazım yapılmadı._
-- [ ] **`INB-02`** `ExamAccessResolver` + sınav kapısı _(P0·M·Opus)_ — Bildirimden açılan sınav arşivin kilit kuralından
+- [x] **`INB-02`** `ExamAccessResolver` + sınav kapısı _(P0·M·Opus)_ — Bildirimden açılan sınav arşivin kilit kuralından
   geçer:
   - Abone ya da daha önce açılmış → açık.
   - Değilse dersin tam listesi yüklenir; `ExamLock.freeExamIds`'e göre açık ya da kilitli → mevcut kilit sheet'i (coin /
@@ -431,7 +431,22 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - Bulunamazsa "Bu sınav artık arşivde bulunmuyor."
   - Çift dokunma koruması.
 
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`ExamAccessResolver`** (`core/data/archive`): `access(examPath, isSubscribed, unlockedIds)` → `ExamAccess`
+    Open / Locked(arşivin kendi öğesi) / Unavailable. Sıra iOS'la aynı: 5 seviyeli değilse istek yok; abone ya da
+    açılmışsa ders yüklenmez; değilse dersin filtresiz tam listesi, dosyasız sınavlar da ücretsiz yerleri sayar.
+    Android eki: silinmiş ders (`ArchiveError.NotFound`) → Unavailable; diğer hatalar fırlar._
+  - _**`InboxExamGate`** (`feature/inbox`, ViewModel'e ait): `check(target)` (açılabilir mi; çalışırken ikinci
+    dokunuş yok sayılır), durum `checkingExamId` / `lockedExam` (kilit sheet'i) / `errorMessage`; `followUp(ExamUnlockEvent)`
+    → `Open(target)` / `AddExam(ders)` / `Paywall`, kilitli sınav başına bir kez; `onSheetDismissed`, `onErrorShown`.
+    "Bu sınav artık arşivde bulunmuyor." → `InboxError.ExamMissing`. Mevcut `ExamUnlockSheet` + `ExamUnlockViewModel`
+    olduğu gibi kullanılacak._
+  - _Kapının ekrana bağlanması (eylem düğmesi, sheet, "Sınav açılamadı" diyaloğu, `ViFiRouter.openExam`) `INB-03`'te;
+    bugün bildirim satırında düğme yok._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda
+    yok). Birim testleri liveDebug 798 / mockDebug 791 / liveRelease 798, hepsi geçti (`ExamAccessResolverTest` 9 —
+    iOS'un 8'i + silinmiş ders —, `InboxExamGateTest` 8). Ekran davranışı olmadığı için emülatör adımı `INB-03`'e
+    kaldı._
 - [ ] **`INB-03`** Bildirim sayfası arayüzü _(P0·M·Sonnet)_:
   - Kart: tür ikonu, başlık, gövde, "Kampanya" etiketi, tarih, okunmadı noktası.
   - Kimlikli görsel; 5 aksiyon düğmesi (abone ise Premium gizli); düğme varsa kart/görsel dokunuşu aynı aksiyonu yapar.
