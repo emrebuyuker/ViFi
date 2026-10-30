@@ -679,13 +679,32 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _**Doğrulama:** `assembleDebug` geçti (anahtarsız). `GoogleMapsConfigurationTest` 6/6 (iOS
     `GoogleMapsConfigurationTests` karşılığı; `keyName` yerine "uygulama derlemenin anahtarını okur ve yazdırmaz").
     `LocationPickerUnavailableTest` derlendi. Boyut ölçümü seçici kodu gelince `MAP-03`'te._
-- [ ] **`MAP-02`** `LocationPickerViewModel` _(P0·M·Opus)_:
+- [x] **`MAP-02`** `LocationPickerViewModel` _(P0·M·Opus)_:
   - Arama: 3+ karakter, 350 ms bekleme, oturum jetonu yenileme, görünür alana göre bias, `TR`.
   - Öneri seçimi (yalnız 4 alan); POI dokunuşu (adres arkada gelir).
   - İğne ~1 m'den fazla kayınca `placeId` düşer; ad/adres sınırları.
   - Cihaz konumu bir kez sorulur; admin haritayı yerleştirdiyse odaklanılmaz. Konum saklanmaz, loglanmaz, gönderilmez.
 
-  ⟶ `MAP-01`
+  ⟶ `MAP-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**Sözleşme** (`locationpicker/`): `PlaceSearcher` (+ `PlaceSuggestion`, `SearchArea` ≤ 50 km, `PlaceDetails`,
+    `PlaceSearchError` Unavailable/NotFound, iOS metinleri), `DeviceLocator` (+ `LocationAuthorization`,
+    `DeviceCoordinate`), `LocationPickerUiState` (`MapCamera`, `CameraRequest`, `PlaceSearchState`, türetilmiş
+    `location`/`canConfirm`/`coordinateText` `%.5f` `Locale.ROOT`), `LocationPickerMapEvent` (Settled/GestureStarted/
+    PlaceTapped = iOS `GoogleMapView.Event`)._
+  - _**`LocationPickerViewModel`** (`@HiltViewModel`, `initial` assisted): iOS durum makinesi birebir; ad/adres
+    sınırları ve kesme kod noktasıyla (emoji bölünmez), harita etiketi tek satıra iner (Unicode boşluklar dahil).
+    **Android farkı:** izin Activity ister; VM `locateDevice(yetki)` ile bir kez başlar, hiç sorulmadıysa
+    `RequestLocationPermission` olayı gönderir, cevabı `onLocationPermissionResult` ile alır (istenmeyen cevap yok
+    sayılır). `onDismissed()` uçuştaki arama/çözme/adres/konum işlerini durdurur._
+  - _**Live** (`app/src/live/.../core/maps/`): `GooglePlacesSearcher` (autocomplete `regionCode TR` + dairesel bias,
+    `fetchPlace` yalnız `ID/DISPLAY_NAME/LOCATION/FORMATTED_ADDRESS`, POI adresi yalnız `FORMATTED_ADDRESS`, her hata
+    → Unavailable, logda yalnız durum kodu), `PlacesSession` (150 sn'de ve her fetch'te yeni jeton),
+    `FusedDeviceLocator` (izin kontrolü, `BALANCED_POWER_ACCURACY`, 15 sn, iptalde istek de iptal, koordinat
+    loglanmaz), `MapsModule` (kapsamsız: her seçicinin kendi Places oturumu). **Mock** `MapsModule` yalnız VM derlensin
+    diye hiçbir şey bulmayan/konum okumayan yer tutucular bağlar._
+  - _**Testler:** `LocationPickerViewModelTest` 22 (iOS 17 + 5), `LocationPickerDeviceLocationTest` 16 (iOS 13 +
+    3; `withoutLocator` → "konum istenmeden hiçbir şey sorulmaz"), `LocationPickerMapPlaceTest` 14 (iOS 14),
+    `PlacesSessionTest` 3 (live); liveDebug ve mockDebug'da geçti._
 - [ ] **`MAP-03`** Seçici arayüzü + composer konum satırları _(P0·M·Sonnet)_ — Ortada sabit iğne, arama + öneriler,
   ayrıntı kartı (koordinat, ad, adres), "Bu konumu seç" / "İptal", izin kapalı notu. `locationPicker.*` ve
   `notificationComposer.location.*` testTag'leri. ⟶ `MAP-02`
