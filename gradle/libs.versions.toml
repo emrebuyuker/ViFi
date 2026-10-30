@@ -29,6 +29,19 @@ androidxHilt = "1.2.0"
 # Google Play Billing (4.0.0 Premium); Play requires 8+ for new apps and updates from 2026-08-31. Only the Java
 # artifact: billing-ktx 9.x pulls kotlin-stdlib 2.2, newer than this project's Kotlin 2.0 compiler can read.
 billing = "9.1.0"
+# The admin's location picker (4.1.0, MAP-01); live flavor only. Pinned to the newest releases built for this
+# project's Kotlin 2.0 / Compose BoM 2024.10.01: maps-compose 6.6+ moves Compose to 1.8 and Places 4.2+ pulls
+# kotlin-stdlib 2.1. Places 4.1.0 already has Places API (New), CircularBounds and the DISPLAY_NAME/LOCATION fields;
+# play-services-maps stays on the 19.x that maps-compose 6.5.3 is built against, and play-services-location 21.4.0
+# ships Kotlin 2.3 metadata this compiler cannot read. Revisit all four with the Kotlin upgrade.
+#noinspection NewerVersionAvailable
+mapsCompose = "6.5.3"
+#noinspection GradleDependency
+playServicesMaps = "19.0.0"
+#noinspection GradleDependency
+places = "4.1.0"
+#noinspection GradleDependency
+playServicesLocation = "21.3.0"
 
 
 firebaseBom = "33.5.1"
@@ -80,6 +93,10 @@ androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
 billing = { module = "com.android.billingclient:billing", version.ref = "billing" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 

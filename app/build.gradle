@@ -43,12 +43,25 @@ android {
         abortOnError = false
     }
 
+    // Google Maps / Places key of the admin's location picker (4.1.0, MAP-01): `MAPS_API_KEY=` in local.properties
+    // (git-ignored), never in the repo. Without it the build still succeeds and the picker says the map is not
+    // configured instead of starting the SDKs.
+    def localPropertiesFile = rootProject.file("local.properties")
+    def localProperties = new Properties()
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.withInputStream { localProperties.load(it) }
+    }
+    def mapsApiKey = (localProperties.getProperty("MAPS_API_KEY") ?: "").trim()
+
     // live: the shared vifi-831a8 Firebase backend. mock: bundled sample data, Firebase never
     // initialised (iOS -ViFiMockData) — debug only, see androidComponents below.
     flavorDimensions = ["backend"]
     productFlavors {
         live {
             dimension "backend"
+            // Maps reads the key from the manifest (src/live/AndroidManifest.xml), Places from BuildConfig.
+            manifestPlaceholders = [mapsApiKey: mapsApiKey]
+            buildConfigField "String", "MAPS_API_KEY", "\"${mapsApiKey.replace('\\', '\\\\').replace('"', '\\"')}\""
         }
         mock {
             dimension "backend"
@@ -150,6 +163,12 @@ dependencies {
     implementation libs.androidx.profileinstaller
     // Premium and paid exam unlocks (4.0.0): live only, so the mock flavor never talks to Google Play.
     liveImplementation libs.billing
+    // The admin's location picker (4.1.0): Google map, Places search and the device's location. Live only, so the
+    // mock flavor never starts a Google SDK or touches the location.
+    liveImplementation libs.maps.compose
+    liveImplementation libs.play.services.maps
+    liveImplementation libs.places
+    liveImplementation libs.play.services.location
     baselineProfile project(':baselineprofile')
     // Preview rendering + test host activity: debug only, never shipped in release.
     debugImplementation libs.compose.ui.tooling
