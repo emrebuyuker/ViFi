@@ -9,6 +9,8 @@
 > ViFi 3.1.0 (17) 28 Ekim 2026'dan beri Play'de üretimde; 4.0.0 (19; 18 dahili testte) `v-4.0.0` dalında hazır ve yalnızca
 > ürün sahibi "release çıkalım" dediğinde yayınlanır. Yol haritasının 223 kalemi tamam (29 Ekim 2026).
 > **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
+> **4.1.0 iş listesi** (iOS `v-4.1.0` hedefli bildirim sistemi paritesi, `v-4.1.0` dalı; backend canlıda, Android backend
+> yazmaz): [`ANDROID-4.1.0-ROADMAP.md`](ANDROID-4.1.0-ROADMAP.md) + iOS olgu eki [`ANDROID-4.1.0-DETAIL.md`](ANDROID-4.1.0-DETAIL.md).
 > **iOS v3.1.0 paritesi** hedefinde ilerleme ve kalan işler
 > [`ANDROID-PARITY-ROADMAP.md`](ANDROID-PARITY-ROADMAP.md) (özet) ve [`ANDROID-PARITY-DETAIL.md`](ANDROID-PARITY-DETAIL.md)
 > (ayrıntı) dosyalarındadır.
@@ -102,6 +104,8 @@ ViFi-Android/
 ├── ANDROID-PARITY-ROADMAP.md     # iOS 3.1.0 parite — özet master liste
 ├── ANDROID-PARITY-DETAIL.md      # Aynı kalemlerin adım/kabul-kriteri/gotcha ayrıntısı
 ├── ANDROID-4.0.0-ROADMAP.md      # 4.0.0 iş listesi (ViFi Premium) — fazlar, paralel hatlar, ayrıntı
+├── ANDROID-4.1.0-ROADMAP.md      # 4.1.0 iş listesi (hedefli bildirim sistemi) — fazlar, paralel hatlar, ayrıntı
+├── ANDROID-4.1.0-DETAIL.md       # 4.1.0 eki: iOS v-4.1.0 olgu listeleri (metinler, kimlikler, kurallar, test adları)
 ├── .claude/                      # ⚠️ Claude yapılandırması & kod üretim bilgisi
 │   ├── settings.json             # İzinler
 │   ├── rules/                    # Proje kuralları (okuma zorunlu — aşağıdaki tablo)
@@ -218,5 +222,5 @@ Projeyi modernize et / Firestore'a taşı.
 
 ---
 
-**Son güncelleme:** 29 Ekim 2026
+**Son güncelleme:** 30 Ekim 2026
 **Proje:** ViFi Android (`com.salticusteam.vifi`, v4.0.0 — iOS 3.1.0 paritesi; giriş, arşiv, görüntüleyiciler, coin, bildirim, profil ve Hesap hazır)

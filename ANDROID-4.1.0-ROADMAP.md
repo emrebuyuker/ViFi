@@ -1,0 +1,951 @@
+# ViFi Android — 4.1.0 Versiyonunda Yapılacak İşler
+
+> **Amaç:** `ViFi-iOS` **`v-4.1.0`** dalındaki **hedefli bildirim sistemini** Android'de birebir hayata geçirmek. Dalda 27
+> commit var (`36ce982`…`6e44c29`, 29–30 Ekim 2026). Sistemin parçaları: bildirimleri sunucu gönderir; tek bildirim
+> sayfası; görsel ve aksiyon; izin + kampanya onayı; Hesap › Bildirim Ayarları; admin "Bildirim Gönder", geçmiş ve
+> harita seçicisi. 4.0.0'ın kalan yayın adımları [ANDROID-4.0.0-ROADMAP.md](ANDROID-4.0.0-ROADMAP.md)'dedir
+> (`RLS-09`…`RLS-11`). Bu dosya 4.1.0'ın **tek** iş listesidir.
+>
+> **Backend hazır.** Firestore/Storage kuralları, indeksler ve 13 Cloud Function 30 Ekim 2026'dan beri canlıda (iOS
+> tarafında, onaylı yayın). Sözleşme platformdan bağımsız. **Android için yeni backend kodu ya da deploy gerekmez.**
+> Android okur, kendi cihaz/tercih kayıtlarını yazar ve callable'ları çağırır.
+>
+> **Dal:** `v-4.1.0`; bugün 4.0.0 (versionCode 19) ile aynı kod. **Yayın:** Faz 0–3 canlıya göndermez. Yayın Faz 4'te,
+> ürün sahibiyle yapılır; her dış adım ayrı onay ister.
+>
+> **Ayrıntı eki:** [ANDROID-4.1.0-DETAIL.md](ANDROID-4.1.0-DETAIL.md) iOS kaynaklarından çıkarılmış tam olgu
+> listelerini içerir: metinler, erişilebilirlik kimlikleri, durum makineleri, hata eşlemeleri ve **iOS test adları**
+> (= Android kabul testleri). Şüphede iOS kodu (`ViFi-iOS`, `v-4.1.0`) ve `firebase/functions/notifications/schema.js`
+> esastır.
+
+---
+
+## 0. Durum Özeti
+
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **4'ü tamam, 0'ı yarım, 46'sı başlanmadı.** Faz 0'ın dört kararı
+> (`NDEC-01`…`04`) ürün sahibince verildi. Geliştirme başlamadı.
+
+| Faz | Ne | Nasıl ilerler | Kalem |
+|---|---|---|---|
+| **Faz 0** | Kararlar + Google Cloud anahtarı + canlı durum denetimi | Sıralı, ürün sahibiyle — ⚠️ onay | 6 |
+| **Faz 1** | Sözleşme (ilk gün) + geliştirme | `NCT-01` sonra **5 paralel kod hattı** (A push · B bildirim sayfası · C izin/ayarlar · D admin · E harita) + **F belge/beyan** | 29 |
+| **Faz 2** | Bağlama + testler | A…E bitince birleşir | 4 |
+| **Faz 3** | Gerçek ortam doğrulaması (canlı backend) | Sıralı; her canlı yazım onayla | 2 |
+| **Faz 4** | Yayın | Sıralı, ürün sahibiyle — ⚠️ her dış adım ayrı onay | 9 |
+
+---
+
+## 1. iOS'ta Ne Yapıldı
+
+### 1.1 Sunucu (ortak depo `ViFi-iOS/firebase/`, canlıda — Android için değişiklik gerekmez)
+
+- **Tek teslim yolu.** Bütün gönderimler `deliverNotification`'dan geçer. İki teslim biçimi var:
+  - **`broadcast`:** (`general` | `system`) + herkes → `announcements/<id>` + FCM topic `all`.
+  - **`fanout`:** segment, **tüm kampanyalar**, kişisel, admin ve test → alıcı başına `users/<uid>/inbox/<id>` + kayıtlı
+    cihaz token'ları. Push 500'lük paketlerle gider; ölü token'ın cihaz dokümanı silinir.
+- **Kampanya onayı.** `promo` yalnız `users/<uid>/settings/notifications.marketing == true` olanlara gider; onay
+  vermeyen kampanyayı ne push ne sayfada görür. Konumlu bildirim sunucuda zorla `promo` yapılır.
+- **Sessiz saatler.** 22:00–09:00 (İstanbul) arasında `promo` ve otomatik "yeni sınav" 09:00'a ertelenir. Kişisel
+  bildirimler, admin'e gidenler ve test anında gider.
+- **Function'lar:**
+  - Admin callable'ları: `getNotificationAudience`, `previewNotification`, `sendNotification` (300 sn),
+    `cancelNotification`.
+  - +90 kullanıcı callable'ı: `trackNotificationEvent`.
+  - Zamanlayıcı: `dispatchScheduledNotifications` (5 dk). Firestore `vifi` tetikleyicileri: `onDeviceWritten`,
+    `onSubmissionModerated`, `onSubmissionCreated`. Auth tetikleyicisi: `onAccountDeleted` (v1).
+- **Otomatik bildirimler** (`kind: system`):
+  - Onay → sahibine "Sınavın onaylandı" (+coin, "Sınava Git") ve bölümüne "Bölümüne yeni sınav eklendi" (bölüm başına
+    günde 1).
+  - Ret → "Gönderin reddedildi" (sebeple).
+  - Yeni gönderim → adminlere "Yeni sınav gönderimi" (gönderen başına saatte 3).
+  - **Android admin onayları da tetikler:** `FirebaseModerationBackend` `publishedExamId`, `rejectionReason` ve
+    `ledger/<gönderimId>.amount` alanlarını yazıyor (30 Ekim'de kontrol edildi).
+- **Push payload:**
+  - `notification{title, body, imageUrl?}`, `data{notificationId, kind}`.
+  - Android bloğu: `android{priority: high, notification{channelId: kind, imageUrl?}}`. Kanal kimlikleri tam olarak
+    `general`, `promo`, `system`.
+  - Görsel, gönderim anında üretilen 7 günlük imzalı URL'dir ve yalnız payload'da durur. Firestore'da yalnız
+    `image.storagePath` vardır.
+- **Hesap silme temizliği sunucuda yapılır** (`onAccountDeleted`): `users/<uid>` alt ağacı, cüzdan + ledger, abonelik,
+  bekleyen gönderimler + `pending/<uid>/` ve RTDB profil silinir.
+
+### 1.2 iOS istemcisi
+
+- **Kullanıcı tarafı:**
+  - Bildirim sayfası: `announcements` (son 50) ∪ `users/<uid>/inbox` (son 100); okunmamış =
+    `createdAt > settings/inbox.readAt`.
+  - Push'a dokunuş → kapılardan sonra sayfa açılır ve bildirim vurgulanır.
+  - Görsel ve 5 aksiyon: Konuma Git, Sınava Git (arşivin kilit kuralıyla), Premium'a Göz At, Sınav Ekle, Bağlantıyı Aç.
+  - İzin akışı: provisional → 1/2 → 2/2 → bağlamsal tekrar. Hesap › Bildirim Ayarları.
+  - Cihaz kaydı, ikon rozeti, açılma/aksiyon istatistiği.
+- **Admin tarafı** (Hesap › "Bildirim Gönder" + "Geçmiş"):
+  - Tür, başlık/mesaj, kitle (Hepsi / üniversite › fakülte › bölüm + cinsiyet; kişi sayılarıyla), görsel, aksiyon
+    (arşivden sınav, haritadan konum dahil), ileri tarih + geçerlilik.
+  - Önizleme + onay, "Bana test gönder".
+  - Geçmiş: durum, sayılar, zamanlanmışı iptal.
+  - Konum seçici: Google Maps + Places; cihaz konumu yalnız haritayı odaklar.
+- **iOS'a özgü olup taşınmayanlar:**
+  - Notification Service Extension + App Group rozet sayacı (→ `NDEC-04`).
+  - Provisional izin (→ `NDEC-01`).
+  - Apple Haritalar (→ `NDEC-03`).
+  - `PrivacyInfo` manifestleri (→ Play Veri güvenliği, `NLG-01`).
+
+### 1.3 Android'e dokunan sözleşme (Firestore `vifi` DB; kurallar canlı)
+
+| Yol | Android ne yapar | Şekil / kural |
+|---|---|---|
+| `announcements/<id>` | okur (son 50, `createdAt` azalan) | `{kind, title, body, createdAt, image?{storagePath}, action?, expiresAt?}` |
+| `users/<uid>/inbox/<id>` | okur (son 100) | aynı şekil |
+| `users/<uid>/settings/inbox` | okur + yazar | tam olarak `{readAt == request.time}`; silinemez |
+| `users/<uid>/settings/notifications` | okur + yazar | tam olarak `{marketing: bool, source: 'prompt'\|'settings', version: 1, updatedAt == request.time}`; silinemez |
+| `users/<uid>/devices/<kurulumId>` | yazar / siler | tam olarak `{token (1…4096), platform: 'android', appVersion (≤32), updatedAt == request.time}`; id `^[A-Za-z0-9_-]{1,128}$` |
+| `notifications/<id>` | yalnız admin okur (geçmiş) | istemci yazamaz |
+| Storage `notificationImages/<id>.jpg` | admin bir kez yükler; +90 okur | `image/jpeg`, 0 < boyut ≤ 1 MiB; üzerine yazma ve silme yok |
+| Callable'lar (`europe-west1`) | çağırır | yukarıdaki 5 callable |
+| FCM topic `all` | abone kalır | broadcast push'u bu yoldan gelir |
+
+**Aksiyon şekilleri:**
+- `location {latitude, longitude, name ≤120, address? ≤200, placeId?}`
+- `exam {examId, path[5], names[5], examKind: JPG|PDF}`; sunucu doldurur, admin yalnız `examId` gönderir.
+- `paywall`, `addExam`
+- `url {url: yalnız https, ≤500}`
+
+### 1.4 Android'de bugün (4.0.0) olanlar ve boşluklar
+
+| Parça | Bugün | 4.1.0'da |
+|---|---|---|
+| FCM servisi | Yalnız `title`/`body` okur. Tek kanal `announcements` (+ yerel `submissions`). Sabit bildirim id'si `0` → her push öncekinin üstüne yazar. Görsel yok. Dokunuş yalnız "inbox aç" bayrağı taşır, `notificationId` taşımaz | `PSH-01`…`03` |
+| Cihaz kaydı | `users/<uid>/devices/<FCM token>` = `{platform, updatedAt}` (merge). **30 Ekim'den beri canlı kural reddediyor:** token id'de `:` içerir, `token`/`appVersion` yok; hata sessizce yutuluyor. Çıkışta ya da silmede kayıt silinmez; bellek içi tekrar koruması çıkışta sıfırlanmaz | `PSH-04`, `PRM-05` |
+| Bildirim sayfası | Yalnız `announcements` (50). Okundu bilgisi yerel DataStore'da (`announcements.readIds`, cihaz bazlı, çıkışta silinmez). Görsel, aksiyon, tür ve süre yok | `INB-01`…`05` |
+| İzin | Tek AlertDialog ("Bildirimleri aç", `notifications.prompted`); tanıtım turuyla aynı anda çıkabiliyor. Kampanya onayı yok. `all` aboneliği her açılışta prompt ViewModel'inden yapılıyor | `PRM-02`, `PRM-03`, `PSH-02` |
+| Hesap | Bildirim satırı yok. Moderasyon satırı admin'e görünür (`isCurrentUserAdmin`, önbellekli claim) | `PRM-04`, `NIT-01` |
+| Sınav kilidi | Yalnız Browse listesinde. Görüntüleyicide kontrol yok. examId'den yol çözen bir kod yok (sunucu aksiyonu 5 kimlikli yolu ve adları zaten taşıyor) | `INB-02` |
+| Başlatma argümanları | `LaunchArg` yalnız boolean | `NCT-01` (metin değeri) |
+| Analytics | Bildirimle ilgili özel olay yok (yalnız `Inbox` ekran adı) | `NCT-01` |
+
+**Hazır olup yeniden kullanılacaklar:**
+- Coil + kimlikli Storage istemcisi (`StorageUrl.canonical`, `StorageAuthInterceptor`).
+- `SubmissionJpegEncoder`: piksel sınırı parametreli, kalite basamakları 80/60/45/30 = iOS.
+- `ForegroundActivityHolder`, `AppForegroundEvents`.
+- `ViFiRouter.openExam`, `ExamUnlockSheet` + `ExamUnlockViewModel`, `ExamLock`, `ExamUnlocksStore`, `SubscriptionStore`.
+- Callable deseni (`FirebaseExamUnlockService`), `NotificationPermissionRequester`.
+
+**Mevcut kayıtların etkisi yok denecek kadar az:**
+- Genel duyurular `all` topic'iyle gelmeye devam ediyor.
+- Sunucu `token` alanı olmayan cihaz dokümanlarını atlıyor (`loadDeviceTargets`).
+- Eski dokümanlar yalnız broadcast'in "kayıtlı cihaz" sayısını biraz şişirir.
+
+---
+
+## 2. Paralel Çalışma Planı
+
+```
+Faz 0  NDEC-01..04 ✅ · NOPS-02 (canlı durum, salt okuma) · NOPS-01 (Maps anahtarı, ürün sahibi) ───────┐
+Faz 1  NCT-01 (sözleşme, DI, rotalar, LaunchArg, analytics, sürüm — İLK GÜN, tek oturum) ─┬─► Hat A  PSH-01..04 │
+                                                                                         ├─► Hat B  INB-01..05 │
+                                                                                         ├─► Hat C  PRM-01..05 │
+                                                                                         ├─► Hat D  ADM-01..06 │
+                                                                                         └─► Hat E  MAP-01..04 ◄┘ (canlı anahtar yalnız doğrulamada)
+       Hat F  NLG-01..04 (bağımsız; yalnız .md + Console hazırlığı)
+Faz 2  NIT-01 (bağlama) ◄── A+B+C+D+E ──► NIT-02 (birim) · NIT-03 (UI + emülatör) · NIT-04 (belgeler)
+Faz 3  NQA-01 (canlı debug) ──► NQA-02 (iOS ↔ Android çapraz)   ◄── NIT-01..03 + NOPS-01/02
+Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 → 09
+```
+
+**Hat sahipliği** (çakışma olmasın diye dosya sınırları; her hat yalnız kendi yerlerine yazar):
+
+| Hat | Dokunduğu yerler | Dokunmaz |
+|---|---|---|
+| **NCT-01 (sözleşme)** | `core/model/` yeni bildirim tipleri + ayrıştırıcı; tüm yeni arayüzler + `fake/`; live + mock Hilt modülleri (live'da `Unavailable*` yer tutucular); `LaunchArgs`; `ViFiRoute` + `ViFiNavHost` boş yuvalar; `AnalyticsEvent`/`AnalyticsEventMapping` + `AnalyticsLimitsTest`; `core/navigation/ModalPresence` (yeni); `app/build.gradle` sürüm | Ekranlar, canlı uygulamalar |
+| **A — Push + cihaz** | `core/notifications/**`, `core/data/firebase/FirestoreDeviceRegistrar.kt` (yeni), `app/MainActivity.kt` (intent okuma), `AndroidManifest.xml` (yalnız FCM meta-data), `res/values/strings_push.xml` (yeni) | `feature/**`, `AppRoot` |
+| **B — Bildirim sayfası** | `feature/inbox/**`, `core/data/inbox/**` (yeni), `core/data/archive/ExamAccessResolver.kt` (yeni), `core/data/notifications/NotificationEventTracker*` (yeni), `strings_inbox.xml` (yeni) + `strings_notifications.xml`'deki mevcut `inbox_*` anahtarları; eski `core/data/announcements/**`, `AnnouncementReadPreferences`, `FirestoreAnnouncementsReader`, `Announcement*` silinir | `AppRoot`/`ViFiNavHost`, `feature/browse/**` (yalnız okur) |
+| **C — İzin / onay / ayarlar** | `feature/notifications/**`, `feature/notificationsettings/**` (yeni), `feature/account/**`, `feature/profile/ProfileCompletion*` (yalnız çıkış kancası), `core/data/notifications/settings/**` (yeni), `core/data/preferences/NotificationPromptHistory*` (yeni), `NotificationService` + `FirebaseNotificationService`, `strings_notification_settings.xml` (yeni) + mevcut `notification_prompt_*` | `core/notifications/**`, inbox |
+| **D — Admin composer + geçmiş** | `feature/notificationcomposer/**` (`locationpicker/` hariç), `core/data/notifications/admin/**` (yeni), `strings_notification_composer.xml` (yeni) | Hesap satırı (→ `NIT-01`), harita |
+| **E — Konum seçici** | `feature/notificationcomposer/locationpicker/**`, `app/src/live/**/maps/**`, `app/src/mock/**/maps/**`, `gradle/libs.versions.toml` + `app/build.gradle` (Maps/Places/location bağımlılıkları, anahtar yer tutucusu), `AndroidManifest.xml` (yalnız konum izinleri + Maps meta-data), `strings_location_picker.xml` (yeni) | Composer gövdesi (yalnız `LocationPicker` arayüzünü kullanır) |
+| **F — Belge / beyan** | `PLAY-DATA-SAFETY.md`, `PLAY-STORE-LISTING.md`, Console hazırlığı (ürün sahibiyle) | Kod |
+
+- **Senkron noktası 1 — `NCT-01` birleşmeden hiçbir hat başlamaz.** Modeller, arayüzler, Fake'ler, Hilt bağlaması,
+  rotalar ve analytics olayları sabitlenir; ViewModel'ler ancak bağlama varken derlenir. 4.0.0'daki `BIL-01` deseni
+  geçerli.
+- **Senkron noktası 2 — Hatlar bitince `NIT-01`.** `AppRoot`, `ViFiNavHost` yuvaları, Hesap satırları, `SessionTeardown`
+  ve live DI'da `Unavailable*` → gerçek sınıf değişimi yalnız burada yapılır. Her hat birleşmeden önce Opus incelemesinden
+  geçer.
+- **Senkron noktası 3 — Faz 3.** `NIT-01…03` + `NOPS-01/02` hazır olunca başlar.
+- **Ortak dosya kuralları:**
+  - `AndroidManifest.xml`'e iki hat dokunur (A: FCM meta-data satırı; E: konum izinleri + Maps meta-data). Farklı
+    bölgeler; çakışma `NIT-01`'de çözülür.
+  - Her hat kendi `strings_*.xml` dosyasına yazar (projede zaten `strings_add_exam.xml`, `strings_moderation.xml`,
+    `strings_notifications.xml` deseni var).
+- **Her hat için:** `./gradlew assembleDebug` + `lintLiveDebug` + **kendi** testleri; tam paket `NIT-02`'de koşar. Canlı
+  Firebase'e dokunulmaz; commit yalnız kendi dalına.
+
+### 2.1 Model planı (ürün sahibinin 30 Ekim isteği: işe göre model; kritikte Opus)
+
+| Model | Kalemler | Neden |
+|---|---|---|
+| **Opus** | `NCT-01`, `NOPS-02`, `PSH-02`…`04`, `INB-01`, `INB-02`, `PRM-01`, `PRM-02`, `ADM-01`, `ADM-02`, `MAP-01`, `MAP-02`, `NLG-03`, `NIT-01`, `NQA-01`, `NQA-02`, `NRL-*`; her hattın birleşme öncesi incelemesi | Sözleşme; eşzamanlılık (dinleyiciler, okundu işareti, yönlendirme, idempotent gönderim); izin/onay (Apple 4.5.4 / Play politikası eşleniği); güvenlik (kimlikli görsel indirme, API anahtarı); canlı ortam |
+| **Sonnet** | `PSH-01`, `INB-03`…`05`, `PRM-03`…`05`, `ADM-03`…`06`, `MAP-03`, `MAP-04`, `NIT-02`, `NIT-03`, `NLG-01`, `NLG-02`, `NLG-04` | Şablonlu Compose ekranları, metinler, iOS testlerinin karşılıkları |
+| **Haiku** | `NIT-04` (belge güncellemesi), metin/testTag listelerinin iOS ile karşılaştırılması | Mekanik |
+
+> Not: 24 Ekim'de ürün sahibi hata riski nedeniyle feature oturumlarında Sonnet istememişti. Bu tablo 30 Ekim isteğine
+> göre bir öneridir; her oturum açılırken son söz ürün sahibinindir.
+
+---
+
+## 3. İş Listesi
+
+> Her kalemin biçimi: `- [ ] `**`ID`**` başlık _(öncelik·efor·model)_ — açıklama ⟶ bağımlılık`. Ayrıntı (adımlar, kabul
+> kriteri, tuzaklar) §4'te, iOS olgu listeleri ekte. ID önekleri 4.0.0'dakilerle karışmasın diye ayrıdır (`N…`).
+
+### Faz 0 — Kararlar ve Hazırlık  ⚠️ (ürün sahibi · ONAY gerektirir)
+
+- [x] **`NDEC-01`** İzin akışının Android eşlemesi _(P0·S)_ — iOS'a en yakın eşleme. ✅ _Karar (2026-10-30, ürün sahibi)._
+  - **13+:** ilk açılışta soru yok (provisional'ın karşılığı yok). Tanıtım turundan sonra 1/2 → sistem POST_NOTIFICATIONS
+    → izin verilirse 2/2.
+  - **12 ve altı:** izin zaten açık → 1/2 atlanır, 2/2 bir kez sorulur.
+  - **Ret sonrası:** en erken 30 gün sonra bir kez (izin: başarılı sınav gönderiminden sonra; onay: bildirim sayfası
+    açılınca). Sistem diyaloğu artık gösterilemiyorsa düğme "Ayarlar'ı Aç" olur.
+- [x] **`NDEC-02`** Admin kapsamı _(P0·S)_ — Tam parite: composer + geçmiş/istatistik/iptal + görsel + arşivden sınav +
+  haritadan konum. Konum seçici için Google Maps + Places Android SDK, ayrı kısıtlı anahtar (`NOPS-01`) ve Veri güvenliği
+  beyanı (`NLG-01`) gerekir. ✅ _Karar (2026-10-30, ürün sahibi)._
+- [x] **`NDEC-03`** "Konuma Git" _(P1·S)_ — Alt sayfada üç seçenek: "Google Haritalar" (uygulama varsa uygulama, yoksa
+  tarayıcı; place id ile), "Başka bir harita uygulaması" (sistem seçicisi, `geo:`) ve "Vazgeç". ✅ _Karar (2026-10-30, ürün sahibi)._
+- [x] **`NDEC-04`** Rozet ve tepsi _(P2·S)_ — Sayısal ikon rozeti taklit edilmez; kanallarda sistem rozeti açık kalır.
+  Uygulama içi zil sunucudaki okunmamış sayısını gösterir. Uygulama öne gelince tepsideki ViFi bildirimleri temizlenir
+  (bugünkü `NotificationBadge.clear()`). ✅ _Karar (2026-10-30, ürün sahibi)._
+- [ ] **`NOPS-01`** Google Cloud: Android Maps/Places anahtarı _(P0·S·ürün sahibi)_ — "Maps SDK for Android" etkin
+  ("Places API (New)" iOS için zaten açık). Yeni anahtar, `com.salticusteam.vifi` + üç SHA-1 (debug, yükleme, Play
+  uygulama imzalama) ve bu iki API ile kısıtlı. Places kotası + bütçe uyarısı mevcut ayara eklenir. Anahtar yalnız yerel
+  `local.properties`'e girer (git dışı). ⟶ `NDEC-02`
+- [ ] **`NOPS-02`** Canlı durumun salt okuma denetimi _(P1·S·Opus)_ — 13 function'ın ve kuralların canlıdaki hâli,
+  `devices` kuralında `platform: 'android'`, FCM'in Android yapılandırması (`google-services.json`), emülatör için App
+  Check debug anahtarı ve eski `devices/<token>` dokümanlarının sayısı. **Yazım yok.**
+
+### Faz 1 — Sözleşme (ilk gün, tek oturum)
+
+- [ ] **`NCT-01`** Sözleşme: modeller, ayrıştırıcı, arayüzler, Fake'ler, DI, rotalar, LaunchArg, analytics, sürüm
+  _(P0·M·Opus)_ — `schema.js` ile alan alan aynı modeller ve saf ayrıştırıcı. Arayüzler ve Fake'ler: `InboxReader`,
+  `DeviceRegistrar`, `NotificationSettingsService`, `NotificationEventReporter`, `NotificationAdminService`,
+  `LocationPicker`. Mock'ta Fake, live'da `Unavailable*` bağlanır. Ayrıca yeni rotalar + boş yuvalar, `ModalPresence`,
+  metin değerli LaunchArg + 4 yeni senaryo, 6 analytics olayı + 3 ekran adı, `versionName 4.1.0` / `versionCode 20`.
+  ⟶ `NDEC-01…04`
+
+### Faz 1 — Geliştirme (5 paralel kod hattı + belge hattı)
+
+#### Hat A — Push altyapısı ve cihaz kaydı
+
+- [ ] **`PSH-01`** Bildirim kanalları + tepsi davranışı _(P0·S·Sonnet)_ — Kanallar `general` / `promo` / `system`
+  (Türkçe adlarla). Eski `announcements` kanalı silinir; yerel `submissions` kalır. Manifest varsayılan kanalı `general`
+  olur. Rozet/tepsi `NDEC-04`'e göre. ⟶ `NCT-01`
+- [ ] **`PSH-02`** `ViFiMessagingService` yeniden yazımı _(P0·M·Opus)_:
+  - Ön planda kanal = `data.kind` (bilinmeyen → `general`).
+  - Bildirim id'si `notificationId`'ye göre (artık her push öncekini silmez).
+  - Görsel varsa kısa zaman aşımıyla indirilip BigPicture gösterilir; inmezse görselsiz.
+  - Dokunuş `PendingIntent`'i `notificationId` taşır.
+  - `onNewToken` → cihaz kaydı + `all` aboneliği.
+
+  ⟶ `PSH-01`
+- [ ] **`PSH-03`** `NotificationRouter` + dokunuş okuma _(P0·M·Opus)_ — `InboxDeepLink`'in yerine geçer:
+  - `pending(notificationId?)`, vurgu, `sessionDidChange` kuralları.
+  - `MainActivity` hem kendi intent'imizden hem sistem tepsisinin başlatma intent'inden `notificationId`'yi okur
+    (soğuk ve sıcak).
+  - Mock'ta `vifi_open_notification <id>`.
+
+  ⟶ `NCT-01`
+- [ ] **`PSH-04`** `DeviceRegistrationStore` + `FirestoreDeviceRegistrar` _(P0·M·Opus)_ — `PushTokenRegistration` /
+  `FirestoreDeviceTokenStore`'un yerine geçer:
+  - Kurulum başı UUID; `users/<uid>/devices/<kurulumId>` = `{token, platform: 'android', appVersion, updatedAt}`.
+  - Token ve oturum birlikte olunca yazar; tekrar koruması kullanıcı değişince ya da çıkışta sıfırlanır.
+  - `unregister(uid)`: en çok 3 sn, asla hata fırlatmaz.
+  - Eski `devices/<token>` dokümanını bir kez siler.
+
+  ⟶ `NCT-01`
+
+#### Hat B — Bildirim sayfası
+
+- [ ] **`INB-01`** `FirestoreInboxReader` + `InboxStore` _(P0·L·Opus)_:
+  - İki kaynak (50 + 100) + `readAt` dinleyicisi (`includeMetadataChanges`, yalnız önbellekteki "yok"u atla).
+  - Birleştirme (aynı id'de kişisel kopya kazanır), süre dolumu, sıralama.
+  - Yükleniyor / hata / kısmi hata durumları; yeniden dene.
+  - Okunmamış = `createdAt > readAt`; sayfa açılınca tek yazım.
+  - Yeni hesapta "şimdi" bir kez yazılır; eski yerel okundu kimlikleri temizlenir.
+
+  ⟶ `NCT-01`
+- [ ] **`INB-02`** `ExamAccessResolver` + sınav kapısı _(P0·M·Opus)_ — Bildirimden açılan sınav arşivin kilit kuralından
+  geçer:
+  - Abone ya da daha önce açılmış → açık.
+  - Değilse dersin tam listesi yüklenir; `ExamLock.freeExamIds`'e göre açık ya da kilitli → mevcut kilit sheet'i (coin /
+    parayla / Premium / coin kazan).
+  - Bulunamazsa "Bu sınav artık arşivde bulunmuyor."
+  - Çift dokunma koruması.
+
+  ⟶ `NCT-01`
+- [ ] **`INB-03`** Bildirim sayfası arayüzü _(P0·M·Sonnet)_:
+  - Kart: tür ikonu, başlık, gövde, "Kampanya" etiketi, tarih, okunmadı noktası.
+  - Kimlikli görsel; 5 aksiyon düğmesi (abone ise Premium gizli); düğme varsa kart/görsel dokunuşu aynı aksiyonu yapar.
+  - Push vurgusu + kaydırma.
+  - Kısmi hata şeridi, yeni boş durum metni; mevcut "izin kapalı" şeridi korunur.
+
+  ⟶ `INB-01`, `INB-02`
+- [ ] **`INB-04`** "Konuma Git" alt sayfası + harita bağlantıları _(P1·S·Sonnet)_ — `NDEC-03`: Google Haritalar
+  (uygulama → web, `query_place_id`), sistem `geo:` seçicisi, Vazgeç. iOS `MapsLinks` sayı biçimi ve kodlama kuralları.
+  ⟶ `NCT-01`
+- [ ] **`INB-05`** `NotificationEventTracker` + `trackNotificationEvent` _(P1·S·Sonnet)_:
+  - `opened` yalnız push vurgusu listede çözülünce; `actionTapped` her aksiyon dokunuşunda.
+  - Kullanıcı + olay + id başına bir kez (kalıcı, en çok 500). Gönder ve unut; başarısızlık hatırlanmaz.
+
+  ⟶ `NCT-01`
+
+#### Hat C — İzin, kampanya onayı, Bildirim Ayarları
+
+- [ ] **`PRM-01`** `NotificationSettingsStore` + `FirestoreNotificationSettingsService` _(P0·M·Opus)_:
+  - Onay dokümanının canlı dinleyicisi; yükleniyor / hazır / okunamıyor durumları.
+  - Kayıt yoksa "cevaplanmadı", kampanyalar kapalı. `waitUntilLoaded`.
+  - `setMarketing`: iyimser güncelleme, 4 sn'de onay gelmezse "kuyrukta" sayılır, hata gelirse eski değere döner.
+  - Kullanıcı değişince temizlenir; eski kullanıcıdan gelen değer yok sayılır.
+
+  ⟶ `NCT-01`
+- [ ] **`PRM-02`** `NotificationPromptHistory` + `NotificationPromptCoordinator` _(P0·M·Opus)_:
+  - Cihaz başı geçmiş (DataStore), 30 gün kuralı, "ilk hayır kazanır".
+  - Eski `notifications.prompted` → "1/2 sunuldu" eşlemesi.
+  - Tetikleyiciler: ilk sunum (turdan sonra), onay yakalama (izinli ama kayıtsız; 12 ve altı dahil), sınav
+    gönderiminden sonra izin tekrarı, bildirim sayfasında onay tekrarı.
+  - Tek yuvalı kuyruk, modal yokken sunum. Android izin durumu + "sistem diyaloğu gösterilebilir mi".
+
+  ⟶ `PRM-01`
+- [ ] **`PRM-03`** İzin/onay sayfaları _(P0·M·Sonnet)_ — AlertDialog'un yerine iki adımlı alt sayfa:
+  - 1/2 "Hiçbir şeyi kaçırma" / tekrarda "Onaylanınca haber verelim mi?"; 2/2 "Öğrenci fırsatları".
+  - Onay sayfası kaydırılarak kapatılamaz (kayıt hatası hariç); yükseklik içeriğe göre; turuncu üstünde siyah metin.
+  - 6 analytics olayı (`source`).
+
+  ⟶ `PRM-02`
+- [ ] **`PRM-04`** Hesap › Bildirim Ayarları _(P0·M·Sonnet)_:
+  - Satır + ekran: izin durumu (Açık / Kapalı / Sorulmadı) + "Bildirimleri Aç" ya da "Ayarlar'ı Aç".
+  - "Kampanya ve fırsat bildirimleri" anahtarı; okunamıyor/hata durumları.
+  - Uygulama öne dönünce izin yeniden okunur; `NotificationSettings` ekran adı.
+
+  ⟶ `PRM-01`
+- [ ] **`PRM-05`** Çıkış ve hesap silme kancası _(P0·S·Sonnet)_:
+  - Hesap'tan çıkışta, profil tamamlama ekranındaki çıkışta ve hesap silmede (`deleteProfile`'dan önce) önce
+    `DeviceRegistration.unregister` çalışır (≤3 sn).
+  - `signOut` askıya alınır ve çift dokunma koruması alır.
+
+  ⟶ `NCT-01`
+
+#### Hat D — Admin "Bildirim Gönder" + Geçmiş
+
+- [ ] **`ADM-01`** `FirebaseNotificationAdminService` _(P0·M·Opus)_:
+  - 4 callable; `sendNotification` zaman aşımı 300 sn (istemci varsayılanı 70 sn).
+  - Geçmiş: `notifications` koleksiyonu, `createdAt` azalan, en çok 50.
+  - Görsel yükleme: önce `getMetadata`, yoksa `putBytes` (`image/jpeg`).
+  - iOS ile aynı hata eşleme tablosu; facets / sonuç / geçmiş ayrıştırıcıları.
+
+  ⟶ `NCT-01`
+- [ ] **`ADM-02`** Composer ViewModel + taslak kuralları _(P0·L·Opus)_:
+  - Doğrulama sırası ve mesajları; karakterler **kod noktasıyla** sayılır (sunucu gibi).
+  - Konumda Tür kilidi; kademeli kitle; tahmini kişi sayısı.
+  - "Sessiz düşürme yok" kuralı (aksiyon seçildiyse geçerli olmalı).
+  - Zamanlama +1 sa / geçerlilik +7 gün.
+  - Önizleme → onay → gönder; test gönderimi; taslak id ömrü; görsel-id kuralı; sonuç işleme; çift dokunma.
+
+  ⟶ `ADM-01`
+- [ ] **`ADM-03`** Composer arayüzü _(P0·M·Sonnet)_ — Bölümler: Tür, İçerik, Hedef kitle, Eylem, Görsel, Zamanlama,
+  geri bildirim, Gönder / Bana test gönder. Onay diyaloğu; `notificationComposer.*` testTag'leri; `NotificationComposer`
+  ekran adı. ⟶ `ADM-02`
+- [ ] **`ADM-04`** Görsel hazırlama _(P1·S·Sonnet)_ — Foto seçici (izinsiz `PickVisualMedia`). `SubmissionJpegEncoder`
+  yeniden kullanılır: en uzun kenar 1600 px, ≤ 1 MiB, EXIF yönü. Ana iş parçacığı dışında çalışır; sürüm sayacıyla eski
+  kodlama yeni seçimin üstüne yazılmaz. ⟶ `ADM-02`
+- [ ] **`ADM-05`** Arşivden sınav seçici _(P1·M·Sonnet)_ — Üniversite → fakülte → bölüm → ders → sınav gezinmesi
+  (`ArchiveRepository`), Türkçe duyarsız arama. Gönderilen yalnız `examId`; dosyasız sınav seçilemez. ⟶ `ADM-02`
+- [ ] **`ADM-06`** Gönderim Geçmişi _(P1·M·Sonnet)_ — Satırlarda durum / tür / Test / Otomatik rozetleri, kitle etiketi,
+  zaman ("(sessiz saat)") ve sayılar. Zamanlanmışta "İptal et" (iOS gibi onaysız). Yenileme ve hata durumları;
+  `NotificationHistory` ekran adı. ⟶ `ADM-01`
+
+#### Hat E — Konum seçici (admin)
+
+- [ ] **`MAP-01`** Bağımlılıklar + anahtar yapılandırması _(P0·S·Opus)_:
+  - Maps Compose + Maps + Places (New) + konum; yalnız **live** flavor'a.
+  - Anahtar `local.properties` → manifest yer tutucusu; anahtar yoksa seçici "yapılandırılmamış" der ve çökmez.
+  - SDK ilk açılışta başlar; mock'ta Google SDK'sı hiç başlamaz.
+  - R8 ve boyut etkisi ölçülür.
+
+  ⟶ `NCT-01`; canlı deneme `NOPS-01`
+- [ ] **`MAP-02`** `LocationPickerViewModel` _(P0·M·Opus)_:
+  - Arama: 3+ karakter, 350 ms bekleme, oturum jetonu yenileme, görünür alana göre bias, `TR`.
+  - Öneri seçimi (yalnız 4 alan); POI dokunuşu (adres arkada gelir).
+  - İğne ~1 m'den fazla kayınca `placeId` düşer; ad/adres sınırları.
+  - Cihaz konumu bir kez sorulur; admin haritayı yerleştirdiyse odaklanılmaz. Konum saklanmaz, loglanmaz, gönderilmez.
+
+  ⟶ `MAP-01`
+- [ ] **`MAP-03`** Seçici arayüzü + composer konum satırları _(P0·M·Sonnet)_ — Ortada sabit iğne, arama + öneriler,
+  ayrıntı kartı (koordinat, ad, adres), "Bu konumu seç" / "İptal", izin kapalı notu. `locationPicker.*` ve
+  `notificationComposer.location.*` testTag'leri. ⟶ `MAP-02`
+- [ ] **`MAP-04`** Mock seçici _(P1·S·Sonnet)_ — Sabit yer ("ViFi Öğrenci Kafesi", 40.9903, 29.0290). Google SDK'sına ve
+  konuma dokunmaz; UI testleri için. ⟶ `NCT-01`
+
+#### Hat F — Yasal metinler ve Play beyanları
+
+- [ ] **`NLG-01`** Veri güvenliği envanteri _(P0·S·Sonnet)_ — `PLAY-DATA-SAFETY.md`:
+  - Cihaz kimlikleri (FCM token + kurulum id'si), kullanıcı kimliği ve profil segmentleri + onay kaydı için "Reklam veya
+    pazarlama" amacı.
+  - Uygulama etkinliği (okundu işareti, açılma/aksiyon istatistiği).
+  - Maps/Places SDK'nın Google'ca yayımlanan beyanları.
+  - Konumun toplanmadığının gerekçesi (Places bias'ı dahil değerlendirilir).
+
+  ⟶ `NDEC-02`
+- [ ] **`NLG-02`** Gizlilik politikası kontrolü _(P1·S·Sonnet)_ — Canlı `/gizlilik` kampanya bildirimlerini, onay
+  kaydını, cihaz kaydını ve admin harita konumunu anıyor mu? Eksikse metin ortak depoda (`ViFi-iOS/firebase/hosting/`)
+  önerilir; hosting yayını ayrıca onay ister. ⟶ `NLG-01`
+- [ ] **`NLG-03`** Play politikası kontrolü _(P1·S·Opus)_ — Onaylı kampanya bildirimlerinin Play kurallarına uygunluğu
+  (bildirimle tanıtım, "Reklam içeriyor" beyanı gerekiyor mu?) ve yalnız ön plan konum izninin beyan gerektirip
+  gerektirmediği. Sonuç ürün sahibine sorulur.
+- [ ] **`NLG-04`** Mağaza girişi + 4.1.0 sürüm notu _(P1·S·Sonnet)_ — `PLAY-STORE-LISTING.md`: tam açıklamaya bildirim
+  özellikleri, 4.1.0 sürüm notu (≤500).
+
+### Faz 2 — Entegrasyon ve Testler
+
+- [ ] **`NIT-01`** Canlı bağlama _(P0·M·Opus)_:
+  - `AppRoot`/`ViFiNavHost`: yönlendirici → kapılardan sonra ve modal yokken Inbox (`launchSingleTop`).
+  - İzin akışı sunucusu `ArchiveHost`'ta (turdan sonra). Bildirim sayfasında onay tekrarı (700 ms, vurgu yoksa).
+  - Sınav Ekle başarısından sonra `examWasSubmitted`. Hesap satırları ("Bildirim Ayarları", admin'e "Bildirim Gönder").
+  - Mevcut modalların `ModalPresence`'a kaydı. `SessionTeardown` sıfırlamaları.
+  - Live DI'da `Unavailable*` → gerçek sınıf; eski sınıfların silinmesi.
+
+  ⟶ Hat A…E
+- [ ] **`NIT-02`** Birim testleri _(P0·M·Sonnet)_ — Hatların testleri + iOS test listelerinin (ek) tam karşılığı.
+  `AnalyticsLimitsTest` (6 olay, ekran sayısı 15 → 18). Üç variant'ta tam paket. ⟶ `NIT-01`
+- [ ] **`NIT-03`** UI testleri + emülatör _(P0·M·Sonnet)_ — iOS `InboxUITests` (13), `NotificationPermissionUITests` (9),
+  `NotificationComposerUITests` (6) ve `LocationCampaignUITests` (6) karşılıkları. Mock'ta uçtan uca; açık/koyu tema;
+  **API 33+ ve API ≤32** emülatörde izin eşlemesi. ⟶ `NIT-01`
+- [ ] **`NIT-04`** Belgeler _(P2·S·Haiku)_ — `CLAUDE.md` (durum, Bildirimler bölümü, LaunchArg tablosu, "Maps anahtarı
+  commit'lenmez") ve `README.md`. ⟶ `NIT-01`
+
+### Faz 3 — Gerçek Ortam Doğrulaması (canlı backend; yayın değildir)
+
+- [ ] **`NQA-01`** Canlı debug derlemesiyle uçtan uca _(P0·M·Opus)_ — Her canlı yazım **onayla**. Bakılacaklar:
+  - Cihaz dokümanının şekli; eski kaydın silinmesi; `onDeviceWritten`.
+  - Admin hesabıyla "Bana test gönder" (görsel + Sınav + Konum): ön planda / arka planda / kapalıyken push, kanal,
+    BigPicture, dokunuş → sayfa + vurgu, geçmişte açılma/aksiyon sayısı.
+  - Kampanya onayının yazımı ve `promo` süzgeci; zamanlanmış gönderim + iptal.
+  - Otomatik bildirim (test gönderimi ret / onay); hesap silme sonrası sunucu temizliği.
+
+  ⟶ `NIT-03`, `NOPS-01`, `NOPS-02`
+- [ ] **`NQA-02`** iOS ↔ Android çapraz kontrol _(P1·S·Opus)_ — Android admin'in gönderdiği bildirim iOS'ta görünür (ve
+  tersi). Aynı hesapla iki cihazda `readAt` senkronu ve kampanya tercihi. ⟶ `NQA-01`
+
+### Faz 4 — Yayın  ⚠️ (ürün sahibiyle · her dış adım ayrı onay)
+
+- [ ] **`NRL-01`** Önkoşul _(P0·S)_ — 4.0.0 (19) üretimde ve 4.0.0 `RLS-09`/`RLS-10` tamam (aynı anda iki inceleme
+  açılmaz).
+- [ ] **`NRL-02`** `v-4.1.0` dalının push'u _(P0·S·ürün sahibi)_ — Bu Mac'te yazma yetkili GitHub kimliği yok.
+- [ ] **`NRL-03`** Release AAB 20 (4.1.0) _(P0·S·Opus)_ — `bundleLiveRelease` yükleme anahtarıyla ve **Maps anahtarıyla**
+  (anahtar commit'lenmez). Kontrol edilecekler: sürüm, imza, izinler (yeni: konum ×2), R8 eşleme, dil bölmesi kapalı.
+  **Onayla.** ⟶ `NRL-02`
+- [ ] **`NRL-04`** Dahili test + Play'den kurulan sürümle **telefonda** duman testi _(P0·M)_ — Play Integrity / App Check,
+  FCM token, push ve görsel, harita (Play imzası SHA-1'i anahtarda), satın alma yolları bozulmadı. 4.0.0'da emülatörde
+  App Check 403 verdiği için **gerçek telefon** gerekir. ⟶ `NRL-03`
+- [ ] **`NRL-05`** Veri güvenliği formu _(P0·S)_ — `NLG-01`'e göre Console'a girilir, üretimle incelemeye gider.
+  ⟶ `NLG-01`
+- [ ] **`NRL-06`** Mağaza girişi + politika beyanları _(P0·S)_ — `NLG-03`/`NLG-04` sonuçlarına göre. ⟶ `NLG-03`, `NLG-04`
+- [ ] **`NRL-07`** Üretime yayın + incelemeye gönder _(P0·S)_ — %100, sürüm notu, yönetilen yayınlama kapalı. **Onayla.**
+  ⟶ `NRL-04`…`06`
+- [ ] **`NRL-08`** Yayın sonrası doğrulama _(P1·S)_ — Android vitals; `devices` kayıtlarının `platform: android` ile
+  dolması; geçmişte Android alıcıların sayılara girmesi; `trackNotificationEvent` hataları. ⟶ `NRL-07`
+- [ ] **`NRL-09`** Güncelleme önerisi _(P1·S)_ — `config/appUpdate/android.latestVersion` → `"4.1.0"`; canlı RTDB yazımı
+  **onayla**, 4.1.0 %100 görünür olunca. ⟶ `NRL-08`
+
+---
+
+## 4. Ayrıntı
+
+> iOS dosya yolları `ViFi-iOS/ViFi/` altındadır. Metinlerin, kimliklerin ve test adlarının tamamı ektedir; burada
+> yalnız kararlar, Android'e özgü adımlar ve tuzaklar var.
+
+#### `NDEC-01` — İzin akışının Android eşlemesi
+- **iOS:** giriş sonrası ilk Home'da sessiz provisional izin; turdan sonra 1/2 (tam izin); izin varsa 2/2 (kampanya
+  onayı); bağlamsal tekrarlar. Durum makinesi: `App/NotificationPromptCoordinator.swift`,
+  `Core/Services/NotificationPromptHistory.swift`, `Features/Notifications/NotificationPermissionFlowModel.swift`.
+- **Android eşlemesi:**
+  - `prepare()` no-op'tur.
+  - **13+:** "1/2 sunulmadı" + izin yok → turdan sonra 1/2. "Bildirimleri Aç" sistem diyaloğunu açar. Sonuç: izinli
+    → 2/2 (onay kaydı yoksa); ret → "hayır" kaydı.
+  - **12 ve altı:** `areNotificationsEnabled() == true` iOS'taki `authorized`'a karşılık gelir → 1/2 yok, onay kaydı
+    yoksa 2/2 bir kez (iOS "consent catch-up"). Kullanıcı bildirimleri sistemden kapattıysa izin `DENIED` sayılır.
+- **"Sistem diyaloğu gösterilebilir mi":** 13+'ta hiç istenmediyse ya da `shouldShowRequestPermissionRationale`
+  true ise evet. Aksi hâlde (iki ret / "bir daha sorma" / 12 ve altında kapalı) düğme "Ayarlar'ı Aç" olur
+  (`Settings.ACTION_APP_NOTIFICATION_SETTINGS`). Etkinliği mevcut `ForegroundActivityHolder` verir.
+- **Ayarlar'daki durum metni:** "Sessiz" Android'de yoktur. `AUTHORIZED` → "Açık", `DENIED` → "Kapalı", `NOT_DETERMINED`
+  → "Sorulmadı".
+
+#### `NDEC-02` — Admin kapsamı
+- Tam parite. Admin, iOS'taki gibi `admin: true` claim'iyle belirlenir; mevcut `AuthService.isCurrentUserAdmin()`
+  önbellekli token okur, yeni claim yenileme ister. Sunucu her callable'da claim'i yeniden doğrular.
+- Hesap'ta "Moderasyon"un yanına "Bildirim Gönder" (`account.notificationComposer`); "Geçmiş"e composer'ın üst
+  çubuğundan girilir.
+
+#### `NDEC-03` — "Konuma Git"
+- **Google Haritalar:** `https://www.google.com/maps/search/?api=1&query=<lat>%2C<lng>[&query_place_id=<kodlu id>]`.
+  Önce `setPackage("com.google.android.apps.maps")` ile denenir; `ActivityNotFoundException` olursa aynı URL tarayıcıda
+  açılır.
+- **Başka uygulama:** `geo:<lat>,<lng>?q=<lat>,<lng>(<kodlu ad>)` + `Intent.createChooser`. Hiç uygulama yoksa Google web.
+- **Sayı biçimi:** iOS `MapsLinks` ile aynı. 6 ondalık, sondaki sıfırlar ve nokta atılır, `-0` → `0`, yerel ayara göre
+  gruplama yok. Kodlama yalnız `A-Za-z0-9-._~`'yi korur.
+
+#### `NDEC-04` — Rozet ve tepsi
+- `NotificationBadge.clear()` her ön plana gelişte çalışmaya devam eder. KDoc düzeltilir: yerel `submissions`
+  bildirimlerini de temizler; bu kabul edilen davranış.
+- Kanallar `setShowBadge(true)`. `setNumber` ve üçüncü taraf rozet kütüphaneleri kullanılmaz.
+
+#### `NOPS-01` — Google Cloud anahtarı
+- **Adımlar** (`vifi-831a8`, proje no 441043948320):
+  1. API'ler → "Maps SDK for Android"ı etkinleştir ("Places API (New)" zaten açık).
+  2. Kimlik bilgileri → yeni API anahtarı. Uygulama kısıtı: Android uygulamaları → `com.salticusteam.vifi` + üç SHA-1
+     (bu Mac'in debug'ı, yükleme anahtarı, Play uygulama imzalama — `BE-01`'de Firebase'e kayıtlı olanlar). API kısıtı:
+     Maps SDK for Android + Places API (New).
+  3. Places günlük kotası ve bütçe uyarısı iOS'takiyle aynı yaklaşım (iOS'ta günlük 300).
+- **Tuzak:** Android anahtarı APK'nın içine gömülür ve görülebilir. Koruma kısıtlardır; anahtar depoya, loga ya da
+  belgeye yazılmaz.
+
+#### `NOPS-02` — Canlı durumun salt okuma denetimi
+- Bakılacaklar (yazım yok):
+  - `firebase functions:list` (13 function, europe-west1).
+  - Kuralların depodaki `ViFi-iOS` `v-4.1.0` ile aynı olduğu.
+  - Firestore'da `collectionGroup('devices')` içinde `token` alanı olmayan eski Android kayıtlarının sayısı.
+  - `config/appUpdate/android`.
+  - Emülatörün App Check debug anahtarının kayıtlı olduğu.
+- **⚠️ Uyarı (4.0.0 §6'daki gibi):** `ViFi-iOS` master'da bildirim function'ları ve `purchaseExamUnlock` yok. Android
+  tarafı deploy etmez; denetim yalnız okur.
+
+#### `NCT-01` — Sözleşme
+- **Sürüm:** `versionName "4.1.0"`, `versionCode 20` (ilk iş). Sürümlü doc comment'ler `// Added in 4.1.0 — …` olur.
+- **Modeller:**
+  - `core/model/AppNotification.kt` (tip düzeyinde tek yorum):
+    - `NotificationKind {GENERAL, PROMO, SYSTEM}`; bilinmeyen değer → `GENERAL`.
+    - `InboxItem(id, source: BROADCAST|PERSONAL, kind, title, body, imageStoragePath?, action?, createdAt: Instant?, expiresAt: Instant?)`;
+      `isExpired(now)` sınır anını da süresi dolmuş sayar (`expiresAt <= now`).
+    - `sealed interface NotificationAction` (`Location`, `Exam(examId, path: ArchivePath, kind: ExamKind)`, `Paywall`,
+      `AddExam`, `Url`), `NotificationLocation`, `NotificationImage` (desen
+      `^notificationImages/[A-Za-z0-9_-]{1,128}\.jpg$`).
+  - `core/model/NotificationAdmin.kt`:
+    - `NotificationDraft` + `Issue`, `NotificationAudience` (`All`, `Segment`).
+    - `AudienceFacets` ağacı (`{total, universities[{id, name, count, female, male, faculties[...departments]}]}`).
+    - `NotificationPreview`, `NotificationSendResult`, `NotificationStatus`, `NotificationStats`, `SentNotification`.
+  - `core/model/NotificationConsent.kt`: `marketing`, kaynak `PROMPT|SETTINGS`, `CURRENT_VERSION = 1`. Analytics kaynağı
+    `prompt|reask|settings` ayrı tutulur.
+  - Hata tipleri (Türkçe `userMessage`): `InboxError`, `NotificationAdminError`, `NotificationSettingsError`.
+- **Ayrıştırıcı:** `NotificationPayloadParser`, saf ve JVM'de test edilir. iOS `Core/Services/NotificationPayloadParser.swift`
+  ile aynı:
+  - Geçersiz id ya da boş başlık → doküman atlanır.
+  - Bilinmeyen tür → `general`; bilinmeyen ya da bozuk aksiyon → aksiyonsuz kart.
+  - `exam` aksiyonu: 5 elemanlı yol, son eleman `examId`, `examKind` `JPG`|`PDF`; `names` yalnız 5 elemansa kullanılır.
+  - `url` yalnız https + host. Bool'lar sayı kabul edilmez. Tarih: `Timestamp`/`Date` ya da epoch milisaniye.
+  - Push extras'tan `notificationId` (desen doğrulamalı).
+- **Arayüzler + Fake'ler** (`core/data/repository/` + `fake/`):
+  - `InboxReader`: `broadcastChanges()`, `personalChanges(uid)`, `readMarkerChanges(uid)`, `markRead(uid)`.
+  - `DeviceRegistrar`: `register(uid, token)`, `unregister(uid)`. `DeviceRegistration` arayüzü (`unregister(uid)`) Hat C
+    içindir.
+  - `NotificationSettingsService`: `consentChanges(uid)`, `setMarketing(uid, enabled, source)`.
+  - `NotificationEventReporter`: `report(notificationId, event)`.
+  - `NotificationAdminService`: `audience()`, `preview(kind, audience)`, `send(draft)`, `cancel(id)`, `history()`,
+    `uploadImage(jpeg, notificationId)`.
+  - `LocationPicker`: `@Composable fun Content(initial, onPick, onCancel)`; flavor başına bağlanır, mock Google'a
+    dokunmaz.
+- **DI:** mock → Fake'ler (`MockGraphTest` Firebase'in başlamadığını doğrulamaya devam eder); live → `Unavailable*` yer
+  tutucular (4.0.0 `BIL-06` deseni). Gerçek sınıflar `NIT-01`'de bağlanır.
+- **Rotalar:** `ViFiRoute.NotificationSettings`, `NotificationComposer`, `NotificationHistory` + `ViFiNavHost`'ta boş
+  yuvalar. Konum seçici tam ekran bir diyalogdur, rota değildir.
+- **`ModalPresence`** (`core/navigation/`): iOS `ModalPresentation` karşılığı. Açık modalların sayacıdır; bir modal
+  `DisposableEffect` ile kaydolur. `NotificationRouter` ve izin akışı sunucusu modal yokken sunar.
+- **LaunchArg:**
+  - `LaunchArgs.value(arg): String?` (metin extra'sı) + `OPEN_NOTIFICATION("vifi_open_notification")`.
+  - Yeni boolean'lar: `NOTIFICATIONS_DENIED`, `NOTIFICATIONS_REASK`, `CONSENT_REASK`.
+  - `NOTIFICATIONS_PROMPT` anlamı "taze kurulum" olur (izin sorulmamış + boş geçmiş).
+  - Mock'ta geçmiş 31 gün önceki retle tohumlanır; öncelik iOS'taki gibi Prompt > Denied > Reask.
+- **Analytics:**
+  - Olaylar: `notification_priming_shown|accepted|declined`, `marketing_consent_shown|accepted|declined`; tek parametre
+    `source`.
+  - Ekranlar: `NotificationSettings`, `NotificationComposer`, `NotificationHistory`.
+  - `AnalyticsEventMapping` (exhaustive `when`) ve `AnalyticsLimitsTest` (indeksler, 18 ekran) birlikte güncellenir.
+- **Metinler:** her hat kendi `strings_*.xml` dosyasını açar (§2). `NCT-01` metin eklemez.
+- **Kabul:** her şey derlenir; hatlar Fake'lerle ekran yazabilir; `test` + `lintLiveDebug` + `MockGraphTest` geçer.
+
+#### `PSH-01` — Kanallar + tepsi
+- **Kanallar** (ad önerisi; `NIT-03`'te ürün sahibine gösterilir):
+
+  | Kimlik | Ad | Açıklama |
+  |---|---|---|
+  | `general` | "Duyurular" | "Genel duyurular" |
+  | `promo` | "Kampanyalar ve fırsatlar" | "Onay verdiğin öğrenci kampanyaları" |
+  | `system` | "Sınav ve hesap bildirimleri" | "Sınavının onayı, reddi ve bölümüne eklenen yeni sınavlar" |
+
+  Hepsi `IMPORTANCE_DEFAULT`, `showBadge = true`.
+- `deleteNotificationChannel("announcements")`. Manifest
+  `com.google.firebase.messaging.default_notification_channel_id` → `general`. Yerel `submissions` kanalı aynen kalır.
+- **Tuzak:** Kanal kimliği bir kez oluşunca değişmez; ad ve açıklama sonradan güncellenebilir. Kullanıcı bir kanalı
+  sistemden kapatabilir. Bu Android'e özgü bir yoldur: `promo`'yu sistemden kapatmak sunucudaki onayı değiştirmez, push
+  gelmez ama kampanya sayfada görünür.
+
+#### `PSH-02` — `ViFiMessagingService`
+- **Ön plan** (`onMessageReceived`):
+  - `notificationId` ve `kind` `message.data`'dan; `title` ve `body` `message.notification`'dan okunur. Kanal = `kind`,
+    bilinmeyen → `general`.
+  - Görsel `message.notification?.imageUrl` (imzalı V4 URL). **Kimliksiz** düz OkHttp istemcisiyle kısa zaman aşımıyla
+    (≈8 sn) indirilir. Asla `StorageAuthInterceptor`'lı istemciden geçmez; kimlik bilgisi yabancı host'a gitmez. İnerse
+    `BigPictureStyle`, inmezse `BigTextStyle`.
+  - Bildirim id'si = `notificationId.hashCode()` (yoksa artan sayaç). `PendingIntent` `notificationId` extra'sı taşır;
+    request code bildirim başına ayrı; `FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT`; `SINGLE_TOP | CLEAR_TOP`.
+- **Arka plan:** sistem gösterir (kanal, görsel ve ikon manifestten). Dokunuş launcher intent'ini `data` anahtarlarıyla
+  açar (`notificationId`, `kind`, `google.message_id`).
+- **Token:** `onNewToken` → `DeviceRegistrationStore.tokenDidChange` + `subscribeToTopic("all")`. `all` aboneliği her
+  açılışta da tekrarlanır (bugün `NotificationPromptViewModel` yapıyor; o sınıf `PRM-03`'te değişeceği için buraya
+  taşınır). Abonelik izin ve oturumdan bağımsızdır.
+- **Kabul:** `NotificationContent`/payload oluşturucu birim testleri (kanal seçimi, id, extras); 13+'ta izin yoksa
+  sessizce gösterilmez.
+
+#### `PSH-03` — `NotificationRouter` + dokunuş okuma
+- **iOS:** `App/NotificationRouter.swift`, `HomeView.showPendingNotification`, `RootView` (`sessionDidChange`). Tüm
+  kurallar ekte (§A.6).
+- **Durum:** `pending: Request(notificationId?)?`, `highlightedId`. Yeni dokunuş bekleyeni değiştirir.
+- **Oturum geçişleri:**
+  - `→ SignedOut`: hepsi sıfırlanır.
+  - `SignedOut → SignedIn`: bekleyen atılır (oturum yokken yapılan dokunuş hiçbir hesaba ait değildir).
+  - `Unknown → SignedIn`: korunur (soğuk başlatma).
+- **Teslim:** `ArchiveHost` var + tanıtım turu kapalı + `ModalPresence` boş → `Inbox` rotası (`launchSingleTop`). Inbox
+  zaten üstteyse yalnız vurgu taşınır. İzin akışı sayfası açıksa kapatılır (yanıtsız sayfa "hayır" sayılır); diğer
+  modallar (kilit sheet'i, güncelleme diyaloğu) **kapatılmaz**, beklenir.
+- **`MainActivity`:**
+  - `onCreate` (`savedInstanceState == null`) ve `onNewIntent`'te `NotificationPayloadParser.notificationId(extras)`;
+    `open_inbox` ya da `google.message_id` varsa id'siz de sayfa açılır.
+  - Zil `openInbox()` vurgusuzdur; sayfa kapanınca vurgu temizlenir.
+- **iOS `3ec75d4` hatasının dersi:** sayfa gerçekten gösterilmeden "açık" işaretlenmez, bekleyen istek askıda kalmaz.
+- **Kabul:** iOS `NotificationRouterTests`'in 14 durumu; dokunuşun soğuk / sıcak / açıkken davranışı emülatörde.
+
+#### `PSH-04` — Cihaz kaydı
+- **iOS:** `Core/Services/DeviceRegistrationStore.swift`, `FirebaseDeviceRegistrar.swift`.
+- **Kurulum id'si:** `UUID().toString().lowercase()`, DataStore `notifications.installationId.v1`. Desene uymazsa
+  yeniden üretilir.
+- **Yazım:** `set` (merge yok) tam 4 alan; `appVersion = BuildConfig.VERSION_NAME.take(32)`,
+  `updatedAt = FieldValue.serverTimestamp()`.
+  - Token ve uid birlikte olunca yazılır. Aynı `(token, uid)` çifti bellekte onaylıysa ya da uçuştaysa atlanır.
+  - Kullanıcı değişince ve çıkışta sıfırlanır (bugünkü hatanın düzeltmesi).
+  - Hata loglanır; sonraki tetikleyicide (token yenilemesi, giriş, açılış) yeniden denenir.
+  - Her soğuk açılış yeniden yazar; `appVersion` güncellemesi böyle yakalanır.
+- **`unregister(uid)`:** önce yerel durum sıfırlanır (uçuştaki token yenilemesi yeniden kaydetmesin). Ardından silme
+  3 sn ile yarışır; asla hata fırlatmaz.
+- **Eski kayıt:** `devices/<mevcutToken>` bir kez silinir (kural sahibine silme izni veriyor). DataStore bayrağı;
+  başarısızlık sessizdir ve bir sonraki açılışta denenir. Eski token'lara ait diğer kayıtlar zararsızdır, sunucu atlar.
+- **Kayıt izinden ve onaydan bağımsızdır:** FCM token izin olmadan da vardır; `promo` süzgeci sunucuda.
+- **Kabul:** iOS `DeviceRegistrationStoreTests` (11) + `FirebaseDeviceRegistrarTests` (6) karşılıkları.
+
+#### `INB-01` — `InboxStore`
+- **iOS:** `Core/Services/InboxStore.swift`, `FirebaseInboxReader.swift`. 29 test ekte (§A.11).
+- **Okuma:**
+  - `announcements` `orderBy(createdAt, DESC).limit(50)` ve `users/<uid>/inbox` `limit(100)`, düz dinleyici. Sınırlar
+    süre filtresinden önce uygulanır.
+  - Hata: kaynak bir kez `failed` olur ve akış biter; kurtarma `retry()` ile.
+  - Durum: iki kaynak da bekliyorsa `loading`; ikisi de hatalıysa `failed("Bildirimler yüklenemedi. Bağlantını kontrol
+    edip tekrar dene.")`; aksi `loaded` + `hasPartialFailure` (tam olarak biri hatalı).
+  - Kaynaklardan biri hatalıyken diğeri hâlâ bekliyorsa `loading`.
+- **Okundu işareti:**
+  - `settings/inbox` dinleyicisi `MetadataChanges.INCLUDE`. `isFromCache && !exists` atlanır.
+  - Değer `ServerTimestampBehavior.ESTIMATE` ile okunur; yazım bekliyorken sayı yanıp sönmez.
+  - Okunmamış yalnız işaret biliniyorsa ve `createdAt > readAt` (eşit = okundu). Tarihsiz öğe hiç okunmamış sayılmaz.
+    Okuma hatasında 0.
+  - **Yeni hesap:** sunucu "yok" diyorsa gözlem başına bir kez yerel `now` + `markRead` (sunucu zamanı). Başarılıysa
+    eski `announcements.readIds` DataStore anahtarı silinir; hata olursa korunur. Okuma hatasında ve bekleyen işarette
+    asla yazılmaz.
+- **`markAllRead`:**
+  - Koşul: kullanıcı var + işaret biliniyor + tarihli okunmamış var. En yeni `createdAt`'e göre tekrar koruması;
+    başarısızlıkta koruma sıfırlanır.
+  - Sayfa açılışında ve sayfa açıkken okunmamış sayısı > 0'a her çıkışta çağrılır.
+- **Yaşam döngüsü:** oturum açılınca gözlem başlar (profil tamamlanmadan da); çıkışta `reset`; eski uid'nin değerleri
+  yok sayılır (`uid` koruması).
+- **Not:** bugünkü `InboxViewModel`'in "açılıştaki okunmamışları dondurma" davranışı kalkar; iOS'ta nokta canlı
+  hesaplanır.
+
+#### `INB-02` — Sınav kapısı
+- **iOS:** `Features/Browse/ExamAccess.swift` (`ExamAccessResolver`), `Features/Notifications/InboxExamGate.swift`.
+- **Karar sırası:**
+  1. Yol 5 seviyeli değil → `unavailable`, istek yapılmaz.
+  2. Abone ya da `unlockedIds` içinde → `open`, ders yüklenmez. Görüntüleyici silinmiş sınavı kendisi ele alır.
+  3. Değilse `archiveRepository.items(dersYolu)`; `path` eşleşen ve dosyalı öğe yoksa `unavailable`.
+  4. `ExamLock.freeExamIds` **filtresiz tam liste** üzerinden hesaplanır (dosyasız sınavlar da sayılır) →
+     `locked(item)` / `open`.
+- **Tepkiler:**
+  - Kilitli → mevcut `ExamUnlockSheet`. Sonraki adım (aç / Sınav Ekle / Paywall) sheet kapandıktan sonra tek kez
+    çalışır.
+  - Bulunamadı → "Sınav açılamadı" başlıklı diyalog + "Bu sınav artık arşivde bulunmuyor." + "Tamam".
+  - Hata → `userMessage`.
+  - Aynı examId için ikinci dokunuş yok sayılır; düğmede yükleniyor göstergesi.
+- **Açılış:** sayfa kapanır → `ViFiRouter.openExam(path, kind)` (yığını ata listeleriyle kurar, Geri arşivde yukarı
+  çıkar).
+- **Kabul:** `ExamAccessResolverTests` (8) + `InboxExamGateTests` (8) karşılıkları.
+
+#### `INB-03` — Bildirim sayfası arayüzü
+- **Metinler** (tamamı ekte, §A.4):
+
+  | Yer | Metin |
+  |---|---|
+  | Başlık | "Bildirimler" (mevcut `ViFiTopAppBar` + geri oku kalır; iOS'taki "Bitti" Android'de yok) |
+  | Boş durum | "Bildirim yok" / "Yeni bildirimler burada görünecek." |
+  | Hata | `ErrorView` + "Tekrar Dene" |
+  | Kısmi hata şeridi | "Bazı bildirimler yüklenemedi." + "Tekrar Dene" |
+  | Düğmeler | "Sınava Git", "Premium'a Göz At", "Sınav Ekle", "Bağlantıyı Aç", "Konuma Git" |
+  | `promo` etiketi | "Kampanya" |
+  | Okunmadı noktası | `contentDescription` "Okunmadı" |
+  | Görsel | `contentDescription` "Bildirim görseli" |
+
+- **Kart:**
+  - Görsel `StorageUrl.canonical(storagePath, bucket)` + mevcut Coil `ImageLoader` (kimlikli) ile yüklenir; yol yeniden
+    doğrulanır. Yer tutucu ve hata ikonu var; yüksekliği ölçekli, ≤ 280 dp.
+  - Düğme turuncu zeminde **siyah** metin (kontrast).
+  - Düğme varsa kart, görsel ve düğme aynı aksiyonu yapar; yoksa kart etkisizdir. Abone için Premium düğmesi gizlenir ve
+    kart etkisizleşir.
+- **Vurgu:** `highlightedId` listede çözülürse satır arka planı `primary` %18, `animateScrollToItem` ile ortalanır,
+  `opened` bildirilir.
+- **Aksiyonlar:** `paywall` → `Paywall` rotası; `addExam` → `AddExam` rotası (profilden ön-dolu); `url` → dış tarayıcı
+  (`ACTION_VIEW`); `location` → `INB-04`; `exam` → `INB-02`.
+- **Korunur:** mevcut "Bildirimler kapalı" izin şeridi (`inbox.permissionBanner`) ve zildeki sayı.
+- **testTag'ler:** mevcut `inbox.list`, `inbox.row.<id>`, `toolbar.inbox`, `state.*` korunur. Yeniler:
+  `inbox.row.<id>.action`, `.image`, `inbox.partialFailure`, `inbox.retry`, `inbox.location.google|other|cancel`.
+  `inbox.unread.<id>` okunmadı noktasına taşınır.
+
+#### `INB-04` — "Konuma Git"
+- **Alt sayfa:** başlık "Konumu hangi uygulamada açmak istersin?". Altında ad (adres varsa ikinci satırda). Seçenekler:
+  "Google Haritalar" (birincil), "Başka bir harita uygulaması", "Vazgeç". Yükseklik içeriğe göre; seçim sheet'i kapatır,
+  "Vazgeç" sayfayı açık bırakır.
+- **Kabul:** iOS `MapsLinksTests` (9) Android URL'lerine uyarlanır (Apple yerine `geo:`).
+
+#### `INB-05` — İstatistik
+- **iOS:** `Core/Services/NotificationEventTracker.swift`. Tekrar koruması anahtarı `"<uid>|<event>|<id>"`. Onaylanan
+  anahtarlar DataStore'da (`notifications.reportedEvents.v1`) en çok 500 tutulur; uçuştaki anahtar tekrar gönderilmez.
+  `@ApplicationScope`'ta gönder ve unut. Callable `trackNotificationEvent {notificationId, event}`; yanıt yok sayılır.
+- **Kabul:** `NotificationEventTrackerTests` (11).
+
+#### `PRM-01` — Onay deposu
+- **iOS:** `Core/Services/NotificationSettingsStore.swift`, `FirebaseNotificationSettingsService.swift`.
+- **Yazım:** `set` (merge yok) `{marketing, source, version: 1, updatedAt: serverTimestamp}`. İstemci tarihi kural
+  tarafından reddedilir; kayıt silinemez.
+- **Okuma:**
+  - Canlı dinleyici, `ESTIMATE`; `includeMetadataChanges` yok.
+  - Yalnız `marketing` bool ise cevap sayılır. Kayıt yoksa "cevaplanmadı" ve kampanyalar kapalı.
+  - Hata → `unavailable`, otomatik yeniden başlatma yok.
+- **`setMarketing`:** kullanıcı yoksa `false` döner. Değer anında gösterilir. Yazım 4 sn ile yarışır: hata → eski değer
+  geri gelir, `false`; zaman aşımı → kaydedildi sayılır (yazım kuyrukta, yerel önbellekte var).
+- **Kabul:** `NotificationSettingsStoreTests` (15) + `FirebaseNotificationSettingsServiceTests` (4).
+
+#### `PRM-02` — Geçmiş + koordinatör
+- **Geçmiş anahtarları** (DataStore, cihaz başı; çıkışta silinmez — iOS ile aynı kabul):
+  - `notifications.primingOffered.v1`, `permissionDeclinedAt.v1`, `permissionReaskShown.v1`, `consentOffered.v1`,
+    `consentDeclinedAt.v1`, `consentReaskShown.v1`.
+  - Tekrar gecikmesi 30 gün. Yalnız ilk "hayır" saklanır. Tekrar, "gösterildi" bayrağı false + ret kaydı var +
+    ≥30 gün olunca "vadesi gelmiş" olur ve gösterilene kadar öyle kalır.
+- **4.0.0 göçü:** `notifications.prompted == true` → `primingOffered = true`. İzin yoksa `permissionDeclinedAt = şimdi`
+  (iOS legacy back-fill: 30 gün 4.1.0'ın ilk açılışında başlar).
+- **Tetikleyiciler** (iOS `NotificationPromptCoordinator`):
+  - İlk sunum turdan sonra.
+  - Onay yakalama: izinli + `!consentOffered` + kayıt 5 sn içinde yüklendi + cevaplanmadı.
+  - `examWasSubmitted()`: vadesi gelmiş + izin yok.
+  - `inboxConsentReask()`: vadesi gelmiş + 2 sn içinde yüklendi + kampanya kapalı; işletim sistemi izni kontrol edilmez.
+  - Kuyruk tek yuvalıdır; yeni istek bekleyeni değiştirir.
+- **Kabul:** `NotificationPromptCoordinatorTests` (21) + `NotificationPromptHistoryTests` (8). Sağlayıcı gerektiren
+  durumlar Android izin modeline uyarlanır.
+
+#### `PRM-03` — İzin/onay sayfaları
+- **Akış:** `ModalBottomSheet`, iki sayfa aynı sheet'te. Ekranlar, metinler ve kimlikler ekte (§B.2–B.3); özet:
+  - **1/2:**
+    - Başlık "Hiçbir şeyi kaçırma" (tekrarda "Onaylanınca haber verelim mi?").
+    - 3 fayda satırı: "Bölümüne yeni sınav gelince ilk sen haberdar ol", "Gönderdiğin sınav onaylanınca coin'in
+      yüklendiğini gör", "Önemli duyurular".
+    - Düğmeler "Bildirimleri Aç" / "Ayarlar'ı Aç" ve "Şimdi Değil".
+    - Kaydırarak kapatma "hayır" sayılır; analytics gönderilmez.
+  - **2/2:**
+    - Başlık "Öğrenci fırsatları"; gövde ve iki satır ("Gece 22:00–09:00 arası asla.", "İstediğin an Hesap'dan kapat.").
+    - Düğmeler: "Evet, fırsatları bildir" / "Hayır, teşekkürler". Hiçbiri önceden seçili değildir ve iki cevap da kayıt
+      yazar.
+    - Kaydırma ve geri tuşuyla kapatma **kapalı** (`skipPartiallyExpanded`, `confirmValueChange = false`,
+      `BackHandler`); yalnız kayıt hatasından sonra açılır.
+    - Hata metni: "Tercihin kaydedilemedi. Bağlantını kontrol edip tekrar dene."
+- **Yerleşim:** mesajın tamamı varsayılan yazı ölçeğinde kaydırmadan görünür (iOS `5fa1d3c` dersi); büyük yazı
+  ölçeğinde gövde kayar, düğmeler altta sabit kalır.
+- **Analytics:** hangi olayın ne zaman gönderileceği ekteki tabloda (§B.6).
+- **Kaldırılanlar:** mevcut `NotificationPrompt` AlertDialog'u ve `notificationPrompt.*` tag'leri. Yeni tag'ler
+  `notifications.priming.*`, `notifications.consent.*`.
+- **Kabul:** `NotificationPermissionFlowModelTests` (15).
+
+#### `PRM-04` — Bildirim Ayarları
+- **Satır:** "Bildirim Ayarları" / "Bildirim izni ve kampanya tercihin" (`account.notificationSettings`). Silme sürerken
+  pasif.
+- **Ekran:**
+  - Satır "Bildirim izni" + durum metni.
+  - Altta not: kapalıysa "Bildirimler kapalı. Açmak için Ayarlar'a git.", sorulmadıysa "Bildirim izni henüz verilmedi."
+  - Düğme "Bildirimleri Aç" (analytics ve geçmiş yok) ya da "Ayarlar'ı Aç".
+  - Anahtar "Kampanya ve fırsat bildirimleri"; altındaki açıklama ekte.
+  - Okunamıyorsa: "Tercihin şu an okunamıyor. Bağlantını kontrol edip bu sayfayı tekrar aç."
+  - Kayıt hatasında anahtar geri döner ve hata gösterilir.
+- **Analytics:** anahtar değişimi `marketing_consent_accepted|declined(source: settings)`; ret burada tekrar kuralını
+  **kurmaz**.
+- **İzin tazeleme:** `LifecycleResumeEffect` ile.
+- **Kabul:** `NotificationSettingsViewModelTests` (9).
+
+#### `PRM-05` — Çıkış kancası
+- `AccountViewModel.signOut()` askıya alınır ve `isSigningOut` koruması alır. Sıra: `unregister` → `authService.signOut()`.
+- Silme akışı: `unregister` → `deleteProfile` → `deleteAccount`. Yeniden doğrulama iptal edilirse kayıt silinmiş kalır;
+  bir sonraki girişte yeniden yazılır.
+- `ProfileCompletionScreen`'deki "Çıkış Yap" da aynı kancayı kullanır.
+- **Kabul:** iOS `AccountSignOutCleanupTests` karşılıkları (`signOutRunsHookFirst`, `signOutIgnoresDoubleTap`,
+  `signOutWhileDeleting`).
+
+#### `ADM-01` — Admin servisi
+- **iOS:** `Core/Services/FirebaseNotificationAdminService.swift`. Callable gövdeleri ve sonuç şekilleri ekte (§C.2–C.3).
+- **Zaman aşımı:** `getHttpsCallable("sendNotification").withTimeout(300, SECONDS)`. Büyük fan-out'ta 70 sn'lik istemci
+  varsayılanı `deadline-exceeded` verir. Aynı id'yle yeniden deneme sunucudaki mevcut sonucu döner (idempotent).
+- **Görsel:** yol `notificationImages/<id>.jpg`. Önce `getMetadata()`; nesne varsa yükleme atlanır (üzerine yazma
+  yasak; yeniden denemeyi güvenli yapan budur). Yalnız `OBJECT_NOT_FOUND`'da `putBytes(bytes, contentType image/jpeg)`.
+- **Hata eşleme** (iOS tablosu, ek §C.3.9): `permission-denied`/`unauthenticated` → "Bu işlem için yetkin yok.";
+  iptalde `failed-precondition` → "Bu bildirim gönderildiği için artık iptal edilemez."; diğer `invalid-argument` /
+  `failed-precondition` → sunucunun Türkçe mesajı olduğu gibi; ağ → çevrimdışı mesajı; Storage hatası → "Görsel
+  yüklenemedi; bildirim gönderilmedi. Tekrar dene."
+
+#### `ADM-02` — Composer ViewModel
+- **Kurallar** ek §C.2–C.3'te. Android'e özgü noktalar:
+  - Sayaç ve sınırlar `trim()` sonrası `codePointCount` ile hesaplanır (iOS grafem sayar; sunucu kod noktası sayar).
+  - Doğrulama sırası: başlık, mesaj, kitle, konum, url, sınav, görsel, zaman, geçerlilik. Dokunulmamış formda boş
+    başlık/mesaj uyarısı gösterilmez.
+- **Taslak id'si:**
+  - Hata ve görsel yükleme hatasında korunur.
+  - Başarıda, `failed`/`canceled` sonucunda ve yükleme denemesinden sonra görsel değişince/kaldırılınca yenilenir.
+  - Test gönderimi her dokunuşta kendi id'sini alır.
+- **Sonuç:** `sent`/`sending` → "Bildirim gönderildi. Alıcı sayısı: N." + form sıfırlanır. `scheduled` → "Bildirim
+  <zaman> için zamanlandı." (sayı yok). `failed` → "Bildirim gönderilemedi. Ayrıntı için geçmişe bak." + yeni id.
+- **Sessiz saat istemcide hesaplanmaz;** sunucunun `scheduled` yanıtı gösterilir.
+- **Kabul:** `NotificationDraftTests` (9), `NotificationComposerViewModelTests` (10), `SendFlowTests` (15),
+  `AttachmentTests` (13), `KindLockTests` (7), `LocationTests` (8).
+
+#### `ADM-03`…`ADM-06` — Composer arayüzü, görsel, sınav seçici, geçmiş
+- **Bileşenler:** Material3 `SingleChoiceSegmentedButtonRow` (Tür, Kitle, Cinsiyet), `ExposedDropdownMenuBox` (Üniversite
+  / Fakülte / Bölüm; seçenek "<ad> · <n> kişi"), `DatePickerDialog` + `TimePicker` (cihaz saat dilimi; sunucuya epoch ms),
+  `AlertDialog` onayı.
+- **Onay diyaloğu:** başlık "Bildirim gönderilsin mi?" ya da "Bildirim zamanlansın mı?"; gövde "N kişiye gönderilecek;
+  M cihaza anlık bildirim (push) iletilecek."; düğmeler "Gönder"/"Zamanla" ve "Vazgeç".
+- **Sınav seçici:** mevcut Browse bileşenleri/`ArchiveRepository` yeniden kullanılır, yeni arşiv kodu yazılmaz. Satır
+  kimlikleri `notificationComposer.exam.row.<ad>`.
+- **Geçmiş:** satır menüsünden "İptal et" (onay yok, iOS paritesi); satır başına bir iptal uçuşta olabilir.
+  `notCancelable` → mesaj + listeyi yenile.
+- **Geçmiş durum rozetleri:** "Zamanlandı", "Gönderiliyor", "Gönderildi", "Başarısız", "İptal edildi". Renkler tema
+  token'larından gelir (sabit renk yok).
+- **Kabul:** `NotificationHistoryViewModelTests` (7), `FirebaseNotificationAdminServiceTests` (8); UI testleri
+  `NIT-03`'te.
+
+#### `MAP-01` — Bağımlılıklar + anahtar
+- **Kütüphaneler:** `com.google.maps.android:maps-compose`, `com.google.android.gms:play-services-maps`,
+  `com.google.android.libraries.places:places` (`Places.initializeWithNewPlacesApiEnabled`),
+  `com.google.android.gms:play-services-location`. Hepsi `liveImplementation` (4.0.0 Billing gibi).
+- **⚠️ Sürüm uyumu MAP-01'de doğrulanır.** Proje Kotlin 2.0.21 + Compose BoM 2024.10.01; 4.0.0'da `billing-ktx` 9.x Kotlin
+  2.2 stdlib istediği için alınamamıştı. Aynı kontrol burada da yapılır; gerekirse uyumlu eski sürüm seçilir.
+- **Anahtar:**
+  - `local.properties` `MAPS_API_KEY=` → live `manifestPlaceholders.mapsApiKey` →
+    `<meta-data android:name="com.google.android.geo.API_KEY">`, ayrıca `buildConfigField` (Places için).
+  - Değer boşsa, kırpılmamışsa ya da `${` ile başlıyorsa kullanılamaz → seçici "Harita anahtarı yapılandırılmamış"
+    görünümüne geçer ve harita hiç oluşturulmaz (iOS `GoogleMapsConfiguration`).
+- **SDK başlatma:** seçici ilk açıldığında; uygulama açılışında değil.
+- **Manifest:** `ACCESS_COARSE_LOCATION` + `ACCESS_FINE_LOCATION` (yalnız ön plan; arka plan izni yok).
+- **Kabul:** anahtarsız live debug çökmez; R8'li release'te harita açılır; APK/AAB boyut farkı not edilir;
+  `GoogleMapsConfigurationTests` (6) karşılığı.
+
+#### `MAP-02` — Seçici ViewModel
+- **iOS:** `Features/NotificationComposer/LocationPicker/LocationPickerViewModel.swift`. 44 test ekte (§C.8).
+- **Kamera:** varsayılan Türkiye (39.0, 35.2, zoom 5); düzenlemede mevcut konum (zoom 16).
+- **Arama:**
+  - Autocomplete: `regionCode "TR"`. Görünür yarıçap 0–50 km ise dairesel **bias** (filtre değil).
+  - Oturum jetonu 150 sn'de ve her yer getirmeden sonra yenilenir.
+  - Yer getirme alanları yalnız `DISPLAY_NAME`, `LOCATION`, `FORMATTED_ADDRESS`, `ID` (fazlası daha pahalı ücret
+    katmanı).
+- **POI dokunuşu:** ad tek satıra indirilir ve 120'ye kesilir; adres yalnız `FORMATTED_ADDRESS` ile arkada gelir; yeni
+  seçim eskisini ezer; yazılmış adres kazanır.
+- **Cihaz konumu:**
+  - Seçici açılınca, izin hiç sorulmadıysa **bir kez** istenir.
+  - İzin varsa `FusedLocationProviderClient.getCurrentLocation`. Doğruluk > 1000 m ise zoom 12, değilse 16.
+  - Admin haritayı yerleştirdiyse (sürükleme, arama, POI, düzenleme) odaklanılmaz.
+  - Reddedildiyse not: "Konum izni kapalı; harita bulunduğun yere odaklanmaz."
+  - Konum **saklanmaz, loglanmaz, sunucuya gitmez**.
+
+#### `MAP-03` / `MAP-04` — Seçici arayüzü ve mock
+- **Arayüz:** `GoogleMap` (pusula, döndürme ve eğme kapalı; konum noktası izin varsa) + ortada sabit iğne. Kamera
+  hareketi bitince merkez = seçim. POI dokunuşu `onPOIClick`.
+- **Mock:** sabit yer ve "Bu konumu seç" / "İptal" (`locationPicker.confirm|cancel`, `locationPicker.mock.name`).
+
+#### `NLG-01`…`NLG-04` — Belge ve beyanlar
+- **Veri güvenliği:** iOS gizlilik etiketinin karşılığı (ek §B.8):
+  - Kullanıcı kimliği, cihaz kimlikleri ve "diğer" (profil segmentleri, onay kaydı) → uygulama işlevi + analytics +
+    **reklam veya pazarlama** (kendi kullanıcılarımıza, üçüncü tarafla paylaşım yok).
+  - Uygulama etkinliği (okundu işareti, istatistik) → uygulama işlevi + analytics.
+- **Konum:** yalnız cihazda kullanılır, gönderilmez. Ancak Places isteği görünür harita alanını bias olarak Google'a
+  gönderir; bunun "toplama" sayılıp sayılmadığı Google'ın Places/Maps SDK beyan rehberine göre değerlendirilir. Karar
+  ürün sahibinindir.
+- **Politika:** onaylı, kapatılabilir kampanya bildirimleri; uygulama içi tanıtım yok. "Reklam içeriyor" beyanının
+  gerekip gerekmediği Play'in güncel tanımına göre kontrol edilip ürün sahibine sunulur.
+
+#### `NIT-01` — Canlı bağlama
+- **`AppRoot`:**
+  - `SessionViewModel` cihaz kaydını ve inbox/onay gözlemini oturumla başlatır.
+  - `ArchiveHost` izin akışı sunucusunu (turdan sonra, `ModalPresence` boşken) ve yönlendirici teslimini barındırır.
+  - Inbox'a onay tekrarı sunucusu eklenir.
+  - Sınav Ekle başarısı → `coordinator.examWasSubmitted()`.
+  - Push dokunuşu izin sheet'ini kapatır.
+- **Mevcut modalların `ModalPresence` kaydı:** tanıtım turu `Dialog`'u, isteğe bağlı güncelleme diyaloğu,
+  `ExamUnlockSheet`, izin sheet'i, "Konuma Git" sheet'i, konum seçici.
+- **Hesap:** "Bildirim Ayarları" satırı herkese; "Bildirim Gönder" yalnız admin'e (Moderasyon'un yanında).
+- **`SessionTeardown`:** yönlendirici, inbox deposu ve onay deposu sıfırlanır; izin akışı kapatılır.
+- **Silinenler:** `InboxDeepLink`, `PushTokenRegistration`, `FirestoreDeviceTokenStore`, `DeviceTokenStore`,
+  `AnnouncementsStore`/`Reader`/`Parser`, `AnnouncementReadPreferences`, `NotificationPrompt`(+VM) ve testleri;
+  yerlerine yenileri gelir.
+
+#### `NIT-02` / `NIT-03` — Testler
+- iOS test adları ve kapsamları ekte (A.11, B.9, C.8); her biri Android karşılığıyla eşlenir.
+- UI testleri mock'ta, `testTag` ile yazılır. Gerekli senaryolar: `vifi_open_notification p-paywall` / `a1` /
+  `does-not-exist`, `vifi_notifications_prompt` + `vifi_show_onboarding`, `vifi_notifications_denied`,
+  `vifi_notifications_reask`, `vifi_consent_reask`, `vifi_admin`, `vifi_subscribed`, `vifi_no_coins`.
+- **Mock örnek bildirimleri** iOS'takiyle aynı kimliklerle: `a1`, `a2`, `a-expired`, `p-exam`, `p-paywall`,
+  `p-exam-locked`, `p-location`. Görünür sıra `a1`, `p-exam`, `p-paywall`, `p-exam-locked`, `a2`, `p-location`.
+
+#### `NQA-01` / `NQA-02` — Gerçek ortam
+- **Canlı yazım örnekleri** (her biri onayla): test bildirimi (`notifications/<id>` + kendine push), onay kaydı, cihaz
+  kaydı.
+- **Bir gönderimi onaylamak arşive sınav ekler;** bu nedenle otomatik bildirim yolu önce **ret** ile denenir. Onay testi
+  ancak ürün sahibinin seçtiği bir gönderimle yapılır.
+- **Hesap silme denemesi** yalnız bir test hesabıyla yapılır (test numarası depoya yazılmaz).
+
+#### `NRL-*` — Yayın
+- **`NRL-01`:** 4.0.0 incelemesi sürerken 4.1.0 gönderilmez; aynı anda iki inceleme açılmaz.
+- **`NRL-04`:** 4.0.0'da atlanan "Play'den kurulan sürümle telefonda deneme" bu sürümde zorunlu. Bildirim yolu ancak
+  gerçek FCM + Play Integrity ile doğrulanır.
+- **`NRL-09`:** erken yazılırsa güncellemeyi henüz Play'de göremeyen kullanıcılara boşuna öneri çıkar.
+
+---
+
+## 5. Riskler ve Açık Noktalar
+
+1. **Yayındaki Android sürümleri (3.1.0 / 4.0.0) kişisel bildirim almaz.**
+   - Cihaz kayıtları 30 Ekim'den beri reddediliyor ve uygulama `users/<uid>/inbox`'ı okumuyor.
+   - Genel duyurular topic'le gelmeye devam ediyor.
+   - Segment, kişisel ve kampanya bildirimleri Android kullanıcısına 4.1.0'a kadar ulaşmaz. Sınav onay/ret bildirimleri
+     de buna dahil; Android 4.0.0'da bunlar zaten yoktu.
+2. **Push dokunuşu ve intent.** Arka planda sistemin gösterdiği bildirime dokunuşta `data` anahtarlarının launcher
+   intent'ine gelmesi FCM davranışıdır. Soğuk açılış, sıcak açılış (`onNewIntent`) ve görev yığını cihazda
+   doğrulanmalı (`PSH-03`, `NQA-01`).
+3. **Android 13+ izin diyaloğu en çok iki kez çıkar.** 30 günlük tekrar sistem diyaloğunu açamayabilir → "Ayarlar'ı Aç"
+   (`NDEC-01`).
+4. **Kanal ile onay arasındaki fark.** Kullanıcı `promo` kanalını sistemden kapatabilir: push gelmez ama sayfada
+   kampanya görünür. Tek otorite sunucudaki onaydır; kanal kapalıyken ayarlar ekranında not gösterilebilir (opsiyonel).
+5. **Maps anahtarı ve maliyet.** Anahtar APK'da görünür; koruma paket + SHA-1 + API kısıtıdır. Places kotası iOS ile
+   ortaktır ve yalnız adminler kullanır.
+6. **Veri güvenliği ve politika.** Kampanya hedeflemesi "reklam veya pazarlama" amacını gerektirir; Maps SDK
+   beyanları; Places bias'ı (`NLG-01`, `NLG-03`).
+7. **Büyük fan-out zaman aşımı.** `sendNotification` 300 sn sürebilir; istemci zaman aşımı yükseltilir, yeniden deneme
+   idempotent (`ADM-01`).
+8. **Cihaz başı izin geçmişi.** Aynı telefonda ikinci hesap ilk sunumu görmez (iOS ile aynı kabul).
+9. **Bildirimden açılan sınav.** `ExamViewer` kilit kontrolü yapmaz; kapı her zaman navigasyondan **önce** uygulanmalı
+   (`INB-02`).
+10. **Ortak backend.** Android deploy etmez. `ViFi-iOS` master'dan functions deploy edilirse bildirim function'ları ve
+    `purchaseExamUnlock` silinmeye önerilir (4.0.0 §6 uyarısı genişledi).
