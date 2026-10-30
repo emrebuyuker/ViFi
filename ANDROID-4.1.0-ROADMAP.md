@@ -22,12 +22,12 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **14'ü tamam, 0'ı yarım, 36'sı başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **15'i tamam, 0'ı yarım, 35'i başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
-> tamam; Hat B'de `INB-01`…`04` (kutu deposu, sınav kapısı, sayfa arayüzü, "Konuma Git") tamam. Faz 0'da açık
-> kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
+> tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı
+> (`NOPS-01`, ürün sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -497,11 +497,24 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     açtı; "Başka bir harita uygulaması" `geo:` ile (tek işleyen Maps olduğu için seçici atlandı) iğneyi doğru
     yere ve Türkçe adla koydu._
 
-- [ ] **`INB-05`** `NotificationEventTracker` + `trackNotificationEvent` _(P1·S·Sonnet)_:
+- [x] **`INB-05`** `NotificationEventTracker` + `trackNotificationEvent` _(P1·S·Sonnet)_:
   - `opened` yalnız push vurgusu listede çözülünce; `actionTapped` her aksiyon dokunuşunda.
   - Kullanıcı + olay + id başına bir kez (kalıcı, en çok 500). Gönder ve unut; başarısızlık hatırlanmaz.
 
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`FirebaseNotificationEventReporter`** (`core/data/firebase`): `trackNotificationEvent`
+    `{notificationId, event}` callable'ı (europe-west1), yanıt yok sayılır; live'da `UnavailableNotificationEventReporter`
+    yerine bağlandı (silindi)._
+  - _**`NotificationEventTracker`** (`core/data/notifications`): anahtar `"<uid>|<event>|<id>"`; onaylananlar DataStore
+    `notifications.reportedEvents.v1`'de eskiden yeniye, en yeni 500; uçuştaki anahtar ikinci kez gönderilmez;
+    hatada uçuş işareti kalkar, onay hatırlanmaz (sonraki dokunuşta tekrar). `@ApplicationScope`'ta gönder ve unut._
+  - _**Bağlama:** `InboxViewModel` `opened`'ı vurgu listede çözülünce (zil, süresi dolmuş ya da gelmemiş bildirim
+    sayılmaz; sonra gelirse sayılır), `actionTapped`'ı eylemden önce (kilitli sınav da) gönderir; kullanıcı yoksa
+    gönderilmez._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı. Birim testleri
+    liveDebug 826 / mockDebug 819 / liveRelease 826, hepsi geçti (`NotificationEventTrackerTest` 11 — iOS'un 11'i —,
+    `InboxViewModelTest` +2). Mock uygulamada push ile açılış + eylem dokunuşu çökmeden çalıştı. Canlı callable
+    çağrısı `NQA-01`'de (onayla)._
 
 #### Hat C — İzin, kampanya onayı, Bildirim Ayarları
 

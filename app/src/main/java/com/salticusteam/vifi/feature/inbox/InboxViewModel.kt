@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.salticusteam.vifi.core.data.billing.SubscriptionStore
 import com.salticusteam.vifi.core.data.inbox.InboxState
 import com.salticusteam.vifi.core.data.inbox.InboxStore
+import com.salticusteam.vifi.core.data.notifications.NotificationEventTracker
 import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.NotificationService
+import com.salticusteam.vifi.core.data.session.SessionStore
 import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.InboxItem
 import com.salticusteam.vifi.core.model.NotificationAction
+import com.salticusteam.vifi.core.model.NotificationEvent
 import com.salticusteam.vifi.core.model.NotificationLocation
 import com.salticusteam.vifi.core.model.NotificationPermission
 import com.salticusteam.vifi.core.util.trackScreen
@@ -22,7 +25,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -30,7 +35,8 @@ import kotlinx.coroutines.launch
 /**
  * The inbox (iOS `InboxView`): the merged notifications newest first, unread ones marked live, each card's action,
  * and the tapped push's highlight. Opening it marks everything read in one server write, and so does anything that
- * arrives while it is open. Exam actions go through the archive's lock rule ([InboxExamGate]).
+ * arrives while it is open. Exam actions go through the archive's lock rule ([InboxExamGate]); opening from a push
+ * and using an action are counted for the admin history ([NotificationEventTracker]).
  */
 @HiltViewModel
 class InboxViewModel @Inject constructor(
@@ -38,6 +44,8 @@ class InboxViewModel @Inject constructor(
     private val notifications: NotificationService,
     subscriptionStore: SubscriptionStore,
     private val gate: InboxExamGate,
+    private val sessionStore: SessionStore,
+    private val eventTracker: NotificationEventTracker,
     private val analytics: AnalyticsTracker,
 ) : ViewModel() {
 
@@ -65,6 +73,19 @@ class InboxViewModel @Inject constructor(
     private var marking: Job? = null
 
     // Intents
+    init {
+        // `opened` once the tapped push's notification is actually listed (never for the bell, an expired one or one
+        // this user did not get); a later delivery still counts.
+        viewModelScope.launch {
+            combine(store.state, requestedHighlight) { state, id ->
+                id?.takeIf { wanted -> state.items.any { it.id == wanted } }
+            }
+                .distinctUntilChanged()
+                .filterNotNull()
+                .collect { id -> report(NotificationEvent.OPENED, id) }
+        }
+    }
+
     fun onScreenShown() {
         analytics.trackScreen(AnalyticsScreen.INBOX)
         store.reevaluateExpiry()
@@ -87,7 +108,10 @@ class InboxViewModel @Inject constructor(
 
     /** The card, its image or its button was tapped: the same action for all three. */
     fun onAction(entry: InboxEntry) {
-        when (val action = entry.action ?: return) {
+        val action = entry.action ?: return
+        // Before anything the action then does: a locked exam counts too.
+        report(NotificationEvent.ACTION_TAPPED, entry.item.id)
+        when (action) {
             is NotificationAction.Exam -> viewModelScope.launch {
                 if (gate.check(action.target)) _events.send(InboxEvent.OpenExam(action.target.path, action.target.kind))
             }
@@ -117,6 +141,11 @@ class InboxViewModel @Inject constructor(
     }
 
     // Helpers
+    private fun report(event: NotificationEvent, notificationId: String) {
+        val uid = sessionStore.user?.id ?: return
+        eventTracker.report(event, notificationId, uid)
+    }
+
     private fun send(event: InboxEvent) {
         viewModelScope.launch { _events.send(event) }
     }

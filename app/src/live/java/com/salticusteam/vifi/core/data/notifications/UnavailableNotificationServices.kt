@@ -1,7 +1,6 @@
 package com.salticusteam.vifi.core.data.notifications
 
 import com.salticusteam.vifi.core.data.repository.NotificationAdminService
-import com.salticusteam.vifi.core.data.repository.NotificationEventReporter
 import com.salticusteam.vifi.core.data.repository.NotificationSettingsService
 import com.salticusteam.vifi.core.model.AudienceFacets
 import com.salticusteam.vifi.core.model.NotificationAdminError
@@ -9,7 +8,6 @@ import com.salticusteam.vifi.core.model.NotificationAudience
 import com.salticusteam.vifi.core.model.NotificationConsent
 import com.salticusteam.vifi.core.model.NotificationConsentSource
 import com.salticusteam.vifi.core.model.NotificationDraft
-import com.salticusteam.vifi.core.model.NotificationEvent
 import com.salticusteam.vifi.core.model.NotificationKind
 import com.salticusteam.vifi.core.model.NotificationPreview
 import com.salticusteam.vifi.core.model.NotificationSendResult
@@ -32,11 +30,6 @@ class UnavailableNotificationSettingsService @Inject constructor() : Notificatio
 }
 
 /** Reports do not reach the server (callers only log). */
-class UnavailableNotificationEventReporter @Inject constructor() : NotificationEventReporter {
-    override suspend fun report(event: NotificationEvent, notificationId: String): Unit =
-        throw UnsupportedOperationException("Notification statistics are not wired in this build yet")
-}
-
 /** Every admin call fails with "Bildirim gönderme henüz kullanılamıyor." */
 class UnavailableNotificationAdminService @Inject constructor() : NotificationAdminService {
     override suspend fun audience(): AudienceFacets = throw NotificationAdminError.Unavailable

@@ -1,15 +1,18 @@
 package com.salticusteam.vifi.feature.inbox
 
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import app.cash.turbine.test
 import com.salticusteam.vifi.core.data.archive.ExamAccessResolver
 import com.salticusteam.vifi.core.data.billing.SubscriptionStore
 import com.salticusteam.vifi.core.data.coins.ExamUnlocksStore
 import com.salticusteam.vifi.core.data.inbox.InboxStore
+import com.salticusteam.vifi.core.data.notifications.NotificationEventTracker
 import com.salticusteam.vifi.core.data.preferences.fake.FakeLegacyInboxReadState
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
 import com.salticusteam.vifi.core.data.repository.fake.FakeInboxReader
+import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationEventReporter
 import com.salticusteam.vifi.core.data.repository.fake.FakeNotificationService
 import com.salticusteam.vifi.core.data.repository.fake.FakeSubscriptionService
 import com.salticusteam.vifi.core.data.repository.fake.FakeUnlocksReader
@@ -21,6 +24,7 @@ import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.InboxItem
 import com.salticusteam.vifi.core.model.InboxSource
 import com.salticusteam.vifi.core.model.NotificationAction
+import com.salticusteam.vifi.core.model.NotificationEvent
 import com.salticusteam.vifi.core.model.NotificationKind
 import com.salticusteam.vifi.core.model.NotificationPermission
 import com.salticusteam.vifi.feature.browse.ExamUnlockEvent
@@ -29,6 +33,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 import kotlin.time.Duration
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -43,6 +48,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InboxViewModelTest {
@@ -50,6 +56,11 @@ class InboxViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    @get:Rule
+    val tmp = TemporaryFolder()
+
+    private val events = FakeNotificationEventReporter()
+    private var stores = 0
     private val now = Instant.ofEpochSecond(1_765_000_000)
     private val analytics = FakeAnalyticsTracker()
     // When the fake server stamps a marker write.
@@ -243,6 +254,39 @@ class InboxViewModelTest {
         }
     }
 
+    // --- Statistics (INB-05) ---
+
+    @Test
+    fun `opened is reported once the tapped push's notification is listed, never for the bell`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val (sut, _) = create()
+            sut.uiState.onEach { }.launchIn(backgroundScope)
+            advanceUntilIdle()
+
+            sut.onHighlightRequested(null)
+            sut.onHighlightRequested("a-expired")
+            advanceUntilIdle()
+            assertTrue(events.reports.isEmpty())
+
+            sut.onHighlightRequested("p-paywall")
+            advanceUntilIdle()
+            assertEquals(listOf(NotificationEvent.OPENED to "p-paywall"), events.reports)
+        }
+
+    @Test
+    fun `using an action is reported, a locked exam included, and an inert card is not`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val (sut, _) = create()
+            sut.uiState.onEach { }.launchIn(backgroundScope)
+            advanceUntilIdle()
+
+            sut.onAction(sut.uiState.value.entry("p-exam-locked"))
+            sut.onAction(sut.uiState.value.entry("a1"))
+            advanceUntilIdle()
+
+            assertEquals(listOf(NotificationEvent.ACTION_TAPPED to "p-exam-locked"), events.reports)
+        }
+
     private fun InboxUiState.entry(id: String): InboxEntry = items.first { it.item.id == id }
 
     private fun personal(id: String, action: NotificationAction) = InboxItem(
@@ -259,6 +303,13 @@ class InboxViewModelTest {
         val subscription = SubscriptionStore(FakeSubscriptionService(subscribed, latency = Duration.ZERO), scope)
         val unlocks = ExamUnlocksStore(FakeUnlocksReader(), SessionStore(FakeAuthService(), scope), scope)
         val gate = InboxExamGate(ExamAccessResolver(FakeArchiveRepository()), unlocks, subscription)
-        return InboxViewModel(store, FakeNotificationService(permission), subscription, gate, analytics) to store
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            // DataStore only takes a `.preferences_pb` file.
+            produceFile = { tmp.newFile("events-${stores++}.preferences_pb").also { it.delete() } },
+        )
+        val tracker = NotificationEventTracker(events, dataStore, scope)
+        val session = SessionStore(FakeAuthService(), scope)
+        return InboxViewModel(store, FakeNotificationService(permission), subscription, gate, session, tracker, analytics) to store
     }
 }
