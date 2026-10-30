@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+        The admin's location picker (4.1.0, MAP-01) asks for these once, when it opens, only to center the map on
+        where the admin is; the location is never stored, logged or sent. Foreground only: no background location.
+        Android 12+ lets the admin grant the approximate one alone.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Places merges this for its "current place" API (Wi-Fi as a location signal); the picker never uses it. -->
+    <uses-permission
+        android:name="android.permission.ACCESS_WIFI_STATE"
+        tools:node="remove" />
+
+    <application>
+        <!-- Maps SDK key from local.properties (MAPS_API_KEY); empty without one, and the picker then shows no map. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${mapsApiKey}" />
+    </application>
+</manifest>

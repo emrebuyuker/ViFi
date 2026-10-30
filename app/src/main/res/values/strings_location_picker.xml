@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Added in 4.1.0 — the admin's location picker (MAP-01…04), iOS LocationPicker texts. -->
+    <string name="location_picker_title">Konum Seç</string>
+    <string name="location_picker_close">Kapat</string>
+    <string name="location_picker_unavailable_title">Harita anahtarı yapılandırılmamış</string>
+    <string name="location_picker_unavailable_message">Konum seçmek için bu sürümün Google Haritalar anahtarıyla derlenmiş olması gerekir. Geliştirici ekibe haber ver.</string>
+</resources>

@@ -652,13 +652,33 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 #### Hat E — Konum seçici (admin)
 
-- [ ] **`MAP-01`** Bağımlılıklar + anahtar yapılandırması _(P0·S·Opus)_:
+- [x] **`MAP-01`** Bağımlılıklar + anahtar yapılandırması _(P0·S·Opus)_:
   - Maps Compose + Maps + Places (New) + konum; yalnız **live** flavor'a.
   - Anahtar `local.properties` → manifest yer tutucusu; anahtar yoksa seçici "yapılandırılmamış" der ve çökmez.
   - SDK ilk açılışta başlar; mock'ta Google SDK'sı hiç başlamaz.
   - R8 ve boyut etkisi ölçülür.
 
-  ⟶ `NCT-01`; canlı deneme `NOPS-01`
+  ⟶ `NCT-01`; canlı deneme `NOPS-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**Sürümler** (`liveImplementation`): `maps-compose` 6.5.3, `play-services-maps` 19.0.0, `places` 4.1.0,
+    `play-services-location` 21.3.0. Projenin Kotlin 2.0.21 / Compose BoM 2024.10.01'iyle derlenmiş en yeni sürümler:
+    maps-compose 6.6+ Compose'u 1.8'e, Places 4.2+ kotlin-stdlib'i 2.1'e çekiyor (6.5.3'ün BoM'u 2024.11.00, içeriği
+    2024.10.01 ile birebir aynı). Places 4.1.0'da Places API (New), `CircularBounds`, `setRegionCode` ve
+    `DISPLAY_NAME`/`LOCATION`/`FORMATTED_ADDRESS`/`ID` alanları var. play-services-location 21.4.0 Kotlin 2.3
+    metadata'sı taşıdığı için derlenmiyor; play-services-maps maps-compose'un derlendiği 19.x'te kaldı. Dördünün "daha
+    yeni sürüm var" lint uyarısı katalogda gerekçeli `#noinspection` ile susturuldu; Kotlin yükseltmesinde birlikte
+    ele alınmalı._
+  - _**Anahtar:** `local.properties` `MAPS_API_KEY=` → live `manifestPlaceholders.mapsApiKey` +
+    `BuildConfig.MAPS_API_KEY`. `GoogleMapsConfiguration` (`app/src/live/.../core/maps/`) boş, kırpılınca boş,
+    metin olmayan ya da `${`/`$(` ile başlayan değeri kullanılamaz sayar; `toString` anahtarı yazmaz.
+    `GoogleMapsSdk.startIfPossible()` Places'i (New, `tr-TR`) ilk çağrıda bir kez başlatır; uygulama açılışında
+    çağrılmaz. Anahtarsız seçici görünümü `LocationPickerUnavailable` ("Harita anahtarı yapılandırılmamış", "Kapat")._
+  - _**Manifest:** konum izinleri ve Maps meta-data'sı ana manifest yerine yeni `app/src/live/AndroidManifest.xml`'de:
+    mock'un birleşik manifestinde konum izni ve harita anahtarı yok, Hat A'nın satırlarıyla çakışma da yok. Places'in
+    eklediği `ACCESS_WIFI_STATE` ("mevcut yer" API'si için; kullanılmıyor) `tools:node="remove"` ile çıkarıldı.
+    Play-services-maps `glEsVersion 2` özelliğini ve Google Haritalar paket sorgusunu ekliyor._
+  - _**Doğrulama:** `assembleDebug` geçti (anahtarsız). `GoogleMapsConfigurationTest` 6/6 (iOS
+    `GoogleMapsConfigurationTests` karşılığı; `keyName` yerine "uygulama derlemenin anahtarını okur ve yazdırmaz").
+    `LocationPickerUnavailableTest` derlendi. Boyut ölçümü seçici kodu gelince `MAP-03`'te._
 - [ ] **`MAP-02`** `LocationPickerViewModel` _(P0·M·Opus)_:
   - Arama: 3+ karakter, 350 ms bekleme, oturum jetonu yenileme, görünür alana göre bias, `TR`.
   - Öneri seçimi (yalnız 4 alan); POI dokunuşu (adres arkada gelir).
