@@ -695,9 +695,22 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _**Açık kararlar:** K1 konum (öneri: yalnız `COARSE` + bias yalnız admin haritayı yerleştirince → konum beyanı
     yok), K2 admin SDK verileri (öneri: kilitlenme + tanılama + arama geçmişi, isteğe bağlı), K3 istatistik
     işaretlerinin silinmesi (öneri: ortak backend), K4 "geliştirici iletişimleri" amacı (öneri: evet)._
-- [ ] **`NLG-02`** Gizlilik politikası kontrolü _(P1·S·Sonnet)_ — Canlı `/gizlilik` kampanya bildirimlerini, onay
+- [x] **`NLG-02`** Gizlilik politikası kontrolü _(P1·S·Sonnet)_ — Canlı `/gizlilik` kampanya bildirimlerini, onay
   kaydını, cihaz kaydını ve admin harita konumunu anıyor mu? Eksikse metin ortak depoda (`ViFi-iOS/firebase/hosting/`)
-  önerilir; hosting yayını ayrıca onay ister. ⟶ `NLG-01`
+  önerilir; hosting yayını ayrıca onay ister. ⟶ `NLG-01` ✅ _Tamamlandı (2026-10-30, Opus). Öneri metni bu dalda
+  [`PRIVACY-POLICY-4.1.0.md`](PRIVACY-POLICY-4.1.0.md)'de; ortak depoya ve hosting'e dokunulmadı. Gelenler:_
+  - _**Kontrol:** `/gizlilik`, `/hesap-silme`, `/kullanim-kosullari` salt okundu (HTTP 200, `Last-Modified` 29 Ekim
+    06:26 GMT). Üçü de `ViFi-iOS` `v-4.1.0`'daki dosyalarla bayt bayt aynı; 4.1.0 için değişiklik yok._
+  - _**Eksikler:** kampanya bildirimleri ve onay kaydı yok; cihaz kaydı kısmen var; segment hedeflemesi, okundu
+    işareti ve istatistik yok; admin harita ekranı ve Google Maps Platform yok. "Reklam göstermez" cümlesi kampanyalarla
+    çelişebilir. Hesap silme sayfası bildirim verilerini anmıyor. Kullanım koşullarında Google Maps Platform şartlarının
+    (§3.2.2) istediği Google Maps maddesi yok; bu iOS 4.1.0'ı da ilgilendiriyor._
+  - _**Önerilen metin:** gizlilik tablosu (2 değişen, 3 yeni satır), "Bildirimler" ve "Yöneticilerin harita ekranı"
+    bölümleri, reklam cümlesinin iki biçimi (R1'e bağlı), aktarım/saklama cümleleri, hesap silme satırları (K3'e bağlı),
+    kullanım koşullarına Google Haritalar maddesi. Ek öneri: Android konum diyaloğundan önce iOS'un amaç metni
+    (`MAP-02`/`MAP-03`)._
+  - _**Ürün sahibine:** metin onayı (P1), Google Maps maddesi (P2), yayın zamanı (P3; iOS 4.1.0 da aynı sayfalara
+    bağlı)._
 - [ ] **`NLG-03`** Play politikası kontrolü _(P1·S·Opus)_ — Onaylı kampanya bildirimlerinin Play kurallarına uygunluğu
   (bildirimle tanıtım, "Reklam içeriyor" beyanı gerekiyor mu?) ve yalnız ön plan konum izninin beyan gerektirip
   gerektirmediği. Sonuç ürün sahibine sorulur.
