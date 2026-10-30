@@ -10,6 +10,7 @@ import com.salticusteam.vifi.core.data.profile.ProfileState
 import com.salticusteam.vifi.core.data.profile.ProfileStore
 import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.AuthService
+import com.salticusteam.vifi.core.data.repository.DeviceRegistration
 import com.salticusteam.vifi.core.data.repository.ProfileService
 import com.salticusteam.vifi.core.data.session.SessionState
 import com.salticusteam.vifi.core.data.session.SessionStore
@@ -41,9 +42,10 @@ import kotlinx.coroutines.launch
  * The signed-in account (iOS AccountViewModel): the profile name, Premium state, coin balance and verified number,
  * all followed live, signing out, and deleting the account.
  *
- * Deleting removes the profile first, while the user is still signed in (the owner-only rules allow it), then
- * the account. When Firebase asks for a recent sign-in, a code is sent to the same number; once it is confirmed
- * the user is reauthenticated and the account deleted. Neither path navigates: the session gate replaces the
+ * Signing out and deleting both first remove this install's push registration, while the user can still write (iOS
+ * `beforeSignOut`, at most 3 s, never fails). Deleting then removes the profile, still signed in (the owner-only rules
+ * allow it), then the account. When Firebase asks for a recent sign-in, a code is sent to the same number; once it is
+ * confirmed the user is reauthenticated and the account deleted. Neither path navigates: the session gate replaces the
  * whole archive, this screen included, with the login screen, and the app-wide teardown resets the rest.
  *
  * The re-verification (code entry, typed code, verification id, resend cooldown) lives in the [SavedStateHandle],
@@ -57,11 +59,16 @@ class AccountViewModel @Inject constructor(
     subscriptionStore: SubscriptionStore,
     private val authService: AuthService,
     private val profileService: ProfileService,
+    /** This install's push registration, removed before signing out or deleting. */
+    private val deviceRegistration: DeviceRegistration,
     private val localDataCleaner: LocalDataCleaner,
     private val analytics: AnalyticsTracker,
     /** The clock the resend cooldown is measured with (a fixed or stepping clock in tests). */
     private val clock: Clock,
-    /** Outlives this screen: the purge after a deletion must finish after the session gate removed it. */
+    /**
+     * Outlives this screen: a confirmed sign-out must finish even if the screen closes during its cleanup, and the
+     * purge after a deletion must finish after the session gate removed it.
+     */
     @ApplicationScope private val appScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -111,20 +118,37 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch { _isAdmin.value = authService.isCurrentUserAdmin() }
     }
 
-    /** Signs out after the user confirmed it. */
+    /**
+     * Signs out after the user confirmed it (iOS `signOut() async`): waits for this install's push registration to be
+     * removed while the user can still write, then ends the session. Ignored while a deletion or another sign-out runs.
+     */
     fun signOut() {
-        if (_deletion.value.isWorking) return
-        authService.signOut()
-        analytics.track(AnalyticsEvent.SignedOut)
+        val state = _deletion.value
+        if (state.isWorking || state.isSigningOut) return
+        val uid = sessionStore.user?.id
+        _deletion.update { it.copy(isSigningOut = true) }
+        appScope.launch {
+            try {
+                uid?.let { deviceRegistration.unregister(it) }
+                authService.signOut()
+                analytics.track(AnalyticsEvent.SignedOut)
+            } finally {
+                _deletion.update { it.copy(isSigningOut = false) }
+            }
+        }
     }
 
     /** Deletes the account after the user confirmed it, verifying the number again first when Firebase asks. */
     fun deleteAccount() {
-        if (_deletion.value.isWorking) return
+        val state = _deletion.value
+        if (state.isWorking || state.isSigningOut) return
         val user = sessionStore.user ?: return fail(AuthError.NotSignedIn)
         _deletion.update { it.copy(isWorking = true, error = null) }
         viewModelScope.launch {
             try {
+                // The push registration goes first, while the user can still write. If the re-verification below is
+                // cancelled it stays removed until the next sign-in registers this install again.
+                deviceRegistration.unregister(user.id)
                 // Removed while still signed in, so a deleted account leaves no profile behind.
                 profileService.deleteProfile(user.id)
                 authService.deleteAccount()
@@ -167,7 +191,7 @@ class AccountViewModel @Inject constructor(
     fun cancelReverification() {
         if (_deletion.value.isWorking) return
         verificationId = null
-        _deletion.value = AccountUiState()
+        _deletion.update { AccountUiState(isSigningOut = it.isSigningOut) }
     }
 
     /** Whole seconds left until another code can be requested, `0` once it can. */

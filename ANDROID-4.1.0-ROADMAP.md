@@ -608,18 +608,60 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     emülatöründe `NotificationPromptContentTest` 7/7. Mock'ta `vifi_notifications_prompt`: 1/2 → "Bildirimleri Aç"
     → 2/2; 2/2 Geri, perde ve kaydırmayla kapanmadı, "Hayır, teşekkürler" kapattı; 1/2 Geri, kaydırma ve "Şimdi
     Değil" ile kapandı; `vifi_notifications_denied` ve varsayılan açılışta sayfa çıkmadı; koyu tema kontrol edildi._
-- [ ] **`PRM-04`** Hesap › Bildirim Ayarları _(P0·M·Sonnet)_:
+- [x] **`PRM-04`** Hesap › Bildirim Ayarları _(P0·M·Sonnet)_:
   - Satır + ekran: izin durumu (Açık / Kapalı / Sorulmadı) + "Bildirimleri Aç" ya da "Ayarlar'ı Aç".
   - "Kampanya ve fırsat bildirimleri" anahtarı; okunamıyor/hata durumları.
   - Uygulama öne dönünce izin yeniden okunur; `NotificationSettings` ekran adı.
 
-  ⟶ `PRM-01`
-- [ ] **`PRM-05`** Çıkış ve hesap silme kancası _(P0·S·Sonnet)_:
+  ⟶ `PRM-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationSettingsViewModel`** + `NotificationSettingsUiState` (`feature/notificationsettings`, iOS
+    `NotificationSettingsViewModel`): izin `permission()` + `canRequestPermission()` ile okunur; ekran her öne
+    gelişte (`LifecycleResumeEffect`) yeniden okur. "Bildirimleri Aç" sistem diyaloğunu açıp izni yeniden okur;
+    diyalog açıkken ikinci dokunuş yok sayılır, analytics gönderilmez, izin geçmişine dokunulmaz. "Ayarlar'ı Aç"
+    `PRM-03`'ün `openAppNotificationSettings()`'ini kullanır. Anahtar onay deposuna canlı bağlı; kayıt okunmadan ve
+    kayıt sürerken pasif. `setMarketing(…, SETTINGS)` başarılıysa `marketing_consent_accepted|declined(settings)`;
+    değilse anahtar geri döner ve hata görünür (sonraki denemede silinir). Kapatma tekrar kuralını kurmaz. Kayıt
+    uygulama kapsamında sürer, ekran kapansa da olay gider (iOS'taki yapısız `Task` gibi). Ekran adı
+    `NotificationSettings`._
+  - _**Android eşlemesi (NDEC-01):** durum "Açık / Kapalı / Sorulmadı" (okunmadan "Yükleniyor…"); düğme
+    `canRequestPermission()`'a göre seçilir. Bir kez reddedilip sistemin yeniden sorabildiği durumda ("Kapalı" +
+    "Bildirimleri Aç") alt not "Bildirim izni henüz verilmedi." olur. "Ayarlar'a git" notu yalnız "Ayarlar'ı Aç"
+    düğmesiyle çıkar (iOS'ta bu durum yok)._
+  - _**Ekran** (`NotificationSettingsScreen` + durumsuz `NotificationSettingsContent`): `ViFiTopAppBar` + liste.
+    Metinler iOS'la birebir (`strings_notification_settings.xml`; "Yükleniyor…" `common_loading`). Tag'ler
+    `notificationSettings.list|permission|enable|openSettings|permissionNote|marketing|unavailable|error`._
+  - _**Hesap satırı:** "Bildirim Ayarları" / "Bildirim izni ve kampanya tercihin" (`account.notificationSettings`),
+    Moderasyon'dan sonra, silme sürerken pasif. `AccountScreen(onNotificationSettings = null)` varsayılanıyla gizli.
+    Satırın gezinmesi ve `ViFiNavHost` yuvasına `NotificationSettingsScreen(onBack)` bağlanması `NIT-01`'de._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda
+    yok). Birim testleri liveDebug 913 / mockDebug 906 / liveRelease 913, hepsi geçti
+    (`NotificationSettingsViewModelTest` 14 — iOS'un 9'u + Android: sistemin yeniden sorabildiği ret, öne dönüşte
+    yeniden okuma, çift dokunma, kayıt sürerken değişiklik, başka cihazdaki değişiklik, ekran adı). Compose UI testleri
+    yazıldı ve derlendi (`NotificationSettingsContentTest` 11, `AccountContentTest` +2); cihazda koşturma
+    birleştirmede._
+- [x] **`PRM-05`** Çıkış ve hesap silme kancası _(P0·S·Sonnet)_:
   - Hesap'tan çıkışta, profil tamamlama ekranındaki çıkışta ve hesap silmede (`deleteProfile`'dan önce) önce
     `DeviceRegistration.unregister` çalışır (≤3 sn).
   - `signOut` askıya alınır ve çift dokunma koruması alır.
 
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**Hesap çıkışı** (`AccountViewModel.signOut`): önce `DeviceRegistration.unregister(uid)` (≤ 3 sn, asla
+    fırlatmaz), sonra `authService.signOut()` + `SignedOut`. Çıkış kancayı bekler (iOS `signOut() async`). Dizi
+    uygulama kapsamında koşar: temizlik sürerken Geri ile ekrandan çıkılsa da onaylanan çıkış iptal olmaz. Çift
+    dokunma koruması `AccountUiState.isSigningOut`; bu sürede "Çıkış Yap" ve "Hesabı Sil" pasif, silme de yok sayılır
+    (iOS yalnız ikinci çıkışı engelliyordu). Bekleme sırasında gösterge yok (iOS gibi)._
+  - _**Hesap silme:** `unregister` → `deleteProfile` → `deleteAccount`. Yeniden doğrulama iptal edilirse kayıt
+    silinmiş kalır; bir sonraki girişte yeniden yazılır._
+  - _**Profil tamamlama "Çıkış Yap":** aynı kanca `ProfileFormViewModel.signOut()`'ta (ekran onu çağırıyor;
+    `ProfileCompletionScreen` değişmedi), uygulama kapsamında ve çift dokunma korumalı. Çıkış mantığı
+    `ProfileFormViewModel.kt`'te olduğu için hat tablosundaki `ProfileCompletion*` yerine bu dosyaya (yalnız çıkışa)
+    dokunuldu; `feature/profile`'a başka hat yazmıyor._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda
+    yok). Birim testleri liveDebug 919 / mockDebug 912 / liveRelease 919, hepsi geçti (`AccountViewModelTest` +4:
+    `signOutRunsHookFirst`, `signOutIgnoresDoubleTap`, silmede kancanın profilden önce koşması, çıkış sürerken silme;
+    mevcut `signOut` ve `signOutWhileDeleting` karşılıkları kancayı da doğruluyor. iOS `signOutFailure`'ın karşılığı
+    yok: Android `signOut()` hata vermiyor. `ProfileFormViewModelTest` +2). Compose UI testi `AccountContentTest` +1
+    (çıkış sürerken satırlar pasif) yazıldı ve derlendi; cihazda koşturma birleştirmede._
 
 #### Hat D — Admin "Bildirim Gönder" + Geçmiş
 

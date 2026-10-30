@@ -6,8 +6,10 @@ import com.salticusteam.vifi.core.data.billing.SubscriptionStore
 import com.salticusteam.vifi.core.data.coins.CoinWalletStore
 import com.salticusteam.vifi.core.data.local.fake.FakeLocalDataCleaner
 import com.salticusteam.vifi.core.data.profile.ProfileStore
+import com.salticusteam.vifi.core.data.repository.DeviceRegistration
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
+import com.salticusteam.vifi.core.data.repository.fake.FakeDeviceRegistration
 import com.salticusteam.vifi.core.data.repository.fake.FakeProfileService
 import com.salticusteam.vifi.core.data.repository.fake.FakeSubscriptionService
 import com.salticusteam.vifi.core.data.repository.fake.FakeWalletReader
@@ -46,6 +48,7 @@ class AccountViewModelTest {
     private val analytics = FakeAnalyticsTracker()
     private val cleaner = FakeLocalDataCleaner()
     private val clock = MutableClock()
+    private val registration = FakeDeviceRegistration()
 
     private fun TestScope.makeSut(
         authService: FakeAuthService = FakeAuthService(isSignedIn = true, latency = KotlinDuration.ZERO),
@@ -55,6 +58,7 @@ class AccountViewModelTest {
         sessionStore: SessionStore = SessionStore(authService, backgroundScope),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         subscriptionService: FakeSubscriptionService = FakeSubscriptionService(latency = KotlinDuration.ZERO),
+        deviceRegistration: DeviceRegistration = registration,
     ) = AccountViewModel(
         sessionStore = sessionStore,
         profileStore = profileStore,
@@ -62,10 +66,12 @@ class AccountViewModelTest {
         subscriptionStore = SubscriptionStore(subscriptionService, backgroundScope),
         authService = authService,
         profileService = profileService,
+        deviceRegistration = deviceRegistration,
         localDataCleaner = cleaner,
         analytics = analytics,
         clock = clock,
         // The test scope itself, so the post-deletion purge is foreground work advanceUntilIdle waits for.
+        // The confirmed sign-out too.
         appScope = this,
         savedStateHandle = savedStateHandle,
     )
@@ -165,9 +171,71 @@ class AccountViewModelTest {
         val sut = makeSut(authService = authService)
 
         sut.signOut()
+        advanceUntilIdle()
 
         assertNull(authService.currentUser)
+        assertEquals(listOf(uid), registration.unregistered)
         assertEquals(listOf(AnalyticsEvent.SignedOut), analytics.events)
+        assertFalse(sut.uiState.value.isSigningOut)
+    }
+
+    // --- Sign-out cleanup (iOS AccountSignOutCleanupTests) ---
+
+    @Test
+    fun `signOut removes the push registration first, while still signed in`() = runTest {
+        val authService = FakeAuthService(isSignedIn = true, latency = KotlinDuration.ZERO)
+        val order = mutableListOf<String>()
+        val hook = object : DeviceRegistration {
+            override suspend fun unregister(uid: String) {
+                order += "hook $uid, signed in: ${authService.currentUser != null}"
+            }
+        }
+        val sut = makeSut(authService = authService, deviceRegistration = hook)
+
+        sut.signOut()
+        advanceUntilIdle()
+
+        assertEquals(listOf("hook $uid, signed in: true"), order)
+        assertNull(authService.currentUser)
+    }
+
+    @Test
+    fun `a second signOut while the cleanup runs is ignored`() = runTest {
+        val authService = FakeAuthService(isSignedIn = true, latency = KotlinDuration.ZERO)
+        val gate = CompletableDeferred<Unit>()
+        val hook = GatedRegistration(gate)
+        val sut = makeSut(authService = authService, deviceRegistration = hook)
+
+        sut.signOut()
+        runCurrent()
+        assertTrue(sut.uiState.value.isSigningOut)
+        assertNotNull("The session lasts until the cleanup is done", authService.currentUser)
+
+        sut.signOut()
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(listOf(uid), hook.unregistered)
+        assertNull(authService.currentUser)
+        assertEquals(listOf(AnalyticsEvent.SignedOut), analytics.events)
+        assertFalse(sut.uiState.value.isSigningOut)
+    }
+
+    @Test
+    fun `deleteAccount while signing out does nothing`() = runTest {
+        val profileService = FakeProfileService(mapOf(uid to FakeProfileService.SAMPLE_PROFILE))
+        val gate = CompletableDeferred<Unit>()
+        val sut = makeSut(profileService = profileService, deviceRegistration = GatedRegistration(gate))
+        sut.signOut()
+        runCurrent()
+
+        sut.deleteAccount()
+        runCurrent()
+
+        assertFalse(sut.uiState.value.isWorking)
+        assertTrue(profileService.calls.isEmpty())
+        gate.complete(Unit)
+        advanceUntilIdle()
     }
 
     @Test
@@ -196,6 +264,27 @@ class AccountViewModelTest {
         assertEquals(listOf(AnalyticsEvent.AccountDeleted), analytics.events)
         assertEquals(1, cleaner.purgeCount)
         assertTrue(authService.sentCodeNumbers.isEmpty())
+    }
+
+    @Test
+    fun `deleteAccount removes the push registration before the profile, while still signed in`() = runTest {
+        val authService = FakeAuthService(isSignedIn = true, latency = KotlinDuration.ZERO)
+        val profileService = FakeProfileService(mapOf(uid to FakeProfileService.SAMPLE_PROFILE))
+        val order = mutableListOf<String>()
+        val hook = object : DeviceRegistration {
+            override suspend fun unregister(uid: String) {
+                order += "hook $uid, signed in: ${authService.currentUser != null}, " +
+                    "profile calls: ${profileService.calls.size}"
+            }
+        }
+        val sut = makeSut(authService = authService, profileService = profileService, deviceRegistration = hook)
+
+        sut.deleteAccount()
+        advanceUntilIdle()
+
+        assertEquals(listOf("hook $uid, signed in: true, profile calls: 0"), order)
+        assertEquals(listOf(FakeProfileService.Call.Delete(uid)), profileService.calls)
+        assertNull(authService.currentUser)
     }
 
     @Test
@@ -426,8 +515,12 @@ class AccountViewModelTest {
         runCurrent()
 
         sut.signOut()
+        runCurrent()
 
         assertNotNull(authService.currentUser)
+        assertFalse(sut.uiState.value.isSigningOut)
+        // Only the deletion's own removal, no sign-out's.
+        assertEquals(listOf(uid), registration.unregistered)
         assertTrue(analytics.events.isEmpty())
     }
 
@@ -475,5 +568,17 @@ class AccountViewModelTest {
 
         assertFalse(restored.uiState.value.isReverifying)
         assertNull(restored.uiState.value.resendAvailableAt)
+    }
+
+    /** Holds each removal until [gate] opens (the 3 s cleanup still running). */
+    private class GatedRegistration(private val gate: CompletableDeferred<Unit>) : DeviceRegistration {
+
+        /** The uids removed, in order of the calls. */
+        val unregistered = mutableListOf<String>()
+
+        override suspend fun unregister(uid: String) {
+            unregistered += uid
+            gate.await()
+        }
     }
 }

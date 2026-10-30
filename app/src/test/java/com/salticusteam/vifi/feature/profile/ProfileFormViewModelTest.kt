@@ -5,8 +5,10 @@ import com.salticusteam.vifi.core.data.catalog.CatalogSource
 import com.salticusteam.vifi.core.data.catalog.UniversityCatalog
 import com.salticusteam.vifi.core.data.profile.ProfileState
 import com.salticusteam.vifi.core.data.profile.ProfileStore
+import com.salticusteam.vifi.core.data.repository.DeviceRegistration
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
+import com.salticusteam.vifi.core.data.repository.fake.FakeDeviceRegistration
 import com.salticusteam.vifi.core.data.repository.fake.FakeProfileService
 import com.salticusteam.vifi.core.model.AnalyticsEvent
 import com.salticusteam.vifi.core.model.AnalyticsScreen
@@ -18,7 +20,9 @@ import com.salticusteam.vifi.core.model.UserProfile
 import com.salticusteam.vifi.testing.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -44,6 +48,7 @@ class ProfileFormViewModelTest {
     private lateinit var profileStore: ProfileStore
     private lateinit var authService: FakeAuthService
     private lateinit var analytics: FakeAnalyticsTracker
+    private lateinit var registration: FakeDeviceRegistration
 
     @Before
     fun setUp() {
@@ -51,9 +56,13 @@ class ProfileFormViewModelTest {
         profileStore = ProfileStore(profileService)
         authService = FakeAuthService(isSignedIn = true)
         analytics = FakeAnalyticsTracker()
+        registration = FakeDeviceRegistration()
     }
 
-    private fun viewModel(existing: UserProfile? = null) = ProfileFormViewModel(
+    private fun TestScope.viewModel(
+        existing: UserProfile? = null,
+        deviceRegistration: DeviceRegistration = registration,
+    ) = ProfileFormViewModel(
         user = user,
         existing = existing,
         profileService = profileService,
@@ -63,6 +72,9 @@ class ProfileFormViewModelTest {
         catalogSource = object : CatalogSource {
             override suspend fun catalog() = catalog
         },
+        deviceRegistration = deviceRegistration,
+        // The test scope itself, so the sign-out is foreground work advanceUntilIdle waits for.
+        appScope = this,
     )
 
     private fun ProfileFormViewModel.fillIn() {
@@ -195,7 +207,48 @@ class ProfileFormViewModelTest {
         val sut = viewModel()
 
         sut.signOut()
+        advanceUntilIdle()
 
+        assertNull(authService.currentUser)
+        assertEquals(listOf(user.id), registration.unregistered)
+    }
+
+    @Test
+    fun `signOut removes the push registration first, while still signed in`() = runTest {
+        val order = mutableListOf<String>()
+        val hook = object : DeviceRegistration {
+            override suspend fun unregister(uid: String) {
+                order += "hook $uid, signed in: ${authService.currentUser != null}"
+            }
+        }
+        val sut = viewModel(deviceRegistration = hook)
+
+        sut.signOut()
+        advanceUntilIdle()
+
+        assertEquals(listOf("hook ${user.id}, signed in: true"), order)
+        assertNull(authService.currentUser)
+    }
+
+    @Test
+    fun `a second signOut while the cleanup runs is ignored`() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        var hookRuns = 0
+        val hook = object : DeviceRegistration {
+            override suspend fun unregister(uid: String) {
+                hookRuns++
+                gate.await()
+            }
+        }
+        val sut = viewModel(deviceRegistration = hook)
+
+        sut.signOut()
+        runCurrent()
+        sut.signOut()
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(1, hookRuns)
         assertNull(authService.currentUser)
     }
 
