@@ -94,11 +94,4 @@ class NotificationContentTest {
         assertNull(content(imageUrl = "file:///sdcard/a.jpg").imageUrl)
         assertNull(content(imageUrl = "").imageUrl)
     }
-
-    @Test
-    fun `a tap opens the inbox for our flag or an FCM launch intent only`() {
-        assertTrue(InboxDeepLink.opensInbox(emptySet(), openInboxFlag = true))
-        assertTrue(InboxDeepLink.opensInbox(setOf("google.message_id"), openInboxFlag = false))
-        assertFalse(InboxDeepLink.opensInbox(setOf("vifi_signed_out"), openInboxFlag = false))
-    }
 }

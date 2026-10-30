@@ -70,7 +70,7 @@ class PushNotifier @Inject constructor(
     private fun tapIntent(content: NotificationContent, requestCode: Int): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            .putExtra(InboxDeepLink.EXTRA_OPEN_INBOX, true)
+            .putExtra(NotificationRouter.EXTRA_OPEN_INBOX, true)
         content.tapExtras().forEach { (key, value) -> intent.putExtra(key, value) }
         // FLAG_IMMUTABLE is mandatory from Android 12 (API 31) on.
         return PendingIntent.getActivity(

@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,7 +20,6 @@ import com.salticusteam.vifi.core.navigation.ViFiNavHost
 import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
-import com.salticusteam.vifi.core.notifications.InboxDeepLink
 import com.salticusteam.vifi.feature.about.AboutScreen
 import com.salticusteam.vifi.feature.account.AccountScreen
 import com.salticusteam.vifi.feature.addexam.AddExamScreen
@@ -75,15 +73,9 @@ private fun ArchiveHost(user: AuthUser, profile: UserProfile) {
     val navController = rememberNavController()
     val router = rememberViFiRouter(navController)
 
-    // A notification tap opens the inbox; a cold-start tap waits here until the signed-in host exists.
-    val inboxDeepLink = rememberInboxDeepLink()
-    val inboxRequested by inboxDeepLink.pending.collectAsStateWithLifecycle()
-    LaunchedEffect(inboxRequested) {
-        if (inboxRequested) {
-            router.push(ViFiRoute.Inbox())
-            inboxDeepLink.consume()
-        }
-    }
+    // A notification tap opens the inbox on that notification; a cold-start tap waits here until the signed-in host
+    // exists, the tour is over and no modal is in the way.
+    PushTapDelivery(router)
     NotificationPrompt()
     ArchivePrefetch()
     PaidUnlockRecovery()
@@ -185,7 +177,10 @@ private fun PaidUnlockRecovery(viewModel: PaidUnlockRecoveryViewModel = hiltView
     LaunchedEffect(viewModel) { viewModel.onArchiveShown() }
 }
 
-/** The process-wide [InboxDeepLink]; reached through a ViewModel so the composable needs no entry-point plumbing. */
+/** Opens the inbox for each tapped push ([DeepLinkViewModel]); an inbox already on top only takes the new highlight. */
 @Composable
-private fun rememberInboxDeepLink(viewModel: DeepLinkViewModel = hiltViewModel()): InboxDeepLink =
-    remember(viewModel) { viewModel.inboxDeepLink }
+private fun PushTapDelivery(router: ViFiRouter, viewModel: DeepLinkViewModel = hiltViewModel()) {
+    LaunchedEffect(viewModel, router) {
+        viewModel.inboxOpenings.collect { router.showInbox(it.notificationId) }
+    }
+}

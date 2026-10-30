@@ -12,10 +12,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.navigation.LocalModalPresence
 import com.salticusteam.vifi.core.navigation.ModalPresence
-import com.salticusteam.vifi.core.notifications.InboxDeepLink
 import com.salticusteam.vifi.core.util.AppLocale
 import com.salticusteam.vifi.core.notifications.NotificationPermissionRequester
+import com.salticusteam.vifi.core.notifications.NotificationRouter
 import com.salticusteam.vifi.core.util.ForegroundActivityHolder
+import com.salticusteam.vifi.core.util.LaunchArg
 import com.salticusteam.vifi.core.util.LaunchArgs
 import com.salticusteam.vifi.feature.notificationcomposer.locationpicker.LocalLocationPicker
 import com.salticusteam.vifi.feature.notificationcomposer.locationpicker.LocationPicker
@@ -31,7 +32,7 @@ class MainActivity : ComponentActivity() {
 
     @Inject lateinit var activityHolder: ForegroundActivityHolder
     @Inject lateinit var permissionRequester: NotificationPermissionRequester
-    @Inject lateinit var inboxDeepLink: InboxDeepLink
+    @Inject lateinit var notificationRouter: NotificationRouter
     @Inject lateinit var modalPresence: ModalPresence
     @Inject lateinit var locationPicker: LocationPicker
 
@@ -52,10 +53,14 @@ class MainActivity : ComponentActivity() {
         // Phone verification's reCAPTCHA fallback needs the host Activity; held weakly, detached on destroy.
         activityHolder.attach(this)
         permissionRequester.attach(notificationPermission)
-        // A notification tap that launched the app opens the inbox once the signed-in host is up.
-        if (savedInstanceState == null) inboxDeepLink.handle(intent?.extras)
         // Before any ViewModel or fake reads a scenario flag (debug builds only).
         LaunchArgs.update(intent?.extras)
+        // A notification tap that launched the app (cold start) opens the inbox once the signed-in host is up; a
+        // recreation (rotation, process restore) does not repeat it.
+        if (savedInstanceState == null) {
+            notificationRouter.handle(intent)
+            LaunchArgs.value(LaunchArg.OPEN_NOTIFICATION)?.let(notificationRouter::receive)
+        }
         // The recent-apps snapshot never shows app content: Android 13+ drops the screenshot itself, older
         // versions see the branded AppSwitcherCover the content lays over itself once paused.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) setRecentsScreenshotEnabled(false)
@@ -83,6 +88,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        inboxDeepLink.handle(intent.extras)
+        // A tap while the app is running (in the background or open).
+        notificationRouter.handle(intent)
     }
 }

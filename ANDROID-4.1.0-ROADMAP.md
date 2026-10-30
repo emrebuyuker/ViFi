@@ -22,11 +22,12 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **8'i tamam, 0'ı yarım, 42'si başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **9'u tamam, 0'ı yarım, 41'i başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
-> 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A'da kanallar (`PSH-01`) ve push gösterimi (`PSH-02`)
-> tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
+> 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A'da kanallar (`PSH-01`), push gösterimi (`PSH-02`) ve
+> dokunuş yönlendirmesi (`PSH-03`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün
+> sahibi).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -322,13 +323,39 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     inmezse metin; aynı id yalnız kendini değiştirir) + `NotificationChannelsDeviceTest` 2/2. Mock uygulama açıldı,
     zil bildirim sayfasını açtı. Yeni açılan emülatör aşırı yüklüyken (yük 26) bir başlangıç ANR'ı görüldü; ana iş
     parçacığı Compose ölçümünde CPU bekliyordu, yük düşünce tekrarlanmadı._
-- [ ] **`PSH-03`** `NotificationRouter` + dokunuş okuma _(P0·M·Opus)_ — `InboxDeepLink`'in yerine geçer:
+- [x] **`PSH-03`** `NotificationRouter` + dokunuş okuma _(P0·M·Opus)_ — `InboxDeepLink`'in yerine geçer:
   - `pending(notificationId?)`, vurgu, `sessionDidChange` kuralları.
   - `MainActivity` hem kendi intent'imizden hem sistem tepsisinin başlatma intent'inden `notificationId`'yi okur
     (soğuk ve sıcak).
   - Mock'ta `vifi_open_notification <id>`.
 
-  ⟶ `NCT-01`
+  ⟶ `NCT-01` ✅ _Tamamlandı (2026-10-30, Opus). Ürün sahibinin kararıyla (30 Ekim) `ArchiveHost` teslimi de burada
+  bağlandı (planda `NIT-01`'deydi); `InboxDeepLink` silindi. Gelenler:_
+  - _**`NotificationRouter`** (`core/notifications`): `pending: StateFlow<Request?>`, `receive`, `reset`,
+    `sessionDidChange` (→ `SignedOut` sıfırlar; `SignedOut → SignedIn` atar; `Unknown → SignedIn` korur),
+    `start(sessions)` (oturumu `SessionViewModel` verir; enjekte edilmez, yoksa `MainActivity` mock grafını başlatma
+    argümanları okunmadan kurardı), `deliveries(ready)` (en yeni dokunuş, tur bitince ve `ModalPresence` boşken;
+    dokunuş ancak teslimi toplanınca düşer, iptalde kaybolmaz), `handle(intent)` + saf `tapRequest`
+    (`open_inbox` ya da `google.message_id`; id sunucu desenine uymazsa vurgusuz; `kind` okunmaz)._
+  - _**Vurgu durumu yönlendiricide tutulmaz:** rota argümanı taşır, "sayfa açık mı" bilgisi yalnız geri yığınıdır
+    (iOS `3ec75d4` dersinin karşılığı). Zil `push(Inbox())`, kapanış geri tuşu._
+  - _**`ViFiRouter.showInbox(highlightId)`:** `launchSingleTop`; üstte bildirim sayfası varsa yalnız argüman
+    değişir (tek kayıt)._
+  - _**`MainActivity`:** soğuk başlatmada (`savedInstanceState == null`) ve `onNewIntent`'te `handle(intent)`; son
+    uygulamalardan yeniden açılış (`FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY`) dokunuşu tekrarlamaz;
+    `vifi_open_notification` (debug) soğuk başlatmada `receive` eder._
+  - _**`AppRoot`:** `ArchiveHost`'ta `PushTapDelivery` → `DeepLinkViewModel.inboxOpenings` (tur durumu
+    `OnboardingPreferences`'tan; yalnız `Hidden` geçirir) → `router.showInbox`._
+  - _**Doğrulama:** `assembleDebug` + iki androidTest APK'sı; `lintLiveDebug` 0 hata, 56 uyarı (değişen dosyalarda
+    yok). Birim testleri liveDebug 744 / mockDebug 737 / liveRelease 744, hepsi geçti (`NotificationRouterTest` 17:
+    iOS'un 14 durumu + tur, modal ve iptal beklemeleri). Tablet emülatöründe `ViFiRouterTest` 9/9 (+3: tek üst kayıt,
+    zil vurgusuz, geri tuşu), `PushNotifierDeviceTest` 4/4, `NotificationChannelsDeviceTest` 2/2. Mock uygulamada adb
+    ile: soğuk başlatma, sıcak dokunuş (ön planda ve arka planda), sistem tepsisi biçimi, sayfa açıkken dokunuş (bir
+    geri tuşuyla ana ekran), normal açılış (sayfa açılmaz), son uygulamalardan açılış (açılmaz),
+    `vifi_open_notification`, tur açıkken bekleme (atlanınca açılır), oturum kapalıyken dokunuş (girişten sonra
+    açılmaz) — hepsi beklendiği gibi; uygulamada ANR yok (emülatörün System UI'ı bir kez ANR verdi)._
+  - _Vurgunun ekranda gösterilmesi `INB-03`'te (bugün `InboxScreen` argümanı okumuyor). Mevcut modalların
+    `ModalPresence` kaydı ve izin akışının kapatılması `NIT-01`'de kalır._
 - [ ] **`PSH-04`** `DeviceRegistrationStore` + `FirestoreDeviceRegistrar` _(P0·M·Opus)_ — `PushTokenRegistration` /
   `FirestoreDeviceTokenStore`'un yerine geçer:
   - Kurulum başı UUID; `users/<uid>/devices/<kurulumId>` = `{token, platform: 'android', appVersion, updatedAt}`.
@@ -482,7 +509,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 ### Faz 2 — Entegrasyon ve Testler
 
 - [ ] **`NIT-01`** Canlı bağlama _(P0·M·Opus)_:
-  - `AppRoot`/`ViFiNavHost`: yönlendirici → kapılardan sonra ve modal yokken Inbox (`launchSingleTop`).
+  - ~~`AppRoot`/`ViFiNavHost`: yönlendirici → kapılardan sonra ve modal yokken Inbox (`launchSingleTop`).~~ `PSH-03`'te
+    yapıldı (30 Ekim, ürün sahibi kararı).
   - İzin akışı sunucusu `ArchiveHost`'ta (turdan sonra). Bildirim sayfasında onay tekrarı (700 ms, vurgu yoksa).
   - Sınav Ekle başarısından sonra `examWasSubmitted`. Hesap satırları ("Bildirim Ayarları", admin'e "Bildirim Gönder").
   - Mevcut modalların `ModalPresence`'a kaydı. `SessionTeardown` sıfırlamaları.
@@ -989,7 +1017,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 #### `NIT-01` — Canlı bağlama
 - **`AppRoot`:**
   - `SessionViewModel` cihaz kaydını ve inbox/onay gözlemini oturumla başlatır.
-  - `ArchiveHost` izin akışı sunucusunu (turdan sonra, `ModalPresence` boşken) ve yönlendirici teslimini barındırır.
+  - `ArchiveHost` izin akışı sunucusunu (turdan sonra, `ModalPresence` boşken) barındırır; yönlendirici teslimi
+    (`PushTapDelivery`) `PSH-03`'te bağlandı.
   - Inbox'a onay tekrarı sunucusu eklenir.
   - Sınav Ekle başarısı → `coordinator.examWasSubmitted()`.
   - Push dokunuşu izin sheet'ini kapatır.
@@ -997,7 +1026,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   `ExamUnlockSheet`, izin sheet'i, "Konuma Git" sheet'i, konum seçici.
 - **Hesap:** "Bildirim Ayarları" satırı herkese; "Bildirim Gönder" yalnız admin'e (Moderasyon'un yanında).
 - **`SessionTeardown`:** yönlendirici, inbox deposu ve onay deposu sıfırlanır; izin akışı kapatılır.
-- **Silinenler:** `InboxDeepLink`, `PushTokenRegistration`, `FirestoreDeviceTokenStore`, `DeviceTokenStore`,
+- **Silinenler:** `PushTokenRegistration`, `FirestoreDeviceTokenStore`, `DeviceTokenStore`,
   `AnnouncementsStore`/`Reader`/`Parser`, `AnnouncementReadPreferences`, `NotificationPrompt`(+VM) ve testleri;
   yerlerine yenileri gelir.
 

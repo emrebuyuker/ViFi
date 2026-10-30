@@ -20,6 +20,14 @@ class ViFiRouter(private val navController: NavHostController) {
 
     fun pop(): Boolean = navController.popBackStack()
 
+    /**
+     * Opens the inbox for a tapped push, highlighting [highlightId]. Single top: an inbox already on top only takes
+     * the new highlight (no second inbox to back out of); the bell keeps using [push] with `Inbox()`.
+     */
+    fun showInbox(highlightId: String?) {
+        navController.navigate(ViFiRoute.Inbox(highlightId)) { launchSingleTop = true }
+    }
+
     fun popToRoot() {
         navController.popBackStack(ViFiRoute.Home, inclusive = false)
     }

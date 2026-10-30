@@ -17,7 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Router stack semantics must match iOS `Router` (push / popToRoot / popTo / openExam). */
+/** Router stack semantics must match iOS `Router` (push / popToRoot / popTo / openExam) and push tap routing. */
 @RunWith(AndroidJUnit4::class)
 class ViFiRouterTest {
 
@@ -113,6 +113,38 @@ class ViFiRouterTest {
         assertEquals(listOf("home"), stack())
     }
 
+    @Test
+    fun showInbox_onTopOfTheInbox_onlyMovesTheHighlight() {
+        runOnUi {
+            router.showInbox("n-1")
+            router.showInbox("n-2")
+        }
+
+        assertEquals(listOf("home", "inbox:n-2"), stack())
+    }
+
+    @Test
+    fun bellOpensWithoutHighlight_aTapMovesIt_andBackLeavesNoInbox() {
+        runOnUi { router.push(ViFiRoute.Inbox()) }
+        assertEquals(listOf("home", "inbox:-"), stack())
+
+        runOnUi { router.showInbox("n-3") }
+        assertEquals(listOf("home", "inbox:n-3"), stack())
+
+        runOnUi { router.pop() }
+        assertEquals(listOf("home"), stack())
+    }
+
+    @Test
+    fun showInbox_overAnotherScreen_stacksOnIt() {
+        runOnUi {
+            router.push(ViFiRoute.Browse(university))
+            router.showInbox(null)
+        }
+
+        assertEquals(listOf("home", "browse:itu", "inbox:-"), stack())
+    }
+
     private fun runOnUi(block: () -> Unit) {
         composeRule.runOnUiThread(block)
         composeRule.waitForIdle()
@@ -127,6 +159,7 @@ class ViFiRouterTest {
     private fun NavBackStackEntry.describe(): String = when {
         destination.hasRoute<ViFiRoute.Home>() -> "home"
         destination.hasRoute<ViFiRoute.Browse>() -> "browse:" + toRoute<ViFiRoute.Browse>().ids.joinToString("/")
+        destination.hasRoute<ViFiRoute.Inbox>() -> "inbox:" + (toRoute<ViFiRoute.Inbox>().highlightId ?: "-")
         destination.hasRoute<ViFiRoute.Exam>() -> toRoute<ViFiRoute.Exam>().let {
             "exam:" + it.ids.joinToString("/") + ":" + it.kind.raw
         }
