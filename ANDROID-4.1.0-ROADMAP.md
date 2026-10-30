@@ -672,7 +672,11 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     metin olmayan ya da `${`/`$(` ile başlayan değeri kullanılamaz sayar; `toString` anahtarı yazmaz.
     `GoogleMapsSdk.startIfPossible()` Places'i (New, `tr-TR`) ilk çağrıda bir kez başlatır; uygulama açılışında
     çağrılmaz. Anahtarsız seçici görünümü `LocationPickerUnavailable` ("Harita anahtarı yapılandırılmamış", "Kapat")._
-  - _**Manifest:** konum izinleri ve Maps meta-data'sı ana manifest yerine yeni `app/src/live/AndroidManifest.xml`'de:
+  - _**Karar (2026-10-30, ürün sahibi; Hat F önerisi K1):** seçici yalnız `ACCESS_COARSE_LOCATION` ister. Play'in yeni
+    kuralı FINE isteyen uygulamadan Console'da gerekçe istiyor (27 Ocak 2027'den itibaren zorunlu); harita zaten semte
+    odaklanıyor. FINE, bir kütüphane eklemeye kalksa da `tools:node="remove"` ile dışarıda tutuluyor (live debug ve
+    release birleşik manifestlerinde yalnız COARSE, doğrulandı). Places bias kuralı için `MAP-02` notuna bakın._
+  - _**Manifest:** konum izni ve Maps meta-data'sı ana manifest yerine yeni `app/src/live/AndroidManifest.xml`'de:
     mock'un birleşik manifestinde konum izni ve harita anahtarı yok, Hat A'nın satırlarıyla çakışma da yok. Places'in
     eklediği `ACCESS_WIFI_STATE` ("mevcut yer" API'si için; kullanılmıyor) `tools:node="remove"` ile çıkarıldı.
     Play-services-maps `glEsVersion 2` özelliğini ve Google Haritalar paket sorgusunu ekliyor._
@@ -711,14 +715,18 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     `FusedDeviceLocator` (izin kontrolü, `BALANCED_POWER_ACCURACY`, 15 sn, iptalde istek de iptal, koordinat
     loglanmaz), `MapsModule` (kapsamsız: her seçicinin kendi Places oturumu). **Mock** `MapsModule` yalnız VM derlensin
     diye hiçbir şey bulmayan/konum okumayan yer tutucular bağlar._
+  - _**Karar (2026-10-30, ürün sahibi; Hat F önerisi K1):** görünür alan bias'ı yalnız admin haritayı kendisi
+    yerleştirdikten sonra (sürükleme/yakınlaştırma, seçilen öneri, POI dokunuşu, mevcut konumu düzenleme) gönderilir.
+    Harita yalnız cihaz konumuyla odaklandıysa arama yalnız `regionCode TR` ile gider; böylece cihaz konumu dolaylı da
+    olsa Google'a ulaşmaz. iOS'tan bilinçli fark._
   - _**Testler:** `LocationPickerViewModelTest` 22 (iOS 17 + 5), `LocationPickerDeviceLocationTest` 16 (iOS 13 +
-    3; `withoutLocator` → "konum istenmeden hiçbir şey sorulmaz"), `LocationPickerMapPlaceTest` 14 (iOS 14),
-    `PlacesSessionTest` 3 (live); liveDebug ve mockDebug'da geçti._
+    3; `withoutLocator` → "konum istenmeden hiçbir şey sorulmaz"), `LocationPickerMapPlaceTest` 16 (iOS 14 + bias
+    kararının 2 testi), `PlacesSessionTest` 3 (live); liveDebug ve mockDebug'da geçti._
 - [x] **`MAP-03`** Seçici arayüzü + composer konum satırları _(P0·M·Sonnet)_ — Ortada sabit iğne, arama + öneriler,
   ayrıntı kartı (koordinat, ad, adres), "Bu konumu seç" / "İptal", izin kapalı notu. `locationPicker.*` ve
   `notificationComposer.location.*` testTag'leri. ⟶ `MAP-02` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
   - _**`LocationPickerScreen`** (main): VM sunum başına (`rememberSaveable` anahtar + `hiltViewModel` assisted; döndürmede
-    korunur, yeniden açılışta sıfırdan), izin isteği `RequestMultiplePermissions` (FINE + COARSE; yaklaşık yeterli),
+    korunur, yeniden açılışta sıfırdan), izin isteği `RequestPermission` (yalnız COARSE, `MAP-01` kararı),
     yetki `checkSelfPermission` + `shouldShowRequestPermissionRationale` (bir kez reddedilen bir daha sorulmaz),
     Geri/✕ → `onDismissed` + iptal. **`LocationPickerContent`** (stateless): ✕ "İptal" üst çubuk, harita yuvası
     (`LocationPickerMap`; TalkBack'e tek öğe "Harita. Konum, haritanın ortasındaki iğnenin gösterdiği yerdir."), ortada
@@ -1240,7 +1248,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - Değer boşsa, kırpılmamışsa ya da `${` ile başlıyorsa kullanılamaz → seçici "Harita anahtarı yapılandırılmamış"
     görünümüne geçer ve harita hiç oluşturulmaz (iOS `GoogleMapsConfiguration`).
 - **SDK başlatma:** seçici ilk açıldığında; uygulama açılışında değil.
-- **Manifest:** `ACCESS_COARSE_LOCATION` + `ACCESS_FINE_LOCATION` (yalnız ön plan; arka plan izni yok).
+- **Manifest:** ~~`ACCESS_COARSE_LOCATION` + `ACCESS_FINE_LOCATION`~~ → yalnız `ACCESS_COARSE_LOCATION` (yalnız ön plan;
+  arka plan izni yok). _Karar 2026-10-30, ürün sahibi (Hat F K1): Play'in FINE gerekçe beyanı gerekmesin._
 - **Kabul:** anahtarsız live debug çökmez; R8'li release'te harita açılır; APK/AAB boyut farkı not edilir;
   `GoogleMapsConfigurationTests` (6) karşılığı.
 
@@ -1248,7 +1257,9 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 - **iOS:** `Features/NotificationComposer/LocationPicker/LocationPickerViewModel.swift`. 44 test ekte (§C.8).
 - **Kamera:** varsayılan Türkiye (39.0, 35.2, zoom 5); düzenlemede mevcut konum (zoom 16).
 - **Arama:**
-  - Autocomplete: `regionCode "TR"`. Görünür yarıçap 0–50 km ise dairesel **bias** (filtre değil).
+  - Autocomplete: `regionCode "TR"`. Görünür yarıçap 0–50 km ise dairesel **bias** (filtre değil). _Karar 2026-10-30,
+    ürün sahibi (Hat F K1): bias yalnız admin haritayı kendisi yerleştirdikten sonra; cihaz konumuyla otomatik odakta
+    yalnız `regionCode`._
   - Oturum jetonu 150 sn'de ve her yer getirmeden sonra yenilenir.
   - Yer getirme alanları yalnız `DISPLAY_NAME`, `LOCATION`, `FORMATTED_ADDRESS`, `ID` (fazlası daha pahalı ücret
     katmanı).

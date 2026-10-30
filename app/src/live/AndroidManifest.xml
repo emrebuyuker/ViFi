@@ -3,12 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-        The admin's location picker (4.1.0, MAP-01) asks for these once, when it opens, only to center the map on
-        where the admin is; the location is never stored, logged or sent. Foreground only: no background location.
-        Android 12+ lets the admin grant the approximate one alone.
+        The admin's location picker (4.1.0, MAP-01) asks for this once, when it opens, only to center the map on
+        the admin's district; the location is never stored, logged or sent. Approximate and foreground only (product
+        owner, 2026-10-30): the district is all the picker needs, and FINE would need Play's new justification.
     -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Kept out even if a library asks for it. -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        tools:node="remove" />
     <!-- Places merges this for its "current place" API (Wi-Fi as a location signal); the picker never uses it. -->
     <uses-permission
         android:name="android.permission.ACCESS_WIFI_STATE"

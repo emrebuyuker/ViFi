@@ -78,17 +78,14 @@ fun LocationPickerScreen(
     }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val permissionRequest = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions(),
-    ) { grants ->
-        // Approximate alone is enough: the map then opens on the district.
-        viewModel.onLocationPermissionResult(granted = grants.values.any { it })
+    val permissionRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        viewModel.onLocationPermissionResult(granted = granted)
     }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                LocationPickerEvent.RequestLocationPermission -> permissionRequest.launch(LOCATION_PERMISSIONS)
+                LocationPickerEvent.RequestLocationPermission -> permissionRequest.launch(LOCATION_PERMISSION)
             }
         }
     }
@@ -212,24 +209,23 @@ private fun CenterPin(modifier: Modifier = Modifier) {
 
 private val PIN_SIZE = 36.dp
 
-/** Both, so Android 12+ lets the admin choose precise or approximate. */
-private val LOCATION_PERMISSIONS = arrayOf(
-    Manifest.permission.ACCESS_FINE_LOCATION,
-    Manifest.permission.ACCESS_COARSE_LOCATION,
-)
+/**
+ * Approximate only (product owner, 2026-10-30): the map opens on the admin's district, which needs no precise fix,
+ * and Play asks apps that request FINE to justify it.
+ */
+private const val LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION
 
 /**
- * The location permission now: granted (precise or approximate); refused before, which is when the system offers a
- * rationale; otherwise never asked. A permission refused for good also reads as never asked, and asking then returns
- * the refusal without a dialog, so the picker still asks the system at most once per opening.
+ * The location permission now: granted; refused before, which is when the system offers a rationale; otherwise never
+ * asked. A permission refused for good also reads as never asked, and asking then returns the refusal without a
+ * dialog, so the picker still asks the system at most once per opening.
  */
 private fun Context.locationAuthorization(): LocationAuthorization {
-    val isGranted = LOCATION_PERMISSIONS.any {
-        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+    if (ContextCompat.checkSelfPermission(this, LOCATION_PERMISSION) == PackageManager.PERMISSION_GRANTED) {
+        return LocationAuthorization.AUTHORIZED
     }
-    if (isGranted) return LocationAuthorization.AUTHORIZED
     val activity = findActivity() ?: return LocationAuthorization.NOT_DETERMINED
-    val wasRefused = LOCATION_PERMISSIONS.any { ActivityCompat.shouldShowRequestPermissionRationale(activity, it) }
+    val wasRefused = ActivityCompat.shouldShowRequestPermissionRationale(activity, LOCATION_PERMISSION)
     return if (wasRefused) LocationAuthorization.DENIED else LocationAuthorization.NOT_DETERMINED
 }
 

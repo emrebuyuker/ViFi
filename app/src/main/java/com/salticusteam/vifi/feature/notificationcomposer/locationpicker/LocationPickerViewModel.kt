@@ -29,8 +29,10 @@ import kotlinx.coroutines.launch
  * can be tapped, and the name and address the notification shows. Ends in a [NotificationLocation], only when it is
  * valid ([LocationPickerUiState.location]).
  *
- * It also opens on the device's location, asking for the permission once, unless the admin has already put the map
- * somewhere (see [locateDevice]). That location only moves the map: it is never stored, logged or sent.
+ * It also opens on the device's (approximate) location, asking for the permission once, unless the admin has already
+ * put the map somewhere (see [locateDevice]). That location only moves the map: it is never stored, logged or sent,
+ * and searches favor the map's area only once the admin has placed it (see [mapDidSettle]), so it never reaches
+ * Google either.
  *
  * One per picker presentation: the screen keys it, with [initial] the location being changed, if any.
  */
@@ -71,7 +73,7 @@ class LocationPickerViewModel @AssistedInject constructor(
     /** The zoom the map last came to rest at. */
     private var zoom: Float = _uiState.value.initialCamera.zoom
 
-    /** Where searches rank results first: what the map shows, once it is zoomed in far enough. */
+    /** Where searches rank results first: what the map shows, once the admin placed it and it is zoomed in enough. */
     private var searchArea: SearchArea? = null
 
     /**
@@ -206,8 +208,10 @@ class LocationPickerViewModel @AssistedInject constructor(
         if (leftThePlace) placeCoordinate = null
         if (zoom != null) this.zoom = zoom
         if (visibleRadius != null) {
-            // A country-wide view is no "area"; searches then rank for Turkey only.
-            val isUsable = visibleRadius > 0 && visibleRadius <= SearchArea.MAXIMUM_RADIUS
+            // A country-wide view is no "area"; searches then rank for Turkey only. Nor is a map only the device's
+            // location put there: its area would send that location to Google with the search (product owner,
+            // 2026-10-30). Once the admin drags, searches or taps a place, the area is theirs.
+            val isUsable = isPlacedByAdmin && visibleRadius > 0 && visibleRadius <= SearchArea.MAXIMUM_RADIUS
             searchArea = if (isUsable) SearchArea(latitude, longitude, visibleRadius) else null
         }
         _uiState.update {

@@ -28,13 +28,11 @@ class FusedDeviceLocator @Inject constructor(
     private val client by lazy { LocationServices.getFusedLocationProviderClient(context) }
 
     override suspend fun currentLocation(): DeviceCoordinate? {
-        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+        // The app holds only the approximate permission (no FINE), so every fix is the district's.
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
         if (!granted) return null
         val request = CurrentLocationRequest.Builder()
-            // About 100 m: enough to center a street-level map; a finer fix only takes longer.
             .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
             .setDurationMillis(FIX_TIMEOUT_MILLIS)
             .build()

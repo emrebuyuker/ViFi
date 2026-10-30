@@ -245,8 +245,9 @@ class LocationPickerMapPlaceTest {
     // --- Search area ---
 
     @Test
-    fun `searches favor what the map shows once it is zoomed in`() = runTest {
+    fun `searches favor what the map shows once the admin placed it and it is zoomed in`() = runTest {
         val sut = viewModel()
+        sut.onMapEvent(LocationPickerMapEvent.GestureStarted)
         sut.onMapEvent(LocationPickerMapEvent.Settled(41.04, 29.0, zoom = 14f, visibleRadius = 3_000.0))
 
         sut.onQueryChange("pastane")
@@ -256,11 +257,48 @@ class LocationPickerMapPlaceTest {
     }
 
     @Test
+    fun `a map only the device's location put there favors no area, so that location stays on the device`() =
+        runTest {
+            val locator = StubDeviceLocator()
+            val sut = LocationPickerViewModel(null, searcher, locator)
+            sut.locateDevice(LocationAuthorization.AUTHORIZED)
+            advanceUntilIdle()
+            val here = LocationPickerFixture.here
+            sut.onMapEvent(LocationPickerMapEvent.Settled(here.latitude, here.longitude, 16f, visibleRadius = 800.0))
+
+            sut.onQueryChange("pastane")
+            advanceUntilIdle()
+            assertEquals("Only the region code goes with the search", listOf<SearchArea?>(null), searcher.areas)
+
+            // The admin drags the map a little: from then on the area is theirs.
+            sut.onMapEvent(LocationPickerMapEvent.GestureStarted)
+            sut.onMapEvent(LocationPickerMapEvent.Settled(41.045, 29.01, 16f, visibleRadius = 800.0))
+            sut.onQueryChange("kafe")
+            advanceUntilIdle()
+            assertEquals(listOf(null, SearchArea(41.045, 29.01, 800.0)), searcher.areas)
+        }
+
+    @Test
+    fun `after a chosen place the next search favors the area around it`() = runTest {
+        val sut = viewModel()
+        sut.onSuggestionSelected(LocationPickerFixture.suggestion)
+        advanceUntilIdle()
+        val kadikoy = LocationPickerFixture.kadikoy
+        sut.onMapEvent(LocationPickerMapEvent.Settled(kadikoy.latitude, kadikoy.longitude, 16f, visibleRadius = 900.0))
+
+        sut.onQueryChange("pastane")
+        advanceUntilIdle()
+
+        assertEquals(listOf(SearchArea(kadikoy.latitude, kadikoy.longitude, 900.0)), searcher.areas)
+    }
+
+    @Test
     fun `before the map settles and on a country-wide view, searches favor no area`() = runTest {
         val sut = viewModel()
         sut.onQueryChange("pastane")
         advanceUntilIdle()
 
+        sut.onMapEvent(LocationPickerMapEvent.GestureStarted)
         sut.onMapEvent(LocationPickerMapEvent.Settled(41.04, 29.0, zoom = 14f, visibleRadius = 3_000.0))
         val countryWide = SearchArea.MAXIMUM_RADIUS * 10
         sut.onMapEvent(LocationPickerMapEvent.Settled(39.0, 35.0, zoom = 5f, visibleRadius = countryWide))

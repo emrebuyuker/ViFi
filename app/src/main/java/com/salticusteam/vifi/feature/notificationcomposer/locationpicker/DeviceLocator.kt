@@ -8,7 +8,7 @@ enum class LocationAuthorization {
     /** Refused. The picker works without it and never asks again. */
     DENIED,
 
-    /** Allowed while the app is in use, precise or approximate. */
+    /** Allowed while the app is in use (approximate: the app asks for nothing finer). */
     AUTHORIZED,
 }
 
