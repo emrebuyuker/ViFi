@@ -674,14 +674,27 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 #### Hat F — Yasal metinler ve Play beyanları
 
-- [ ] **`NLG-01`** Veri güvenliği envanteri _(P0·S·Sonnet)_ — `PLAY-DATA-SAFETY.md`:
+- [x] **`NLG-01`** Veri güvenliği envanteri _(P0·S·Sonnet)_ — `PLAY-DATA-SAFETY.md`:
   - Cihaz kimlikleri (FCM token + kurulum id'si), kullanıcı kimliği ve profil segmentleri + onay kaydı için "Reklam veya
     pazarlama" amacı.
   - Uygulama etkinliği (okundu işareti, açılma/aksiyon istatistiği).
   - Maps/Places SDK'nın Google'ca yayımlanan beyanları.
   - Konumun toplanmadığının gerekçesi (Places bias'ı dahil değerlendirilir).
 
-  ⟶ `NDEC-02`
+  ⟶ `NDEC-02` ✅ _Tamamlandı (2026-10-30, Opus). Form ürün sahibinin kararlarından (K1…K4) sonra doldurulur. Gelenler:_
+  - _**Tablo:** UID, profil segmentleri ve cihaz kimliklerine "geliştirici iletişimleri" + "reklam veya pazarlama";
+    uygulama etkileşimlerine "uygulama işlevi"; yeni satır "Diğer işlemler" (onay kaydı, isteğe bağlı). Kurulum kimliği,
+    okundu işareti, istatistik, 6 olay + 3 ekran adı (29 olay, 18 ekran) işlendi. "Segmentasyon Analytics audience'la"
+    notu düzeltildi: hedefleme sunucuda RTDB profilleriyle._
+  - _**§4.1.0:** amaçların Play tanımlarına göre gerekçesi; bildirim verilerinin yer/yazım/okuma/silme envanteri;
+    Maps ve Places SDK'nın Google beyanları (ikisi de 28 Ekim 2026 güncel) ve Play türlerine eşlemesi; konum analizi;
+    Console kontrol listesi (`NRL-05`)._
+  - _**Bulgular:** (1) Places bias'ı otomatik cihaz odağında cihaz konumunu dolaylı olarak Google'a gönderiyor; Google
+    "enlem-boylam sınırları"nı toplanan veri sayıyor. (2) Kişi başı istatistik işaretleri
+    (`notifications/<id>/events/<uid>_<olay>`) hesap silmede silinmiyor._
+  - _**Açık kararlar:** K1 konum (öneri: yalnız `COARSE` + bias yalnız admin haritayı yerleştirince → konum beyanı
+    yok), K2 admin SDK verileri (öneri: kilitlenme + tanılama + arama geçmişi, isteğe bağlı), K3 istatistik
+    işaretlerinin silinmesi (öneri: ortak backend), K4 "geliştirici iletişimleri" amacı (öneri: evet)._
 - [ ] **`NLG-02`** Gizlilik politikası kontrolü _(P1·S·Sonnet)_ — Canlı `/gizlilik` kampanya bildirimlerini, onay
   kaydını, cihaz kaydını ve admin harita konumunu anıyor mu? Eksikse metin ortak depoda (`ViFi-iOS/firebase/hosting/`)
   önerilir; hosting yayını ayrıca onay ister. ⟶ `NLG-01`
