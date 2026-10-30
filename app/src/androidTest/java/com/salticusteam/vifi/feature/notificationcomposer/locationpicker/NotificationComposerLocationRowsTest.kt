@@ -94,6 +94,7 @@ class NotificationComposerLocationRowsTest {
         show(initial = null)
 
         composeRule.onNodeWithTag("notificationComposer.location.pick").performClick()
+        composeRule.waitForIdle()
         assertNull("A new place starts from nothing", pickerInitial)
         composeRule.onNodeWithTag("locationPicker.confirm").performClick()
 
@@ -125,6 +126,7 @@ class NotificationComposerLocationRowsTest {
         composeRule.onNodeWithTag("notificationComposer.location.summary")
             .assertContentDescriptionEquals("Seçilen konum: ViFi Öğrenci Kafesi")
         composeRule.onNodeWithText("Değiştir").performClick()
+        composeRule.waitForIdle()
 
         assertEquals(noAddress, pickerInitial)
     }

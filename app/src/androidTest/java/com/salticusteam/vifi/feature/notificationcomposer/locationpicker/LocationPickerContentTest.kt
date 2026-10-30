@@ -50,8 +50,9 @@ class LocationPickerContentTest {
                     state = state,
                     onQueryChange = { calls += "query:$it" },
                     onSuggestionSelected = { calls += "suggestion:${it.id}" },
-                    onNameChange = { calls += "name:$it" },
-                    onAddressChange = { calls += "address:$it" },
+                    // Like the ViewModel, the fields show what was typed (a field left behind loses its edit otherwise).
+                    onNameChange = { calls += "name:$it"; state = state.copy(name = it) },
+                    onAddressChange = { calls += "address:$it"; state = state.copy(address = it) },
                     onConfirm = { calls += "confirm" },
                     onCancel = { calls += "cancel" },
                     map = { Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant)) },

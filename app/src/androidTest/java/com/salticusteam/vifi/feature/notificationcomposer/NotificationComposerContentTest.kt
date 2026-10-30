@@ -4,7 +4,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -189,7 +191,9 @@ class NotificationComposerContentTest {
 
         composeRule.onNode(hasText("Bildirim zamanlansın mı?")).assertIsDisplayed()
         composeRule.onNode(hasText("12 kişiye gönderilecek; 15 cihaza", substring = true)).assertIsDisplayed()
-        composeRule.onNode(hasText(at.toComposerDateTime(), substring = true)).assertIsDisplayed()
+        // The scheduling row behind the dialog shows the time too.
+        composeRule.onNode(hasText(at.toComposerDateTime(), substring = true) and hasAnyAncestor(isDialog()))
+            .assertIsDisplayed()
         tag("confirm").assertTextContains("Zamanla").performClick()
         assertTrue(confirmed)
     }

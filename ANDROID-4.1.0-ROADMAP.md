@@ -22,12 +22,18 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **18'i tamam, 0'ı yarım, 32'si başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (30 Ekim 2026):** Toplam 50 kalemin **34'ü tamam, 0'ı yarım, 16'sı başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
-> tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam; Hat C'de onay deposu, izin koordinatörü ve izin/onay
-> sayfaları (`PRM-01`…`03`) tamam. Faz 0'da açık kalan tek iş Google Cloud Maps anahtarı (`NOPS-01`, ürün sahibi).
+> tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam; Hat C (`PRM-01`…`05`) tamam. Hat C'nin kalanı, D
+> (`ADM-01`…`06`), E (`MAP-01`…`04`) ve F (`NLG-01`…`04`) 30 Ekim'de ayrı oturumlarda paralel yapıldı ve `v-4.1.0`'a
+> birleştirildi; senkron noktası 2 açıldı, sıradaki iş `NIT-01`. Birleştirmede hatların yeni UI testleri tablet
+> emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
+> güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
+> konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
+> Google Cloud Maps anahtarı (`NOPS-01`) ve Hat F'nin yasal/politika kararları (K2–K4, R1–R2, P1–P3;
+> `PLAY-POLICY-4.1.0.md`, `PRIVACY-POLICY-4.1.0.md`).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
