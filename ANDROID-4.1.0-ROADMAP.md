@@ -669,9 +669,26 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     zamanlamanın geçerliliği taşıması, ekran adı), `…SendFlowTest` 16 (15 + geçmişe kayan zaman),
     `…AttachmentTest` 16 (13 + eski kodlamanın yenisini ezmemesi, hazırlanırken gönderim kapalı, okunamayan görsel),
     `…KindLockTest` 7, `…LocationTest` 8; iOS `StubNotificationAdminService` karşılığı test çifti._
-- [ ] **`ADM-03`** Composer arayüzü _(P0·M·Sonnet)_ — Bölümler: Tür, İçerik, Hedef kitle, Eylem, Görsel, Zamanlama,
+- [x] **`ADM-03`** Composer arayüzü _(P0·M·Sonnet)_ — Bölümler: Tür, İçerik, Hedef kitle, Eylem, Görsel, Zamanlama,
   geri bildirim, Gönder / Bana test gönder. Onay diyaloğu; `notificationComposer.*` testTag'leri; `NotificationComposer`
-  ekran adı. ⟶ `ADM-02`
+  ekran adı. ⟶ `ADM-02` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**`NotificationComposerScreen`** (durumlu; `onBack`, `onOpenHistory`, `locationRows`) + durumsuz
+    `NotificationComposerContent(state, actions: NotificationComposerActions, …)`; üst çubukta "Geçmiş"
+    (`notificationComposer.history`). Form iOS sırasıyla kart bölümler hâlinde: Tür (segment; Konum'da kilit + kilit
+    notu), İçerik (sayaçlar, sınır aşılınca hata rengi), Hedef kitle (segment, yükleniyor/hata + "Tekrar dene",
+    Üniversite/Fakülte/Bölüm açılır menüleri "<ad> · <n> kişi", Cinsiyet, "≈ N kişi", iki dipnot), Eylem (Buton menüsü,
+    https alanı), Zamanlama (anahtarlar + gün → saat seçicileri, cihaz saat dilimi), geri bildirim (hata / başarı /
+    neden), Gönder + "Bana test gönder". Onay `AlertDialog`'u ("…gönderilsin mi?" / "…zamanlansın mı?", "N kişiye…",
+    zamanlıysa saat) `ModalPresence`'a kayıtlı. Metinler `strings_notification_composer.xml`'de iOS'la birebir
+    (`Issue` metinleri dahil, sınırlar `%1$d`); tarih "30 Eki 2026 14:30" (iOS kısaltılmış tarih + kısa saat)._
+  - _**Konum yuvası:** Konum seçiliyken Eylem bölümü `ComposerLocationRows(location, enabled, onLocationPicked)` çizer;
+    satırlar ve seçicinin sunumu Hat E'nin (`MAP-03`), bağlama `NIT-01`'de (not: ortak not klasöründe
+    `hat-d-adm-notes.md`). Görsel bölümü `ADM-04`'te, sınav satırı `ADM-05`'te eklendi._
+  - _Tag'ler iOS kimlikleri + Android alt kimlikleri: segmentler `.kind.general|promo`,
+    `.audience.everyone|segment`, `.gender.all|female|male`; menüler `<menü>.field` ve `<menü>.option.<id|ad>`._
+  - _**Testler:** `NotificationComposerContentTest` 7 (gerçek VM + Fake servis: dokunulmamış form, kademeli kitle
+    64 → 40 → 28 → 17 → 24 → 9, onaydan sonra gönderim, vazgeçince gönderilmemesi, Konum'da Tür kilidi; durumsuz:
+    sayaç/neden, zamanlı onay diyaloğu) — yalnız derlendi; cihazda `NIT-03`'te._
 - [ ] **`ADM-04`** Görsel hazırlama _(P1·S·Sonnet)_ — Foto seçici (izinsiz `PickVisualMedia`). `SubmissionJpegEncoder`
   yeniden kullanılır: en uzun kenar 1600 px, ≤ 1 MiB, EXIF yönü. Ana iş parçacığı dışında çalışır; sürüm sayacıyla eski
   kodlama yeni seçimin üstüne yazılmaz. ⟶ `ADM-02`

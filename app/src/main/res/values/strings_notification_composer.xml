@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Added in 4.1.0 — the admin "Bildirim Gönder" composer, its exam picker and the sending history (iOS verbatim). -->
+<resources>
+    <!-- Composer -->
+    <string name="notification_composer_title">Bildirim Gönder</string>
+    <string name="notification_composer_history">Geçmiş</string>
+    <string name="notification_composer_select">Seç</string>
+    <string name="notification_composer_cancel">Vazgeç</string>
+    <string name="notification_composer_ok">Tamam</string>
+
+    <!-- Kind -->
+    <string name="notification_composer_kind_label">Tür</string>
+    <string name="notification_composer_kind_general">Duyuru</string>
+    <string name="notification_composer_kind_promo">Kampanya</string>
+    <string name="notification_composer_kind_system">Sistem</string>
+    <string name="notification_composer_kind_footer">Kampanyalar yalnızca kampanya bildirimlerini açmış kullanıcılara gider.</string>
+    <string name="notification_composer_kind_lock_note">Tür Kampanya\'ya kilitli: konumlu bildirimler her zaman kampanya olarak gider.</string>
+
+    <!-- Content -->
+    <string name="notification_composer_content_header">İçerik</string>
+    <string name="notification_composer_title_field">Başlık</string>
+    <string name="notification_composer_body_field">Mesaj</string>
+    <string name="notification_composer_counter">%1$d/%2$d</string>
+    <plurals name="cd_notification_composer_counter">
+        <item quantity="one">%1$d / %2$d karakter</item>
+        <item quantity="other">%1$d / %2$d karakter</item>
+    </plurals>
+
+    <!-- Audience -->
+    <string name="notification_composer_audience_header">Hedef kitle</string>
+    <string name="notification_composer_audience_label">Kitle</string>
+    <string name="notification_composer_audience_everyone">Hepsi</string>
+    <string name="notification_composer_audience_segment">Belirli kitle</string>
+    <string name="notification_composer_audience_loading">Kitle bilgisi yükleniyor…</string>
+    <string name="notification_composer_audience_retry">Tekrar dene</string>
+    <string name="notification_composer_university">Üniversite</string>
+    <string name="notification_composer_faculty">Fakülte</string>
+    <string name="notification_composer_faculty_all">Tüm fakülteler</string>
+    <string name="notification_composer_department">Bölüm</string>
+    <string name="notification_composer_department_all">Tüm bölümler</string>
+    <string name="notification_composer_gender">Cinsiyet</string>
+    <string name="notification_composer_gender_all">Hepsi</string>
+    <string name="notification_composer_gender_female">Kadın</string>
+    <string name="notification_composer_gender_male">Erkek</string>
+    <plurals name="notification_composer_audience_option">
+        <item quantity="one">%1$s · %2$d kişi</item>
+        <item quantity="other">%1$s · %2$d kişi</item>
+    </plurals>
+    <string name="notification_composer_estimate_label">Tahmini kitle</string>
+    <plurals name="notification_composer_estimate_value">
+        <item quantity="one">≈ %1$d kişi</item>
+        <item quantity="other">≈ %1$d kişi</item>
+    </plurals>
+    <string name="notification_composer_audience_footer_segment">Önce bir üniversite seç. Listelerde yalnızca kayıtlı kullanıcısı olanlar görünür.</string>
+    <string name="notification_composer_audience_footer_promo">Kampanyada yalnızca bildirim onayı verenler alır; kesin sayıyı göndermeden önce göreceksin.</string>
+
+    <!-- Action -->
+    <string name="notification_composer_action_header">Eylem</string>
+    <string name="notification_composer_action_label">Buton</string>
+    <string name="notification_composer_action_none">Yok</string>
+    <string name="notification_composer_action_paywall">Premium</string>
+    <string name="notification_composer_action_add_exam">Sınav Ekle</string>
+    <string name="notification_composer_action_url">Bağlantı</string>
+    <string name="notification_composer_action_exam">Sınav</string>
+    <string name="notification_composer_action_location">Konum</string>
+    <string name="notification_composer_url_placeholder">https://</string>
+    <string name="notification_composer_action_footer">Karta dokunulduğunda ya da butona basıldığında açılır. Bağlantı https ile başlamalı.</string>
+
+    <!-- Timing -->
+    <string name="notification_composer_timing_header">Zamanlama</string>
+    <string name="notification_composer_timing_footer">Süresi dolan bildirim, kullanıcıların bildirim sayfasından kalkar.</string>
+    <string name="notification_composer_schedule_toggle">İleri tarihte gönder</string>
+    <string name="notification_composer_scheduled_at">Gönderim zamanı</string>
+    <string name="notification_composer_expiry_toggle">Geçerlilik süresi</string>
+    <string name="notification_composer_expires_at">Bitiş zamanı</string>
+
+    <!-- Feedback: why the draft cannot be sent yet (NotificationDraft.Issue) -->
+    <string name="notification_composer_issue_empty_title">Başlık boş olamaz.</string>
+    <plurals name="notification_composer_issue_title_too_long">
+        <item quantity="one">Başlık en fazla %1$d karakter olabilir.</item>
+        <item quantity="other">Başlık en fazla %1$d karakter olabilir.</item>
+    </plurals>
+    <string name="notification_composer_issue_empty_body">Mesaj boş olamaz.</string>
+    <plurals name="notification_composer_issue_body_too_long">
+        <item quantity="one">Mesaj en fazla %1$d karakter olabilir.</item>
+        <item quantity="other">Mesaj en fazla %1$d karakter olabilir.</item>
+    </plurals>
+    <string name="notification_composer_issue_invalid_audience">Geçerli bir hedef kitle seç.</string>
+    <string name="notification_composer_issue_invalid_location">Haritadan geçerli bir konum seç.</string>
+    <string name="notification_composer_issue_invalid_url">Bağlantı https:// ile başlamalı.</string>
+    <string name="notification_composer_issue_empty_exam">Bağlanacak sınavı seç.</string>
+    <string name="notification_composer_issue_invalid_image">Görsel bu bildirime ait değil; görseli yeniden seç.</string>
+    <string name="notification_composer_issue_schedule_in_past">Gönderim zamanı geçmişte olamaz.</string>
+    <string name="notification_composer_issue_expiry_before_delivery">Geçerlilik süresi gönderim zamanından sonra olmalı.</string>
+
+    <!-- Feedback: results -->
+    <string name="notification_composer_success_sent">Bildirim gönderildi. Alıcı sayısı: %1$d.</string>
+    <string name="notification_composer_success_scheduled_at">Bildirim %1$s için zamanlandı.</string>
+    <string name="notification_composer_success_scheduled">Bildirim zamanlandı.</string>
+    <string name="notification_composer_success_test">Test bildirimi gönderildi. Birazdan cihazına ulaşır.</string>
+    <string name="notification_composer_error_send_failed">Bildirim gönderilemedi. Ayrıntı için geçmişe bak.</string>
+
+    <!-- Send -->
+    <string name="notification_composer_send">Gönder</string>
+    <string name="notification_composer_test_send">Bana test gönder</string>
+    <string name="notification_composer_send_footer">Test yalnızca senin cihazına gider; kitleye ulaşmaz.</string>
+
+    <!-- Confirmation -->
+    <string name="notification_composer_confirm_send_title">Bildirim gönderilsin mi?</string>
+    <string name="notification_composer_confirm_schedule_title">Bildirim zamanlansın mı?</string>
+    <plurals name="notification_composer_confirm_message">
+        <item quantity="one">%1$d kişiye gönderilecek; %2$d cihaza anlık bildirim (push) iletilecek.</item>
+        <item quantity="other">%1$d kişiye gönderilecek; %2$d cihaza anlık bildirim (push) iletilecek.</item>
+    </plurals>
+    <string name="notification_composer_confirm_scheduled_at">Gönderim zamanı: %1$s</string>
+    <string name="notification_composer_confirm_send">Gönder</string>
+    <string name="notification_composer_confirm_schedule">Zamanla</string>
+</resources>
