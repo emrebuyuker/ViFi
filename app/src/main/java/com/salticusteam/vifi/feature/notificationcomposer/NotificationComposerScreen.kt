@@ -1,5 +1,8 @@
 package com.salticusteam.vifi.feature.notificationcomposer
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -63,6 +66,8 @@ class NotificationComposerActions(
     val onActionChoiceChange: (ActionChoice) -> Unit = {},
     val onUrlTextChange: (String) -> Unit = {},
     val onLocationPicked: (NotificationLocation) -> Unit = {},
+    val onPickImage: () -> Unit = {},
+    val onRemoveImage: () -> Unit = {},
     val onSchedulingToggle: (Boolean) -> Unit = {},
     val onScheduledAtChange: (Instant) -> Unit = {},
     val onExpiryToggle: (Boolean) -> Unit = {},
@@ -89,7 +94,12 @@ fun NotificationComposerScreen(
 
     LaunchedEffect(Unit) { viewModel.onScreenShown() }
 
-    val actions = remember(viewModel) {
+    // The system Photo Picker needs no storage permission; the result is a content URI, encoded off the main thread.
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let { viewModel.onImagePicked(it.toString()) }
+    }
+
+    val actions = remember(viewModel, imagePicker) {
         NotificationComposerActions(
             onKindSelected = viewModel::onKindSelected,
             onTitleChange = viewModel::onTitleChange,
@@ -103,6 +113,10 @@ fun NotificationComposerScreen(
             onActionChoiceChange = viewModel::onActionChoiceChange,
             onUrlTextChange = viewModel::onUrlTextChange,
             onLocationPicked = viewModel::onLocationPicked,
+            onPickImage = {
+                imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            onRemoveImage = viewModel::onImageRemoved,
             onSchedulingToggle = viewModel::onSchedulingToggle,
             onScheduledAtChange = viewModel::onScheduledAtChange,
             onExpiryToggle = viewModel::onExpiryToggle,
@@ -179,6 +193,7 @@ fun NotificationComposerContent(
                 locationRows = locationRows,
                 examRow = {},
             )
+            ImageSection(state, onPickImage = actions.onPickImage, onRemoveImage = actions.onRemoveImage)
             TimingSection(
                 state = state,
                 onSchedulingToggle = actions.onSchedulingToggle,

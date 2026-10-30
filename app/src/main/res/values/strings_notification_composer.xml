@@ -66,6 +66,17 @@
     <string name="notification_composer_url_placeholder">https://</string>
     <string name="notification_composer_action_footer">Karta dokunulduğunda ya da butona basıldığında açılır. Bağlantı https ile başlamalı.</string>
 
+    <!-- Image -->
+    <string name="notification_composer_image_header">Görsel</string>
+    <string name="notification_composer_image_footer">İsteğe bağlı. Bildirimde ve bildirim sayfasında görünür; en fazla 1 MB JPEG\'e küçültülür.</string>
+    <string name="notification_composer_image_pick">Görsel Seç</string>
+    <string name="notification_composer_image_change">Görseli Değiştir</string>
+    <string name="notification_composer_image_remove">Görseli Kaldır</string>
+    <string name="cd_notification_composer_image_preview">Seçilen görsel</string>
+    <string name="cd_notification_composer_image_preparing">Görsel hazırlanıyor</string>
+    <string name="notification_composer_image_unreadable">Görsel yüklenemedi. Başka bir görsel seç.</string>
+    <string name="notification_composer_image_unusable">Bu görsel kullanılamıyor. Başka bir görsel seç.</string>
+
     <!-- Timing -->
     <string name="notification_composer_timing_header">Zamanlama</string>
     <string name="notification_composer_timing_footer">Süresi dolan bildirim, kullanıcıların bildirim sayfasından kalkar.</string>

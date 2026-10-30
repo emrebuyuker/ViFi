@@ -1,12 +1,14 @@
 package com.salticusteam.vifi.core.data.notifications.admin
 
+import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.media.ExifInterface
 import android.net.Uri
+import androidx.core.graphics.scale
+import androidx.core.net.toUri
 import com.salticusteam.vifi.core.data.files.SubmissionJpegEncoder
 import com.salticusteam.vifi.core.model.NotificationImage
 import com.salticusteam.vifi.core.util.LogCategory
@@ -33,7 +35,7 @@ class ContentResolverNotificationImageEncoder @Inject constructor(
 
     override suspend fun encode(uri: String): EncodedNotificationImage = withContext(Dispatchers.IO) {
         try {
-            encode(Uri.parse(uri))
+            encode(uri.toUri())
         } catch (e: CancellationException) {
             throw e
         } catch (e: IOException) {
@@ -81,7 +83,7 @@ class ContentResolverNotificationImageEncoder @Inject constructor(
     private fun scaled(bitmap: Bitmap): Bitmap {
         val (width, height) = SubmissionJpegEncoder.targetSize(bitmap.width, bitmap.height, MAX_PIXEL_SIZE)
         if (width == bitmap.width && height == bitmap.height) return bitmap
-        return Bitmap.createScaledBitmap(bitmap, width, height, true).also { if (it !== bitmap) bitmap.recycle() }
+        return bitmap.scale(width, height).also { if (it !== bitmap) bitmap.recycle() }
     }
 
     /** Applies the EXIF orientation, recycling the original when replaced. */
@@ -96,13 +98,21 @@ class ContentResolverNotificationImageEncoder @Inject constructor(
             .also { if (it !== bitmap) bitmap.recycle() }
     }
 
-    /** The EXIF orientation tag, or "normal" when the image carries none or it cannot be read. */
+    /**
+     * The EXIF orientation tag, or "normal" when the image carries none or it cannot be read. Read with the platform
+     * reader, like the exam submission's encoder: the AndroidX `exifinterface` library the lint check suggests is not a
+     * dependency of the app (adding it, and moving both encoders over, is a build change outside this feature).
+     */
+    @SuppressLint("ExifInterface")
     private fun orientation(source: Uri): Int = try {
         resolver.openInputStream(source)?.use {
-            ExifInterface(it).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-        } ?: ExifInterface.ORIENTATION_NORMAL
+            android.media.ExifInterface(it).getAttributeInt(
+                android.media.ExifInterface.TAG_ORIENTATION,
+                android.media.ExifInterface.ORIENTATION_NORMAL,
+            )
+        } ?: android.media.ExifInterface.ORIENTATION_NORMAL
     } catch (e: Exception) {
-        ExifInterface.ORIENTATION_NORMAL
+        android.media.ExifInterface.ORIENTATION_NORMAL
     }
 
     private companion object {

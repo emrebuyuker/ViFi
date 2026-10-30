@@ -689,9 +689,20 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - _**Testler:** `NotificationComposerContentTest` 7 (gerçek VM + Fake servis: dokunulmamış form, kademeli kitle
     64 → 40 → 28 → 17 → 24 → 9, onaydan sonra gönderim, vazgeçince gönderilmemesi, Konum'da Tür kilidi; durumsuz:
     sayaç/neden, zamanlı onay diyaloğu) — yalnız derlendi; cihazda `NIT-03`'te._
-- [ ] **`ADM-04`** Görsel hazırlama _(P1·S·Sonnet)_ — Foto seçici (izinsiz `PickVisualMedia`). `SubmissionJpegEncoder`
+- [x] **`ADM-04`** Görsel hazırlama _(P1·S·Sonnet)_ — Foto seçici (izinsiz `PickVisualMedia`). `SubmissionJpegEncoder`
   yeniden kullanılır: en uzun kenar 1600 px, ≤ 1 MiB, EXIF yönü. Ana iş parçacığı dışında çalışır; sürüm sayacıyla eski
-  kodlama yeni seçimin üstüne yazılmaz. ⟶ `ADM-02`
+  kodlama yeni seçimin üstüne yazılmaz. ⟶ `ADM-02` ✅ _Tamamlandı (2026-10-30, Opus). Gelenler:_
+  - _**"Görsel" bölümü** (`NotificationComposerImageSection`): sistem Photo Picker'ı (`PickVisualMedia.ImageOnly`,
+    izin yok), önizleme (Coil, 160 dp, 12 dp köşe), "Görsel Seç"/"Görseli Değiştir", hazırlanırken ilerleme ("Görsel
+    hazırlanıyor"), "Görseli Kaldır", hata satırı (okunamadı / kullanılamıyor); iOS tag'leri `.imagePicker`,
+    `.imagePreview`, `.imageRemove`, `.imageError` + Android `.imagePreparing`._
+  - _Kodlayıcı (`ContentResolverNotificationImageEncoder`, ADM-02'de geldi) lint'e göre düzeltildi: `toUri()` /
+    `Bitmap.scale()`. EXIF yönü, Sınav Ekle'nin kodlayıcısı gibi platform `ExifInterface`'iyle okunuyor; AndroidX
+    `exifinterface` uygulamanın bağımlılığı değil, uyarı yalnız o fonksiyonda gerekçeyle susturuldu (iki kodlayıcıyı
+    AndroidX'e geçirmek bir derleme değişikliği; `NIT-01`'e not)._
+  - _Sürüm sayacı ve "hazırlanırken gönderim kapalı" ADM-02'nin VM testlerinde._
+  - _**Testler:** cihazda `ContentResolverNotificationImageEncoderTest` 4 (2400×1200 → 1600×800 JPEG ≤ 1 MiB, küçük
+    görsel büyütülmez, görsel olmayan veri, eksik dosya) ve `NotificationComposerImageSectionTest` 5 — yalnız derlendi._
 - [ ] **`ADM-05`** Arşivden sınav seçici _(P1·M·Sonnet)_ — Üniversite → fakülte → bölüm → ders → sınav gezinmesi
   (`ArchiveRepository`), Türkçe duyarsız arama. Gönderilen yalnız `examId`; dosyasız sınav seçilemez. ⟶ `ADM-02`
 - [ ] **`ADM-06`** Gönderim Geçmişi _(P1·M·Sonnet)_ — Satırlarda durum / tür / Test / Otomatik rozetleri, kitle etiketi,
