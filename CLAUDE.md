@@ -9,7 +9,7 @@
 > canlıda emülatörde doğrulandı. ViFi 3.1.0 (17) 28 Ekim 2026'da Play'de üretime çıktı; 4.0.0 (19) 29 Ekim'de üretime
 > alınıp incelemeye gönderildi, 29 Ekim 19:14'te onaylanıp %100 yayına çıktı (`RLS-08`); yayın sonrası kontroller
 > temiz (`RLS-09`; gerçek telefon adımı ürün sahibinin kararıyla yapılmadı); `RLS-10` ürün sahibinin kararıyla
-> kapatıldı, `RLS-11` açık. **Gerçek telefon testi yok:** ürün sahibinin telefonu yok; telefon gerektiren adımlar
+> kapatıldı, `RLS-11` (W-8BEN) yapılmadan kapatıldı; 4.0.0 listesi 38/38 kapandı. **Gerçek telefon testi yok:** ürün sahibinin telefonu yok; telefon gerektiren adımlar
 > önerilmez ve gündeme getirilmez (31 Ekim 2026 kararı).
 > iOS v3.1.0 parite yol haritasının 223 kalemi tamam (29 Ekim 2026).
 > **4.1.0 (21)** `v-4.1.0` dalında geliştiriliyor: iOS `v-4.1.0`'ın **hedefli bildirim sistemi** (bildirimleri sunucu
