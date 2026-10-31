@@ -73,5 +73,5 @@ adb shell am start -n com.salticusteam.vifi/.app.MainActivity --es vifi_open_not
   - Admin: Hesap › Bildirim Gönder (kitle, görsel, aksiyon, zamanlama, "Bana test gönder"), Gönderim Geçmişi
     (zamanlanmışı iptal) ve haritadan konum seçici.
 - **Yayın:** 3.1.0 (17) 28 Ekim 2026'da Play'de üretime çıktı; 4.0.0 (19) 29 Ekim'de onaylanıp %100 yayına çıktı.
-  4.1.0'da geliştirme, testler, Maps anahtarı ve canlı doğrulama (`NQA-01`, `NQA-02`) tamam; sırada yayın (Faz 4).
+  4.1.0'da geliştirme, testler, Maps anahtarı ve canlı doğrulama (`NQA-01`, `NQA-02`) tamam; yayında (Faz 4) önkoşul (`NRL-01`) kapandı, sırada dalın push'u (`NRL-02`).
   Yayın yalnız ürün sahibinin onayıyla. Ayrıntı ve kalan işler yol haritalarında.

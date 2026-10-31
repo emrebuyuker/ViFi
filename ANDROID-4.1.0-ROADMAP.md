@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **41'i tamam, 9'u başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **42'si tamam, 8'i başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -39,7 +39,8 @@
 > test hesabı silindikten sonra sunucu temizliği canlıda geçti; uygulama hatası bulunmadı. **`NQA-02` tamam** (31 Ekim,
 > aynı admin hesabı Android tablet + iOS 4.1.0 simülatöründe, her canlı yazım onayla): iki yönde "Bana test gönder"
 > karşı platformun bildirim sayfasına düştü, `readAt` ve kampanya tercihi iki yönde canlı eşlendi; **Faz 3 tamam.**
-> **Sıradaki:** Faz 4 yayın (`NRL-01`…), yalnız ürün sahibinin açık onayıyla. Hatların birleştirilmesinde yeni UI
+> Faz 4: `NRL-01` (önkoşul) 31 Ekim'de ürün sahibinin kararıyla kapatıldı. **Sıradaki:** `NRL-02` (dalın push'u, ürün
+> sahibi); sonrası yalnız ürün sahibinin açık onayıyla. Hatların birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
@@ -170,7 +171,7 @@ Faz 1  NCT-01 (sözleşme, DI, rotalar, LaunchArg, analytics, sürüm — İLK G
        Hat F  NLG-01..04 (bağımsız; yalnız .md + Console hazırlığı)
 Faz 2  NIT-01 (bağlama) ◄── A+B+C+D+E ──► NIT-02 (birim) · NIT-03 (UI + emülatör) · NIT-04 (belgeler)
 Faz 3  NQA-01 (canlı debug) ✅ ──► NQA-02 (iOS ↔ Android çapraz) ✅   ◄── NIT-01..03 + NOPS-01/02
-Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 → 09
+Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 → 03 → 04 → (05, 06) → 07 → 08 → 09
 ```
 
 **Hat sahipliği** (çakışma olmasın diye dosya sınırları; her hat yalnız kendi yerlerine yazar):
@@ -1266,15 +1267,18 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 ### Faz 4 — Yayın  ⚠️ (ürün sahibiyle · her dış adım ayrı onay)
 
-- [ ] **`NRL-01`** Önkoşul _(P0·S)_ — 4.0.0 (19) üretimde ve 4.0.0 `RLS-09`/`RLS-10` tamam (`RLS-10` 31 Ekim'de
-  kapatıldı; aynı anda iki inceleme açılmaz).
+- [x] **`NRL-01`** Önkoşul _(P0·S)_ — 4.0.0 (19) üretimde ve 4.0.0 `RLS-09`/`RLS-10` tamam (`RLS-10` 31 Ekim'de
+  kapatıldı; aynı anda iki inceleme açılmaz). ✅ _Kapatıldı (2026-10-31, ürün sahibi kararı): 4.0.0 (19) 29 Ekim
+  19:14'te onaylanıp %100 yayında, açık inceleme yok; `RLS-10` kapatıldı. `RLS-09`'un telefon adımı beklenmedi: Play'den
+  inen 4.0.0'ın gerçek telefonda denemesi `NRL-04`'teki telefon oturumunda birlikte yapılır._
 - [ ] **`NRL-02`** `v-4.1.0` dalının push'u _(P0·S·ürün sahibi)_ — Bu Mac'te yazma yetkili GitHub kimliği yok.
 - [ ] **`NRL-03`** Release AAB 20 (4.1.0) _(P0·S·Opus)_ — `bundleLiveRelease` yükleme anahtarıyla ve **Maps anahtarıyla**
   (anahtar commit'lenmez). Kontrol edilecekler: sürüm, imza, izinler (yeni: konum ×2), R8 eşleme, dil bölmesi kapalı.
   **Onayla.** ⟶ `NRL-02`
 - [ ] **`NRL-04`** Dahili test + Play'den kurulan sürümle **telefonda** duman testi _(P0·M)_ — Play Integrity / App Check,
   FCM token, push ve görsel, harita (Play imzası SHA-1'i anahtarda), satın alma yolları bozulmadı. 4.0.0'da emülatörde
-  App Check 403 verdiği için **gerçek telefon** gerekir. ⟶ `NRL-03`
+  App Check 403 verdiği için **gerçek telefon** gerekir. Aynı telefonda 4.0.0 `RLS-09`'un açık telefon adımı da
+  kapatılır (`NRL-01` notu). ⟶ `NRL-03`
 - [ ] **`NRL-05`** Veri güvenliği formu _(P0·S)_ — `NLG-01`'e göre Console'a girilir, üretimle incelemeye gider.
   ⟶ `NLG-01`
 - [ ] **`NRL-06`** Mağaza girişi + politika beyanları _(P0·S)_ — `NLG-03`/`NLG-04` sonuçlarına göre. ⟶ `NLG-03`, `NLG-04`
