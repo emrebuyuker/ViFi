@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **39'u tamam, 1'i yarım, 10'u başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **40'ı tamam, 10'u başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -33,9 +33,11 @@
 > birleştirildi; **Faz 2 tamam.** Birleşik dalda: `assembleDebug` başarılı, `lintLiveDebug` 0 hata / 56 uyarı, birim
 > testleri liveDebug 1100 / mockDebug 1084 / liveRelease 1100, tablet emülatöründe (API 37) mock 227 (226 geçti, 1
 > atlandı) ve live 191 (188 geçti, 3 atlandı; atlananlar başka API düzeyine ya da Haritalar'ın kurulu olmamasına bağlı),
-> başarısız test yok. Maps anahtarı (`NOPS-01`) 31 Ekim'de oluşturuldu; senkron noktası 3 açıldı. **`NQA-01` yarım:**
-> 1. aşama (cihaz kaydı, onay yazımı, üç test gönderimi, harita seçici) canlıda geçti; 2. aşama (zamanlanmış gönderim +
-> iptal, `promo` süzgeci, ret bildirimi, hesap silme temizliği) ürün sahibinin onayını bekliyor. Hatların birleştirilmesinde yeni UI testleri tablet
+> başarısız test yok. Maps anahtarı (`NOPS-01`) 31 Ekim'de oluşturuldu; senkron noktası 3 açıldı. **`NQA-01` tamam**
+> (31 Ekim, iki aşama, her canlı yazım ürün sahibinin onayıyla): cihaz kaydı, onay yazımı, üç test gönderimi (ön plan /
+> arka plan / kapalıyken), harita seçici, zamanlanmış gönderim + iptal, `promo` süzgeci (0 alıcı), ret bildirimleri ve
+> test hesabı silindikten sonra sunucu temizliği canlıda geçti; uygulama hatası bulunmadı. **Sıradaki:** `NQA-02` (iOS ↔
+> Android çapraz). Hatların birleştirilmesinde yeni UI testleri tablet
 > emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
@@ -165,7 +167,7 @@ Faz 1  NCT-01 (sözleşme, DI, rotalar, LaunchArg, analytics, sürüm — İLK G
                                                                                          └─► Hat E  MAP-01..04 ◄┘ (canlı anahtar yalnız doğrulamada)
        Hat F  NLG-01..04 (bağımsız; yalnız .md + Console hazırlığı)
 Faz 2  NIT-01 (bağlama) ◄── A+B+C+D+E ──► NIT-02 (birim) · NIT-03 (UI + emülatör) · NIT-04 (belgeler)
-Faz 3  NQA-01 (canlı debug) ──► NQA-02 (iOS ↔ Android çapraz)   ◄── NIT-01..03 + NOPS-01/02
+Faz 3  NQA-01 (canlı debug) ✅ ──► NQA-02 (iOS ↔ Android çapraz)   ◄── NIT-01..03 + NOPS-01/02
 Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 → 09
 ```
 
@@ -1179,16 +1181,17 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 ### Faz 3 — Gerçek Ortam Doğrulaması (canlı backend; yayın değildir)
 
-- [ ] **`NQA-01`** Canlı debug derlemesiyle uçtan uca _(P0·M·Opus)_ — Her canlı yazım **onayla**. Bakılacaklar:
+- [x] **`NQA-01`** Canlı debug derlemesiyle uçtan uca _(P0·M·Opus)_ — Her canlı yazım **onayla**. Bakılacaklar:
   - Cihaz dokümanının şekli; eski kaydın silinmesi; `onDeviceWritten`.
   - Admin hesabıyla "Bana test gönder" (görsel + Sınav + Konum): ön planda / arka planda / kapalıyken push, kanal,
     BigPicture, dokunuş → sayfa + vurgu, geçmişte açılma/aksiyon sayısı.
   - Kampanya onayının yazımı ve `promo` süzgeci; zamanlanmış gönderim + iptal.
   - Otomatik bildirim (test gönderimi ret / onay); hesap silme sonrası sunucu temizliği.
 
-  ⟶ `NIT-03`, `NOPS-01`, `NOPS-02` ⏳ _Yarım — 1. aşama tamam (2026-10-31, Opus; tablet emülatörü API 37, live debug,
-  ürün sahibinin admin hesabı; her canlı yazım ürün sahibinin onayıyla). Emülatörün App Check debug anahtarını ve
-  girişi ürün sahibi yaptı. Bulgular:_
+  ⟶ `NIT-03`, `NOPS-01`, `NOPS-02` ✅ _Tamam (2026-10-31, Opus; iki aşama, live debug; tablet emülatörü API 37
+  ürün sahibinin admin hesabıyla, telefon emülatörü API 32 (Android 12L) gönderim ve hesap silme için; her canlı yazım
+  ürün sahibinin onayıyla). Emülatörlerin App Check debug anahtarlarını ve girişleri ürün sahibi yaptı. Uygulama
+  hatası bulunmadı. Bulgular:_
   - _**Cihaz kaydı:** `users/<uid>/devices/<installationId>` tam olarak `{token, platform: "android", appVersion:
     "4.1.0", updatedAt}`; `onDeviceWritten` iki yazımda da hatasız koştu. Bu kurulumun jetonuyla eski biçimli kayıt
     olmadığından eski kaydın silinmesi canlıda görülemedi (birim testinde kapalı); hesaptaki iki eski biçimli kayıt
@@ -1212,9 +1215,30 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     sırasında Mac yükü). App Check debug anahtarı kayıtlı değilken açılan süreçte Realtime Database bağlantısı sunucu
     tarafından kalıcı kapatıldı; anahtar eklendikten sonra profil kapısı uygulama yeniden başlatılana kadar
     "Yükleniyor…"da kaldı (Firebase SDK davranışı; gerçek kullanıcıda yalnız App Check başarısızsa)._
-  - _**Kalan (2. aşama, her biri ayrıca onayla):** uygulama tamamen kapalıyken teslim (3. gönderimde süreç teslim
-    anında yaşıyordu); gerçek kitleye zamanlanmış gönderim + iptal ve `promo` süzgeci; test gönderimi reddiyle otomatik
-    bildirimler; test hesabının silinmesi sonrası sunucu temizliği._
+  - _**2. aşama — kapalıyken teslim:** süreç tamamen kapalı ve ağ kesikken "Bana test gönder" (test 4); ağ açılınca
+    bildirim 2 sn'de geldi, dokunuş soğuk açılışta Bildirimler'i vurgulu kayıtla açtı._
+  - _**2. aşama — zamanlanmış gönderim + iptal:** kitle yalnız admin'i kapsayacak biçimde daraltıldı (tek üniversite,
+    1 kişi), bir saat sonraya zamanlandı ve Gönderim Geçmişi'nden iptal edildi: durum "İptal edildi", kimseye bir şey
+    gitmedi._
+  - _**2. aşama — `promo` süzgeci:** admin'in kampanya onayı kapatıldı, aynı kitleye kampanya gönderildi: kayıt
+    "0 alıcı · 0 push", cihaza bir şey gelmedi; onay sonra yeniden açıldı. Gözlem (hata değil): composer'daki "Tahmini
+    kitle" onayı hesaba katmaz ("1 kişi"), gönderim öncesi onay penceresi sunucu önizlemesiyle doğru sayıyı ("0 kişiye")
+    gösterdi; süzme gönderim anında sunucuda._
+  - _**2. aşama — otomatik bildirimler (ret):** telefondan 1 görselli deneme sınavı gönderildi (yeni ders "NQA Test
+    Dersi"); admin'e "Yeni sınav gönderimi" push + bildirim sayfası kaydı geldi. Tablette Moderasyon'dan sebeple
+    reddedildi; gönderene "Gönderin reddedildi" (metinde sebep) ~30 sn'de push + kayıt olarak geldi, Moderasyon "Bekleyen
+    gönderim yok". Onay denenmedi (arşive sınav ekler). Not: telefonda önce admin hesabıyla oturum açıldığından gönderen
+    admin'di; bildirimler admin'in iki cihazına da düştü (beklenen). Kullanım Koşulları kutusu işaretlenmeden "Gönder"
+    pasif kalıyor (doğru)._
+  - _**2. aşama — hesap silme temizliği:** telefonda admin'den çıkış yapıldı (cihaz kaydı silindi), Console test
+    numarasıyla aynı gün oluşturulmuş ayrı bir test hesabına girildi (numara depoya yazılmaz); profil tamamlandı, API 32'de
+    yalnız kampanya onayı (2/2) çıktı ve kabul edildi. Silme öncesi: Auth hesabı, Firestore `users/<uid>/devices` ve
+    `settings`, RTDB `users/<uid>/profile`; cüzdan yoktu. İlk silme denemesi son adımda (Auth `delete`) ağ kopmasıyla
+    ("Connection reset by peer") yarım kaldı: uygulama "Bir sorun oluştu. Lütfen tekrar dene." gösterdi; cihaz kaydı ve
+    profil önceden silinmişti (belgelenmiş sıra, iOS ile aynı). İkinci deneme yeniden doğrulama istedi, kodla silindi.
+    `onAccountDeleted` hatasız koştu (`pendingSubmissions: 0`, `unlinkedPurchases: 0`); Auth kaydı, Firestore
+    `users/<uid>` (alt koleksiyonlar dahil) ve RTDB `users/<uid>` temizlendi. Cihazda sınav dosyası önbelleği boş,
+    tercih deposunda yalnız cihaza ait `notifications.consentOffered.v1` kaldı._
 - [ ] **`NQA-02`** iOS ↔ Android çapraz kontrol _(P1·S·Opus)_ — Android admin'in gönderdiği bildirim iOS'ta görünür (ve
   tersi). Aynı hesapla iki cihazda `readAt` senkronu ve kampanya tercihi. ⟶ `NQA-01`
 

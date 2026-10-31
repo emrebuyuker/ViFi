@@ -13,7 +13,8 @@
 > gönderir; tek bildirim sayfası, görsel + aksiyon, izin + kampanya onayı, Hesap › Bildirim Ayarları, admin "Bildirim
 > Gönder" + Geçmiş + konum seçici). Sözleşme (`NCT-01`), beş kod hattı (A…E), belge/beyan hattı (F) ve canlı bağlama
 > (`NIT-01`), birim ve UI testleri (`NIT-02`/`NIT-03`; izin akışı API 32 ve 37 emülatörde) ve Android Maps anahtarı
-> (`NOPS-01`) tamam; sırada canlı doğrulama (Faz 3, `NQA-01`). Yayın (Faz 4) yalnızca ürün sahibinin açık onayıyla, her
+> (`NOPS-01`) tamam; canlı uçtan uca doğrulama (`NQA-01`) 31 Ekim'de geçti, sırada iOS ↔ Android çapraz kontrol
+> (`NQA-02`). Yayın (Faz 4) yalnızca ürün sahibinin açık onayıyla, her
 > dış adım ayrı onayla yapılır.
 > **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
 > **4.1.0 iş listesi** (iOS `v-4.1.0` hedefli bildirim sistemi paritesi, `v-4.1.0` dalı; backend canlıda, Android backend
