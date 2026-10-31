@@ -22,14 +22,19 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **35'i tamam, 0'ı yarım, 15'i başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **38'i tamam, 0'ı yarım, 12'si başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
 > tamam; Hat B (bildirim sayfası, `INB-01`…`05`) tamam; Hat C (`PRM-01`…`05`) tamam. Hat C'nin kalanı, D
 > (`ADM-01`…`06`), E (`MAP-01`…`04`) ve F (`NLG-01`…`04`) 30 Ekim'de ayrı oturumlarda paralel yapıldı ve `v-4.1.0`'a
-> birleştirildi; senkron noktası 2 açıldı. `NIT-01` (canlı bağlama) 31 Ekim'de tamamlandı; sıradaki iş `NIT-02`,
-> `NIT-03` ve `NIT-04` (paralel). Birleştirmede hatların yeni UI testleri tablet
+> birleştirildi; senkron noktası 2 açıldı. `NIT-01` (canlı bağlama) 31 Ekim'de tamamlandı; `NIT-02` (birim testleri),
+> `NIT-03` (UI testleri, izin akışı API 32 ve 37 emülatörde) ve `NIT-04` (belgeler) aynı gün paralel yapılıp
+> birleştirildi; **Faz 2 tamam.** Birleşik dalda: `assembleDebug` başarılı, `lintLiveDebug` 0 hata / 56 uyarı, birim
+> testleri liveDebug 1100 / mockDebug 1084 / liveRelease 1100, tablet emülatöründe (API 37) mock 227 (226 geçti, 1
+> atlandı) ve live 191 (188 geçti, 3 atlandı; atlananlar başka API düzeyine ya da Haritalar'ın kurulu olmamasına bağlı),
+> başarısız test yok. **Sıradaki iş `NQA-01`** (Faz 3, canlı debug ile uçtan uca); ürün sahibinin Maps anahtarını
+> (`NOPS-01`) bekliyor. Hatların birleştirilmesinde yeni UI testleri tablet
 > emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
@@ -1153,9 +1158,10 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     bağlı `MAPS_API_KEY` (`local.properties`; değer yazılmaz, anahtarsız derleme geçer), Android 13+ ile 12 ve altı izin
     farkı, flavor tablosunda harita seçicisi ve tam senaryo listesi, `vifi_open_notification` örneği, Durum (özellikler,
     4.1.0 bildirim sistemi, yayın durumu). Eski "Play geliştirici hesabı kaldırılmış" notu kalktı._
-  - _`NIT-02`/`NIT-03` test sayıları yazılmadı (birleştirmede eklenecek); §0 Durum Özeti'ne dokunulmadı._
+  - _`NIT-02`/`NIT-03` test sayıları yazılmadı; birleştirmede §0 Durum Özeti'ne eklendi._
   - _**Kapsam dışı not:** `.claude/rules/architecture.md`'deki sürümlü doc comment kuralı "Bugünkü değer `4.0.0`"
-    diyor; `versionName` artık 4.1.0 (yeni eklemeler `Added in 4.1.0` alıyor). Kural dosyası bu kalemde değiştirilmedi._
+    diyor; `versionName` artık 4.1.0 (yeni eklemeler `Added in 4.1.0` alıyor). Kural dosyası bu kalemde değiştirilmedi;
+    birleştirmede 4.1.0'a düzeltildi._
 
 ### Faz 3 — Gerçek Ortam Doğrulaması (canlı backend; yayın değildir)
 

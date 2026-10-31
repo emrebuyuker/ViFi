@@ -12,8 +12,9 @@
 > **4.1.0 (20)** `v-4.1.0` dalında geliştiriliyor: iOS `v-4.1.0`'ın **hedefli bildirim sistemi** (bildirimleri sunucu
 > gönderir; tek bildirim sayfası, görsel + aksiyon, izin + kampanya onayı, Hesap › Bildirim Ayarları, admin "Bildirim
 > Gönder" + Geçmiş + konum seçici). Sözleşme (`NCT-01`), beş kod hattı (A…E), belge/beyan hattı (F) ve canlı bağlama
-> (`NIT-01`) tamam; birim ve UI testleri (`NIT-02`/`NIT-03`) sürüyor. Canlı doğrulama (Faz 3) ürün sahibinin Google Maps
-> anahtarını (`NOPS-01`) bekliyor; yayın (Faz 4) yalnızca ürün sahibinin açık onayıyla, her dış adım ayrı onayla yapılır.
+> (`NIT-01`), birim ve UI testleri (`NIT-02`/`NIT-03`; izin akışı API 32 ve 37 emülatörde) tamam. Canlı doğrulama
+> (Faz 3) ürün sahibinin Google Maps anahtarını (`NOPS-01`) bekliyor; yayın (Faz 4) yalnızca ürün sahibinin açık onayıyla,
+> her dış adım ayrı onayla yapılır.
 > **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
 > **4.1.0 iş listesi** (iOS `v-4.1.0` hedefli bildirim sistemi paritesi, `v-4.1.0` dalı; backend canlıda, Android backend
 > yazmaz): [`ANDROID-4.1.0-ROADMAP.md`](ANDROID-4.1.0-ROADMAP.md) + iOS olgu eki [`ANDROID-4.1.0-DETAIL.md`](ANDROID-4.1.0-DETAIL.md).

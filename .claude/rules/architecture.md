@@ -91,7 +91,7 @@ data class Exam(val id: String, val isLocked: Boolean)
 ```
 
 **Kurallar:**
-- `<versionName>`, değişikliğin yapıldığı andaki `app/build.gradle(.kts)` içindeki `versionName`'dir — yani eklemenin ilk çıkacağı sürüm. (Bugünkü değer `4.0.0` — iOS ile aynı seri, 2026-10-24 kararı; 2026-10-29'da REL-02 için 3.1.0 → 4.0.0. Daha önce eklenen `Added in 2.5`/`Added in 3.1.0` yorumları olduğu gibi kalır.)
+- `<versionName>`, değişikliğin yapıldığı andaki `app/build.gradle(.kts)` içindeki `versionName`'dir — yani eklemenin ilk çıkacağı sürüm. (Bugünkü değer `4.1.0` — iOS ile aynı seri, 2026-10-24 kararı; 2026-10-29'da REL-02 için 3.1.0 → 4.0.0, 2026-10-30'da `v-4.1.0` dalında NCT-01 ile 4.0.0 → 4.1.0. Daha önce eklenen `Added in 2.5`/`Added in 3.1.0`/`Added in 4.0.0` yorumları olduğu gibi kalır.)
 - Tek satır, **İngilizce**, sürüm ile amaç arasında em dash (`—`). Amaç, alanın/case'in **ne sağladığını** söyler, implementasyon detayını değil.
 - Yalnızca **var olan tiplere yapılan eklemelere** uygulanır. Sıfırdan yeni bir model/enum tek bir tip-seviyesi `// Added in <versionName> — ...` yorumu alır (üye başına değil).
 - Rule'dan önceki mevcut alan/case'lere geriye dönük sürüm yorumu **ekleme** — dokunma.
