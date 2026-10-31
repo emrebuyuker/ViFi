@@ -46,8 +46,11 @@
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Hat F'nin yasal/politika
 > kararları (K2–K4, R1–R2, P1–P3) 31 Ekim'de verildi, hepsi öneri yönünde. Yayından önce ortak depoda (iOS tarafı,
 > her deploy ayrı onay): K3 için hesap silme temizliğine bildirim istatistiği kayıtları + Functions deploy; P1–P3 için
-> gizlilik, hesap silme ve kullanım koşulları sayfaları + hosting yayını (en erken fırsatta). Mağaza metni ve 4.1.0
-> sürüm notu (`NLG-04`) onay bekliyor.
+> gizlilik, hesap silme ve kullanım koşulları sayfaları + hosting yayını (en erken fırsatta). İkisi 31 Ekim'de ürün
+> sahibinin isteğiyle ortak depoda hazırlandı (`ViFi-iOS` `ab53aa2` temizlik + `events.uid` index izni, `cd67bd1` canlı
+> TTL ayarı dosyaya, `d688251` üç sayfa; Firebase testleri 425'in 421'i geçti, başarısız yok, 4'ü önceden belgeli
+> TODO); yayınlar (index → `onAccountDeleted` → hosting) onay bekliyor. Mağaza metni ve 4.1.0 sürüm notu (`NLG-04`)
+> onay bekliyor.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
