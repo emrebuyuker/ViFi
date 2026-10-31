@@ -195,6 +195,8 @@ class AccountContentTest {
         composeRule.onNodeWithTag("account.reauth.code").assertIsDisplayed()
         composeRule.onNodeWithTag("account.reauth.verify").assertIsNotEnabled()
         composeRule.onNodeWithTag("account.delete").assertIsNotEnabled()
+        // The error is the list's last row: below the fold on a phone, so it is only composed once scrolled to.
+        composeRule.onNodeWithTag("account.list").performScrollToNode(hasTestTag("account.error"))
         composeRule.onNodeWithTag("account.error").assert(hasText("Kod hatalı."))
 
         composeRule.onNodeWithTag("account.reauth.code").performTextInput("3")

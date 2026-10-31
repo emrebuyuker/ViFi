@@ -1060,33 +1060,51 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     fabrikasıyla kurulur); `answerDocumentPicker` (belge seçiciye `Instrumentation.ActivityMonitor` ile örnek PDF
     döndürür, Espresso-Intents gerekmez); `assertNeverAppears` (gecikmeli bir şeyin çıkmadığını kör bekleme yerine
     yoklayarak doğrular)._
-  - _**İzin eşlemesi (`NDEC-01`) cihazda:** `NotificationPermissionMappingDeviceTest` (`androidTestLive`, 3). Mock'ta
+  - _**İzin eşlemesi (`NDEC-01`) cihazda:** `NotificationPermissionMappingDeviceTest` (`androidTestLive`, 5). Mock'ta
     izin sahte servisle simüle edildiği için eşleme yalnız live'daki gerçek `FirebaseNotificationService` +
     koordinatörle doğrulanabiliyor; onay kaydı ve sunum geçmişi bellekte, Firebase'e yazım yok. 13+: hiç sorulmamış →
-    "Sorulmadı" ve ilk açılışta 1/2, uygulamanın sorusundan sonra → "Kapalı", izinli → "Açık" ve yalnız 2/2. ≤12:
-    bildirimler açıkken "Açık", sistem hiç sorulmaz, 1/2 atlanır, yalnız 2/2 (iOS "consent catch-up"). Her test yalnız
-    kendi API düzeyinde koşar; "hiç sorulmamış" testi izni hiç verilmemiş cihaz ister (koşudan önce `adb shell pm revoke
-    com.salticusteam.vifi android.permission.POST_NOTIFICATIONS`; test içinden geri almak süreci öldürür). NIT-02'nin
-    cihaza bıraktığı izin kalemi bununla karşılandı; cihazda kapatılamadığı için ≤12'de "bildirimler kapalı → Kapalı" ve
-    gerçek sistem diyaloğundaki ikinci sorma (`shouldShowRequestPermissionRationale`) cihaz testi dışında kaldı._
+    "Sorulmadı" ve ilk açılışta 1/2, uygulamanın sorusundan sonra → "Kapalı", izinli → "Açık" ve yalnız 2/2; **gerçek
+    sistem diyaloğunda** (uygulamanın kendi istek yolu, "Reddet"e erişilebilirlik API'siyle basılır) ilk "Reddet" →
+    "Kapalı" ama bir kez daha sorulabilir (`shouldShowRequestPermissionRationale`), ikinci "Reddet" → kesin, yalnız
+    sistem ayarları kalır. ≤12: bildirimler açıkken "Açık", sistem hiç sorulmaz, 1/2 atlanır, yalnız 2/2 (iOS "consent
+    catch-up"); **sistemin uygulama bildirim ayarlarından kapatılınca** ("Tüm ViFi bildirimleri" anahtarı test içinden
+    çevrilir, sonda geri açılır) "Kapalı", yeniden sorma yolu yok, ilk açılışta hiçbir şey önerilmez. Her test yalnız
+    kendi API düzeyinde koşar; 13+ testleri izni hiç verilmemiş cihaz ister (koşudan önce `adb shell pm revoke
+    com.salticusteam.vifi android.permission.POST_NOTIFICATIONS`; test içinden geri almak süreci öldürür, diyalog
+    cevaplarını silmek öldürmez ve test bunu kendisi yapar). NIT-02'nin cihaza bıraktığı izin kalemi ve iki açık dal
+    bununla kapandı._
   - _**"Konuma Git" seçenekleri cihazda** (NIT-02'nin cihaza bıraktığı ikinci kalem, iOS `MapsLinksTests.googleChoice`):
     `MapsLaunchDeviceTest` (`androidTest`, iki flavor'da, 4). Başlatmalar dışarı çıkarken yakalanır, hiçbir şey açılmaz.
     Google Haritalar uygulamada açılır; uygulama yoksa (sistemin "böyle bir uygulama yok" cevabı canlandırılır) aynı
     bağlantı tarayıcıda; başka uygulama seçeneği `geo:` alan uygulamalara seçici açar, hiçbiri yoksa Google Haritalar
     web. Son dal cihaza bağlı (`assume`): tablette Haritalar kurulu olduğu için atlanır; bir kez Haritalar geçici olarak
     devre dışı bırakılarak (`pm disable-user`, sonra `pm enable`) koşturuldu ve geçti._
-  - _**Uygulama kodu değişmedi;** testler gerçek bir hata bulmadı. `testTag` eklenmedi ya da değiştirilmedi._
+  - _**Uygulama kodu değişmedi;** testler gerçek bir hata bulmadı. `testTag` eklenmedi ya da değiştirilmedi. API 32
+    koşusunun bulduğu iki test sorunu düzeltildi: (1) live paket hiç FCM jetonu almamış bir cihazda ilk testte
+    çöküyordu (NIT-03'ten önce de; tablette jeton zaten vardı): live Firebase açılışta jeton alıp uygulamanın
+    `ViFiMessagingService`'ine veriyor, servis `HiltTestApplication`'da Hilt bileşeni olmadan başlayamıyor. Ortak
+    `HiltTestRunner` artık koşu boyunca bu servisi uygulama içinden (süreç korunarak) kapatıp sonda açar; FCM jetonu
+    yine saklar, bir daha vermez. Bu, Hilt testinde servisin gerçek bağımlılıklarla canlıya cihaz kaydı yazmasını da
+    önler. (2) `AccountContentTest.account_whileReverifying_showsTheCodeEntryAndError` telefon yüksekliğinde
+    başarısızdı: hata satırı tembel listenin en altında, kaydırılmadan oluşturulmuyor; test önce o satıra kaydırır._
   - _**Doğrulama:** tablet emülatöründe (API 37) tam enstrümanlı paket mock 223/223 (187 + 36), live 185 (182 + 3; 184
     geçti, ≤12 testi API 37'de atlandı; "hiç sorulmamış" testi izin geri alınarak koştu ve geçti). Yeni 36 test koyu
     temada (`cmd uimode night yes`) 36/36 ve telefon yerleşiminde (1080×2400, geçici API 37 AVD; mevcut
     `Medium_Phone`'da Play'den kurulu 4.0.0 (19) olduğu için ona dokunulmadı) 36/36. `assembleDebug` + iki androidTest
     APK'sı derlendi; `lintLiveDebug` 0 hata, 56 uyarı. NIT-02 notundan sonra eklenen `MapsLaunchDeviceTest` ayrıca
-    koşturuldu: mock 4 (3 geçti, 1 atlandı), Haritalar kapalıyken live 4 (3 geçti, 1 atlandı); tam paketlerde beklenen
-    sayı mock 227, live 189. Birim testlerine dokunulmadı. PSH-01'in kanal adları cihazda Türkçe görüldü ve ürün
-    sahibine gösterildi: Duyurular, Kampanyalar ve fırsatlar, Sınav ve hesap bildirimleri (+ yerel Sınav gönderimleri)._
-  - _**Açık — API ≤32:** bu Mac'te yalnız `android-37.0` imajı var, `cmdline-tools` (`sdkmanager`) da yok. ≤12 testi
-    yazıldı, API 37'de atlanıyor; API 32 emülatöründe koşturulması ürün sahibinin indirme onayını bekliyor
-    (`system-images;android-32;google_apis;arm64-v8a`, Google `sdkmanager`, ~1,5 GB)._
+    koşturuldu: mock 4 (3 geçti, 1 atlandı), Haritalar kapalıyken live 4 (3 geçti, 1 atlandı). **Son hâliyle tam
+    paketler** (iki yeni izin testi ve iki test düzeltmesiyle): tablet API 37 mock 227 (226 geçti, 1 atlandı: Haritalar
+    kurulu olduğu için "hiç harita uygulaması yok"), live 191 (188 geçti, 3 atlandı: ≤12'nin iki testi + aynı Haritalar
+    testi); API 32 mock 227 (226 geçti, 1 atlandı), live 191 (187 geçti, 4 atlandı: 13+'nın üç testi + aynı Haritalar
+    testi; uygulama verisi silinip FCM jetonu yokken koşturuldu, çökme yok). Son derleme: `assembleDebug` + iki
+    androidTest APK'sı, `lintLiveDebug` 0 hata, 56 uyarı. Birim testlerine dokunulmadı. PSH-01'in kanal adları cihazda
+    Türkçe görüldü ve ürün sahibine gösterildi: Duyurular, Kampanyalar ve fırsatlar, Sınav ve hesap bildirimleri (+
+    yerel Sınav gönderimleri)._
+  - _**API ≤32 (ürün sahibinin onayıyla, 2026-10-31):** `system-images;android-32;google_apis;arm64-v8a` r8 (Android
+    12L). Bu Mac'te `cmdline-tools` yok ve ek bir şey indirilmemesi istendiği için `sdkmanager`'ın kullanacağı dosya
+    (`arm64-v8a-32_r08.zip`, 1.569.899.980 bayt) aynı Google deposundan doğrudan indirildi; boyut ve SHA-1 deponun
+    listesiyle aynı, lisansı (`android-sdk-arm-dbt-license`) API 37 imajıyla aynı ve bu Mac'te kabul edilmiş. AVD
+    `ViFi_API_32` (telefon profili, Play Store'suz); mevcut API 37 AVD'lerine dokunulmadı. Sonuçlar Doğrulama'da._
 - [ ] **`NIT-04`** Belgeler _(P2·S·Haiku)_ — `CLAUDE.md` (durum, Bildirimler bölümü, LaunchArg tablosu, "Maps anahtarı
   commit'lenmez") ve `README.md`. ⟶ `NIT-01`
 
