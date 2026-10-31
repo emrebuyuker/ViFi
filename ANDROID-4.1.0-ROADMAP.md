@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **43'ü tamam, 7'si başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **44'ü tamam, 6'sı başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -40,7 +40,9 @@
 > aynı admin hesabı Android tablet + iOS 4.1.0 simülatöründe, her canlı yazım onayla): iki yönde "Bana test gönder"
 > karşı platformun bildirim sayfasına düştü, `readAt` ve kampanya tercihi iki yönde canlı eşlendi; **Faz 3 tamam.**
 > Faz 4: `NRL-01` (önkoşul) 31 Ekim'de ürün sahibinin kararıyla kapatıldı, `NRL-02` (dalın push'u) ürün sahibince
-> yapıldı. **Sıradaki:** `NRL-03` (release AAB), yalnız ürün sahibi "release çıkalım" deyince; sonrası her dış adım ayrı onayla. Hatların birleştirilmesinde yeni UI
+> yapıldı. `NRL-03` (release AAB 20) 31 Ekim'de ürün sahibinin onayıyla derlendi ve denetlendi
+(`play-store/ViFi-4.1.0-20.aab`, Play'e yüklenmedi). **Sıradaki:** `NRL-04` (dahili test + gerçek telefonda duman
+testi; Play'e yükleme ayrı onayla, telefon gerekir); sonrası her dış adım ayrı onayla. Hatların birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Hat F'nin yasal/politika
@@ -1282,9 +1284,18 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
 - [x] **`NRL-02`** `v-4.1.0` dalının push'u _(P0·S·ürün sahibi)_ — Bu Mac'te yazma yetkili GitHub kimliği yok. ✅ _Tamam
   (2026-10-31): ürün sahibi push etti; `origin/v-4.1.0` = `a2d301e`, yerel dalla aynı (`git ls-remote` ile doğrulandı).
   Bu kaydı içeren belge commit'i bir sonraki push'la gider._
-- [ ] **`NRL-03`** Release AAB 20 (4.1.0) _(P0·S·Opus)_ — `bundleLiveRelease` yükleme anahtarıyla ve **Maps anahtarıyla**
+- [x] **`NRL-03`** Release AAB 20 (4.1.0) _(P0·S·Opus)_ — `bundleLiveRelease` yükleme anahtarıyla ve **Maps anahtarıyla**
   (anahtar commit'lenmez). Kontrol edilecekler: sürüm, imza, izinler (yeni: konum ×2), R8 eşleme, dil bölmesi kapalı.
-  **Onayla.** ⟶ `NRL-02`
+  **Onayla.** ⟶ `NRL-02` ✅ _Tamamlandı (2026-10-31, Opus, ürün sahibinin "sıradaki işten devam edelim" onayıyla):
+  temiz `clean bundleLiveRelease` (JDK 21, 2 dk), kaynak `6bf986a` (uygulama kodu GitHub'daki `a2d301e` ile aynı,
+  sonrası yalnız belge). Uyarılar yalnız Places/Location kütüphanelerinin Kotlin metadata'sı için R8 bilgi notları; hata
+  yok. İmza: yükleme anahtarı SHA-1 `75:61…:25:D9`, `jarsigner` doğruladı. Manifest: `com.salticusteam.vifi`,
+  versionCode 20, 4.1.0, min 24 / target 36, debuggable değil, `allowBackup=false`; `com.google.android.geo.API_KEY`
+  girdisi var (değer okunmadı; `local.properties`'teki anahtarla derlendi). İzinler: 19'a (4.0.0) göre tek yeni izin
+  `ACCESS_COARSE_LOCATION` — "konum ×2" K1 kararıyla tek izne indi, `ACCESS_FINE_LOCATION` yok. `BundleConfig` 19 ile
+  bayt bayt aynı (`LANGUAGE` bölmesi kapalı). Pakette R8 eşleme dosyası (`proguard.map`) ve Baseline Profile var.
+  Dosya `play-store/ViFi-4.1.0-20.aab` (12,5 MB, git dışı, SHA-256 `084b0b0073572c07…`). Play'e yüklenmedi (`NRL-04`,
+  ayrı onay)._
 - [ ] **`NRL-04`** Dahili test + Play'den kurulan sürümle **telefonda** duman testi _(P0·M)_ — Play Integrity / App Check,
   FCM token, push ve görsel, harita (Play imzası SHA-1'i anahtarda), satın alma yolları bozulmadı. 4.0.0'da emülatörde
   App Check 403 verdiği için **gerçek telefon** gerekir. Aynı telefonda 4.0.0 `RLS-09`'un açık telefon adımı da
