@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **44'ü tamam, 6'sı başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **44'ü tamam, 1'i yarım, 5'i başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -40,9 +40,11 @@
 > aynı admin hesabı Android tablet + iOS 4.1.0 simülatöründe, her canlı yazım onayla): iki yönde "Bana test gönder"
 > karşı platformun bildirim sayfasına düştü, `readAt` ve kampanya tercihi iki yönde canlı eşlendi; **Faz 3 tamam.**
 > Faz 4: `NRL-01` (önkoşul) 31 Ekim'de ürün sahibinin kararıyla kapatıldı, `NRL-02` (dalın push'u) ürün sahibince
-> yapıldı. `NRL-03` (release AAB 20) 31 Ekim'de ürün sahibinin onayıyla derlendi ve denetlendi
-(`play-store/ViFi-4.1.0-20.aab`, Play'e yüklenmedi). **Sıradaki:** `NRL-04` (dahili test + gerçek telefonda duman
-testi; Play'e yükleme ayrı onayla, telefon gerekir); sonrası her dış adım ayrı onayla. Hatların birleştirilmesinde yeni UI
+> yapıldı. `NRL-03` (release AAB) 31 Ekim'de ürün sahibinin onayıyla derlendi ve denetlendi. `NRL-04` yarım: 20'nin
+> Play önizlemesinde 7 cihaz düştü (6'sı konum donanımı zorunluluğu yüzünden). Live manifestinde konum donanımı isteğe
+> bağlı yapıldı ve paket 21 olarak yeniden derlendi. 21 (4.1.0), ürün sahibinin onayıyla 31 Ekim 21:04'te dahili teste
+> yayınlandı; 4.1.0 sürüm notu da bu onayla kabul edildi. **Sıradaki:** `NRL-04`'ün gerçek telefonda duman testi
+> (telefon gerekir); sonrası her dış adım ayrı onayla. Hatların birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Hat F'nin yasal/politika
@@ -993,7 +995,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   - _**Tam açıklama (4.1.0, 2188/4000):** yeni "BİLDİRİMLER" bölümü (sınav onayı ve bölüme yeni sınav; tek sayfa,
     görsel ve düğmeler; cihazlar arası okundu; onaylı kampanyalar, 22:00–09:00 yok, Hesap › Bildirim Ayarları). "DİĞER"deki
     bildirim maddesi buraya taşındı. Admin özellikleri mağaza metnine girmedi. 4.0.0 metni 4.0.0 yayını için duruyor._
-  - _**Sürüm notu (4.1.0, 426/500, Türkçe).**_
+  - _**Sürüm notu (4.1.0, 426/500, Türkçe).** Ürün sahibi 31 Ekim'de onayladı; 21'in dahili test sürümünde kullanıldı
+    (`NRL-04`). Tam açıklama hâlâ onay bekliyor (`NRL-06`)._
   - _**Uygulama içeriği notları:** gizlilik (NLG-02), reklamlar (R1/R2), veri güvenliği (`NRL-05`). Açık konular:
     isteğe bağlı dolu Bildirimler ekran görüntüsü (`NQA-01` sonrası). "Reklam yok." cümlesi R1/R2'ye bağlı._
 
@@ -1294,12 +1297,34 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   girdisi var (değer okunmadı; `local.properties`'teki anahtarla derlendi). İzinler: 19'a (4.0.0) göre tek yeni izin
   `ACCESS_COARSE_LOCATION` — "konum ×2" K1 kararıyla tek izne indi, `ACCESS_FINE_LOCATION` yok. `BundleConfig` 19 ile
   bayt bayt aynı (`LANGUAGE` bölmesi kapalı). Pakette R8 eşleme dosyası (`proguard.map`) ve Baseline Profile var.
-  Dosya `play-store/ViFi-4.1.0-20.aab` (12,5 MB, git dışı, SHA-256 `084b0b0073572c07…`). Play'e yüklenmedi (`NRL-04`,
-  ayrı onay)._
+  Dosya `play-store/ViFi-4.1.0-20.aab` (12,5 MB, git dışı, SHA-256 `084b0b0073572c07…`).
+  **Güncelleme (aynı gün, `NRL-04`):** Play önizlemesindeki cihaz kaybı yüzünden 21 olarak yeniden derlendi (ayrıntı
+  `NRL-04`'te). 20 yalnız Play kitaplığında duruyor, hiçbir kanala çıkmadı._
 - [ ] **`NRL-04`** Dahili test + Play'den kurulan sürümle **telefonda** duman testi _(P0·M)_ — Play Integrity / App Check,
   FCM token, push ve görsel, harita (Play imzası SHA-1'i anahtarda), satın alma yolları bozulmadı. 4.0.0'da emülatörde
   App Check 403 verdiği için **gerçek telefon** gerekir. Aynı telefonda 4.0.0 `RLS-09`'un açık telefon adımı da
-  kapatılır (`NRL-01` notu). ⟶ `NRL-03`
+  kapatılır (`NRL-01` notu). ⟶ `NRL-03` ⏳ _Yarım — dahili test yayını tamam, telefon adımı açık (2026-10-31, Opus, her
+  Console adımı ürün sahibinin onayıyla; AAB'leri Console'a ürün sahibi yükledi, uygulamadaki tarayıcı dosya seçemiyor):_
+  - _**20'nin önizlemesi:** Hata yok. 7 cihaz desteği kaybediyordu (hiçbirinde kurulum yok). 6'sının nedeni
+    `android.hardware.location` zorunluluğu: Play, `ACCESS_COARSE_LOCATION` iznini konum donanımı zorunlu diye okuyor.
+    Etkilenenler 5 GPS'siz Android 15 tablet (DigiLand DL1036 / H10XS, PCBOX PCB-T107, HCNCP HA10Kids,
+    WS TD-TP010G-2) ve 1 telefon. 1 telefonun (Ubiquiti UVP masa telefonu) nedeni ise Maps SDK'nın OpenGL ES 2.0
+    zorunluluğu. 20 taslaktan çıkarıldı._
+  - _**Düzeltme (ürün sahibi kararı):** `app/src/live/AndroidManifest.xml`'e `android.hardware.location` ve
+    `.network` için `required="false"` eklendi; `FusedDeviceLocator` konum alamazsa `null` döner, harita ortalanmadan
+    açılır. OpenGL ES 2.0 zorunluluğu kaldı. `versionCode` 21 oldu (20 Play'de kullanıldı). Doğrulama: temiz derleme;
+    birim testleri liveDebug 1100 / liveRelease 1100 / mockDebug 1084, başarısız yok; `lintLiveDebug` 0 hata / 56
+    uyarı._
+  - _**AAB 21:** İmza `75:61…:25:D9` (`jarsigner` doğruladı). 21 / 4.1.0, min 24 / target 36. Konum özellikleri
+    isteğe bağlı, izinler ve `BundleConfig` 20 ile aynı, eşleme dosyası ve Baseline Profile pakette. Dosya
+    `play-store/ViFi-4.1.0-21.aab` (12,5 MB, git dışı, SHA-256 `9ecd96c20a5a1234…`)._
+  - _**Dahili test:** Önizlemede hata yok. Yalnız 1 cihaz düştü (OpenGL ES 2.0'sız masa telefonu); tabletlerin hepsi
+    (6.823) destekleniyor. Yeni kurulum 5,31 MB, güncelleme 3,7 MB. Tek uyarı yerel kod için hata ayıklama sembolü yok
+    (4.0.0'da da vardı, engel değil). Sürüm adı "21 (4.1.0)", 4.1.0 tr-TR sürüm notuyla 31 Ekim 21:04'te dahili teste
+    yayınlandı ("Dahili test kullanıcıları tarafından kullanılabilir"); üretim (19, 4.0.0) değişmedi._
+  - _**Kalan (telefon gerekiyor):** Play'den inen 21 ile gerçek telefonda giriş (Play Integrity / App Check), FCM
+    token ve cihaz kaydı, push + görsel + dokunuş, harita (Play imzası SHA-1'i anahtarda), satın alma yolları. Aynı
+    oturumda 4.0.0 `RLS-09`'un telefon adımı da kapatılır._
 - [ ] **`NRL-05`** Veri güvenliği formu _(P0·S)_ — `NLG-01`'e göre Console'a girilir, üretimle incelemeye gider.
   ⟶ `NLG-01`
 - [ ] **`NRL-06`** Mağaza girişi + politika beyanları _(P0·S)_ — `NLG-03`/`NLG-04` sonuçlarına göre. ⟶ `NLG-03`, `NLG-04`
@@ -1375,7 +1400,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   tarafı deploy etmez; denetim yalnız okur.
 
 #### `NCT-01` — Sözleşme
-- **Sürüm:** `versionName "4.1.0"`, `versionCode 20` (ilk iş). Sürümlü doc comment'ler `// Added in 4.1.0 — …` olur.
+- **Sürüm:** `versionName "4.1.0"`, `versionCode 20` (ilk iş; `NRL-04`'te 21'e çıktı, 20 Play'de kullanıldı). Sürümlü doc
+  comment'ler `// Added in 4.1.0 — …` olur.
 - **Modeller:**
   - `core/model/AppNotification.kt` (tip düzeyinde tek yorum):
     - `NotificationKind {GENERAL, PROMO, SYSTEM}`; bilinmeyen değer → `GENERAL`.
@@ -1732,6 +1758,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
 - **SDK başlatma:** seçici ilk açıldığında; uygulama açılışında değil.
 - **Manifest:** ~~`ACCESS_COARSE_LOCATION` + `ACCESS_FINE_LOCATION`~~ → yalnız `ACCESS_COARSE_LOCATION` (yalnız ön plan;
   arka plan izni yok). _Karar 2026-10-30, ürün sahibi (Hat F K1): Play'in FINE gerekçe beyanı gerekmesin._
+  `android.hardware.location` ve `.network` `required="false"`: Play konum iznini "konum donanımı zorunlu" sayıp GPS'siz
+  tabletleri dışlıyordu (`NRL-04`, 31 Ekim). OpenGL ES 2.0 zorunluluğu Maps SDK'dan gelir ve kalır.
 - **Kabul:** anahtarsız live debug çökmez; R8'li release'te harita açılır; APK/AAB boyut farkı not edilir;
   `GoogleMapsConfigurationTests` (6) karşılığı.
 

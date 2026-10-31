@@ -6,8 +6,8 @@
 > **4.0.0 (LEG-03, ürün sahibince onaylandı 2026-10-29):** tam açıklama, sürüm notu ve uygulama içeriği
 > cevapları Premium ve parayla tek sınav açma için güncellendi. Console'a **4.0.0 sürümüyle birlikte** girilir; o
 > zamana kadar canlıda 3.1.0 metni kalır (önceki metin: `git show 7343c53:PLAY-STORE-LISTING.md`).
-> **4.1.0 (NLG-04, 30 Ekim 2026, ürün sahibinin onayını bekliyor):** Tam açıklamaya "BİLDİRİMLER" bölümü ve 4.1.0
-> sürüm notu eklendi. Uygulama içeriği satırlarına 4.1.0 notları düşüldü. Console'a **4.1.0 sürümüyle** girilir
+> **4.1.0 (NLG-04, 30 Ekim 2026):** Tam açıklamaya "BİLDİRİMLER" bölümü ve 4.1.0 sürüm notu eklendi. Sürüm notunu
+> ürün sahibi 31 Ekim'de onayladı (21'in dahili test sürümünde kullanıldı); tam açıklama onay bekliyor. Uygulama içeriği satırlarına 4.1.0 notları düşüldü. Console'a **4.1.0 sürümüyle** girilir
 > (`NRL-06`); 4.0.0 yayınlanırken 4.0.0 metni kullanılır. "Reklam yok." cümlesi ve reklam beyanı
 > [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md)'deki R1/R2 kararına bağlıdır.
 
@@ -186,7 +186,7 @@ ViFi yenilendi: yeni tasarım, telefon numarasıyla giriş, coin ile kilitli sı
   **Kalan:** aynı onay kutusu iOS'ta yok (parite işi).
 - **4.1.0 ekran görüntüsü (isteğe bağlı):** Bildirimler sayfası canlıda boş olduğu için listede yoktu. `NQA-01`'deki
   test bildirimiyle (görsel + düğme) canlıda dolu bir sayfa çekilebilir; test hesabının telefonu görünmemeli.
-- **4.1.0 metinleri:** Tam açıklama ve sürüm notu ürün sahibinin onayını bekliyor. "Hesap › Bildirim Ayarları"
+- **4.1.0 metinleri:** Sürüm notu onaylandı (31 Ekim); tam açıklama ürün sahibinin onayını bekliyor. "Hesap › Bildirim Ayarları"
   (`PRM-04`) ve bildirim düğmeleri 4.1.0'da hazır olmalı; olmazsa ilgili cümle çıkarılır.
 - **"Bağımsız uygulama" cümlesi:** Tam açıklamadaki üniversitelerle resmi bağlantı olmadığı cümlesinin doğruluğunu ürün
   sahibi teyit etmeli; üniversite adları geçtiği için yanıltıcı içerik politikası açısından önerilir.

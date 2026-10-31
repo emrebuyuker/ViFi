@@ -17,7 +17,7 @@ android {
         applicationId "com.salticusteam.vifi"
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 20
+        versionCode 21
         versionName "4.1.0"
         testInstrumentationRunner "com.salticusteam.vifi.HiltTestRunner"
         // Turkish-only (LOC-01): package only the default (Turkish) and tr resources, dropping libraries' other locales.
