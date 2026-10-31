@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **39'u tamam, 0'ı yarım, 11'i başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **39'u tamam, 1'i yarım, 10'u başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -33,8 +33,9 @@
 > birleştirildi; **Faz 2 tamam.** Birleşik dalda: `assembleDebug` başarılı, `lintLiveDebug` 0 hata / 56 uyarı, birim
 > testleri liveDebug 1100 / mockDebug 1084 / liveRelease 1100, tablet emülatöründe (API 37) mock 227 (226 geçti, 1
 > atlandı) ve live 191 (188 geçti, 3 atlandı; atlananlar başka API düzeyine ya da Haritalar'ın kurulu olmamasına bağlı),
-> başarısız test yok. Maps anahtarı (`NOPS-01`) 31 Ekim'de oluşturuldu; senkron noktası 3 açıldı. **Sıradaki iş
-> `NQA-01`** (Faz 3, canlı debug ile uçtan uca; her canlı yazım onayla). Hatların birleştirilmesinde yeni UI testleri tablet
+> başarısız test yok. Maps anahtarı (`NOPS-01`) 31 Ekim'de oluşturuldu; senkron noktası 3 açıldı. **`NQA-01` yarım:**
+> 1. aşama (cihaz kaydı, onay yazımı, üç test gönderimi, harita seçici) canlıda geçti; 2. aşama (zamanlanmış gönderim +
+> iptal, `promo` süzgeci, ret bildirimi, hesap silme temizliği) ürün sahibinin onayını bekliyor. Hatların birleştirilmesinde yeni UI testleri tablet
 > emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
@@ -1185,7 +1186,35 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
   - Kampanya onayının yazımı ve `promo` süzgeci; zamanlanmış gönderim + iptal.
   - Otomatik bildirim (test gönderimi ret / onay); hesap silme sonrası sunucu temizliği.
 
-  ⟶ `NIT-03`, `NOPS-01`, `NOPS-02`
+  ⟶ `NIT-03`, `NOPS-01`, `NOPS-02` ⏳ _Yarım — 1. aşama tamam (2026-10-31, Opus; tablet emülatörü API 37, live debug,
+  ürün sahibinin admin hesabı; her canlı yazım ürün sahibinin onayıyla). Emülatörün App Check debug anahtarını ve
+  girişi ürün sahibi yaptı. Bulgular:_
+  - _**Cihaz kaydı:** `users/<uid>/devices/<installationId>` tam olarak `{token, platform: "android", appVersion:
+    "4.1.0", updatedAt}`; `onDeviceWritten` iki yazımda da hatasız koştu. Bu kurulumun jetonuyla eski biçimli kayıt
+    olmadığından eski kaydın silinmesi canlıda görülemedi (birim testinde kapalı); hesaptaki iki eski biçimli kayıt
+    başka eski jetonların, zararsız (`NOPS-02`). **Ölü jeton temizliği:** test 1'de 6 push'un 1'i başarısız oldu, sunucu
+    o cihaz kaydını sildi (6 → 5); sonraki gönderimlerde başarısız yok._
+  - _**İzin/onay:** izin testlerden verili olduğu ve kampanya onayı 30 Ekim'de iOS'tan (`source: "prompt"`) kayıtlı
+    olduğu için 1/2 ve 2/2 çıkmadı (doğru; mock testleri ve `NotificationPermissionMappingDeviceTest` kapsıyor). Bildirim
+    Ayarları'ndan kapat/aç: `settings/notifications` `{marketing: false → true, source: "settings", updatedAt, version:
+    1}` doğru yazıldı. Sayfa kampanyaları istemcide süzmez (süzme gönderimde, sunucuda); `promo` süzgeci 2. aşamada._
+  - _**"Bana test gönder" (3 gönderim, yalnız admin):** (1) Duyuru + görsel + Sınava Git, uygulama ön planda: kanal
+    `general`, BigPicture, dokunuş → Bildirimler, kayıt vurgulu; Sınava Git sınavı arşiv hiyerarşisinin üstünde açtı
+    (sınav hesapta önceden açılmış olduğu için kilit sheet'i beklenmedi). (2) Konum (tür Kampanya'ya kilitlendi), arka
+    planda: kanal `promo`, dokunuş (`onNewIntent`) → vurgulu kayıt; Konuma Git → üç seçenek, Google Haritalar uygulamada
+    yer kartıyla açıldı. (3) Duyuru, arka planda teslim; süreç sonra kapatıldı ve tepsideki bildirime dokunuldu:
+    soğuk açılışta vurgulu kayıt. Gönderim Geçmişi: her birinde 1 alıcı, 5 push, açılma 1, düğme 1/1/0 — doğru.
+    Okundu işareti `settings/inbox.readAt` sayfa açılınca yazıldı._
+  - _**Harita seçici (`NOPS-01` anahtarı cihazda):** yalnız yaklaşık konum izni istendi ("Only this time"); harita
+    döşemeleri yüklendi, yetki hatası yok; Places araması (Autocomplete + Fetch) "Sakarya Üniversitesi"ni koordinat,
+    ad ve adresle doldurdu._
+  - _**Gözlemler (hata değil):** ilk açılışta tek ANR — ana iş parçacığı 23 sn işlemci bekledi, 3,7 sn koştu (kurulum
+    sırasında Mac yükü). App Check debug anahtarı kayıtlı değilken açılan süreçte Realtime Database bağlantısı sunucu
+    tarafından kalıcı kapatıldı; anahtar eklendikten sonra profil kapısı uygulama yeniden başlatılana kadar
+    "Yükleniyor…"da kaldı (Firebase SDK davranışı; gerçek kullanıcıda yalnız App Check başarısızsa)._
+  - _**Kalan (2. aşama, her biri ayrıca onayla):** uygulama tamamen kapalıyken teslim (3. gönderimde süreç teslim
+    anında yaşıyordu); gerçek kitleye zamanlanmış gönderim + iptal ve `promo` süzgeci; test gönderimi reddiyle otomatik
+    bildirimler; test hesabının silinmesi sonrası sunucu temizliği._
 - [ ] **`NQA-02`** iOS ↔ Android çapraz kontrol _(P1·S·Opus)_ — Android admin'in gönderdiği bildirim iOS'ta görünür (ve
   tersi). Aynı hesapla iki cihazda `readAt` senkronu ve kampanya tercihi. ⟶ `NQA-01`
 
