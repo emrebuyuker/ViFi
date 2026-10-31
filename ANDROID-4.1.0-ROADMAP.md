@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **40'ı tamam, 10'u başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **41'i tamam, 9'u başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -36,9 +36,11 @@
 > başarısız test yok. Maps anahtarı (`NOPS-01`) 31 Ekim'de oluşturuldu; senkron noktası 3 açıldı. **`NQA-01` tamam**
 > (31 Ekim, iki aşama, her canlı yazım ürün sahibinin onayıyla): cihaz kaydı, onay yazımı, üç test gönderimi (ön plan /
 > arka plan / kapalıyken), harita seçici, zamanlanmış gönderim + iptal, `promo` süzgeci (0 alıcı), ret bildirimleri ve
-> test hesabı silindikten sonra sunucu temizliği canlıda geçti; uygulama hatası bulunmadı. **Sıradaki:** `NQA-02` (iOS ↔
-> Android çapraz). Hatların birleştirilmesinde yeni UI testleri tablet
-> emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
+> test hesabı silindikten sonra sunucu temizliği canlıda geçti; uygulama hatası bulunmadı. **`NQA-02` tamam** (31 Ekim,
+> aynı admin hesabı Android tablet + iOS 4.1.0 simülatöründe, her canlı yazım onayla): iki yönde "Bana test gönder"
+> karşı platformun bildirim sayfasına düştü, `readAt` ve kampanya tercihi iki yönde canlı eşlendi; **Faz 3 tamam.**
+> **Sıradaki:** Faz 4 yayın (`NRL-01`…), yalnız ürün sahibinin açık onayıyla. Hatların birleştirilmesinde yeni UI
+> testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
 > Hat F'nin yasal/politika kararları (K2–K4, R1–R2, P1–P3;
@@ -1239,8 +1241,28 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     `onAccountDeleted` hatasız koştu (`pendingSubmissions: 0`, `unlinkedPurchases: 0`); Auth kaydı, Firestore
     `users/<uid>` (alt koleksiyonlar dahil) ve RTDB `users/<uid>` temizlendi. Cihazda sınav dosyası önbelleği boş,
     tercih deposunda yalnız cihaza ait `notifications.consentOffered.v1` kaldı._
-- [ ] **`NQA-02`** iOS ↔ Android çapraz kontrol _(P1·S·Opus)_ — Android admin'in gönderdiği bildirim iOS'ta görünür (ve
-  tersi). Aynı hesapla iki cihazda `readAt` senkronu ve kampanya tercihi. ⟶ `NQA-01`
+- [x] **`NQA-02`** iOS ↔ Android çapraz kontrol _(P1·S·Opus)_ — Android admin'in gönderdiği bildirim iOS'ta görünür (ve
+  tersi). Aynı hesapla iki cihazda `readAt` senkronu ve kampanya tercihi. ⟶ `NQA-01` ✅ _Tamam (2026-10-31, Opus; aynı
+  admin hesabı: Android tablet emülatörü API 37 live debug 4.1.0 (20) + `ViFi-iOS` `v-4.1.0` 4.1.0 (10) Debug, iPhone 17
+  Pro simülatörü iOS 26; iOS deposunda kod değişmedi. Simülatörün App Check debug anahtarını ve girişi ürün sahibi yaptı;
+  her canlı yazım ürün sahibinin onayıyla. Uygulama hatası bulunmadı. Bulgular:_
+  - _**Android → iOS:** tablette Duyuru "NQA-02 Android->iOS" için "Bana test gönder". Tablete `general` kanalında push
+    geldi, zilde "1 okunmamış" çıktı. iOS'ta zil rozetlendi, kayıt bildirim sayfasının en üstünde göründü. `NQA-01`'in
+    Android'den giden kayıtları da (test 1–4, ret, yeni gönderim) iOS sayfasında aynı sırada listelendi._
+  - _**iOS → Android:** simülatörde Duyuru "NQA-02 iOS->Android" için "Bana test gönder". Tablete `general` kanalında push
+    geldi, zilde "1 okunmamış" çıktı ve kayıt Bildirimler'in en üstüne düştü. Gönderim Geçmişi iki test için de "1 alıcı
+    · 3 push · 0 başarısız" gösterdi._
+  - _**`readAt` senkronu (iki yön):** tablet ana sayfadayken iOS'ta Bildirimler açıldı; tabletteki "1 okunmamış" ~2 sn'de,
+    uygulama yenilenmeden kalktı. Ters yönde tablette Bildirimler açıldı; iOS'taki zil rozeti birkaç saniyede kalktı._
+  - _**Kampanya tercihi (iki yön, iki ekran da açıkken):** tablette Bildirim Ayarları'ndan kapatıldı; iOS'taki düğme sayfa
+    yeniden açılmadan kapandı. iOS'ta yeniden açıldı; tablettekisi ~4 sn'de açıldı. Son durum iki platformda da açık
+    (testten önceki hâli)._
+  - _**Simülatörde push doğrulanamadı (iOS ortam sınırı, Android'le ilgisi yok):** simülatör izin verse de ("Açık") FCM
+    jetonu almadı, cihaz kaydı oluşmadı. Push sayısının 18:58'deki 4'ten 3'e inmesi `NQA-01`'deki telefon çıkışıyla
+    açıklanıyor; simülatör alıcı olmadı. iOS push'u 30 Ekim'de gerçek iPhone'da doğrulanmıştı (iOS `CLAUDE.md`). iOS
+    tarafı bildirim sayfası ve rozetle doğrulandı._
+  - _**Kapanış:** simülatörden çıkış yapıldı (cihaz kaydı oluşmadığı için silinecek kayıt yoktu). Tablet ana sayfada,
+    okunmamış yok. Gözlem: test metinleri ASCII yazıldı (`adb input text` Türkçe karakter ve "→" yazamıyor)._
 
 ### Faz 4 — Yayın  ⚠️ (ürün sahibiyle · her dış adım ayrı onay)
 
