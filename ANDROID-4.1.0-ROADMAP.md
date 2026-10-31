@@ -49,8 +49,9 @@
 > gizlilik, hesap silme ve kullanım koşulları sayfaları + hosting yayını (en erken fırsatta). İkisi 31 Ekim'de ürün
 > sahibinin isteğiyle ortak depoda hazırlandı (`ViFi-iOS` `ab53aa2` temizlik + `events.uid` index izni, `cd67bd1` canlı
 > TTL ayarı dosyaya, `d688251` üç sayfa; Firebase testleri 425'in 421'i geçti, başarısız yok, 4'ü önceden belgeli
-> TODO); yayınlar (index → `onAccountDeleted` → hosting) onay bekliyor. Mağaza metni ve 4.1.0 sürüm notu (`NLG-04`)
-> onay bekliyor.
+> TODO) ve ürün sahibinin onayıyla aynı gün yayınlandı: `events.uid` index izni etkin, `onAccountDeleted` güncellendi,
+> üç sayfa canlıda (HTTP 200, yerel dosyalarla bayt bayt aynı). Mağaza metni ve 4.1.0 sürüm notu (`NLG-04`) onay
+> bekliyor.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -1292,7 +1293,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   ⟶ `NLG-01`
 - [ ] **`NRL-06`** Mağaza girişi + politika beyanları _(P0·S)_ — `NLG-03`/`NLG-04` sonuçlarına göre. ⟶ `NLG-03`, `NLG-04`
   Önkoşul: üç yasal sayfa ortak depoda güncellenip yayında (P1–P3) ve canlıda yeniden salt okunmuş olmalı; reklam
-  beyanı "Hayır" kalır (R2).
+  beyanı "Hayır" kalır (R2). → 31 Ekim: sayfalar yayınlandı ve salt okundu; gönderimden hemen önce bir kez daha okunur.
 - [ ] **`NRL-07`** Üretime yayın + incelemeye gönder _(P0·S)_ — %100, sürüm notu, yönetilen yayınlama kapalı. **Onayla.**
   ⟶ `NRL-04`…`06`
 - [ ] **`NRL-08`** Yayın sonrası doğrulama _(P1·S)_ — Android vitals; `devices` kayıtlarının `platform: android` ile

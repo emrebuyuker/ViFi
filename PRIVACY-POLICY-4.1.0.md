@@ -2,7 +2,9 @@
 
 > **Durum (31 Ekim 2026):** Kontrol ve öneri metni; **ürün sahibi 31 Ekim'de onayladı** (P1–P3). Köşeli parantezli
 > kısımlar: R1 = sponsorlu kampanya yok (§3.4'ün ilk biçimi), K3 = istatistik kayıtları backend'de silinir (§3.7'deki
-> satır girer). Yayın en erken fırsatta (P3). Sayfaların kaynağı ortak depoda
+> satır girer). Yayın en erken fırsatta (P3). **31 Ekim'de yayınlandı:** ortak depoda `d688251` (ürün sahibinin isteğiyle
+> bu oturumda hazırlandı), hosting yayını ürün sahibinin onayıyla; canlı sayfalar dosyalarla bayt bayt aynı. Saklama
+> cümlesine "bildirim etkileşimlerin" eklendi (K3 ile bu kayıtlar da hesap silinince silindiği için). Sayfaların kaynağı ortak depoda
 > (`ViFi-iOS/firebase/hosting/`). Değişikliği iOS tarafı yapar, hosting yayını ayrıca onay ister. Android bu dosyaları
 > yazmaz ve yayınlamaz. Sayfalar Android ile iOS'ta ortak; iOS 4.1.0 da şu anki metinlerle App Store incelemesinde.
 > Veri envanteri: [`PLAY-DATA-SAFETY.md`](PLAY-DATA-SAFETY.md) §4.1.0. Politika kontrolü: [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md).

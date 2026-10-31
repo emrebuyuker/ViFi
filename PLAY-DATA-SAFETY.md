@@ -245,8 +245,8 @@ Play'deki "kullanıcılar verilerinin silinmesini isteyebilir" cevabı her iki d
   "isteğe bağlı" beyan edilsin. Alternatif: yalnız kilitlenme/tanılama (iOS'la aynı). Alternatif: hiçbiri; gerekçe
   "admin'ler geliştirici ekibi". Bu alternatif riskli, çünkü admin de uygulamanın bir kullanıcısıdır.
 - ✅ **K3 İstatistik işaretleri:** backend temizliği (öneri) ya da sayfada açıklama. 31 Ekim: backend temizliği
-  seçildi; ortak depodaki `accountCleanup.js` hâlâ bu yolu kapsamıyor (31 Ekim okundu), iOS tarafında eklenip deploy
-  edilir (ayrı onay).
+  seçildi ve aynı gün uygulandı: ortak depoda `ab53aa2` (`onAccountDeleted` işaretleri koleksiyon grubu sorgusuyla siler,
+  sayaçlar kalır; `events.uid` index izni), ürün sahibinin onayıyla yayınlandı.
 - ✅ **K4 "Geliştirici iletişimleri":** Duyurular için bu amaç eklensin mi? Öneri evet (Play'in tanımına birebir uyuyor).
   31 Ekim: evet.
 - Onay kaydı kanıt işlevi de gördüğü için "Dolandırıcılığı önleme, güvenlik ve uyumluluk" amacı da işaretlenebilir;
