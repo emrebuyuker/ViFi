@@ -9,8 +9,8 @@
 > **4.1.0 (NLG-01, 30 Ekim 2026, ürün sahibinin onayını bekliyor):** Hedefli bildirim sistemi için tabloya "Geliştirici
 > iletişimleri" ve "Reklam veya pazarlama" amaçları, kampanya onayı kaydı, okundu işareti, açılma/aksiyon istatistiği ve
 > kurulum kimliği eklendi. _(4.1.0)_ işaretli hücreler yenidir. Admin harita seçicisinin (Google Maps + Places SDK) ve
-> konumun etkisi §4.1.0'dadır. K1 (konum) karara bağlandı ve uygulandı; kalan açık kararlar (K2…K4) verilmeden form
-> doldurulmaz. Console formu 4.1.0 sürümüyle
+> konumun etkisi §4.1.0'dadır. K1 (konum) karara bağlandı ve uygulandı; K2…K4 31 Ekim 2026'da ürün sahibince öneri
+> yönünde karara bağlandı. Console formu 4.1.0 sürümüyle
 > girilir (`NRL-05`); o zamana kadar yayındaki sürümün beyanı geçerlidir.
 
 ## Toplanan veriler
@@ -241,11 +241,14 @@ Play'deki "kullanıcılar verilerinin silinmesini isteyebilir" cevabı her iki d
 ### Açık kararlar (ürün sahibi)
 
 - ~~**K1 Konum**~~ ✅ A seçildi ve Hat E'de uygulandı (`7c74b21`); konum beyan edilmez.
-- **K2 Admin harita SDK'sının verileri:** Öneri, kilitlenme günlükleri + tanılama + uygulama içi arama geçmişi
+- ✅ **K2 Admin harita SDK'sının verileri** (31 Ekim: öneri kabul — üçü de "isteğe bağlı"): Öneri, kilitlenme günlükleri + tanılama + uygulama içi arama geçmişi
   "isteğe bağlı" beyan edilsin. Alternatif: yalnız kilitlenme/tanılama (iOS'la aynı). Alternatif: hiçbiri; gerekçe
   "admin'ler geliştirici ekibi". Bu alternatif riskli, çünkü admin de uygulamanın bir kullanıcısıdır.
-- **K3 İstatistik işaretleri:** backend temizliği (öneri) ya da sayfada açıklama.
-- **K4 "Geliştirici iletişimleri":** Duyurular için bu amaç eklensin mi? Öneri evet (Play'in tanımına birebir uyuyor).
+- ✅ **K3 İstatistik işaretleri:** backend temizliği (öneri) ya da sayfada açıklama. 31 Ekim: backend temizliği
+  seçildi; ortak depodaki `accountCleanup.js` hâlâ bu yolu kapsamıyor (31 Ekim okundu), iOS tarafında eklenip deploy
+  edilir (ayrı onay).
+- ✅ **K4 "Geliştirici iletişimleri":** Duyurular için bu amaç eklensin mi? Öneri evet (Play'in tanımına birebir uyuyor).
+  31 Ekim: evet.
 - Onay kaydı kanıt işlevi de gördüğü için "Dolandırıcılığı önleme, güvenlik ve uyumluluk" amacı da işaretlenebilir;
   zorunlu değil.
 

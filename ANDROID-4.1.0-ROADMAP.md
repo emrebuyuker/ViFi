@@ -43,9 +43,11 @@
 > yapıldı. **Sıradaki:** `NRL-03` (release AAB), yalnız ürün sahibi "release çıkalım" deyince; sonrası her dış adım ayrı onayla. Hatların birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
-> konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
-> Hat F'nin yasal/politika kararları (K2–K4, R1–R2, P1–P3;
-> `PLAY-POLICY-4.1.0.md`, `PRIVACY-POLICY-4.1.0.md`).
+> konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Hat F'nin yasal/politika
+> kararları (K2–K4, R1–R2, P1–P3) 31 Ekim'de verildi, hepsi öneri yönünde. Yayından önce ortak depoda (iOS tarafı,
+> her deploy ayrı onay): K3 için hesap silme temizliğine bildirim istatistiği kayıtları + Functions deploy; P1–P3 için
+> gizlilik, hesap silme ve kullanım koşulları sayfaları + hosting yayını (en erken fırsatta). Mağaza metni ve 4.1.0
+> sürüm notu (`NLG-04`) onay bekliyor.
 
 | Faz | Ne | Nasıl ilerler | Kalem |
 |---|---|---|---|
@@ -943,7 +945,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
     (`notifications/<id>/events/<uid>_<olay>`) hesap silmede silinmiyor._
   - _**Kararlar:** K1 konum ✅ (ürün sahibi 30 Ekim: yalnız `COARSE` + bias yalnız admin haritayı yerleştirince; Hat E
     `7c74b21`'de uyguladı → konum beyanı yok). Açık: K2 admin SDK verileri (öneri: kilitlenme + tanılama + arama geçmişi, isteğe bağlı), K3 istatistik
-    işaretlerinin silinmesi (öneri: ortak backend), K4 "geliştirici iletişimleri" amacı (öneri: evet)._
+    işaretlerinin silinmesi (öneri: ortak backend), K4 "geliştirici iletişimleri" amacı (öneri: evet). → Ürün sahibi
+    31 Ekim: K2 kilitlenme + tanılama + arama geçmişi (isteğe bağlı), K3 ortak backend'de silinsin, K4 evet._
 - [x] **`NLG-02`** Gizlilik politikası kontrolü _(P1·S·Sonnet)_ — Canlı `/gizlilik` kampanya bildirimlerini, onay
   kaydını, cihaz kaydını ve admin harita konumunu anıyor mu? Eksikse metin ortak depoda (`ViFi-iOS/firebase/hosting/`)
   önerilir; hosting yayını ayrıca onay ister. ⟶ `NLG-01` ✅ _Tamamlandı (2026-10-30, Opus). Öneri metni bu dalda
@@ -959,7 +962,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
     kullanım koşullarına Google Haritalar maddesi. Ek öneri: Android konum diyaloğundan önce iOS'un amaç metni
     (`MAP-02`/`MAP-03`) → ürün sahibi 31 Ekim: gerek yok (konum izni yalnız admin konum seçicisinde isteniyor)._
   - _**Ürün sahibine:** metin onayı (P1), Google Maps maddesi (P2), yayın zamanı (P3; iOS 4.1.0 da aynı sayfalara
-    bağlı)._
+    bağlı). → Ürün sahibi 31 Ekim: P1 onaylandı (R1 = sponsorlu yok, K3 = backend), P2 evet, P3 en erken fırsatta._
 - [x] **`NLG-03`** Play politikası kontrolü _(P1·S·Opus)_ — Onaylı kampanya bildirimlerinin Play kurallarına uygunluğu
   (bildirimle tanıtım, "Reklam içeriyor" beyanı gerekiyor mu?) ve yalnız ön plan konum izninin beyan gerektirip
   gerektirmediği. Sonuç ürün sahibine sorulur. ✅ _Tamamlandı (2026-10-30, Opus). Ayrıntı
@@ -970,7 +973,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
     ihlal örneği. Öneri (R1): bildirimde yalnız ViFi'nin kendi teklifleri ve karşılıksız öğrenci fırsatları; ücretli
     ya da sponsorlu işletme tanıtımı ve içerik derecelendirmesine aykırı kampanya (alkol, tütün, kumar) yok._
   - _**"Reklam içeriyor":** Premium ve satın alma teklifleri kapsam dışı. Sponsorlu kampanya akış içi native reklam
-    sayılır. Öneri (R2): R1 kabul edilirse cevap "Hayır" kalır._
+    sayılır. Öneri (R2): R1 kabul edilirse cevap "Hayır" kalır. → Ürün sahibi 31 Ekim: R1 kabul (sponsorlu/ücretli
+    tanıtım ve alkol, tütün, kumar yok), R2 "Hayır" kalır._
   - _**Konum:** arka plan beyanı gerekmez. Ancak yeni "en dar kapsam" kuralıyla `ACCESS_FINE_LOCATION` için Console
     beyanı Kasım 2026'da açılıyor, 27 Ocak 2027'de zorunlu oluyor. K1 ✅: yalnız `ACCESS_COARSE_LOCATION` (ürün sahibi
     onayı; Hat E `7c74b21`) → beyan gerekmez. Konum düğmesi zorunluluğu `targetSdk 37+`._
@@ -1284,6 +1288,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
 - [ ] **`NRL-05`** Veri güvenliği formu _(P0·S)_ — `NLG-01`'e göre Console'a girilir, üretimle incelemeye gider.
   ⟶ `NLG-01`
 - [ ] **`NRL-06`** Mağaza girişi + politika beyanları _(P0·S)_ — `NLG-03`/`NLG-04` sonuçlarına göre. ⟶ `NLG-03`, `NLG-04`
+  Önkoşul: üç yasal sayfa ortak depoda güncellenip yayında (P1–P3) ve canlıda yeniden salt okunmuş olmalı; reklam
+  beyanı "Hayır" kalır (R2).
 - [ ] **`NRL-07`** Üretime yayın + incelemeye gönder _(P0·S)_ — %100, sürüm notu, yönetilen yayınlama kapalı. **Onayla.**
   ⟶ `NRL-04`…`06`
 - [ ] **`NRL-08`** Yayın sonrası doğrulama _(P1·S)_ — Android vitals; `devices` kayıtlarının `platform: android` ile

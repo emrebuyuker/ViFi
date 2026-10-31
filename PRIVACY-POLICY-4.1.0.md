@@ -1,6 +1,8 @@
 # Gizlilik Politikası ve Yasal Sayfalar — 4.1.0 Kontrolü (NLG-02)
 
-> **Durum (30 Ekim 2026):** Kontrol ve öneri metni; **ürün sahibinin onayını bekliyor.** Sayfaların kaynağı ortak depoda
+> **Durum (31 Ekim 2026):** Kontrol ve öneri metni; **ürün sahibi 31 Ekim'de onayladı** (P1–P3). Köşeli parantezli
+> kısımlar: R1 = sponsorlu kampanya yok (§3.4'ün ilk biçimi), K3 = istatistik kayıtları backend'de silinir (§3.7'deki
+> satır girer). Yayın en erken fırsatta (P3). Sayfaların kaynağı ortak depoda
 > (`ViFi-iOS/firebase/hosting/`). Değişikliği iOS tarafı yapar, hosting yayını ayrıca onay ister. Android bu dosyaları
 > yazmaz ve yayınlamaz. Sayfalar Android ile iOS'ta ortak; iOS 4.1.0 da şu anki metinlerle App Store incelemesinde.
 > Veri envanteri: [`PLAY-DATA-SAFETY.md`](PLAY-DATA-SAFETY.md) §4.1.0. Politika kontrolü: [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md).
@@ -144,9 +146,9 @@ Bu `MAP-02`/`MAP-03` kapsamındadır; Hat F kod yazmaz.
 
 ## 6. Ürün sahibine sorular
 
-- **P1:** §3'teki metinler onaylanıyor mu (G1–G10)?
-- **P2:** Kullanım koşullarına Google Haritalar maddesi eklensin mi? Öneri: evet; şartların gereği ve iOS'u da kapsıyor.
-- **P3:** Sayfalar iOS 4.1.0 yayına girmeden mi güncellensin, yoksa Android 4.1.0 incelemesinden önce mi? Öneri: en erken
+- ✅ **P1 (31 Ekim: onaylandı):** §3'teki metinler onaylanıyor mu (G1–G10)?
+- ✅ **P2 (31 Ekim: evet):** Kullanım koşullarına Google Haritalar maddesi eklensin mi? Öneri: evet; şartların gereği ve iOS'u da kapsıyor.
+- ✅ **P3 (31 Ekim: en erken fırsatta):** Sayfalar iOS 4.1.0 yayına girmeden mi güncellensin, yoksa Android 4.1.0 incelemesinden önce mi? Öneri: en erken
   fırsatta. iOS 4.1.0 da kampanya bildirimi ve harita içeriyor.
 - R1 ve K3 için [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md) ile [`PLAY-DATA-SAFETY.md`](PLAY-DATA-SAFETY.md) §4.1.0'a bakın.
 

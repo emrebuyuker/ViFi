@@ -1,6 +1,6 @@
 # Play Politika Kontrolü — 4.1.0 (NLG-03)
 
-> **Durum (30 Ekim 2026):** Kontrol ve öneri; **kararlar ürün sahibinin.** Okunan kaynaklar: Play Geliştirici Programı
+> **Durum (31 Ekim 2026):** Kontrol ve öneri; R1 ve R2 31 Ekim'de ürün sahibince öneri yönünde karara bağlandı. Okunan kaynaklar: Play Geliştirici Programı
 > Politikası (29 Ekim 2026'dan itibaren yürürlükteki metin), Play Console yardım sayfaları ve 29 Ekim 2026 politika
 > duyurusu. Bağlantılar en altta. Bu belge hukuki görüş değildir.
 > İlgili belgeler: [`PLAY-DATA-SAFETY.md`](PLAY-DATA-SAFETY.md) §4.1.0 (K1…K4),
@@ -130,9 +130,9 @@ Play'in Kullanıcı Verileri politikasındaki onay kuralları ([Politika][ddp]) 
 
 ## 7. Ürün sahibine sorular
 
-- **R1:** Kampanya bildirimleri ücretli ya da sponsorlu bir işletme tanıtımı içerecek mi? Öneri: hayır. Bildirimde
+- ✅ **R1 (31 Ekim: hayır):** Kampanya bildirimleri ücretli ya da sponsorlu bir işletme tanıtımı içerecek mi? Öneri: hayır. Bildirimde
   yalnız ViFi'nin kendi teklifleri ve karşılıksız öğrenci fırsatları olsun; alkol, tütün, kumar içeriği olmasın.
-- **R2:** "Reklam içeriyor" beyanı. Öneri: R1 "hayır" ise bugünkü "Hayır" kalsın.
+- ✅ **R2 (31 Ekim: "Hayır" kalır):** "Reklam içeriyor" beyanı. Öneri: R1 "hayır" ise bugünkü "Hayır" kalsın.
 - ~~**K1:**~~ ✅ Yalnız `ACCESS_COARSE_LOCATION`; ürün sahibi onayladı, Hat E uyguladı (`7c74b21`).
 - **R3 (bilgi):** Ticari statü beyanı Kasım 2026'da Console'a geliyor; 4.1.0'dan bağımsız.
 - **Kapsam dışı:** Kampanya push'larının Türk mevzuatındaki ticari elektronik ileti ve onay kuralları karşısındaki
