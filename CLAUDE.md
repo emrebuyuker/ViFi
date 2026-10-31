@@ -7,15 +7,15 @@
 > tamamlama/düzenleme, Hesap ekranı (çıkış + hesap silme), sınav görüntüleyicileri, coin cüzdanı + sınav kilidi, ViFi
 > Premium, bildirimler (FCM + bildirim sayfası), onboarding, Hakkında, force update kapısı ve analytics hazır; ana akışlar
 > canlıda emülatörde doğrulandı. ViFi 3.1.0 (17) 28 Ekim 2026'da Play'de üretime çıktı; 4.0.0 (19) 29 Ekim'de üretime
-> alınıp incelemeye gönderildi (`RLS-08`), yayın sonrası adımlar (`RLS-09`…`RLS-11`) açık. iOS v3.1.0 parite yol
+> alınıp incelemeye gönderildi, 29 Ekim 19:14'te onaylanıp %100 yayına çıktı (`RLS-08`); yayın sonrası kontroller
+> temiz, yalnız gerçek telefonla deneme açık (`RLS-09`), `RLS-10`/`RLS-11` açık. iOS v3.1.0 parite yol
 > haritasının 223 kalemi tamam (29 Ekim 2026).
 > **4.1.0 (20)** `v-4.1.0` dalında geliştiriliyor: iOS `v-4.1.0`'ın **hedefli bildirim sistemi** (bildirimleri sunucu
 > gönderir; tek bildirim sayfası, görsel + aksiyon, izin + kampanya onayı, Hesap › Bildirim Ayarları, admin "Bildirim
 > Gönder" + Geçmiş + konum seçici). Sözleşme (`NCT-01`), beş kod hattı (A…E), belge/beyan hattı (F) ve canlı bağlama
 > (`NIT-01`), birim ve UI testleri (`NIT-02`/`NIT-03`; izin akışı API 32 ve 37 emülatörde) ve Android Maps anahtarı
-> (`NOPS-01`) tamam; canlı uçtan uca doğrulama (`NQA-01`) 31 Ekim'de geçti, sırada iOS ↔ Android çapraz kontrol
-> (`NQA-02`). Yayın (Faz 4) yalnızca ürün sahibinin açık onayıyla, her
-> dış adım ayrı onayla yapılır.
+> (`NOPS-01`) tamam; canlı doğrulama (Faz 3: `NQA-01` uçtan uca, `NQA-02` iOS ↔ Android çapraz) 31 Ekim'de geçti.
+> Sırada yayın (Faz 4, `NRL-01`…`NRL-09`); yalnızca ürün sahibinin açık onayıyla, her dış adım ayrı onayla yapılır.
 > **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
 > **4.1.0 iş listesi** (iOS `v-4.1.0` hedefli bildirim sistemi paritesi, `v-4.1.0` dalı; backend canlıda, Android backend
 > yazmaz): [`ANDROID-4.1.0-ROADMAP.md`](ANDROID-4.1.0-ROADMAP.md) + iOS olgu eki [`ANDROID-4.1.0-DETAIL.md`](ANDROID-4.1.0-DETAIL.md).

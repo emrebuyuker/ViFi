@@ -169,7 +169,7 @@ Faz 1  NCT-01 (sözleşme, DI, rotalar, LaunchArg, analytics, sürüm — İLK G
                                                                                          └─► Hat E  MAP-01..04 ◄┘ (canlı anahtar yalnız doğrulamada)
        Hat F  NLG-01..04 (bağımsız; yalnız .md + Console hazırlığı)
 Faz 2  NIT-01 (bağlama) ◄── A+B+C+D+E ──► NIT-02 (birim) · NIT-03 (UI + emülatör) · NIT-04 (belgeler)
-Faz 3  NQA-01 (canlı debug) ✅ ──► NQA-02 (iOS ↔ Android çapraz)   ◄── NIT-01..03 + NOPS-01/02
+Faz 3  NQA-01 (canlı debug) ✅ ──► NQA-02 (iOS ↔ Android çapraz) ✅   ◄── NIT-01..03 + NOPS-01/02
 Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 → 09
 ```
 
