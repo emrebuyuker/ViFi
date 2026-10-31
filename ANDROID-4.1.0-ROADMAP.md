@@ -1022,8 +1022,33 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     → mock seçici → seçilen yer, Geçmiş, Bildirim Ayarları açıldı); `vifi_notifications_reask` + PDF'li gerçek
     gönderim (form kapandı, "Onaylanınca haber verelim mi?" geldi). Canlıya yazım yapılmadı; live derleme Maps
     anahtarsız (seçici "yapılandırılmamış" der; `NOPS-01`)._
-- [ ] **`NIT-02`** Birim testleri _(P0·M·Sonnet)_ — Hatların testleri + iOS test listelerinin (ek) tam karşılığı.
-  `AnalyticsLimitsTest` (6 olay, ekran sayısı 15 → 18). Üç variant'ta tam paket. ⟶ `NIT-01`
+- [x] **`NIT-02`** Birim testleri _(P0·M·Sonnet)_ — Hatların testleri + iOS test listelerinin (ek) tam karşılığı.
+  `AnalyticsLimitsTest` (6 olay, ekran sayısı 15 → 18). Üç variant'ta tam paket. ⟶ `NIT-01` ✅ _Tamamlandı
+  (2026-10-31, Opus). Gelenler:_
+  - _**Eşleme:** ekteki 321 iOS birim testinin (A.11: 98, B.9: 96, C.8: 127) 312'sinin karşılığı var: 311'i JVM birim
+    testi, `InboxActionButtonTests.buttons` Compose testi (`InboxContentTest`, metin eşlemesi private). Hatlar testleri
+    iOS'la birebir yazmıştı. Android uyarlamaları: iki provisional testi tek "sessiz izin yok" testinde (`NDEC-01`);
+    `bellAndDismiss` gezinmede (zil vurgusuz `Inbox()` açar, kapanış Back, vurgu rota argümanı). Test test tablo ortak
+    not klasöründe (`nit-02-esleme.md`)._
+  - _**Bilinçli eşlenmeyen 9:** `NotificationBadgeCounterTests`'in 5'i (`NDEC-04`: sayaç yok; ön plana gelişte temizleme
+    `AppLifecycleHooksTest`'te); `NotificationPermissionTests` (2) ve `MapsLinksTests.googleChoice` (1) cihaza bağlı
+    (`SDK_INT`/izin, Intent; JVM'de çalışmaz, `NIT-03`'e not bırakıldı); `signOutFailure` (1): Android'de
+    `AuthService.signOut()` ve `DeviceRegistration.unregister` hata fırlatmaz._
+  - _**Yeni 20 test (7 dosya),** iOS listesinde olmayan ve testsiz kalmış 4.1.0 sınıfları için:
+    `FirestoreInboxReaderTest` (9: `announcements` 50 / `users/<uid>/inbox` 100 `createdAt` azalan, ayrıştırılamayan
+    belge düşer, hata → `InboxError.Unavailable`, dinleyici hata ve iptalde sökülür, işaret `MetadataChanges.INCLUDE` +
+    tahmini zaman, yalnız önbellekte eksik işaret yayılmaz, `markRead` tam olarak `{readAt: serverTimestamp}`, görsel
+    URL'si yalnız `notificationImages/`), `FirebaseNotificationEventReporterTest` (2: `trackNotificationEvent` yükü,
+    hata fırlatılır), `LegacyInboxReadStateTest` (2: 4.0.0 anahtarı `announcements.readIds`), `InboxDateTest` (2: "30 Eki
+    2026"), `NotificationComposerTextTest` (2: "30 Eki 2026 14:30", admin yalnız Duyuru/Kampanya seçer),
+    `DeepLinkViewModelTest` (2: push dokunuşu tur bitene kadar bekler), `SessionViewModelTest` (1: oturum izleyicileri
+    bir kez başlar). Her biri geçici kod bozmasıyla kırılarak denendi, kod geri alındı._
+  - _**`AnalyticsLimitsTest`:** `NCT-01`'de tamamlanmıştı (6 olay örneklerde, 18 ekranın hepsi listede); değişiklik
+    gerekmedi. `InboxViewModelTest` (+5), `NotificationPromptViewModelTest` (+2), `AccountContentTest` (+3) `NIT-01`'den;
+    boşluk yok._
+  - _**Uygulama kodu değişmedi;** testler hata bulmadı._
+  - _**Doğrulama:** `assembleDebug` başarılı. `lintLiveDebug` 0 hata, 56 uyarı (testlerde yok). Birim testleri liveDebug
+    1080 → 1100 / mockDebug 1064 → 1084 / liveRelease 1080 → 1100 (her birinde +20), hepsi geçti. Emülatör kullanılmadı (`NIT-03`'te)._
 - [ ] **`NIT-03`** UI testleri + emülatör _(P0·M·Sonnet)_ — iOS `InboxUITests` (13), `NotificationPermissionUITests` (9),
   `NotificationComposerUITests` (6) ve `LocationCampaignUITests` (6) karşılıkları. Mock'ta uçtan uca; açık/koyu tema;
   **API 33+ ve API ≤32** emülatörde izin eşlemesi. ⟶ `NIT-01`
