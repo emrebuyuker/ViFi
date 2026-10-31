@@ -957,7 +957,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   - _**Önerilen metin:** gizlilik tablosu (2 değişen, 3 yeni satır), "Bildirimler" ve "Yöneticilerin harita ekranı"
     bölümleri, reklam cümlesinin iki biçimi (R1'e bağlı), aktarım/saklama cümleleri, hesap silme satırları (K3'e bağlı),
     kullanım koşullarına Google Haritalar maddesi. Ek öneri: Android konum diyaloğundan önce iOS'un amaç metni
-    (`MAP-02`/`MAP-03`)._
+    (`MAP-02`/`MAP-03`) → ürün sahibi 31 Ekim: gerek yok (konum izni yalnız admin konum seçicisinde isteniyor)._
   - _**Ürün sahibine:** metin onayı (P1), Google Maps maddesi (P2), yayın zamanı (P3; iOS 4.1.0 da aynı sayfalara
     bağlı)._
 - [x] **`NLG-03`** Play politikası kontrolü _(P1·S·Opus)_ — Onaylı kampanya bildirimlerinin Play kurallarına uygunluğu
