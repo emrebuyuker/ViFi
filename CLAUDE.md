@@ -12,16 +12,16 @@
 > kapatıldı, `RLS-11` (W-8BEN) yapılmadan kapatıldı; 4.0.0 listesi 38/38 kapandı. **Gerçek telefon testi yok:** ürün sahibinin telefonu yok; telefon gerektiren adımlar
 > önerilmez ve gündeme getirilmez (31 Ekim 2026 kararı).
 > iOS v3.1.0 parite yol haritasının 223 kalemi tamam (29 Ekim 2026).
-> **4.1.0 (21)** `v-4.1.0` dalında geliştiriliyor: iOS `v-4.1.0`'ın **hedefli bildirim sistemi** (bildirimleri sunucu
+> **4.1.0 (21)** `v-4.1.0` dalında geliştirildi ve 31 Ekim 2026'da üretime çıktı: iOS `v-4.1.0`'ın **hedefli bildirim sistemi** (bildirimleri sunucu
 > gönderir; tek bildirim sayfası, görsel + aksiyon, izin + kampanya onayı, Hesap › Bildirim Ayarları, admin "Bildirim
 > Gönder" + Geçmiş + konum seçici). Sözleşme (`NCT-01`), beş kod hattı (A…E), belge/beyan hattı (F) ve canlı bağlama
 > (`NIT-01`), birim ve UI testleri (`NIT-02`/`NIT-03`; izin akışı API 32 ve 37 emülatörde) ve Android Maps anahtarı
 > (`NOPS-01`) tamam; canlı doğrulama (Faz 3: `NQA-01` uçtan uca, `NQA-02` iOS ↔ Android çapraz) 31 Ekim'de geçti.
 > Yayın (Faz 4): `NRL-01`…`NRL-07` tamam. 21 (4.1.0) (`play-store/ViFi-4.1.0-21.aab`; konum donanımı isteğe bağlı
 > yapıldığı için 20 yerine 21) dahili testten üretime %100 alındı. Tam açıklama ve veri güvenliğiyle birlikte 31 Ekim
-> ~21:28'de incelemeye gönderildi (`NRL-07`); yönetilen yayınlama kapalı, onayda kendiliğinden yayına çıkar.
-> `NRL-09` (güncelleme önerisi) ürün sahibinin kararıyla yapılmadan kapatıldı. Sırada son kalem `NRL-08` (yayın
-> sonrası doğrulama, salt okuma).
+> ~21:28'de incelemeye gönderildi (`NRL-07`), aynı akşam onaylanıp yayına çıktı. `NRL-08` ilk gözlemle (mağaza,
+> politika, vitals, function hataları temiz), `NRL-09` (güncelleme önerisi) yapılmadan ürün sahibinin kararıyla
+> kapatıldı. **4.1.0 listesi 50/50 kapandı.**
 > **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
 > **4.1.0 iş listesi** (iOS `v-4.1.0` hedefli bildirim sistemi paritesi, `v-4.1.0` dalı; backend canlıda, Android backend
 > yazmaz): [`ANDROID-4.1.0-ROADMAP.md`](ANDROID-4.1.0-ROADMAP.md) + iOS olgu eki [`ANDROID-4.1.0-DETAIL.md`](ANDROID-4.1.0-DETAIL.md).
@@ -248,4 +248,4 @@ Projeyi modernize et / Firestore'a taşı.
 ---
 
 **Son güncelleme:** 31 Ekim 2026
-**Proje:** ViFi Android (`com.salticusteam.vifi`, v4.1.0 (21) geliştirmede — hedefli bildirim sistemi; giriş, arşiv, görüntüleyiciler, coin, Premium, bildirim, profil ve Hesap hazır)
+**Proje:** ViFi Android (`com.salticusteam.vifi`, v4.1.0 (21) 31 Ekim 2026'dan beri üretimde — hedefli bildirim sistemi; giriş, arşiv, görüntüleyiciler, coin, Premium, bildirim, profil ve Hesap hazır)

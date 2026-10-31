@@ -1,8 +1,8 @@
 # ViFi Android
 
 Üniversitelerin geçmiş sınavlarını tek yerde toplayan sınav arşivi uygulamasının Android istemcisi.
-**Kotlin + Jetpack Compose + MVVM + Hilt** üzerinde; sürüm serisi iOS ile aynıdır. Bugünkü geliştirme **4.1.0 (21)**,
-`v-4.1.0` dalında: iOS `v-4.1.0`'ın hedefli bildirim sistemi.
+**Kotlin + Jetpack Compose + MVVM + Hilt** üzerinde; sürüm serisi iOS ile aynıdır. Yayındaki sürüm **4.1.0 (21)**
+(31 Ekim 2026'dan beri üretimde, `v-4.1.0` dalı): iOS `v-4.1.0`'ın hedefli bildirim sistemi.
 
 - 4.1.0 iş listesi (hedefli bildirim sistemi): [`ANDROID-4.1.0-ROADMAP.md`](ANDROID-4.1.0-ROADMAP.md), iOS olgu eki [`ANDROID-4.1.0-DETAIL.md`](ANDROID-4.1.0-DETAIL.md)
 - 4.0.0 iş listesi (ViFi Premium): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md)

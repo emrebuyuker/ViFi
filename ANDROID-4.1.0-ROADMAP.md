@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **49'u tamam, 1'i yarım.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **50'si tamam; liste kapandı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -48,9 +48,8 @@
 > incelemeye `NRL-07` ile gidecek. `NRL-04` 31 Ekim'de ürün sahibinin kararıyla telefon adımı yapılmadan kapatıldı.
 > `NRL-07`: 21 (4.1.0) üretime %100 olarak, mağaza girişi ve veri güvenliğiyle birlikte 31 Ekim ~21:28'de ürün
 > sahibinin onayıyla incelemeye gönderildi. `NRL-09` (güncelleme önerisi) ürün sahibinin kararıyla yapılmadan
-> kapatıldı. 4.1.0 aynı akşam onaylanıp üretime çıktı. **Son kalem:** `NRL-08` yarım. İlk gözlem temiz (mağaza,
-> politika, vitals, function hataları); kullanıcılar 21'e geçtikten sonra cihaz kayıtları ve vitals'a yeniden bakılacak.
-> Hatların
+> kapatıldı. 4.1.0 aynı akşam onaylanıp üretime çıktı. `NRL-08` ilk gözlemle (mağaza, politika, vitals, function
+> hataları temiz) ürün sahibinin kararıyla kapatıldı. **4.1.0 listesi tamamlandı.** Hatların
 > birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
@@ -1378,9 +1377,11 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   - _**Onay:** Gönderim 28 (31 Ekim 21:28) aynı akşam "Yayınlandı" oldu. Yayın özeti'nde "Son yayınlanma tarihi: 31 Ekim
     2026" görünüyor, bekleyen değişiklik yok; Console bildirimi "Uygulama güncellemesi yayınlandı". 21 (4.1.0)
     üretimde._
-- [ ] **`NRL-08`** Yayın sonrası doğrulama _(P1·S)_ — Android vitals; `devices` kayıtlarının `platform: android` ile
-  dolması; geçmişte Android alıcıların sayılara girmesi; `trackNotificationEvent` hataları. ⟶ `NRL-07` ⏳ _Yarım — ilk
-  gözlem 31 Ekim ~21:48, yayından ~20 dk sonra. Salt okuma yapıldı; Console'da ve Firebase'de hiçbir şey değiştirilmedi:_
+- [x] **`NRL-08`** Yayın sonrası doğrulama _(P1·S)_ — Android vitals; `devices` kayıtlarının `platform: android` ile
+  dolması; geçmişte Android alıcıların sayılara girmesi; `trackNotificationEvent` hataları. ⟶ `NRL-07` ✅ _Kapatıldı
+  (2026-10-31, ürün sahibi kararı): ilk gözlemle kapatıldı, kullanıcılar 21'e geçtikten sonraki ikinci kontrol
+  beklenmedi. Gözlem 31 Ekim ~21:48, yayından ~20 dk sonra. Salt okuma yapıldı; Console'da ve Firebase'de hiçbir şey
+  değiştirilmedi:_
   - _**Mağaza sayfası:** "Yenilikler"de 4.1.0 notu ve açıklamada "BİLDİRİMLER" bölümü var. Güncellenme tarihi 31 Eki
     2026. Veri güvenliği özeti "Kişisel bilgiler, Finansal bilgiler ve 5 veri türü daha" (7 kategori, yeni beyanla
     uyumlu)._
@@ -1390,8 +1391,9 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   - _**Cloud Logging:** `ondevicewritten` + `tracknotificationevent`, 31 Ekim: 39 kayıt (32 Info, 7 Debug), hata/uyarı
     yok. Son kayıt 19:07 (`NQA-02`). Yayından (21:28) sonra yeni cihaz kaydı ya da istatistik çağrısı yok; kullanıcılar
     güncellemeyi henüz almadı (Play'in otomatik güncellemesi saatler sürer)._
-  - _**Kalan:** Kullanıcılar 21'e geçtikten sonra `devices` kayıtlarının `platform: android` ile dolması, geçmişteki
-    alıcı sayılarına Android'in girmesi, 21'in vitals verisi ve yeniden function hataları kontrol edilecek._
+  - _**Kontrol edilmeden kalanlar (ürün sahibinin kararıyla):** Kullanıcılar 21'e geçtikten sonra `devices`
+    kayıtlarının `platform: android` ile dolması, geçmişteki alıcı sayılarına Android'in girmesi ve 21'in vitals
+    verisi. Cihaz kaydı ve gönderim yolu `NQA-01`/`NQA-02`'de canlıda doğrulanmıştı._
 - [x] **`NRL-09`** Güncelleme önerisi _(P1·S)_ — `config/appUpdate/android.latestVersion` → `"4.1.0"`; canlı RTDB yazımı
   **onayla**, 4.1.0 %100 görünür olunca. ⟶ `NRL-08` ✅ _Kapatıldı (2026-10-31, ürün sahibi kararı; yapılmadı).
   Güncelleme önerisi yapılmayacak; `config/appUpdate/android`'e yazılmadı, canlı RTDB'ye dokunulmadı. Eski sürümdeki
