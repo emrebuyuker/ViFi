@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **42'si tamam, 8'i başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **43'ü tamam, 7'si başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -39,8 +39,8 @@
 > test hesabı silindikten sonra sunucu temizliği canlıda geçti; uygulama hatası bulunmadı. **`NQA-02` tamam** (31 Ekim,
 > aynı admin hesabı Android tablet + iOS 4.1.0 simülatöründe, her canlı yazım onayla): iki yönde "Bana test gönder"
 > karşı platformun bildirim sayfasına düştü, `readAt` ve kampanya tercihi iki yönde canlı eşlendi; **Faz 3 tamam.**
-> Faz 4: `NRL-01` (önkoşul) 31 Ekim'de ürün sahibinin kararıyla kapatıldı. **Sıradaki:** `NRL-02` (dalın push'u, ürün
-> sahibi); sonrası yalnız ürün sahibinin açık onayıyla. Hatların birleştirilmesinde yeni UI
+> Faz 4: `NRL-01` (önkoşul) 31 Ekim'de ürün sahibinin kararıyla kapatıldı, `NRL-02` (dalın push'u) ürün sahibince
+> yapıldı. **Sıradaki:** `NRL-03` (release AAB), yalnız ürün sahibi "release çıkalım" deyince; sonrası her dış adım ayrı onayla. Hatların birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
@@ -171,7 +171,7 @@ Faz 1  NCT-01 (sözleşme, DI, rotalar, LaunchArg, analytics, sürüm — İLK G
        Hat F  NLG-01..04 (bağımsız; yalnız .md + Console hazırlığı)
 Faz 2  NIT-01 (bağlama) ◄── A+B+C+D+E ──► NIT-02 (birim) · NIT-03 (UI + emülatör) · NIT-04 (belgeler)
 Faz 3  NQA-01 (canlı debug) ✅ ──► NQA-02 (iOS ↔ Android çapraz) ✅   ◄── NIT-01..03 + NOPS-01/02
-Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 → 03 → 04 → (05, 06) → 07 → 08 → 09
+Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07 → 08 → 09
 ```
 
 **Hat sahipliği** (çakışma olmasın diye dosya sınırları; her hat yalnız kendi yerlerine yazar):
@@ -1271,7 +1271,9 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 → 03 → 04 → (05, 06) → 07 →
   kapatıldı; aynı anda iki inceleme açılmaz). ✅ _Kapatıldı (2026-10-31, ürün sahibi kararı): 4.0.0 (19) 29 Ekim
   19:14'te onaylanıp %100 yayında, açık inceleme yok; `RLS-10` kapatıldı. `RLS-09`'un telefon adımı beklenmedi: Play'den
   inen 4.0.0'ın gerçek telefonda denemesi `NRL-04`'teki telefon oturumunda birlikte yapılır._
-- [ ] **`NRL-02`** `v-4.1.0` dalının push'u _(P0·S·ürün sahibi)_ — Bu Mac'te yazma yetkili GitHub kimliği yok.
+- [x] **`NRL-02`** `v-4.1.0` dalının push'u _(P0·S·ürün sahibi)_ — Bu Mac'te yazma yetkili GitHub kimliği yok. ✅ _Tamam
+  (2026-10-31): ürün sahibi push etti; `origin/v-4.1.0` = `a2d301e`, yerel dalla aynı (`git ls-remote` ile doğrulandı).
+  Bu kaydı içeren belge commit'i bir sonraki push'la gider._
 - [ ] **`NRL-03`** Release AAB 20 (4.1.0) _(P0·S·Opus)_ — `bundleLiveRelease` yükleme anahtarıyla ve **Maps anahtarıyla**
   (anahtar commit'lenmez). Kontrol edilecekler: sürüm, imza, izinler (yeni: konum ×2), R8 eşleme, dil bölmesi kapalı.
   **Onayla.** ⟶ `NRL-02`

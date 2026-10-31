@@ -16,8 +16,8 @@
 > Gönder" + Geçmiş + konum seçici). Sözleşme (`NCT-01`), beş kod hattı (A…E), belge/beyan hattı (F) ve canlı bağlama
 > (`NIT-01`), birim ve UI testleri (`NIT-02`/`NIT-03`; izin akışı API 32 ve 37 emülatörde) ve Android Maps anahtarı
 > (`NOPS-01`) tamam; canlı doğrulama (Faz 3: `NQA-01` uçtan uca, `NQA-02` iOS ↔ Android çapraz) 31 Ekim'de geçti.
-> Yayın (Faz 4): `NRL-01` (önkoşul) kapatıldı, sırada `NRL-02` (dalın push'u, ürün sahibi); `NRL-03`…`NRL-09` yalnızca
-> ürün sahibinin açık onayıyla, her dış adım ayrı onayla yapılır.
+> Yayın (Faz 4): `NRL-01` (önkoşul) ve `NRL-02` (dalın push'u) tamam; sırada `NRL-03` (release AAB). `NRL-03`…`NRL-09`
+> yalnızca ürün sahibinin açık onayıyla, her dış adım ayrı onayla yapılır.
 > **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
 > **4.1.0 iş listesi** (iOS `v-4.1.0` hedefli bildirim sistemi paritesi, `v-4.1.0` dalı; backend canlıda, Android backend
 > yazmaz): [`ANDROID-4.1.0-ROADMAP.md`](ANDROID-4.1.0-ROADMAP.md) + iOS olgu eki [`ANDROID-4.1.0-DETAIL.md`](ANDROID-4.1.0-DETAIL.md).
