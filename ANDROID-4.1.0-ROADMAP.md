@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **44'ü tamam, 1'i yarım, 5'i başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **45'i tamam, 1'i yarım, 4'ü başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -43,8 +43,10 @@
 > yapıldı. `NRL-03` (release AAB) 31 Ekim'de ürün sahibinin onayıyla derlendi ve denetlendi. `NRL-04` yarım: 20'nin
 > Play önizlemesinde 7 cihaz düştü (6'sı konum donanımı zorunluluğu yüzünden). Live manifestinde konum donanımı isteğe
 > bağlı yapıldı ve paket 21 olarak yeniden derlendi. 21 (4.1.0), ürün sahibinin onayıyla 31 Ekim 21:04'te dahili teste
-> yayınlandı; 4.1.0 sürüm notu da bu onayla kabul edildi. **Sıradaki:** `NRL-04`'ün gerçek telefonda duman testi
-> (telefon gerekir); sonrası her dış adım ayrı onayla. Hatların birleştirilmesinde yeni UI
+> yayınlandı; 4.1.0 sürüm notu da bu onayla kabul edildi. `NRL-05` (veri güvenliği formu) aynı gün onayla Console'a
+> girildi, Yayın özeti'nde bekliyor (incelemeye `NRL-07` ile). **Sıradaki:** `NRL-06` (mağaza girişi + politika
+> beyanları; tam açıklama onay bekliyor) ve `NRL-04`'ün gerçek telefonda duman testi (telefon gerekir); sonrası her dış
+> adım ayrı onayla. Hatların birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Hat F'nin yasal/politika
@@ -1325,8 +1327,17 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   - _**Kalan (telefon gerekiyor):** Play'den inen 21 ile gerçek telefonda giriş (Play Integrity / App Check), FCM
     token ve cihaz kaydı, push + görsel + dokunuş, harita (Play imzası SHA-1'i anahtarda), satın alma yolları. Aynı
     oturumda 4.0.0 `RLS-09`'un telefon adımı da kapatılır._
-- [ ] **`NRL-05`** Veri güvenliği formu _(P0·S)_ — `NLG-01`'e göre Console'a girilir, üretimle incelemeye gider.
-  ⟶ `NLG-01`
+- [x] **`NRL-05`** Veri güvenliği formu _(P0·S)_ — `NLG-01`'e göre Console'a girilir, üretimle incelemeye gider.
+  ⟶ `NLG-01` ✅ _Tamamlandı (2026-10-31, Opus, ürün sahibinin onayıyla; `NLG-01` envanteri de bu onayla kabul edildi)._
+  - _**Eklenen türler:** Uygulama içi arama geçmişi, Diğer işlemler (kampanya onayı), Kilitlenme günlükleri. Hepsi
+    toplanıyor, paylaşılmıyor, kısa süreli değil, isteğe bağlı._
+  - _**Yeni amaçlar:** Kullanıcı kimliklerine, Diğer bilgilere ve Cihaz kimliklerine Geliştirici iletişimleri + Reklam
+    veya pazarlama; Uygulama işlemlerine Uygulama işlevselliği. Ek düzeltme: Kullanıcı kimliklerine Analiz. UID
+    Analytics'e gidiyordu, 4.0.0 beyanında bu amaç eksikti._
+  - _Konum beyan edilmedi (K1); paylaşım, şifreleme ve silme cevapları değişmedi. Önizleme `PLAY-DATA-SAFETY.md`
+    kontrol listesiyle birebir uyuştu._
+  - _Form kaydedildi. Yayın özeti'nde "henüz incelemeye gönderilmeyen 1 değişiklik" olarak bekliyor, incelemeye
+    gönderilmedi; `NRL-07`'de üretim sürümüyle birlikte gönderilecek._
 - [ ] **`NRL-06`** Mağaza girişi + politika beyanları _(P0·S)_ — `NLG-03`/`NLG-04` sonuçlarına göre. ⟶ `NLG-03`, `NLG-04`
   Önkoşul: üç yasal sayfa ortak depoda güncellenip yayında (P1–P3) ve canlıda yeniden salt okunmuş olmalı; reklam
   beyanı "Hayır" kalır (R2). → 31 Ekim: sayfalar yayınlandı ve salt okundu; gönderimden hemen önce bir kez daha okunur.

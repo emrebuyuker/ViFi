@@ -6,7 +6,7 @@
 > **4.0.0 (LEG-02):** ViFi Premium ve parayla tek sınav açma ile "Finansal bilgiler → Satın alma geçmişi" eklendi
 > (iOS gizlilik manifestindeki "satın alma geçmişi"nin karşılığı). Console formu 4.0.0 sürümüyle birlikte, ürün
 > sahibince güncellenir; o zamana kadar canlıdaki 3.1.0 beyanı geçerlidir.
-> **4.1.0 (NLG-01, 30 Ekim 2026, ürün sahibinin onayını bekliyor):** Hedefli bildirim sistemi için tabloya "Geliştirici
+> **4.1.0 (NLG-01, 30 Ekim 2026; ürün sahibi 31 Ekim'de onayladı, Console'a girildi — `NRL-05`):** Hedefli bildirim sistemi için tabloya "Geliştirici
 > iletişimleri" ve "Reklam veya pazarlama" amaçları, kampanya onayı kaydı, okundu işareti, açılma/aksiyon istatistiği ve
 > kurulum kimliği eklendi. _(4.1.0)_ işaretli hücreler yenidir. Admin harita seçicisinin (Google Maps + Places SDK) ve
 > konumun etkisi §4.1.0'dadır. K1 (konum) karara bağlandı ve uygulandı; K2…K4 31 Ekim 2026'da ürün sahibince öneri
@@ -45,7 +45,8 @@ bağlıdır. Konum beyan edilmez (K1, uygulandı); bkz. §4.1.0.
 - **Silme talebi:** Uygulama içi hesap silme (iOS'ta var; Android'de Hesap alanı) — Play hesap silme URL'si de gerekli.
   4.1.0: hesap silinince sunucu (`onAccountDeleted`) `users/<uid>` altını siler: bildirim kutusu, cihaz kayıtları,
   onay kaydı ve okundu işareti. Uygulama cihaz kaydını çıkıştan ve silmeden önce kendisi de siler (`PRM-05`).
-  ⚠️ Açılma/aksiyon istatistiğinin kişi başı işaretleri (`notifications/<id>/events/<uid>_<olay>`) silinmiyor (K3).
+  Açılma/aksiyon istatistiğinin kişi başı işaretleri (`notifications/<id>/events/<uid>_<olay>`) de silinir; anonim
+  sayaçlar kalır (K3, ortak depo `ab53aa2`, 31 Ekim'de canlıda).
   4.0.0 (ürün sahibi kararı, 2026-10-29): `purchasedTransactions` kayıtları tekrar kullanımı önlemek için hesap
   silinince de saklanır, hesapla bağı (UID) en geç 30 gün içinde elle kaldırılır; hesap silme ve gizlilik sayfaları
   bunu söyler (LEG-01).
@@ -237,6 +238,22 @@ Play'deki "kullanıcılar verilerinin silinmesini isteyebilir" cevabı her iki d
 6. K2'ye göre: Kilitlenme günlükleri (yeni), Tanılama (+ Analiz), Uygulama içi arama geçmişi (yeni).
 7. Konum: beyan yok (K1-A uygulandı). Release AAB'de yalnız `ACCESS_COARSE_LOCATION` olduğu `NRL-03`'te doğrulanır.
 8. Değişmeyenler: paylaşım yok, aktarımda şifreleme var, silme isteği var, reklam kimliği yok.
+
+**✅ 31 Ekim 2026'da Console'a girildi** (ürün sahibinin onayıyla). 1–8 aynen uygulandı. Ek düzeltme (ürün sahibinin
+onayıyla): "Kullanıcı kimlikleri"ne **Analiz** eklendi. Analytics'e UID `setUserId` ile gidiyordu, 4.0.0 beyanında bu
+amaç eksikti. Yeni türlerin cevapları:
+
+| Tür | Kısa süreli | Kullanıcının seçimi | Amaç |
+|---|---|---|---|
+| Uygulama içi arama geçmişi | Hayır | İsteğe bağlı | Uygulama işlevselliği |
+| Diğer işlemler | Hayır | İsteğe bağlı | Uygulama işlevselliği, Reklam veya pazarlama |
+| Kilitlenme günlükleri | Hayır | İsteğe bağlı | Analiz |
+
+Hepsi "toplanıyor, paylaşılmıyor". Önizleme listeyle birebir uyuştu. Form kaydedildi, Yayın özeti'nde "henüz
+incelemeye gönderilmeyen 1 değişiklik" olarak bekliyor; incelemeye `NRL-07`'de üretim sürümüyle birlikte gider.
+4.0.0'dan kalan ve dokunulmayan farklar:
+- Telefon numarasında "Analiz" var. Fazla beyan zararsız.
+- Teşhislerin amacı yalnız "Analiz" ve tür zorunlu işaretli.
 
 ### Açık kararlar (ürün sahibi)
 
