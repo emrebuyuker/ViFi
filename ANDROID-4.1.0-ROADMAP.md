@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **38'i tamam, 0'ı yarım, 12'si başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **39'u tamam, 0'ı yarım, 11'i başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -33,12 +33,12 @@
 > birleştirildi; **Faz 2 tamam.** Birleşik dalda: `assembleDebug` başarılı, `lintLiveDebug` 0 hata / 56 uyarı, birim
 > testleri liveDebug 1100 / mockDebug 1084 / liveRelease 1100, tablet emülatöründe (API 37) mock 227 (226 geçti, 1
 > atlandı) ve live 191 (188 geçti, 3 atlandı; atlananlar başka API düzeyine ya da Haritalar'ın kurulu olmamasına bağlı),
-> başarısız test yok. **Sıradaki iş `NQA-01`** (Faz 3, canlı debug ile uçtan uca); ürün sahibinin Maps anahtarını
-> (`NOPS-01`) bekliyor. Hatların birleştirilmesinde yeni UI testleri tablet
+> başarısız test yok. Maps anahtarı (`NOPS-01`) 31 Ekim'de oluşturuldu; senkron noktası 3 açıldı. **Sıradaki iş
+> `NQA-01`** (Faz 3, canlı debug ile uçtan uca; her canlı yazım onayla). Hatların birleştirilmesinde yeni UI testleri tablet
 > emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Ürün sahibini bekleyenler:
-> Google Cloud Maps anahtarı (`NOPS-01`) ve Hat F'nin yasal/politika kararları (K2–K4, R1–R2, P1–P3;
+> Hat F'nin yasal/politika kararları (K2–K4, R1–R2, P1–P3;
 > `PLAY-POLICY-4.1.0.md`, `PRIVACY-POLICY-4.1.0.md`).
 
 | Faz | Ne | Nasıl ilerler | Kalem |
@@ -156,7 +156,7 @@
 ## 2. Paralel Çalışma Planı
 
 ```
-Faz 0  NDEC-01..04 ✅ · NOPS-02 (canlı durum, salt okuma) · NOPS-01 (Maps anahtarı, ürün sahibi) ───────┐
+Faz 0  NDEC-01..04 ✅ · NOPS-02 (canlı durum, salt okuma) · NOPS-01 (Maps anahtarı, ürün sahibi) ✅ ─────┐
 Faz 1  NCT-01 (sözleşme, DI, rotalar, LaunchArg, analytics, sürüm — İLK GÜN, tek oturum) ─┬─► Hat A  PSH-01..04 │
                                                                                          ├─► Hat B  INB-01..05 │
                                                                                          ├─► Hat C  PRM-01..05 │
@@ -229,10 +229,23 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 - [x] **`NDEC-04`** Rozet ve tepsi _(P2·S)_ — Sayısal ikon rozeti taklit edilmez; kanallarda sistem rozeti açık kalır.
   Uygulama içi zil sunucudaki okunmamış sayısını gösterir. Uygulama öne gelince tepsideki ViFi bildirimleri temizlenir
   (bugünkü `NotificationBadge.clear()`). ✅ _Karar (2026-10-30, ürün sahibi)._
-- [ ] **`NOPS-01`** Google Cloud: Android Maps/Places anahtarı _(P0·S·ürün sahibi)_ — "Maps SDK for Android" etkin
+- [x] **`NOPS-01`** Google Cloud: Android Maps/Places anahtarı _(P0·S·ürün sahibi)_ — "Maps SDK for Android" etkin
   ("Places API (New)" iOS için zaten açık). Yeni anahtar, `com.salticusteam.vifi` + üç SHA-1 (debug, yükleme, Play
   uygulama imzalama) ve bu iki API ile kısıtlı. Places kotası + bütçe uyarısı mevcut ayara eklenir. Anahtar yalnız yerel
-  `local.properties`'e girer (git dışı). ⟶ `NDEC-02`
+  `local.properties`'e girer (git dışı). ⟶ `NDEC-02` ✅ _Tamamlandı (2026-10-31, ürün sahibinin isteğiyle tarayıcıdan;
+  oturumu ürün sahibi açtı, proje sahibi hesabı). Gelenler:_
+  - _**API'ler:** "Maps SDK for Android" etkinleştirildi; "Places API (New)" ve "Maps SDK for iOS" zaten açıktı._
+  - _**Anahtar "ViFi Android Maps (admin)":** uygulama kısıtı Android uygulamaları → `com.salticusteam.vifi` + üç SHA-1
+    (debug `E6:B9…:6B:AB`, yükleme `75:61…:25:D9`, Play uygulama imzalama `7F:A3…:21:9A`; `BE-01`'deki kayıtlarla aynı,
+    eski `b7:6a…` eklenmedi); API kısıtı Maps SDK for Android + Places API (New). iOS'un "ViFi iOS Maps (admin)"
+    anahtarının karşılığı; eski otomatik anahtarlara dokunulmadı._
+  - _**Yerel:** değer pano üzerinden doğrudan `local.properties`'e (`MAPS_API_KEY`, git dışı) yazıldı; sohbete, loga ya da
+    depoya girmedi, pano sonra temizlendi. `assembleLiveDebug` anahtarı `BuildConfig` ve birleşik manifeste taşıdı._
+  - _**Çalışma denemesi:** Places API (New) Text Search, debug imzası başlıklarıyla 200 döndü; Android başlıkları olmadan
+    403 `PERMISSION_DENIED` (uygulama kısıtı etkin). Haritanın cihazda açılması `NQA-01`'de (admin hesabıyla)._
+  - _**Kota ve bütçe:** değişiklik gerekmedi. Android seçicisi yalnız Autocomplete ve GetPlace çağırıyor; ikisinin günlük
+    kotası proje genelinde 300 (iOS'la ortak). Proje bütçesi (aylık ₺1.000) ve "ViFi aylık" (₺200) uyarıları %50/90/100'de
+    ve tüm servisleri kapsıyor. Maps SDK for Android harita yüklemesi ücretsiz._
 - [x] **`NOPS-02`** Canlı durumun salt okuma denetimi _(P1·S·Opus)_ — 13 function'ın ve kuralların canlıdaki hâli,
   `devices` kuralında `platform: 'android'`, FCM'in Android yapılandırması (`google-services.json`), emülatör için App
   Check debug anahtarı ve eski `devices/<token>` dokümanlarının sayısı. **Yazım yok.** ✅ _Tamamlandı (2026-10-30). Okuma
