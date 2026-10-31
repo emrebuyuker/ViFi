@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **46'sı tamam, 1'i yarım, 3'ü başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **47'si tamam, 3'ü başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -45,8 +45,9 @@
 > bağlı yapıldı ve paket 21 olarak yeniden derlendi. 21 (4.1.0), ürün sahibinin onayıyla 31 Ekim 21:04'te dahili teste
 > yayınlandı; 4.1.0 sürüm notu da bu onayla kabul edildi. `NRL-05` (veri güvenliği formu) aynı gün onayla Console'a
 > girildi. `NRL-06` (tam açıklama + politika beyanları) da aynı gün onayla girildi. İkisi Yayın özeti'nde bekliyor,
-> incelemeye `NRL-07` ile gidecek. **Sıradaki:** `NRL-04`'ün gerçek telefonda duman testi (telefon gerekir), sonra
-> `NRL-07` (üretim + incelemeye gönderme, onayla); sonrası her dış adım ayrı onayla. Hatların birleştirilmesinde yeni UI
+> incelemeye `NRL-07` ile gidecek. `NRL-04` 31 Ekim'de ürün sahibinin kararıyla telefon adımı yapılmadan kapatıldı.
+> **Sıradaki:** `NRL-07` (üretim + incelemeye gönderme, onayla); sonrası her dış adım ayrı onayla. Hatların
+> birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Hat F'nin yasal/politika
@@ -1284,8 +1285,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
 
 - [x] **`NRL-01`** Önkoşul _(P0·S)_ — 4.0.0 (19) üretimde ve 4.0.0 `RLS-09`/`RLS-10` tamam (`RLS-10` 31 Ekim'de
   kapatıldı; aynı anda iki inceleme açılmaz). ✅ _Kapatıldı (2026-10-31, ürün sahibi kararı): 4.0.0 (19) 29 Ekim
-  19:14'te onaylanıp %100 yayında, açık inceleme yok; `RLS-10` kapatıldı. `RLS-09`'un telefon adımı beklenmedi: Play'den
-  inen 4.0.0'ın gerçek telefonda denemesi `NRL-04`'teki telefon oturumunda birlikte yapılır._
+  19:14'te onaylanıp %100 yayında, açık inceleme yok; `RLS-10` kapatıldı. `RLS-09`'un telefon adımı beklenmedi; 31
+  Ekim'de ürün sahibinin kararıyla yapılmadan kapatıldı (telefon yok)._
 - [x] **`NRL-02`** `v-4.1.0` dalının push'u _(P0·S·ürün sahibi)_ — Bu Mac'te yazma yetkili GitHub kimliği yok. ✅ _Tamam
   (2026-10-31): ürün sahibi push etti; `origin/v-4.1.0` = `a2d301e`, yerel dalla aynı (`git ls-remote` ile doğrulandı).
   Bu kaydı içeren belge commit'i bir sonraki push'la gider._
@@ -1302,11 +1303,12 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   Dosya `play-store/ViFi-4.1.0-20.aab` (12,5 MB, git dışı, SHA-256 `084b0b0073572c07…`).
   **Güncelleme (aynı gün, `NRL-04`):** Play önizlemesindeki cihaz kaybı yüzünden 21 olarak yeniden derlendi (ayrıntı
   `NRL-04`'te). 20 yalnız Play kitaplığında duruyor, hiçbir kanala çıkmadı._
-- [ ] **`NRL-04`** Dahili test + Play'den kurulan sürümle **telefonda** duman testi _(P0·M)_ — Play Integrity / App Check,
+- [x] **`NRL-04`** Dahili test + Play'den kurulan sürümle **telefonda** duman testi _(P0·M)_ — Play Integrity / App Check,
   FCM token, push ve görsel, harita (Play imzası SHA-1'i anahtarda), satın alma yolları bozulmadı. 4.0.0'da emülatörde
   App Check 403 verdiği için **gerçek telefon** gerekir. Aynı telefonda 4.0.0 `RLS-09`'un açık telefon adımı da
-  kapatılır (`NRL-01` notu). ⟶ `NRL-03` ⏳ _Yarım — dahili test yayını tamam, telefon adımı açık (2026-10-31, Opus, her
-  Console adımı ürün sahibinin onayıyla; AAB'leri Console'a ürün sahibi yükledi, uygulamadaki tarayıcı dosya seçemiyor):_
+  kapatılır (`NRL-01` notu). ⟶ `NRL-03` ✅ _Tamamlandı (2026-10-31, Opus). Dahili test yayını tamam; her Console adımı
+  ürün sahibinin onayıyla yapıldı. AAB'leri Console'a ürün sahibi yükledi, çünkü uygulamadaki tarayıcı dosya seçemiyor.
+  Telefon adımı ürün sahibinin kararıyla yapılmadı (telefon yok):_
   - _**20'nin önizlemesi:** Hata yok. 7 cihaz desteği kaybediyordu (hiçbirinde kurulum yok). 6'sının nedeni
     `android.hardware.location` zorunluluğu: Play, `ACCESS_COARSE_LOCATION` iznini konum donanımı zorunlu diye okuyor.
     Etkilenenler 5 GPS'siz Android 15 tablet (DigiLand DL1036 / H10XS, PCBOX PCB-T107, HCNCP HA10Kids,
@@ -1324,9 +1326,10 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
     (6.823) destekleniyor. Yeni kurulum 5,31 MB, güncelleme 3,7 MB. Tek uyarı yerel kod için hata ayıklama sembolü yok
     (4.0.0'da da vardı, engel değil). Sürüm adı "21 (4.1.0)", 4.1.0 tr-TR sürüm notuyla 31 Ekim 21:04'te dahili teste
     yayınlandı ("Dahili test kullanıcıları tarafından kullanılabilir"); üretim (19, 4.0.0) değişmedi._
-  - _**Kalan (telefon gerekiyor):** Play'den inen 21 ile gerçek telefonda giriş (Play Integrity / App Check), FCM
-    token ve cihaz kaydı, push + görsel + dokunuş, harita (Play imzası SHA-1'i anahtarda), satın alma yolları. Aynı
-    oturumda 4.0.0 `RLS-09`'un telefon adımı da kapatılır._
+  - _**Telefon adımı yapılmadı (ürün sahibi kararı, 31 Ekim):** Play'den inen 21 ile gerçek telefonda giriş, push,
+    harita ve satın alma denemesi yapılmadı, beklenmiyor da; 4.0.0 `RLS-09` de aynı kararla kapatıldı. Gerçek telefon
+    testleri bu projede bir daha gündeme getirilmez. Bu yolların canlı doğrulaması `NQA-01`/`NQA-02`'de emülatör ve
+    tabletle yapıldı. `NRL-08`'deki yayın sonrası kontroller ilk gerçek kullanıcı verisiyle sinyal verir._
 - [x] **`NRL-05`** Veri güvenliği formu _(P0·S)_ — `NLG-01`'e göre Console'a girilir, üretimle incelemeye gider.
   ⟶ `NLG-01` ✅ _Tamamlandı (2026-10-31, Opus, ürün sahibinin onayıyla; `NLG-01` envanteri de bu onayla kabul edildi)._
   - _**Eklenen türler:** Uygulama içi arama geçmişi, Diğer işlemler (kampanya onayı), Kilitlenme günlükleri. Hepsi
@@ -1858,8 +1861,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
 
 #### `NRL-*` — Yayın
 - **`NRL-01`:** 4.0.0 incelemesi sürerken 4.1.0 gönderilmez; aynı anda iki inceleme açılmaz.
-- **`NRL-04`:** 4.0.0'da atlanan "Play'den kurulan sürümle telefonda deneme" bu sürümde zorunlu. Bildirim yolu ancak
-  gerçek FCM + Play Integrity ile doğrulanır.
+- **`NRL-04`:** ~~4.0.0'da atlanan "Play'den kurulan sürümle telefonda deneme" bu sürümde zorunlu.~~ 31 Ekim: ürün
+  sahibinin kararıyla telefon adımı yapılmadı (telefon yok); gerçek telefon testi gündeme getirilmez.
 - **`NRL-09`:** erken yazılırsa güncellemeyi henüz Play'de göremeyen kullanıcılara boşuna öneri çıkar.
 
 ---
