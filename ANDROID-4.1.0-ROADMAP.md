@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **47'si tamam, 3'ü başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **48'i tamam, 2'si başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -46,8 +46,9 @@
 > yayınlandı; 4.1.0 sürüm notu da bu onayla kabul edildi. `NRL-05` (veri güvenliği formu) aynı gün onayla Console'a
 > girildi. `NRL-06` (tam açıklama + politika beyanları) da aynı gün onayla girildi. İkisi Yayın özeti'nde bekliyor,
 > incelemeye `NRL-07` ile gidecek. `NRL-04` 31 Ekim'de ürün sahibinin kararıyla telefon adımı yapılmadan kapatıldı.
-> **Sıradaki:** `NRL-07` (üretim + incelemeye gönderme, onayla); sonrası her dış adım ayrı onayla. Hatların
-> birleştirilmesinde yeni UI
+> `NRL-07`: 21 (4.1.0) üretime %100 olarak, mağaza girişi ve veri güvenliğiyle birlikte 31 Ekim ~21:28'de ürün
+> sahibinin onayıyla incelemeye gönderildi. **Sıradaki:** `NRL-08` (yayın sonrası doğrulama; inceleme onayından sonra),
+> ardından `NRL-09` (güncelleme önerisi, canlı yazım onayla). Hatların birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Hat F'nin yasal/politika
@@ -1358,8 +1359,19 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
   - _**Yasal sayfalar (canlıda yeniden okundu):** gizlilik, hesap-silme ve kullanım-koşulları HTTP 200 dönüyor;
     ortak depodaki 4.1.0 sürümüyle (`ViFi-iOS` `d688251`) bayt bayt aynı. `NRL-07` gönderiminden hemen önce bir kez
     daha okunur._
-- [ ] **`NRL-07`** Üretime yayın + incelemeye gönder _(P0·S)_ — %100, sürüm notu, yönetilen yayınlama kapalı. **Onayla.**
-  ⟶ `NRL-04`…`06`
+- [x] **`NRL-07`** Üretime yayın + incelemeye gönder _(P0·S)_ — %100, sürüm notu, yönetilen yayınlama kapalı. **Onayla.**
+  ⟶ `NRL-04`…`06` ✅ _Tamamlandı (2026-10-31 ~21:28 TRT, Opus; her adım ürün sahibinin onayıyla — "sıradaki işten
+  devam edelim", gönderim için "Evet, gönder"):_
+  - _**Yasal sayfalar:** Gönderimden hemen önce canlıda yeniden okundu; üçü de HTTP 200 dönüyor, 4.1.0 sürümüyle
+    aynı._
+  - _**Üretim sürümü:** 21 (4.1.0) dahili testten "Sürümü yükselt → Üretim" ile taşındı. Sürüm adı ve tr-TR notu aynen
+    geldi, 19 (4.0.0) sürüme dahil değil. Kullanıma sunum %100, hedeflenen tüm ülkeler (178); 39 etkin yükleme._
+  - _**Önizleme:** Hata yok. 1 cihaz düşüyor (OpenGL ES 2.0'sız masa telefonu); tabletlerin hepsi (6.823)
+    destekleniyor. Yeni kurulum 5,31 MB, güncelleme 3,7 MB. Tek uyarı yerel kod için hata ayıklama sembolü yok._
+  - _**Gönderim:** Yayın özeti'ndeki 3 değişiklik (üretim 21, varsayılan mağaza girişi tam açıklaması, veri güvenliği)
+    "Değişikliği incelemeye gönder" ile gönderildi. Durum "İncelenmekte olan değişiklikler"; Google'ın hızlı
+    kontrolleri (en çok 14 dk) bitince incelemeye girer. Yönetilen yayınlama kapalı, onayda kendiliğinden yayına
+    çıkar. Sonrası `NRL-08`._
 - [ ] **`NRL-08`** Yayın sonrası doğrulama _(P1·S)_ — Android vitals; `devices` kayıtlarının `platform: android` ile
   dolması; geçmişte Android alıcıların sayılara girmesi; `trackNotificationEvent` hataları. ⟶ `NRL-07`
 - [ ] **`NRL-09`** Güncelleme önerisi _(P1·S)_ — `config/appUpdate/android.latestVersion` → `"4.1.0"`; canlı RTDB yazımı

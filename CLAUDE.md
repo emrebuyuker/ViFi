@@ -17,11 +17,10 @@
 > Gönder" + Geçmiş + konum seçici). Sözleşme (`NCT-01`), beş kod hattı (A…E), belge/beyan hattı (F) ve canlı bağlama
 > (`NIT-01`), birim ve UI testleri (`NIT-02`/`NIT-03`; izin akışı API 32 ve 37 emülatörde) ve Android Maps anahtarı
 > (`NOPS-01`) tamam; canlı doğrulama (Faz 3: `NQA-01` uçtan uca, `NQA-02` iOS ↔ Android çapraz) 31 Ekim'de geçti.
-> Yayın (Faz 4): `NRL-01`…`NRL-06` tamam. `NRL-04`: 21 (4.1.0) 31 Ekim'de dahili testte
-> (`play-store/ViFi-4.1.0-21.aab`; konum donanımı isteğe bağlı yapıldığı için 20 yerine 21); telefon adımı ürün
-> sahibinin kararıyla yapılmadı. `NRL-05` (veri güvenliği formu) ve `NRL-06` (tam açıklama) Console'a girildi, Yayın
-> özeti'nde `NRL-07` ile incelemeye gitmeyi bekliyor; sırada `NRL-07`. `NRL-07`…`NRL-09` yalnızca ürün sahibinin açık
-> onayıyla, her dış adım ayrı onayla yapılır.
+> Yayın (Faz 4): `NRL-01`…`NRL-07` tamam. 21 (4.1.0) (`play-store/ViFi-4.1.0-21.aab`; konum donanımı isteğe bağlı
+> yapıldığı için 20 yerine 21) dahili testten üretime %100 alındı. Tam açıklama ve veri güvenliğiyle birlikte 31 Ekim
+> ~21:28'de incelemeye gönderildi (`NRL-07`); yönetilen yayınlama kapalı, onayda kendiliğinden yayına çıkar.
+> Sırada `NRL-08` (yayın sonrası doğrulama) ve `NRL-09` (güncelleme önerisi; canlı yazım ayrıca onaylanır).
 > **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
 > **4.1.0 iş listesi** (iOS `v-4.1.0` hedefli bildirim sistemi paritesi, `v-4.1.0` dalı; backend canlıda, Android backend
 > yazmaz): [`ANDROID-4.1.0-ROADMAP.md`](ANDROID-4.1.0-ROADMAP.md) + iOS olgu eki [`ANDROID-4.1.0-DETAIL.md`](ANDROID-4.1.0-DETAIL.md).
