@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **45'i tamam, 1'i yarım, 4'ü başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **46'sı tamam, 1'i yarım, 3'ü başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -44,9 +44,9 @@
 > Play önizlemesinde 7 cihaz düştü (6'sı konum donanımı zorunluluğu yüzünden). Live manifestinde konum donanımı isteğe
 > bağlı yapıldı ve paket 21 olarak yeniden derlendi. 21 (4.1.0), ürün sahibinin onayıyla 31 Ekim 21:04'te dahili teste
 > yayınlandı; 4.1.0 sürüm notu da bu onayla kabul edildi. `NRL-05` (veri güvenliği formu) aynı gün onayla Console'a
-> girildi, Yayın özeti'nde bekliyor (incelemeye `NRL-07` ile). **Sıradaki:** `NRL-06` (mağaza girişi + politika
-> beyanları; tam açıklama onay bekliyor) ve `NRL-04`'ün gerçek telefonda duman testi (telefon gerekir); sonrası her dış
-> adım ayrı onayla. Hatların birleştirilmesinde yeni UI
+> girildi. `NRL-06` (tam açıklama + politika beyanları) da aynı gün onayla girildi. İkisi Yayın özeti'nde bekliyor,
+> incelemeye `NRL-07` ile gidecek. **Sıradaki:** `NRL-04`'ün gerçek telefonda duman testi (telefon gerekir), sonra
+> `NRL-07` (üretim + incelemeye gönderme, onayla); sonrası her dış adım ayrı onayla. Hatların birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Hat F'nin yasal/politika
@@ -998,7 +998,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
     görsel ve düğmeler; cihazlar arası okundu; onaylı kampanyalar, 22:00–09:00 yok, Hesap › Bildirim Ayarları). "DİĞER"deki
     bildirim maddesi buraya taşındı. Admin özellikleri mağaza metnine girmedi. 4.0.0 metni 4.0.0 yayını için duruyor._
   - _**Sürüm notu (4.1.0, 426/500, Türkçe).** Ürün sahibi 31 Ekim'de onayladı; 21'in dahili test sürümünde kullanıldı
-    (`NRL-04`). Tam açıklama hâlâ onay bekliyor (`NRL-06`)._
+    (`NRL-04`). Tam açıklama da 31 Ekim'de onaylandı ve Console'a girildi (`NRL-06`)._
   - _**Uygulama içeriği notları:** gizlilik (NLG-02), reklamlar (R1/R2), veri güvenliği (`NRL-05`). Açık konular:
     isteğe bağlı dolu Bildirimler ekran görüntüsü (`NQA-01` sonrası). "Reklam yok." cümlesi R1/R2'ye bağlı._
 
@@ -1338,9 +1338,23 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
     kontrol listesiyle birebir uyuştu._
   - _Form kaydedildi. Yayın özeti'nde "henüz incelemeye gönderilmeyen 1 değişiklik" olarak bekliyor, incelemeye
     gönderilmedi; `NRL-07`'de üretim sürümüyle birlikte gönderilecek._
-- [ ] **`NRL-06`** Mağaza girişi + politika beyanları _(P0·S)_ — `NLG-03`/`NLG-04` sonuçlarına göre. ⟶ `NLG-03`, `NLG-04`
+- [x] **`NRL-06`** Mağaza girişi + politika beyanları _(P0·S)_ — `NLG-03`/`NLG-04` sonuçlarına göre. ⟶ `NLG-03`, `NLG-04`
   Önkoşul: üç yasal sayfa ortak depoda güncellenip yayında (P1–P3) ve canlıda yeniden salt okunmuş olmalı; reklam
   beyanı "Hayır" kalır (R2). → 31 Ekim: sayfalar yayınlandı ve salt okundu; gönderimden hemen önce bir kez daha okunur.
+  ✅ _Tamamlandı (2026-10-31, Opus, ürün sahibinin onayıyla):_
+  - _**Tam açıklama:** 4.1.0 metni ürün sahibince onaylandı. Varsayılan mağaza girişine (tr-TR) dosyadan birebir
+    girildi (2188/4000). Önceki değer 4.0.0 metniydi. Kısa açıklama, ad ve görseller değişmedi._
+  - _**Yapay zekayla üretilmiş öğe beyanı:** Play'in yeni adımı; yardım sayfası bunu görsel öğeler için tarif ediyor.
+    Ürün sahibinin kararıyla "Öğeleri etiketleme" (varsayılan) seçili kaldı. Görseller gerçek ekran görüntüleri, iOS
+    simgesi ve logo + metinden oluşan öne çıkan görsel._
+  - _Mağaza girişi kaydedildi ("İncelemeye gönderilmek için hazır olan değişiklikler"). Veri güvenliğiyle birlikte
+    Yayın özeti'nde bekliyor; incelemeye `NRL-07` ile gider._
+  - _**Politika beyanları (salt okundu, değişmedi):** Reklam "Hayır, uygulamam reklam içermiyor" (R2). Konum beyanı
+    gerekmiyor: yalnız `ACCESS_COARSE_LOCATION`, arka plan yok. Uygulama içeriğinde bekleyen beyan yok (10 beyan
+    tamam)._
+  - _**Yasal sayfalar (canlıda yeniden okundu):** gizlilik, hesap-silme ve kullanım-koşulları HTTP 200 dönüyor;
+    ortak depodaki 4.1.0 sürümüyle (`ViFi-iOS` `d688251`) bayt bayt aynı. `NRL-07` gönderiminden hemen önce bir kez
+    daha okunur._
 - [ ] **`NRL-07`** Üretime yayın + incelemeye gönder _(P0·S)_ — %100, sürüm notu, yönetilen yayınlama kapalı. **Onayla.**
   ⟶ `NRL-04`…`06`
 - [ ] **`NRL-08`** Yayın sonrası doğrulama _(P1·S)_ — Android vitals; `devices` kayıtlarının `platform: android` ile
