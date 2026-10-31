@@ -20,7 +20,8 @@
 > Yayın (Faz 4): `NRL-01`…`NRL-07` tamam. 21 (4.1.0) (`play-store/ViFi-4.1.0-21.aab`; konum donanımı isteğe bağlı
 > yapıldığı için 20 yerine 21) dahili testten üretime %100 alındı. Tam açıklama ve veri güvenliğiyle birlikte 31 Ekim
 > ~21:28'de incelemeye gönderildi (`NRL-07`); yönetilen yayınlama kapalı, onayda kendiliğinden yayına çıkar.
-> Sırada `NRL-08` (yayın sonrası doğrulama) ve `NRL-09` (güncelleme önerisi; canlı yazım ayrıca onaylanır).
+> `NRL-09` (güncelleme önerisi) ürün sahibinin kararıyla yapılmadan kapatıldı. Sırada son kalem `NRL-08` (yayın
+> sonrası doğrulama, salt okuma).
 > **4.0.0 iş listesi** (ViFi Premium paritesi, fazlı ve paralel hatlı): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md).
 > **4.1.0 iş listesi** (iOS `v-4.1.0` hedefli bildirim sistemi paritesi, `v-4.1.0` dalı; backend canlıda, Android backend
 > yazmaz): [`ANDROID-4.1.0-ROADMAP.md`](ANDROID-4.1.0-ROADMAP.md) + iOS olgu eki [`ANDROID-4.1.0-DETAIL.md`](ANDROID-4.1.0-DETAIL.md).

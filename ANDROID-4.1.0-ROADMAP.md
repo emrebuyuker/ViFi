@@ -22,7 +22,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **48'i tamam, 2'si başlanmadı.** Faz 0'ın dört kararı
+> **İlerleme (31 Ekim 2026):** Toplam 50 kalemin **49'u tamam, 1'i başlanmadı.** Faz 0'ın dört kararı
 > (`NDEC-01`…`04`) ürün sahibince verildi. Canlı durum salt okumayla denetlendi (`NOPS-02`): function'lar, kurallar,
 > indeksler ve App Check beklendiği gibi; 3 eski Android cihaz kaydı var. Sözleşme (`NCT-01`) tamam; senkron noktası
 > 1 açıldı, beş kod hattı (A…E) ve F paralel başlayabilir. Hat A (push altyapısı ve cihaz kaydı, `PSH-01`…`04`)
@@ -47,8 +47,9 @@
 > girildi. `NRL-06` (tam açıklama + politika beyanları) da aynı gün onayla girildi. İkisi Yayın özeti'nde bekliyor,
 > incelemeye `NRL-07` ile gidecek. `NRL-04` 31 Ekim'de ürün sahibinin kararıyla telefon adımı yapılmadan kapatıldı.
 > `NRL-07`: 21 (4.1.0) üretime %100 olarak, mağaza girişi ve veri güvenliğiyle birlikte 31 Ekim ~21:28'de ürün
-> sahibinin onayıyla incelemeye gönderildi. **Sıradaki:** `NRL-08` (yayın sonrası doğrulama; inceleme onayından sonra),
-> ardından `NRL-09` (güncelleme önerisi, canlı yazım onayla). Hatların birleştirilmesinde yeni UI
+> sahibinin onayıyla incelemeye gönderildi. `NRL-09` (güncelleme önerisi) ürün sahibinin kararıyla yapılmadan
+> kapatıldı. **Sıradaki ve son kalem:** `NRL-08` (yayın sonrası doğrulama; inceleme onayından sonra). Hatların
+> birleştirilmesinde yeni UI
 > testleri tablet emülatöründe koştu: mock 81/81, live 78/78. Dört test hatası düzeltildi: belirsiz metin araması, durumu
 > güncellemeyen test sahnesi, `waitForIdle` eksiği; uygulama kodunda hata yoktu. Konum kararı (K1) verildi: seçici yalnız yaklaşık
 > konum ister, harita bölgesi aramaya ancak admin haritayı kendisi yerleştirince eklenir. Hat F'nin yasal/politika
@@ -1374,8 +1375,10 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
     çıkar. Sonrası `NRL-08`._
 - [ ] **`NRL-08`** Yayın sonrası doğrulama _(P1·S)_ — Android vitals; `devices` kayıtlarının `platform: android` ile
   dolması; geçmişte Android alıcıların sayılara girmesi; `trackNotificationEvent` hataları. ⟶ `NRL-07`
-- [ ] **`NRL-09`** Güncelleme önerisi _(P1·S)_ — `config/appUpdate/android.latestVersion` → `"4.1.0"`; canlı RTDB yazımı
-  **onayla**, 4.1.0 %100 görünür olunca. ⟶ `NRL-08`
+- [x] **`NRL-09`** Güncelleme önerisi _(P1·S)_ — `config/appUpdate/android.latestVersion` → `"4.1.0"`; canlı RTDB yazımı
+  **onayla**, 4.1.0 %100 görünür olunca. ⟶ `NRL-08` ✅ _Kapatıldı (2026-10-31, ürün sahibi kararı; yapılmadı).
+  Güncelleme önerisi yapılmayacak; `config/appUpdate/android`'e yazılmadı, canlı RTDB'ye dokunulmadı. Eski sürümdeki
+  kullanıcılar 4.1.0'a Play'in otomatik güncellemesiyle geçer. 4.0.0'daki `RLS-10` ile aynı karar._
 
 ---
 
@@ -1875,7 +1878,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
 - **`NRL-01`:** 4.0.0 incelemesi sürerken 4.1.0 gönderilmez; aynı anda iki inceleme açılmaz.
 - **`NRL-04`:** ~~4.0.0'da atlanan "Play'den kurulan sürümle telefonda deneme" bu sürümde zorunlu.~~ 31 Ekim: ürün
   sahibinin kararıyla telefon adımı yapılmadı (telefon yok); gerçek telefon testi gündeme getirilmez.
-- **`NRL-09`:** erken yazılırsa güncellemeyi henüz Play'de göremeyen kullanıcılara boşuna öneri çıkar.
+- **`NRL-09`:** ~~erken yazılırsa güncellemeyi henüz Play'de göremeyen kullanıcılara boşuna öneri çıkar.~~ 31 Ekim:
+  ürün sahibinin kararıyla yapılmadı.
 
 ---
 
