@@ -1373,6 +1373,9 @@ Faz 4  NRL-01 (4.0.0 üretimde) ✅ → 02 ✅ → 03 → 04 → (05, 06) → 07
     "Değişikliği incelemeye gönder" ile gönderildi. Durum "İncelenmekte olan değişiklikler"; Google'ın hızlı
     kontrolleri (en çok 14 dk) bitince incelemeye girer. Yönetilen yayınlama kapalı, onayda kendiliğinden yayına
     çıkar. Sonrası `NRL-08`._
+  - _**Onay:** Gönderim 28 (31 Ekim 21:28) aynı akşam "Yayınlandı" oldu. Yayın özeti'nde "Son yayınlanma tarihi: 31 Ekim
+    2026" görünüyor, bekleyen değişiklik yok; Console bildirimi "Uygulama güncellemesi yayınlandı". 21 (4.1.0)
+    üretimde._
 - [ ] **`NRL-08`** Yayın sonrası doğrulama _(P1·S)_ — Android vitals; `devices` kayıtlarının `platform: android` ile
   dolması; geçmişte Android alıcıların sayılara girmesi; `trackNotificationEvent` hataları. ⟶ `NRL-07`
 - [x] **`NRL-09`** Güncelleme önerisi _(P1·S)_ — `config/appUpdate/android.latestVersion` → `"4.1.0"`; canlı RTDB yazımı
