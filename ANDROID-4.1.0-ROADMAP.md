@@ -271,7 +271,7 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
     eksikse eklenmesi (App Check ayarı) onay ister._
   - _**`google-services.json`:** proje numarası 441043948320 (FCM gönderici), paket `com.salticusteam.vifi`. Değişiklik
     gerekmiyor._
-  - _**`config/appUpdate/android`:** `latestVersion` ve `minimumVersion` 3.1.0 (4.0.0'ın `RLS-10` adımı bekliyor)._
+  - _**`config/appUpdate/android`:** `latestVersion` ve `minimumVersion` 3.1.0 (4.0.0'ın `RLS-10` adımı 31 Ekim'de ürün sahibinin kararıyla yapılmadan kapatıldı)._
   - _**Cihaz kayıtları:** toplam 8 doküman. 5'i iOS ve yeni biçimde. 3'ü Android ve eski biçimde (`token`/`appVersion`
     yok, id = FCM token). Sunucu bu üçünü atlıyor; yalnız broadcast'in "kayıtlı cihaz" sayısını 3 şişiriyor. `PSH-04`
     her cihazın kendi eski kaydını siler; kalanlar zararsız._
@@ -1266,8 +1266,8 @@ Faz 4  NRL-01 (4.0.0 üretimde) → 02 → 03 → 04 → (05, 06) → 07 → 08 
 
 ### Faz 4 — Yayın  ⚠️ (ürün sahibiyle · her dış adım ayrı onay)
 
-- [ ] **`NRL-01`** Önkoşul _(P0·S)_ — 4.0.0 (19) üretimde ve 4.0.0 `RLS-09`/`RLS-10` tamam (aynı anda iki inceleme
-  açılmaz).
+- [ ] **`NRL-01`** Önkoşul _(P0·S)_ — 4.0.0 (19) üretimde ve 4.0.0 `RLS-09`/`RLS-10` tamam (`RLS-10` 31 Ekim'de
+  kapatıldı; aynı anda iki inceleme açılmaz).
 - [ ] **`NRL-02`** `v-4.1.0` dalının push'u _(P0·S·ürün sahibi)_ — Bu Mac'te yazma yetkili GitHub kimliği yok.
 - [ ] **`NRL-03`** Release AAB 20 (4.1.0) _(P0·S·Opus)_ — `bundleLiveRelease` yükleme anahtarıyla ve **Maps anahtarıyla**
   (anahtar commit'lenmez). Kontrol edilecekler: sürüm, imza, izinler (yeni: konum ×2), R8 eşleme, dil bölmesi kapalı.

@@ -8,8 +8,8 @@
 > Premium, bildirimler (FCM + bildirim sayfası), onboarding, Hakkında, force update kapısı ve analytics hazır; ana akışlar
 > canlıda emülatörde doğrulandı. ViFi 3.1.0 (17) 28 Ekim 2026'da Play'de üretime çıktı; 4.0.0 (19) 29 Ekim'de üretime
 > alınıp incelemeye gönderildi, 29 Ekim 19:14'te onaylanıp %100 yayına çıktı (`RLS-08`); yayın sonrası kontroller
-> temiz, yalnız gerçek telefonla deneme açık (`RLS-09`), `RLS-10`/`RLS-11` açık. iOS v3.1.0 parite yol
-> haritasının 223 kalemi tamam (29 Ekim 2026).
+> temiz, yalnız gerçek telefonla deneme açık (`RLS-09`); `RLS-10` ürün sahibinin kararıyla kapatıldı, `RLS-11` açık.
+> iOS v3.1.0 parite yol haritasının 223 kalemi tamam (29 Ekim 2026).
 > **4.1.0 (20)** `v-4.1.0` dalında geliştiriliyor: iOS `v-4.1.0`'ın **hedefli bildirim sistemi** (bildirimleri sunucu
 > gönderir; tek bildirim sayfası, görsel + aksiyon, izin + kampanya onayı, Hesap › Bildirim Ayarları, admin "Bildirim
 > Gönder" + Geçmiş + konum seçici). Sözleşme (`NCT-01`), beş kod hattı (A…E), belge/beyan hattı (F) ve canlı bağlama
