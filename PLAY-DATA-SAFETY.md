@@ -12,6 +12,10 @@
 > konumun etkisi §4.1.0'dadır. K1 (konum) karara bağlandı ve uygulandı; K2…K4 31 Ekim 2026'da ürün sahibince öneri
 > yönünde karara bağlandı. Console formu 4.1.0 sürümüyle
 > girilir (`NRL-05`); o zamana kadar yayındaki sürümün beyanı geçerlidir.
+> **4.2.0 (SLG-01, 21 Kasım 2026; öneri, Console'a girilmedi):** Soru soru sınavlar, "Sınava gir" pratik modu ve
+> Premium'un sunucuda doğrulanması için envanter §4.2.0'da. Kısa sonuç: yeni veri türü yok; "Satın alma geçmişi"nin
+> kapsamı aboneliği de içine alacak şekilde genişliyor (amaç eklemesi açık nokta), diğer satırlar değişmiyor. Console
+> formu `SRL-05`'te ürün sahibiyle gözden geçirilir; o zamana kadar yayındaki 4.1.0 beyanı geçerlidir.
 
 > **SMS Defense / reCAPTCHA SDK (18 Kasım 2026, ürün sahibinin onayıyla Console'a girildi ve kaydedildi):** Firebase BoM 33.5.1 reCAPTCHA Android SDK 18.5.1'i dolaylı getiriyor; SMS Defense AUDIT 18 Kasım'da açıldı. Google'ın beyan sayfasına göre SDK IP adresi, SDK sürümü, paket adı, kullanıcı eylemi, cihaz bütünlüğü yanıtı, uygulama etkileşimleri, yüklü uygulamalar ve cihaz kimliği toplar ([kaynak](https://docs.cloud.google.com/recaptcha/docs/disclosure-requirements-android)). Forma: **Yüklü uygulamalar** (yeni; toplanıyor, paylaşılmıyor, kısa süreli değil, zorunlu, amaç *Sahtekarlığı önleme, güvenlik ve kanunlara uygunluk*); **Uygulama işlemleri** ve **Teşhisler**'e aynı amaç eklendi; **Cihaz veya diğer kimlikler**'de amaç zaten vardı; IP adresi Play'de ayrı tür olmadığından beyan edilmez. Değişiklik aynı gün Yayın özeti'nden ürün sahibinin onayıyla incelemeye gönderildi.
 
@@ -55,7 +59,8 @@ bağlıdır. Konum beyan edilmez (K1, uygulandı); bkz. §4.1.0.
 - **Coin bakiyesi / açılmış sınavlar:** Uygulama içi durum; coin parayla satın alınmaz, finansal veri sayılmaz.
 - **Satın almalar (4.0.0):**
   - *ViFi Premium aboneliği* cihazda Google Play Billing ile doğrulanır; sunucuya yazılmaz, bizim tarafımızda
-    toplanmaz (iOS ile aynı, `DEC-03`).
+    toplanmaz (iOS ile aynı, `DEC-03`). _4.2.0'da değişir:_ "Sınava gir"de Premium'u kanıtlamak için satın alma
+    jetonu sunucuya gider ve abonelik hesaba bağlanır (§4.2.0).
   - *Parayla tek sınav açma:* satın alma jetonu `purchaseExamUnlock`'a gider, Play Developer API ile doğrulanır;
     sunucuda yukarıdaki "Satın alma geçmişi" tutulur.
   - *Ödeme bilgileri* (kart, banka) Google Play'de kalır, uygulamaya gelmez → "Finansal bilgiler → Ödeme bilgileri"
@@ -271,8 +276,139 @@ incelemeye gönderilmeyen 1 değişiklik" olarak bekliyor; incelemeye `NRL-07`'d
 - Onay kaydı kanıt işlevi de gördüğü için "Dolandırıcılığı önleme, güvenlik ve uyumluluk" amacı da işaretlenebilir;
   zorunlu değil.
 
+## 4.2.0 — Soru soru sınavlar ve "Sınava gir" (SLG-01)
+
+> Kaynaklar: yol haritası [`ANDROID-4.2.0-ROADMAP.md`](ANDROID-4.2.0-ROADMAP.md) (§1, Hat C, Hat F); iOS `v-4.2.0`
+> sözleşme belgesi `STRUCTURED-EXAMS.md` §6, §9, §14 ve sunucu kodu `firebase/functions/conversions/schema.js`
+> (PRACTICE MODE bloğu), `conversions/practice.js`, `accountCleanup.js` (salt okundu); ortak hosting'deki gizlilik,
+> hesap silme ve kullanım koşulları sayfalarının 21 Kasım 2026 sürümü (`5e39574`); [Data safety][ds] yardım sayfası
+> (21 Kasım 2026'da okundu). Bu bölüm öneridir; form `SRL-05`'te ürün sahibinin onayıyla doldurulur. Android'in bu
+> sürümdeki kodu henüz yazılmadı (Faz 1); aşağıdaki "Android ne gönderir" satırları yol haritasındaki tasarımdır,
+> `SRL-05`'ten önce koda karşı yeniden kontrol edilir.
+
+### Yeni veri akışları
+
+| Veri | Nerede / nasıl | Android ne gönderir | Ne zaman silinir | Play türü | Formda var mı? |
+|---|---|---|---|---|---|
+| "Sınava gir" günlük sayacı | Sunucu `users/<uid>/practice/daily` = `{day, count, seenToday (günün son ≤ 50 soru kimliği), updatedAt}`. Yalnız sunucu yazar (`nextPracticeQuestions`), sahibi okur. Ücretsiz kullanıcıda her verilen yeni soruda artar, İstanbul gününde sıfırlanır. Premium'da sayaç tutulmaz | Çağrı parametreleri: ders (`subjectId`), sınav türü, kapsam, ders/üniversite kimliği, oturumda görülen ≤ 300 soru kimliği, istenen sayı. Hepsi arşiv kimliği; serbest metin yok | Hesap silinince (`users/<uid>` ile birlikte; hesap silme sayfası "en geç 30 gün") | Uygulama etkinliği → **Uygulama etkileşimleri** (öneri; gerekçe aşağıda) | Var; amaçlarda "Uygulama işlevi" 4.1.0'dan beri var |
+| Premium kanıtı (abonelik doğrulaması) | Her pratik çağrısında `subscriptionProof = {platform: "android", purchaseToken, productId}`. Sunucu Play Developer API ile doğrular (`SRV-01`), sonucu `subscriptions/<uid>` = `{platform, productId, originalTransactionId (Android'de Play sipariş kimliği), expiresAt, verifiedAt}` olarak en çok 24 saat hatırlar | Satın alma jetonu + ürün kimliği (`PRC-03`); jeton günlüğe yazılmaz | Hesap silinince (`accountCleanup.js`; sayfa "en geç 30 gün") | Finansal bilgiler → **Satın alma geçmişi** | Var (4.0.0); kapsam genişler |
+| Abonelik–hesap bağı | `subscriptionOwners/android-<sipariş kimliği>` = `{uid, platform, originalTransactionId, boundAt}`. Yalnız sunucu; istemci erişemez. Bir abonelik ilk doğrulandığı hesaba bağlanır, başka hesapta ücretsiz kurallar uygulanır | — (sunucu kanıttan üretir) | Hesap silinince bağ silinir, abonelik yeni hesapta kullanılabilir | Finansal bilgiler → **Satın alma geçmişi** | Var; amaç eklemesi açık nokta (S1) |
+| Yeni analytics olayları | `answer_revealed` (`question_order`), `practice_started` (`exam_type`, `scope`), `practice_answer_revealed`, `practice_limit_reached`, `practice_paywall_opened`; `exam_open`'a `kind: structured` + `question_count`. Yeni ekran adları `StructuredExam`, `PracticeSetup`, `PracticeSession` (iOS ile aynı) | Düşük kardinaliteli sabitler: soru sırası, sınav türü slug'ı, kapsam (`course`/`university`/`tr`), soru sayısı. Ders adı, soru metni, serbest metin yok | Analytics saklama süresi (en çok 14 ay) | Uygulama etkinliği → **Uygulama etkileşimleri** | Var ("Analiz" amacıyla, 3.1.0'dan beri) |
+| Soru ve şekil okuma | `questions` (yayınlanmış sorular) ve Storage `questionFigures/…` okunur; cevap aç/kapa durumu cihazda (`rememberSaveable`), Firestore'a yazılmaz | Yalnız okuma isteği (kimlik doğrulamalı, App Check'li) | — | — (kullanıcı verisi değil) | — |
+| Son görüntülenen kaydına `isStructured` | Cihazda (`recentExams.v1`) | Hiçbir şey; cihazda kalır | Uygulama verisi silinince / hesap silinince `purge` | — (cihazda kalır, toplama sayılmaz) | — |
+
+**Sayaç neden "Uygulama etkileşimleri":** Play bu türü uygulamayla nasıl etkileşildiği bilgisi olarak tanımlıyor
+(sayfa ziyaretleri, dokunulan bölümler); "Diğer işlemler" ise başka yerde sayılmayan uygulama içi etkinlik (oyun
+ilerlemesi, beğeniler). Sayaç "bugün kaç pratik sorusu görüldü" bilgisidir; ikisine de sığar. "Uygulama etkileşimleri"
+önerilir, çünkü tür zaten beyanlı ve 4.1.0'dan beri "Uygulama işlevi" amacını taşıyor; yeni bir satır açmak gerekmez.
+"Diğer işlemler" seçilirse de yeni satır gerekmez (4.1.0'da açıldı, "Uygulama işlevi" var). Seçim formun sonucunu
+değiştirmez; açık nokta S2.
+
+**Abonelik neden "Satın alma geçmişi":** Play'in tanımı "kullanıcının yaptığı satın alma ya da işlemler hakkında
+bilgi". Ürün kimliği, sipariş kimliği ve bitiş tarihi bunun içinde. Ödeme bilgisi (kart, banka) yine Google Play'de
+kalır → "Ödeme bilgileri" beyan edilmez. Bu satır bugün "isteğe bağlı" (yalnız satın alan); 4.2.0'da da yalnız
+Premium kullanıcısı "Sınava gir"i açınca toplanır → "isteğe bağlı" kalır.
+
+### Vertex AI'da sınav sayfalarının işlenmesi
+
+**Ne oluyor:** Sınav sayfaları (görsel/PDF) sunucuda Google Cloud **Vertex AI** üzerinden yapay zekâ modellerine
+(Anthropic Claude ve Google Gemini) gönderilir; modeller soruları metne çevirir ve çözer, sonuç admin incelemesinden
+sonra yayınlanır. İş yalnız admin eylemiyle başlar: gönderimin 1. onayı, "Yeni yapıya geçir" ya da toplu dönüştürme.
+İstemci (Android dahil) Vertex AI'ya hiçbir şey göndermez; telefon, ad ya da hesap bilgisi modele gitmez (gizlilik
+sayfası "Yapay zekâ ile soru hazırlama" bölümü). Sayfalar iki kaynaktan gelir:
+
+1. **Arşivde zaten yayında olan sınavlar** ("Yeni yapıya geçir", toplu dönüştürme): uygulamanın kendi içeriği.
+   Yayından önce kullanıcıdan alınmış olsalar da artık herkese açık arşivin parçası; yeni bir toplama yok.
+2. **Kullanıcının gönderdiği sınav dosyaları** (1. onayla dönüştürme başlar): bunlar bugün formda beyanlı
+   (aşağıda). Yeni olan, aynı verinin bir işleyicide yeni bir işlemden geçmesi.
+
+**Play'e göre "paylaşım" mı?** Hayır (öneri). Gerekçe:
+- Play paylaşımı "toplanan kullanıcı verisinin üçüncü tarafa aktarılması" olarak tanımlıyor ve **hizmet
+  sağlayıcıya** aktarımı istisna sayıyor: geliştirici adına, talimatıyla işleyen taraf. "Üçüncü taraf", birinci taraf
+  ve hizmet sağlayıcıları dışındaki herkes ([Data safety][ds]).
+- Vertex AI, Google Cloud'un kurumsal hizmeti; işlem Google Cloud koşulları ve Veri İşleme Eki'ne göre yapılıyor.
+  Google'ın Vertex AI veri yönetişimi sayfası, müşteri verisinin izin ya da talimat olmadan model eğitiminde
+  kullanılmayacağını yazıyor ([Vertex AI veri yönetişimi][vxgov]). Yani veri bizim talimatımızla, bizim amacımız
+  için (soruları hazırlamak) işleniyor: hizmet sağlayıcı tanımına uyuyor.
+- Kullanım koşulları gönderen kişinin bu işleme izin verdiğini de yazıyor ("sorularının yapay zekâ ile metne çevrilip
+  çözülmesi"); ancak "paylaşım değil" sonucu buna değil, hizmet sağlayıcı istisnasına dayanır.
+- Firebase için bugün kullanılan gerekçenin aynısı ("Google hizmet sağlayıcı olarak işler; paylaşım sayılmaz").
+
+**Formda hangi tür?** Bu belgenin envanteri gönderimleri **"Uygulama etkinliği → Diğer kullanıcı içeriği"** olarak
+listeliyor (amaç Uygulama işlevi, isteğe bağlı). Play'in tanımına göre kullanıcının fotoğrafları "Fotoğraflar",
+dosyaları "Dosyalar ve dokümanlar" türüne de sığabilir. Console'da hangisinin işaretli olduğu bu depodan
+görülemiyor (açık nokta S3). Hangisi olursa olsun 4.2.0 yeni bir tür ya da amaç gerektirmez: veri zaten
+"toplanıyor, Uygulama işlevi"; soruları hazırlamak arşive ekleme işlevinin parçası. Play formunda "üçüncü taraf
+işleyici notu" diye bir alan yoktur; işleyici bilgisi gizlilik politikasında yer alır ve 21 Kasım sürümü bunu
+söylüyor ("Sınav sayfaları, soruların hazırlanması için Google Cloud Vertex AI hizmetinde işlenir").
+
+**Dikkat:** Sınav kâğıdında yazılı ad ya da öğrenci numarası görüntüde kalmış olabilir (koşullar bunları göndermeyi
+yasaklıyor; gizlilik sayfası olasılığı söylüyor). Bu veri ayrı bir "Ad" toplaması sayılmaz: uygulama onu alan olarak
+istemiyor, çıkarmıyor, saklamıyor; görüntünün içeriğidir ve görüntü zaten beyanlı.
+
+### Diğer 4.2.0 değişiklikleri (beyan etkisi yok)
+
+- **Moderasyonda gönderen kartı:** Admin'e gönderenin adı soyadı, üniversitesi, fakültesi, bölümü gösterilir (telefon
+  yok). Admin'ler geliştirici ekibidir; ekip içi kullanım paylaşım değildir. "Ad" ve "Diğer bilgiler" satırlarında
+  "Uygulama işlevi" zaten var. Gizlilik sayfası 21 Kasım'da bunu ekledi.
+- **Admin dönüştürme ekranları** (`DDEC-01` tam parite): taslak sorular, model seçimi, maliyet göstergesi, ders eşleme.
+  Geliştirici içeriği; son kullanıcı verisi değil.
+- **"Bize Ulaş" e-postası:** Kullanıcının kendi başlattığı e-posta; içerik uygulamaya değil, e-posta sağlayıcısına
+  gider. Değişmez.
+- **Yeni bağımlılık:** LaTeX çizim kütüphanesi (`DDEC-02`, `SPK-01`) yerel çizim yapar, ağ erişimi beklenmez.
+  `SPK-01` kütüphanenin veri toplamadığını (ağ izni, analitik) doğrulamalı; topluyorsa bu tablo yeniden açılır.
+- **reCAPTCHA SDK'sının açık yazılması** (`RCD-01`, 18.5.1): sürüm aynı, 18 Kasım beyanı geçerli.
+
+### Hesap silme
+
+Hesap silinince sunucu (`onAccountDeleted` → `accountCleanup.js`) günlük sayacı (`users/<uid>/practice/*`),
+`subscriptions/<uid>` kaydını ve hesabın `subscriptionOwners` bağlarını da siler; abonelik yeni bir hesapta
+kullanılabilir. Hesap silme sayfası 21 Kasım'da bunu ekledi ("en geç 30 gün"). Play'deki "kullanıcılar verilerinin
+silinmesini isteyebilir" cevabı "Evet" kalır.
+
+### Forma etkisi (`SRL-05` kontrol listesi)
+
+| Form satırı | 4.2.0 etkisi | Neden |
+|---|---|---|
+| Finansal bilgiler → Satın alma geçmişi | **Değişir (kapsam):** abonelik kanıtı ve hesap bağı eklenir. Toplanıyor, paylaşılmıyor, kısa süreli değil, isteğe bağlı, Uygulama işlevi aynı kalır. Amaçlara **"Dolandırıcılığı önleme, güvenlik ve uyumluluk"** eklenmesi önerilebilir (S1) | Bir aboneliğin tek hesapta kullanılması kötüye kullanımı önler |
+| Uygulama etkinliği → Uygulama etkileşimleri | Değişmez | Yeni olaylar ve sayaç bu türde; Analiz + Uygulama işlevi zaten var |
+| Uygulama etkinliği → Diğer işlemler | Değişmez | (Sayaç buraya konursa da Uygulama işlevi var) |
+| Gönderilen sınav dosyaları (Diğer kullanıcı içeriği / Fotoğraflar / Dosyalar) | Değişmez | Vertex AI hizmet sağlayıcı; paylaşım yok; amaç aynı |
+| Ad, Diğer bilgiler (kişisel) | Değişmez | Gönderen kartı ekip içi, Uygulama işlevi var |
+| Kullanıcı kimlikleri | Değişmez | Sayaç ve bağ UID'ye bağlı; Uygulama işlevi var |
+| Cihaz veya diğer kimlikler, Tanılama, Kilitlenme günlükleri, Uygulama içi arama geçmişi, Yüklü uygulamalar, Telefon numarası | Değişmez | 4.2.0'da yeni kullanım yok |
+| Paylaşım | Değişmez ("paylaşılmıyor") | Vertex AI (Google Cloud) hizmet sağlayıcı |
+| Aktarımda şifreleme, silme isteği, reklam kimliği | Değişmez | — |
+| Konum | Değişmez (beyan yok) | — |
+
+Sonuç: zorunlu bir form değişikliği yok; "Satın alma geçmişi" satırının cevapları aynı kalabilir. S1 "evet" ise
+tek değişiklik o satıra bir amaç eklemektir. Analytics envanterindeki olay sayısı 29'dan 34'e, ekran adı 18'den 21'e
+çıkar (yukarıdaki "Analytics envanteri" bölümü 4.2.0 kodu yazılınca `SLG-04` ile güncellenir).
+
+### Açık noktalar / ürün sahibine sorular
+
+- **S1 — Satın alma geçmişine amaç eklenmesi:** Abonelik–hesap bağı kötüye kullanımı önlemek içindir. "Dolandırıcılığı
+  önleme, güvenlik ve uyumluluk" amacı eklensin mi? Zorunlu görünmüyor (bağ, Premium özelliğinin işleyişinin
+  parçası olarak "Uygulama işlevi" altında da savunulabilir). Fazla beyan zararsız.
+- **S2 — Sayacın türü:** "Uygulama etkileşimleri" (öneri) mi, "Diğer işlemler" mi? Form sonucu değişmez; yalnız
+  kayıt için.
+- **S3 — Gönderimlerin Console'daki türü:** Formda gönderilen sınav dosyaları hangi türde işaretli ("Diğer kullanıcı
+  içeriği", "Fotoğraflar", "Dosyalar ve dokümanlar")? Belgeyle Console ayrışıyorsa `SRL-05`'te hizalanmalı.
+- **S4 — Claude'un Vertex AI üzerinden işlenmesi:** Google'ın veri yönetişimi sayfası eğitim yasağını Vertex AI'daki
+  yönetilen modeller için yazıyor; Anthropic modellerinde verinin Anthropic'e ulaşıp ulaşmadığını ayrıca söylemiyor.
+  "Hizmet sağlayıcı" gerekçesi Google Cloud sözleşmesine dayanıyor; ürün sahibi kullanılan Claude modelinin Google
+  Cloud koşulları (ve Veri İşleme Eki) kapsamında olduğunu teyit etmeli. Değilse Anthropic ayrı bir hizmet sağlayıcı
+  olarak değerlendirilir; sonuç ("paylaşım değil") büyük olasılıkla değişmez, gerekçe değişir.
+- **S5 — Android kodunun doğrulanması:** Bu tablo yol haritasındaki tasarıma göre yazıldı. `PRC-03` (jeton günlüğe
+  yazılmaz), `SQS-05`/`PRC-04` (olay adları ve parametreleri) ve `SPK-01` (kütüphanenin veri toplamaması) bittikten
+  sonra `SRL-05`'ten önce koda karşı kontrol edilir.
+- **S6 — Abonelikte `obfuscatedAccountId`:** Bugün abonelik satın alımı (tek sınavdan farklı olarak)
+  `obfuscatedAccountId` göndermiyor. `SRV-01` bunu eklerse Google'a UID özeti gider; Google ödeme hizmet sağlayıcısı
+  olduğundan paylaşım sayılmaz, beyan değişmez. Bilgi notu.
+
 [ds]: https://support.google.com/googleplay/android-developer/answer/10787469
 [maps]: https://developers.google.com/maps/documentation/android-sdk/play-data-disclosure
 [places]: https://developers.google.com/maps/documentation/places/android-sdk/play-data-disclosure
 [gms]: https://developers.google.com/android/guides/play-data-disclosure
 [gmpterms]: https://cloud.google.com/maps-platform/terms
+[vxgov]: https://docs.cloud.google.com/vertex-ai/generative-ai/docs/data-governance

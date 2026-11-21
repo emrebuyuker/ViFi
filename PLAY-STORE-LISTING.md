@@ -11,6 +11,10 @@
 > Console'a girildi (`NRL-06`); Yayın özeti'nde `NRL-07` ile incelemeye gitmeyi bekliyor. Uygulama içeriği satırlarına
 > 4.1.0 notları düşüldü. "Yapay zekayla üretilmiş öğe beyanı": "Öğeleri etiketleme" (ürün sahibi kararı, 31 Ekim). "Reklam yok." cümlesi ve reklam beyanı
 > [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md)'deki R1/R2 kararına bağlıdır.
+> **4.2.0 (SLG-03, 21 Kasım 2026; öneri, onay bekliyor):** 4.2.0 sürüm notu (iOS "Yenilikler" taslağıyla aynı içerik)
+> ve tam açıklama önerisi ("SORU SORU ÇALIŞ", "SINAVA GİR" bölümleri, Premium maddesine pratik) eklendi. Console'a
+> `SRL-06`'da üretim sürümüyle girilir; o zamana kadar 4.1.0 metinleri kalır. Politika kontrolü:
+> [`PLAY-POLICY-4.2.0.md`](PLAY-POLICY-4.2.0.md).
 
 ## 1. Yayın öncesi sıra
 
@@ -50,6 +54,67 @@
 
 ```
 Üniversitelerin geçmiş vize ve final sınavları tek yerde. Ders seç, sınavı aç.
+```
+
+**Tam açıklama** (4.2.0 önerisi, en çok 4000 karakter; 2763 karakter). 4.1.0 metnine göre fark: giriş cümlesine
+"soru soru" eklendi; "SORU SORU ÇALIŞ" ve "SINAVA GİR" bölümleri eklendi; ViFi PREMIUM'un ilk maddesine günlük soru
+sınırının kalkması eklendi. Geri kalan metin aynı. Yapay zekâ notu "yine de hata içerebilir" der; "doğru", "hatasız"
+gibi mutlak ifade yok. "Ücretsiz kullanımda günde 5 soru" sunucudaki sınırla (`PRACTICE_FREE_DAILY_LIMIT = 5`) aynı;
+sınır değişirse metin de değişir. Değişiklik isteğe bağlıdır: 4.1.0 metni yanlış olmaz, ama yeni özellikleri ve
+Premium'un yeni faydasını anlatmaz (Abonelikler politikasının teklif açıklığı beklentisi için önerilir,
+`PLAY-POLICY-4.2.0.md` §3).
+
+```
+ViFi, üniversitelerin geçmiş sınavlarını tek bir arşivde toplar. Üniversiteni, fakülteni, bölümünü ve dersini seç; önceki yılların vize, final ve bütünleme sınavlarını görsel, PDF ya da soru soru olarak uygulama içinde incele.
+
+SINAVLARI BUL
+• Üniversite, fakülte, bölüm ve ders adımlarıyla aradığın sınava kolayca ulaş.
+• Her listede arama yaparak sonuçları daralt.
+• Son görüntülediğin sınavlara ana sayfadan tek dokunuşla dön.
+
+RAHATÇA İNCELE
+• Görsel ve PDF sınavlar tek yerde.
+• Sayfaları yakınlaştırarak ayrıntılı incele.
+• Açtığın sınavlar cihazında önbelleğe alınır; tekrar açtığında daha hızlı yüklenir.
+
+SORU SORU ÇALIŞ
+• Bazı sınavlar sayfa görseli yerine tek tek sorular hâlinde açılır; formüller matematik gösterimiyle görünür.
+• Cevabı Göster ile istediğin sorunun cevabını ve adım adım çözümünü aç.
+• Çözümler yapay zekâ ile hazırlanır ve yayından önce incelenir; yine de hata içerebilir, çalışma amacıyla kullan.
+
+SINAVA GİR
+• Soru soru hazırlanmış derslerde sınav türünü ve kapsamı (bu ders, üniversiten ya da Türkiye geneli) seç, rastgele sorularla çalış.
+• Ücretsiz kullanımda günde 5 soru; ViFi Premium'da sınırsız.
+
+COIN İLE KİLİT AÇ
+• Her derste en eski iki sınav ücretsizdir.
+• Diğer sınavlar 100 coin ile açılır ve hesabında kalıcı olarak açık kalır.
+• Coin satın alınmaz; onaylanan sınav gönderimleriyle kazanılır.
+• İstersen bir sınavı coin yerine tek seferlik ödemeyle de açabilirsin; o sınav da hesabında kalıcı olarak açık kalır.
+
+ViFi PREMIUM
+• Aylık ya da yıllık abonelikle arşivdeki tüm sınavlar coin gerekmeden açılır; Sınava gir'de günlük soru sınırı kalkar.
+• Abonelik dönem sonunda otomatik olarak yenilenir; Google Play abonelik ayarlarından istediğin zaman iptal edebilirsin.
+
+SINAV EKLE, COIN KAZAN
+• Elindeki sınavları fotoğraf ya da PDF olarak gönder.
+• Gönderimler yayınlanmadan önce incelenir; onaylandığında coin'lerin hesabına yüklenir.
+• Gönderim arka planda sürer; sonucu bildirimle öğrenirsin.
+
+BİLDİRİMLER
+• Gönderdiğin sınav onaylandığında ya da bölümüne yeni sınav eklendiğinde haberin olsun.
+• Tüm bildirimlerin tek sayfada. Bildirimler görsel ve düğme içerebilir: tek dokunuşla sınava, Premium'a ya da Sınav Ekle'ye geç, paylaşılan bir konumu haritada aç.
+• Okuduğun bildirimler, aynı hesapla girdiğin tüm cihazlarında okundu görünür.
+• Öğrenci fırsatları ve kampanya bildirimleri yalnızca onay verirsen gelir; gece 22:00–09:00 arasında gönderilmez. Tercihini Hesap › Bildirim Ayarları'ndan istediğin an değiştirebilirsin.
+
+DİĞER
+• Telefon numaranla (+90) giriş.
+• Reklam yok.
+• Açık ve koyu tema desteği.
+
+ViFi bağımsız bir uygulamadır; listelenen üniversitelerle resmi bir bağlantısı yoktur. Sınav belgelerini görüntülemek için internet bağlantısı gerekir.
+
+Görüş ve önerilerin için: buyukeryazilim@gmail.com
 ```
 
 **Tam açıklama** (4.1.0, en çok 4000 karakter; 2188 karakter). 4.0.0 metnine göre fark: "BİLDİRİMLER"
@@ -141,6 +206,19 @@ ViFi bağımsız bir uygulamadır; listelenen üniversitelerle resmi bir bağlan
 Görüş ve önerilerin için: buyukeryazilim@gmail.com
 ```
 
+**Sürüm notları** (4.2.0 önerisi, en çok 500 karakter; 482 karakter). İçerik iOS 4.2.0 (13) App Store "Yenilikler"
+taslağıyla aynı (iOS `README.md`, `b2a1b34`), madde biçimi de aynı; Play notlarda satır sonunu korur. Sınıra yakın:
+bir kelime eklenecekse önce "Hata düzeltmeleri ve iyileştirmeler." satırı çıkarılabilir (satır sonuyla 39 karakter). "Premium'da sınırsız"
+ifadesi Play abonelik doğrulaması canlıdayken doğrudur (`SRV-02`; değilse yayın yok, `SRL-01`).
+
+```
+• Sınavları soru soru incele: bazı sınavlar artık sayfa görseli yerine tek tek sorular hâlinde açılıyor; formüller matematik gösterimiyle.
+• Cevabı Göster: istediğin soruda cevabı ve adım adım çözümü aç. Çözümler yapay zekâ ile hazırlanıp incelenmiştir; hata içerebilir.
+• Sınava gir: soru soru hazırlanmış derslerde rastgele sorularla çalış (ücretsiz günde 5 soru, Premium'da sınırsız).
+• Soru içeriği de sınav içeriği korumasının kapsamında.
+• Hata düzeltmeleri ve iyileştirmeler.
+```
+
 **Sürüm notları** (4.1.0, en çok 500 karakter; 426 karakter):
 
 ```
@@ -189,5 +267,16 @@ ViFi yenilendi: yeni tasarım, telefon numarasıyla giriş, coin ile kilitli sı
   test bildirimiyle (görsel + düğme) canlıda dolu bir sayfa çekilebilir; test hesabının telefonu görünmemeli.
 - **4.1.0 metinleri:** Sürüm notu ve tam açıklama onaylandı (31 Ekim), ikisi de Console'da. "Hesap › Bildirim Ayarları"
   (`PRM-04`) ve bildirim düğmeleri 4.1.0'da hazır olmalı; olmazsa ilgili cümle çıkarılır.
+- **4.2.0 metinleri (açık noktalar / ürün sahibine sorular):**
+  - **M1 — Sürüm notu:** iOS taslağıyla birebir mi kalsın (öneri), yoksa Android'e özgü bir madde eklensin mi (ör.
+    Sınav Ekle'de genişleyen sınav adı listesi, arşiv satırındaki "N soru")? Eklenecekse 500 sınırı için bir satır
+    çıkarılmalı.
+  - **M2 — Tam açıklama:** Önerilen 4.2.0 açıklaması kullanılsın mı, yoksa 4.1.0 metni mi kalsın? Öneri: yeni metin
+    (Premium'un yeni faydası mağazada görünür olur).
+  - **M3 — Soru ekranı görseli:** Soru ekranı da ekran korumasında (`FLAG_SECURE`) olduğundan emülatörde ekran
+    görüntüsü siyah çıkar; yeni mağaza görseli planlanmadı. Görsel istenirse ayrı bir çekim yöntemi gerekir ve
+    yapay zekâyla üretilmiş öğe beyanı yeniden değerlendirilir.
+  - **M4 — Çıkış koşulu:** "Sınava gir" ve soru soru sınavlar 4.2.0 (22)'de hazır olmalı; Faz 3'te bir özellik
+    düşerse ilgili madde sürüm notundan ve açıklamadan çıkarılır.
 - **"Bağımsız uygulama" cümlesi:** Tam açıklamadaki üniversitelerle resmi bağlantı olmadığı cümlesinin doğruluğunu ürün
   sahibi teyit etmeli; üniversite adları geçtiği için yanıltıcı içerik politikası açısından önerilir.
