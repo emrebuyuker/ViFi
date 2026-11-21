@@ -4,6 +4,13 @@
 **Kotlin + Jetpack Compose + MVVM + Hilt** üzerinde; sürüm serisi iOS ile aynıdır. Yayındaki sürüm **4.1.0 (21)**
 (31 Ekim 2026'dan beri üretimde, `v-4.1.0` dalı): iOS `v-4.1.0`'ın hedefli bildirim sistemi.
 
+**4.2.0 (22) geliştirmede** (`v-4.2.0` dalı, iOS `v-4.2.0` paritesi): soru soru sınavlar (LaTeX formül için AndroidMath,
+JitPack), "Sınava gir" pratik modu, iki aşamalı moderasyon ve admin dönüştürme. Yayın iOS ile aynı gün, ürün sahibinin
+kararıyla yapılır.
+
+- 4.2.0 iş listesi: [`ANDROID-4.2.0-ROADMAP.md`](ANDROID-4.2.0-ROADMAP.md), olgu eki [`ANDROID-4.2.0-DETAIL.md`](ANDROID-4.2.0-DETAIL.md)
+- 4.2.0 Play politikası kontrolü: [`PLAY-POLICY-4.2.0.md`](PLAY-POLICY-4.2.0.md)
+
 - 4.1.0 iş listesi (hedefli bildirim sistemi): [`ANDROID-4.1.0-ROADMAP.md`](ANDROID-4.1.0-ROADMAP.md), iOS olgu eki [`ANDROID-4.1.0-DETAIL.md`](ANDROID-4.1.0-DETAIL.md)
 - 4.0.0 iş listesi (ViFi Premium): [`ANDROID-4.0.0-ROADMAP.md`](ANDROID-4.0.0-ROADMAP.md)
 - iOS v3.1.0 paritesi (tamam): [`ANDROID-PARITY-ROADMAP.md`](ANDROID-PARITY-ROADMAP.md) (özet), [`ANDROID-PARITY-DETAIL.md`](ANDROID-PARITY-DETAIL.md) (ayrıntı)
@@ -16,6 +23,9 @@
 - Android Studio (güncel) ve Android SDK 36
 - Gradle'ı çalıştırmak için **JDK 17–21** (Android Studio'nun gömülü JBR 25'i Gradle 8.14 ile çalışmaz), ör.:
   `export JAVA_HOME="$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home"`
+- İnternet erişimi: 4.2.0'dan itibaren LaTeX çizimi için AndroidMath kütüphanesi **JitPack** deposundan çekilir
+  (`settings.gradle`'da yalnız bu kütüphaneye kapsamlı; diğer bağımlılıklar yalnız Google/Maven Central'dan çözülür).
+  JitPack erişilemezse derleme bu bağımlılıkta durur.
 - `app/google-services.json` (ortak `vifi-831a8` Firebase projesi)
 - Yalnız `live` ve isteğe bağlı: admin konum seçicisi için Google Maps/Places anahtarı. Proje kökündeki
   `local.properties`'e `MAPS_API_KEY=<anahtar>` satırı olarak girer (git dışı); anahtarın değeri depoya, commit'e ya da
@@ -32,7 +42,7 @@ içinden sorulur; 12 ve altında izin sistemde açık geldiği için yalnız kam
 | Flavor | Ne | Not |
 |---|---|---|
 | `live` | Ortak `vifi-831a8` backend'i | Debug'da App Check **debug token**'ı ve geliştirme makinesinin debug SHA-1/SHA-256'sı Firebase Console'a eklenmeli; telefonla giriş Console'daki test numarası + `111111` ile denenir. Admin konum seçicisi (Google Maps/Places) yalnız bu flavor'da; `MAPS_API_KEY` ister |
-| `mock` | Paket içi örnek veri; Firebase ve Google Maps SDK'sı hiç başlamaz | Yalnız debug; UI testleri ve demo için. Örnek kullanıcı girişli açılır; konum seçici sabit bir örnek yer döner. Senaryo bayrakları (`core/util/LaunchArgs.kt`): `--ez <ad> true` ile `vifi_signed_out`, `vifi_profile_incomplete`, `vifi_force_update`, `vifi_optional_update`, `vifi_delete_requires_reauth`, `vifi_no_coins`, `vifi_show_onboarding`, `vifi_subscribed`, `vifi_admin`, `vifi_notifications_prompt`, `vifi_notifications_denied`, `vifi_notifications_reask`, `vifi_consent_reask`; metin değerli `--es vifi_open_notification <id>` (ör. `p-paywall`) |
+| `mock` | Paket içi örnek veri; Firebase ve Google Maps SDK'sı hiç başlamaz | Yalnız debug; UI testleri ve demo için. Örnek kullanıcı girişli açılır; konum seçici sabit bir örnek yer döner. Senaryo bayrakları (`core/util/LaunchArgs.kt`): `--ez <ad> true` ile `vifi_signed_out`, `vifi_profile_incomplete`, `vifi_force_update`, `vifi_optional_update`, `vifi_delete_requires_reauth`, `vifi_no_coins`, `vifi_show_onboarding`, `vifi_subscribed`, `vifi_admin`, `vifi_notifications_prompt`, `vifi_notifications_denied`, `vifi_notifications_reask`, `vifi_consent_reask`, `vifi_practice_limit_reached` (4.2.0: ücretsiz günlük pratik hakkı bitmiş, "Sınava gir" paywall ile açılır); metin değerli `--es vifi_open_notification <id>` (ör. `p-paywall`) |
 
 ## Komutlar
 

@@ -2,6 +2,18 @@
 
 Üniversitelerin geçmiş sınavlarını tek yerde toplayan sınav arşivi uygulamasının Android istemcisi.
 
+> **Durum (21 Kasım 2026) — 4.2.0 (22) geliştirmede:** `v-4.2.0` dalında iOS `v-4.2.0` paritesi: **soru soru sınavlar**
+> (yapay zekâ ile dönüştürülmüş sınav sayfa yerine soru kartlarıyla açılır; Markdown + LaTeX formül, şıklar, şekil,
+> "Cevabı Göster"), **"Sınava gir" pratik modu** (ders → tür → kapsam; ücretsizde günde 5 soru, Premium sınırsız),
+> **iki aşamalı moderasyon** (1. onay coin verir ve dönüştürmeyi başlatır, 2. onay yayınlar) + admin dönüştürme
+> ekranları ve küçük pariteler (22 sınav adı, mükerrer gönderim uyarısı, "N soru" rozeti). Kod hatları büyük ölçüde
+> tamam (`SCT-01` ve Hat A…H kalemleri); açık olanlar: `ADX-04`/`ADX-05` ekran bağlantısı, birleştirme ve testler
+> (`SIT-01`…`SIT-04`), canlı doğrulama (Faz 3), yayın (Faz 4) — cihaz testi ve canlı doğrulama sürüyor. Play abonelik
+> doğrulaması ortak depoda ayrı dalda (`SRV-01` tamam); deploy (`SRV-02`) ürün sahibinin açık onayını bekliyor. Yayın
+> iOS ile aynı gün, ürün sahibinin kararıyla yapılır. İş listesi: [`ANDROID-4.2.0-ROADMAP.md`](ANDROID-4.2.0-ROADMAP.md)
+> + olgu eki [`ANDROID-4.2.0-DETAIL.md`](ANDROID-4.2.0-DETAIL.md); Play politikası: [`PLAY-POLICY-4.2.0.md`](PLAY-POLICY-4.2.0.md).
+> Yayındaki sürüm hâlâ 4.1.0 (21).
+>
 > **Durum (31 Ekim 2026):** Uygulama **Kotlin + Jetpack Compose + MVVM + Hilt** üzerinde (eski Java/Activity kodu
 > silindi, FM-23). **Phone Auth (+90)**, oturum + profil kapısı, **canlı arşiv** (isimli `vifi` Firestore), profil
 > tamamlama/düzenleme, Hesap ekranı (çıkış + hesap silme), sınav görüntüleyicileri, coin cüzdanı + sınav kilidi, ViFi
@@ -98,15 +110,20 @@ göre yazılır; eski Java/Activity ekranlar yol haritasına göre göç ettiril
 | Konu | Değer |
 |---|---|
 | **Dil/UI** | Kotlin + Compose (eski Java/XML ekranlar FM-23'te silindi); tek `app/MainActivity` + `AppRoot` + `ViFiNavHost` |
-| **Uygulama** | `com.salticusteam.vifi`, `versionName 4.1.0` (iOS ile aynı seri), `versionCode 21`, `compileSdk/targetSdk 36`, `minSdk 24` |
+| **Uygulama** | `com.salticusteam.vifi`, `versionName 4.2.0` (iOS ile aynı seri), `versionCode 22`, `compileSdk/targetSdk 36`, `minSdk 24` |
+| **Soru ekranı (4.2.0)** | `feature/structuredexam` (`StructuredExamScreen`, `StructuredExamViewModel`, `QuestionCard`, `QuestionFigureImage`); `questions` okuması (`examId` + `order`, indeks); yönlendirme `ExamRouting` (`format == structured` ve `questionCount > 0`) — özetsiz açılışta belge structured çıkarsa soru ekranına yer değiştirir (`ExamViewerViewModel`); `FLAG_SECURE` (`ScreenCaptureProtection`) soru içeriğinde de açık; kilitli sınav soru ekranına ulaşmaz |
+| **Formül (4.2.0)** | AndroidMath `v1.1.0` (JitPack, yalnız `settings.gradle`'da kapsamlı) + uygulama içi Unicode yaması; `core/designsystem/math` (`QuestionRichText`, `FormulaText`/`FormulaView`, `MathTypesetter` + Compose `Canvas`, `MathLineBreaker`, `LatexCompatibility` tablosu, Markdown satır içi alt kümesi, önbellek); R8 keep kuralı (`com.pvporbit.freetype`) release için zorunlu |
+| **Pratik (4.2.0)** | `feature/practice` (`PracticeEntry`, `PracticeSetupScreen`, `PracticeSessionScreen`, ViewModel'ler); `core/data/practice` — `questionPoolIndex/<subjectId>` tek okuma (düğme görünürlüğü + sayılar), `nextPracticeQuestions` callable (`exclude` ≤ 300, `count` 1…10, `subscriptionProof` her çağrıda: Play aboneliğinin `{platform, purchaseToken, productId}` kanıtı); limit → paywall; havuz bitince "Baştan başla" |
+| **Moderasyon iki aşamalı (4.2.0)** | `ModerationService.approve(record, provider)`: 1. onay coin + dosya kopyası + `approved` + `publishPlan` + `conversionProvider` (`exams`/`catalogNodes`'e yazmaz); mükerrerde (`duplicateExamId`) "Bu sınav arşivde zaten yüklü" uyarısı; gönderen kartı (ad, üniversite, fakülte, bölüm; telefon yok); katalog adı Türkçe büyük harf (`CatalogName`). Eski doğrudan yayın yolu (`FirebaseModerationBackend.commitApproval`) bu sürümde kullanılmaz |
+| **Admin dönüştürme (4.2.0)** | `feature/conversionadmin` — Hazır sınavlar (`ConversionReviewScreen`, taslak + orijinal yan yana, soru düzenleme, tek soru/tümü yeniden üretme, iptal, yayın), Başarısız işler + toplu dönüştürme (`dryRun` maliyeti, `aiUsage` 50 $ göstergesi), ders eşleme (`SubjectMappingScreen`), yayındaki soruda Yönetici menüsü (`PublishedQuestionAdminMenu`); her AI işleminde `claude` / `gemini` seçimi. Admin kapısı `isCurrentUserAdmin()` (ID token `admin` claim) |
 | **Flavor** | `live` (canlı vifi-831a8) · `mock` (örnek veri, Firebase başlamaz, yalnız debug) |
 | **Veri (arşiv)** | Live `FirestoreArchiveRepository` → named `vifi` Firestore `catalogNodes`/`exams` (`BE-15`); mock örnek veri |
 | **Sınav dosyaları** | `RemoteFileLoader` (OkHttp + ID token/App Check) → `cacheDir/ExamFiles` (Files + Coil Images); görsel pager + platform `PdfRenderer`; `FLAG_SECURE` ekran koruması; hesap silmede `purge()` |
 | **Coin** | `wallets/<uid>` + `users/<uid>/unlocks` canlı okuma, `ExamLock` (en eski 2 sınav ücretsiz, 100 coin), `unlockExam` callable (europe-west1), `config/rewards` android→ios fallback |
 | **Bildirim** | **Push:** native FCM, topic `all` + cihaz kaydı `users/<uid>/devices/<kurulumId>` (`{token, platform: 'android', appVersion, updatedAt}`; çıkış ve hesap silmede silinir); kanallar `general`/`promo`/`system` (= sunucunun `kind`'ı) + yerel `submissions`; bildirim başına tepsi kaydı, görsel (BigPicture), dokunuş (`FLAG_IMMUTABLE`) → `NotificationRouter` → kapılardan sonra bildirim sayfası + vurgu. **Bildirim sayfası:** `announcements` (son 50) ∪ `users/<uid>/inbox` (son 100), okundu = `settings/inbox.readAt` (cihazlar arası); görsel + 5 aksiyon (Sınava Git — arşivin kilit kuralıyla, Premium'a Göz At, Sınav Ekle, Bağlantıyı Aç, Konuma Git); açılma/aksiyon istatistiği. **İzin:** turdan sonra 1/2 → `POST_NOTIFICATIONS` → 2/2 kampanya onayı (`settings/notifications`); 12 ve altında yalnız 2/2; retten en erken 30 gün sonra bir kez tekrar (izin: sınav gönderiminden sonra, onay: bildirim sayfasında). Hesap › Bildirim Ayarları (izin durumu + kampanya anahtarı). **Admin:** Hesap › "Bildirim Gönder" (tür, kitle, görsel, aksiyon, zamanlama, önizleme + onay, "Bana test gönder") + Gönderim Geçmişi (zamanlanmışı iptal) + konum seçici (Google Maps/Places yalnız live'da, yalnız yaklaşık konum; mock'ta sabit örnek yer) |
 | **Giriş** | Phone Auth `+90` (`BE-04`) → `SessionStore` → `ProfileGate` (`ProfileStore`, RTDB `users/<uid>/profile`) → arşiv |
-| **Senaryo bayrakları** | Debug intent extra'ları (`core/util/LaunchArgs.kt`). Boolean (`--ez <ad> true`), mock'ta: `vifi_signed_out`, `vifi_profile_incomplete`, `vifi_force_update`, `vifi_optional_update`, `vifi_delete_requires_reauth`, `vifi_no_coins`, `vifi_show_onboarding`, `vifi_subscribed`, `vifi_admin` (Moderasyon + Bildirim Gönder); bildirim izni: `vifi_notifications_prompt` (hiç sorulmadı → 1/2), `vifi_notifications_denied` (reddedildi, sorulamaz → "Ayarlar'ı Aç"), `vifi_notifications_reask` (31 gün önce ret → sınav gönderiminden sonra tekrar), `vifi_consent_reask` (31 gün önce onay reddi → bildirim sayfasında tekrar). Metin değerli (`--es <ad> <değer>`): `vifi_open_notification <id>` (o bildirimin push'una dokunulmuş gibi açılır; mock örnekleri ör. `p-paywall`, `p-location`, `p-exam-locked`). Live debug'da `vifi_phone_auth_testing` (yalnız Console test numaralarıyla) |
-| **Kütüphane** | AndroidX, AGP 8.13.2 + Gradle 8.14.3, `libs.versions.toml`, Kotlin 2.0.21 + Coroutines, Hilt 2.52, Compose BoM 2024.10.01, Navigation 2.8.3, Firebase BoM 33.5.1, Timber; yalnız live: Maps Compose 6.5.3, Play Services Maps 19.0.0, Places 4.1.0 (Places API New), Play Services Location 21.3.0 (Kotlin 2.0 / Compose BoM 2024.10.01 ile derlenen en yeni sürümlere sabit; Kotlin yükseltmesinde birlikte ele alınır) |
+| **Senaryo bayrakları** | Debug intent extra'ları (`core/util/LaunchArgs.kt`). Boolean (`--ez <ad> true`), mock'ta: `vifi_signed_out`, `vifi_profile_incomplete`, `vifi_force_update`, `vifi_optional_update`, `vifi_delete_requires_reauth`, `vifi_no_coins`, `vifi_show_onboarding`, `vifi_subscribed`, `vifi_admin` (Moderasyon + Bildirim Gönder), `vifi_practice_limit_reached` (ücretsiz günlük pratik hakkı bitmiş → "Sınava gir" paywall ile açılır; iOS `-ViFiPracticeLimitReached`); bildirim izni: `vifi_notifications_prompt` (hiç sorulmadı → 1/2), `vifi_notifications_denied` (reddedildi, sorulamaz → "Ayarlar'ı Aç"), `vifi_notifications_reask` (31 gün önce ret → sınav gönderiminden sonra tekrar), `vifi_consent_reask` (31 gün önce onay reddi → bildirim sayfasında tekrar). Metin değerli (`--es <ad> <değer>`): `vifi_open_notification <id>` (o bildirimin push'una dokunulmuş gibi açılır; mock örnekleri ör. `p-paywall`, `p-location`, `p-exam-locked`). Live debug'da `vifi_phone_auth_testing` (yalnız Console test numaralarıyla) |
+| **Kütüphane** | AndroidX, AGP 8.13.2 + Gradle 8.14.3, `libs.versions.toml`, Kotlin 2.0.21 + Coroutines, Hilt 2.52, Compose BoM 2024.10.01, Navigation 2.8.3, Firebase BoM 33.5.1, Timber; yalnız live: Maps Compose 6.5.3, Play Services Maps 19.0.0, Places 4.1.0 (Places API New), Play Services Location 21.3.0 (Kotlin 2.0 / Compose BoM 2024.10.01 ile derlenen en yeni sürümlere sabit; Kotlin yükseltmesinde birlikte ele alınır); 4.2.0: AndroidMath `v1.1.0` (MIT, JitPack; LaTeX çizimi, yalnız `settings.gradle`'da kapsamlı depo), reCAPTCHA `18.5.1` (Phone Auth için açık bağımlılık, BoM değişse de alt sınır korunur) |
 | **Build** | Gradle Groovy DSL (plugins DSL), `google-services` 4.4.2, Java 17 hedefi + desugaring; Gradle'ı JDK 17–21 ile çalıştır (Android Studio JBR 25 desteklenmez); release R8 küçültmeli |
 | **❌ Yeni kodda yapma** | `com.android.support`/`jcenter`, AdMob, XML ekran (Compose kullan), sır/keystore commit'i, Maps anahtarı commit'i (yalnız `local.properties`), mock'a canlı Firebase ya da Google Maps binding'i, `ACCESS_FINE_LOCATION` (seçici yalnız yaklaşık konum ister, K1 kararı) |
 
@@ -126,6 +143,9 @@ ViFi-Android/
 ├── PLAY-STORE-LISTING.md         # Mağaza metinleri ve sürüm notları
 ├── PLAY-POLICY-4.1.0.md          # 4.1.0 Play politikası kontrolü (kampanya bildirimleri, konum)
 ├── PRIVACY-POLICY-4.1.0.md       # 4.1.0 gizlilik / hesap silme / kullanım koşulları metin önerisi
+├── ANDROID-4.2.0-ROADMAP.md      # 4.2.0 iş listesi (soru soru sınavlar, pratik, moderasyon, admin) — fazlar, hatlar, ayrıntı
+├── ANDROID-4.2.0-DETAIL.md       # 4.2.0 eki: iOS v-4.2.0 sözleşme özeti (koleksiyonlar, callable'lar, LaTeX kuralları, test eşlemesi)
+├── PLAY-POLICY-4.2.0.md          # 4.2.0 Play politikası kontrolü (yapay zekâ ile üretilen içerik, abonelik sınırı)
 ├── .claude/                      # ⚠️ Claude yapılandırması & kod üretim bilgisi
 │   ├── settings.json             # İzinler
 │   ├── rules/                    # Proje kuralları (okuma zorunlu — aşağıdaki tablo)
@@ -139,7 +159,8 @@ ViFi-Android/
 │   │   ├── java/com/salticusteam/vifi/   # app/ (MainActivity, AppRoot) · core/ (model, data, di, designsystem,
 │   │   │   # navigation, util, notifications) · feature/<ad>/ (home, browse, examviewer, addexam, moderation,
 │   │   │   # premium, login, profile, account, about, onboarding, update, inbox, notifications,
-│   │   │   # notificationsettings, notificationcomposer [+ locationpicker/] — Screen, ViewModel, UiState)
+│   │   │   # notificationsettings, notificationcomposer [+ locationpicker/], structuredexam (soru ekranı),
+│   │   │   # practice (Sınava gir), conversionadmin (admin dönüştürme) — Screen, ViewModel, UiState)
 │   │   └── res/                  # drawable/, mipmap-*/, values/ (strings_*.xml özellik başına), values-night/, xml/
 │   └── src/live/ · src/mock/     # Flavor bağlamaları; live: Google Maps/Places seçici + konum izni
 │                                 # (src/live/AndroidManifest.xml), mock: sahte servisler, mock seçici, örnek veri
@@ -213,11 +234,11 @@ Android ve iOS **aynı** `vifi-831a8` projesini paylaşır (ayrıntı: `.claude/
 |---|---|
 | **Proje** | `vifi-831a8` (proje no `441043948320`, Blaze; bucket `vifi-831a8.appspot.com`) |
 | **Android kaydı** | `com.salticusteam.vifi` — debug (bu Mac), Play uygulama imzalama ve yükleme anahtarının SHA-1/SHA-256'ları kayıtlı (`BE-01`, 28 Ekim 2026); Play Integrity sağlayıcı kaydı `REL-01`'de |
-| **Arşiv** | named `vifi` Firestore `catalogNodes`/`exams` (`BE-05`, `BE-15`); RTDB `Universitiess` artık okunmuyor |
+| **Arşiv** | named `vifi` Firestore `catalogNodes`/`exams` (`BE-05`, `BE-15`); RTDB `Universitiess` artık okunmuyor. **4.2.0 okunan:** `exams` (`format`, `questionCount` eklenir), `questions` (`examId` + `order`, +90 ve admin; sorgu indeksi READY), `questionPoolIndex/<subjectId>` (pratik sayımı, tek doküman), `subjects/<subjectId>` (ders kimliği, `catalogNodes.subjectId`). Storage `questionFigures/<jobId>/<nnn>-<k>.jpg` yalnız tek dosya okuma (`figures[].storagePath` aynen kullanılır). **4.2.0 admin (yalnız admin okur/yazar, istemci yazmaz):** `examConversions/<jobId>` (+ `questions/<nnn>` taslakları), `aiUsage/<YYYY-MM>` (aylık 50 $ sınırı). Kurallar ve indeksler ortak depoda (`ViFi-iOS/firebase/`), canlıda |
 | **Giriş** | Phone Auth `+90` (`BE-04`); canlı test için Console'daki test numarası + `111111` |
 | **App Check** | Storage/RTDB/Auth/Firestore enforce **AÇIK** (Firestore 28 Ekim 2026, `BE-03`) → geçerli token yoksa **403** / `PERMISSION_DENIED`; Cloud Functions'ta enforce kapalı |
 | **Bildirim** | Native FCM (Parse kaldırıldı, `BE-11`), `POST_NOTIFICATIONS`. Gönderimi sunucu yapar (`deliverNotification`): **broadcast** (`general`/`system`, herkes) → `announcements/<id>` + topic `all`; **fanout** (segment, tüm kampanyalar, kişisel, admin, test) → `users/<uid>/inbox/<id>` + kayıtlı cihaz token'ları. `promo` yalnız `settings/notifications.marketing == true` olanlara gider; sessiz saatler 22:00–09:00 (İstanbul). Android (isimli `vifi`) okur: `announcements`, `users/<uid>/inbox`; yazar: `users/<uid>/settings/inbox` (`readAt`), `users/<uid>/settings/notifications` (onay), `users/<uid>/devices/<kurulumId>`; admin okur: `notifications` (geçmiş), yükler: Storage `notificationImages/<id>.jpg` (JPEG ≤ 1 MiB). Kurallar 30 Ekim 2026'dan beri canlıda (ortak depo) |
-| **Cloud Functions (ortak, europe-west1)** | Android **çağırır** (`BE-08/09`), yeni function yazmaz: `unlockExam`, `recordLoginDiagnostic`, `purchaseExamUnlock`; 4.1.0 bildirim callable'ları — admin: `getNotificationAudience`, `previewNotification`, `sendNotification` (istemci zaman aşımı 300 sn), `cancelNotification`; +90 kullanıcı: `trackNotificationEvent` (açılma/aksiyon). İstisna: `purchaseExamUnlock` Google Play dalı (4.0.0 `DEC-04`/`SRV-01`). Bildirim zamanlayıcısı ve tetikleyicileri (`dispatchScheduledNotifications`, `onDeviceWritten`, `onSubmissionModerated`, `onSubmissionCreated`, `onAccountDeleted`) yalnız sunucuda |
+| **Cloud Functions (ortak, europe-west1)** | Android **çağırır** (`BE-08/09`), yeni function yazmaz: `unlockExam`, `recordLoginDiagnostic`, `purchaseExamUnlock`; 4.2.0 pratik: `nextPracticeQuestions` (istemci çağırır); 4.2.0 ders eşleme (admin): `listSubjects`, `setCourseSubject`, `renameSubject`, `mergeSubjects`; 4.2.0 dönüştürme (admin, sekiz callable): `requestExamConversion`, `requestBulkConversion`, `regenerateExamConversion`, `regenerateDraftQuestion`, `publishExamConversion`, `discardExamConversion`, `updatePublishedQuestion`, `regeneratePublishedQuestion`; 4.1.0 bildirim callable'ları — admin: `getNotificationAudience`, `previewNotification`, `sendNotification` (istemci zaman aşımı 300 sn), `cancelNotification`; +90 kullanıcı: `trackNotificationEvent` (açılma/aksiyon). İstisna: `purchaseExamUnlock` Google Play dalı (4.0.0 `DEC-04`/`SRV-01`). Bildirim zamanlayıcısı ve tetikleyicileri (`dispatchScheduledNotifications`, `onDeviceWritten`, `onSubmissionModerated`, `onSubmissionCreated`, `onAccountDeleted`) yalnız sunucuda |
 
 ---
 
@@ -247,5 +268,5 @@ Projeyi modernize et / Firestore'a taşı.
 
 ---
 
-**Son güncelleme:** 31 Ekim 2026
-**Proje:** ViFi Android (`com.salticusteam.vifi`, v4.1.0 (21) 31 Ekim 2026'dan beri üretimde — hedefli bildirim sistemi; giriş, arşiv, görüntüleyiciler, coin, Premium, bildirim, profil ve Hesap hazır)
+**Son güncelleme:** 21 Kasım 2026
+**Proje:** ViFi Android (`com.salticusteam.vifi`, v4.1.0 (21) 31 Ekim 2026'dan beri üretimde — hedefli bildirim sistemi; 4.2.0 (22) `v-4.2.0` dalında geliştirmede; giriş, arşiv, görüntüleyiciler, coin, Premium, bildirim, profil ve Hesap hazır)
