@@ -53,6 +53,20 @@ class ExamRoutingTest {
     }
 
     @Test
+    fun `a notification's exam keeps the notification's names on the question screen, as on iOS`() {
+        // iOS InboxView.open → Router.openExam(at: target.path) → ExamRouting.redirect(document.path): the document
+        // carries the path it was opened with, so the title and breadcrumb show the notification's names (SQA-04).
+        val fromNotification = ArchivePath(
+            listOf("u", "f", "d", "c", "e"),
+            listOf("Sakarya Üniversitesi", "F", "D", "Güç elektroniği devreleri", "2017 FİNAL"),
+        )
+        val document = ExamDocument(fromNotification, ExamKind.IMAGES, emptyList(), questionCount = 3)
+
+        assertEquals(ViFiRoute.Exam(fromNotification, ExamKind.IMAGES), ExamRouting.route(fromNotification, ExamKind.IMAGES, null))
+        assertEquals(ViFiRoute.StructuredExam(fromNotification, ExamKind.IMAGES), ExamRouting.redirect(document))
+    }
+
+    @Test
     fun `the lock rule is unchanged - a structured exam is locked like any other`() {
         fun exam(id: String, questions: Int?) =
             ArchiveItem(course.appending(id, id), ArchiveLevel.EXAM, null, ExamSummary(ExamKind.IMAGES, 1, questionCount = questions))

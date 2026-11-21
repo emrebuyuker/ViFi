@@ -143,6 +143,17 @@ class StructuredExamContentTest {
     }
 
     @Test
+    fun talkBack_readsSolutionStepsLikeIOS_onlyTheMathDelimitersRemoved() {
+        // iOS QuestionContentView.answerSpeech maps steps through MathTextTokenizer.plainText: Markdown and the LaTeX
+        // source stay as written (SQA-04 parity; the steps have no stored speech).
+        val step = questions[0].copy(solution = listOf("**Tanım:** Bir \$(X, \\Im)\$ uzayı"))
+        show(loaded(listOf(step)).copy(revealedOrders = setOf(step.order)))
+
+        composeRule.onNodeWithTag("questions.answer.${step.order}")
+            .assert(hasContentDescription("Çözüm: **Tanım:** Bir (X, \\Im) uzayı", substring = true))
+    }
+
+    @Test
     fun aFigureThatCannotLoad_saysSo() {
         show(loaded(listOf(questions[2])))
 
