@@ -31,6 +31,14 @@ class ViFiRouter(private val navController: NavHostController) {
         navController.navigate(ViFiRoute.Inbox(highlightId)) { launchSingleTop = true }
     }
 
+    /**
+     * "Bitir" in a "Sınava gir" session: leaves the session and its setup in one step, back to the course (iOS closes
+     * the practice sheet). Without a setup underneath (not reachable today) it only pops the session.
+     */
+    fun finishPractice() {
+        if (!navController.popBackStack<ViFiRoute.PracticeSetup>(inclusive = true)) pop()
+    }
+
     fun popToRoot() {
         navController.popBackStack(ViFiRoute.Home, inclusive = false)
     }

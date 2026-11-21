@@ -35,6 +35,12 @@ enum class LaunchArg(val extraKey: String, val takesValue: Boolean = false) {
 
     /** The campaign consent was declined 31 days ago: opening the inbox asks once more. */
     CONSENT_REASK("vifi_consent_reask"),
+
+    /**
+     * The free daily practice limit is already used up: a "Sınava gir" session opens on the paywall prompt (4.2.0,
+     * iOS `-ViFiPracticeLimitReached`).
+     */
+    PRACTICE_LIMIT_REACHED("vifi_practice_limit_reached"),
 }
 
 /** Process-wide holder of the active launch arguments; empty unless set from a launching intent. */

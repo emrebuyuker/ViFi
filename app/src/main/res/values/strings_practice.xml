@@ -17,6 +17,21 @@
         <item quantity="other">%1$d soru</item>
     </plurals>
 
+    <!-- Session (iOS PracticeSessionView) -->
+    <string name="practice_session_question_title">Soru %1$d</string>
+    <plurals name="practice_session_remaining_today">
+        <item quantity="one">Bugün kalan: %1$d soru</item>
+        <item quantity="other">Bugün kalan: %1$d soru</item>
+    </plurals>
+    <string name="practice_session_next">Sıradaki soru</string>
+    <string name="practice_session_finish">Bitir</string>
+    <string name="practice_session_exhausted_title">Bu kapsamdaki tüm soruları gördün</string>
+    <string name="practice_session_exhausted_message">İstersen aynı sorulara baştan başlayabilir ya da çıkabilirsin.</string>
+    <string name="practice_session_restart">Baştan başla</string>
+    <string name="practice_session_limit_title">Bugünlük ücretsiz soru hakkın bitti</string>
+    <string name="practice_session_limit_message">Ücretsiz soru hakkı her gün yenilenir. Premium ile istediğin kadar soru çözebilirsin.</string>
+    <string name="practice_session_paywall">Premium\'a Göz At</string>
+
     <!-- Scopes -->
     <string name="practice_scope_course">Bu ders</string>
     <string name="practice_scope_university">Üniversitem</string>

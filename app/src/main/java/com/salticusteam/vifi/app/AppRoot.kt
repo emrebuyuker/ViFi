@@ -1,12 +1,14 @@
 package com.salticusteam.vifi.app
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
@@ -39,6 +41,8 @@ import com.salticusteam.vifi.feature.notifications.NotificationPromptHost
 import com.salticusteam.vifi.feature.notifications.NotificationPromptViewModel
 import com.salticusteam.vifi.feature.notificationsettings.NotificationSettingsScreen
 import com.salticusteam.vifi.feature.onboarding.OnboardingGate
+import com.salticusteam.vifi.feature.practice.PracticeEntry
+import com.salticusteam.vifi.feature.practice.PracticeSessionScreen
 import com.salticusteam.vifi.feature.practice.PracticeSetupScreen
 import com.salticusteam.vifi.feature.premium.PaywallScreen
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
@@ -108,7 +112,7 @@ private fun ArchiveHost(
                 onAboutClick = { router.push(ViFiRoute.About) },
             )
         },
-        browse = { _ ->
+        browse = { path ->
             BrowseScreen(
                 onItemClick = { router.open(it) },
                 onBack = { router.pop() },
@@ -118,6 +122,19 @@ private fun ArchiveHost(
                 onEarnCoins = { lesson -> router.push(ViFiRoute.AddExam(lesson)) },
                 // The unlock sheet's "Tek tek açmak yerine Premium'a geç".
                 onOpenPaywall = { router.push(ViFiRoute.Paywall) },
+                // A course offers "Sınava gir" above its exams once its subject has practice questions (iOS
+                // `PracticeStartSection`); every other level shows nothing.
+                practiceEntry = if (path.level == ArchiveLevel.LESSON) {
+                    {
+                        PracticeEntry(
+                            course = path,
+                            onOpen = { subjectId -> router.push(ViFiRoute.PracticeSetup(path, subjectId)) },
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    }
+                } else {
+                    null
+                },
             )
         },
         exam = { path, kind ->
@@ -208,12 +225,20 @@ private fun ArchiveHost(
         notificationHistory = {
             NotificationHistoryScreen(onBack = { router.pop() })
         },
-        // The session screen is plugged in by SIT-01 (it needs the question card); only the setup opens today.
         practiceSetup = { course, subjectId ->
             PracticeSetupScreen(
                 subjectId = subjectId,
                 courseId = course.components.lastOrNull().orEmpty(),
                 onStartSession = { router.push(ViFiRoute.PracticeSession(it)) },
+                onBack = { router.pop() },
+            )
+        },
+        practiceSession = { selection ->
+            PracticeSessionScreen(
+                selection = selection,
+                onFinish = { router.finishPractice() },
+                // The paywall opens like everywhere else; closing it returns to the limit screen (iOS sheet).
+                onOpenPaywall = { router.push(ViFiRoute.Paywall) },
                 onBack = { router.pop() },
             )
         },
