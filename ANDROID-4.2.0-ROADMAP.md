@@ -38,7 +38,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **53'ü tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **54'ü tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
@@ -50,7 +50,7 @@
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
 > S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Yeniden üretilen yayındaki soru
 > ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. `SRV-02` deploy edildi. Faz 3: `SQA-01`, `SQA-04` tamam,
-> `SQA-02` ücretsiz kısmı tamam (Premium kaldı), `SQA-03` ürün sahibinin kararıyla şimdilik yapılmadı.
+> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` ürün sahibinin kararıyla şimdilik yapılmadı.
 
 ---
 
@@ -381,7 +381,7 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 - [x] **`SQA-01`** Canlı soru ekranı _(P0·S·Opus)_ — Live debug, test hesabı: yapılandırılmış sınav Browse / son
   görüntülenen / bildirimden soru ekranında açılıyor; şekiller iniyor; kilitli yapılandırılmış sınav kilit sayfasında
   kalıyor; dönüştürülmemiş sınav sayfa görünümünde; emülatörde `FLAG_SECURE` (ekran görüntüsü siyah). Yazım yok. ⟶ `SIT-04`
-- [ ] **`SQA-02`** Canlı pratik _(P0·S·Opus)_ — Ücretsiz test hesabıyla 5 soru + paywall (sunucu sayacına yazar → onay);
+- [x] **`SQA-02`** Canlı pratik _(P0·S·Opus)_ — Ücretsiz test hesabıyla 5 soru + paywall (sunucu sayacına yazar → onay);
   Premium kanıtı lisanslı test hesabıyla (`SRV-02` sonrası). ⟶ `SIT-04`, `SRV-02`
 - [ ] **`SQA-03`** Canlı iki aşamalı onay _(P0·M·Opus)_ — Test gönderimi → Android'den 1. onay (Gemini; Claude kotası
   açıksa Claude) → coin, iş `queued` → taslak hazır bildirimi → 2. onay Android'in Hazır sınavlar ekranından → Android'de
