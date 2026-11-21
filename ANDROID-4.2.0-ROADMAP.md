@@ -38,7 +38,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **50'si tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **51'i tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
@@ -49,8 +49,8 @@
 > `Slug` girdisi NFC'ye normalleşir; paywall'a "Sınava gir'de sınırsız soru" (Android); pratikte bildirme yolu yok
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
 > S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Yeniden üretilen yayındaki soru
-> ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. Sıradaki: `SRV-02` deploy onayı
-> (önce Play API izni kontrolü), Faz 3 canlı doğrulama (onaylı).
+> ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. `SRV-02` deploy edildi. Sıradaki: Faz 3 canlı
+> doğrulama (onaylı).
 
 ---
 
@@ -329,7 +329,7 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   şekli; tek hesap bağı (`subscriptionOwners`, Play sipariş kimliği; `obfuscatedAccountId` mevcut sha256 düzeniyle
   uyumlu); 24 saat hatırlama; geçersiz kanıt hata değil, ücretsiz. Emulator testleri (`practice.test.mjs`). iOS yolu
   değişmez. ⟶ `DDEC-03`
-- [ ] **`SRV-02`** Deploy ⚠️ _(P0·S·ürün sahibi + Opus)_ — Yalnız ilgili Function'lar, ürün sahibinin açık onayıyla;
+- [x] **`SRV-02`** Deploy ⚠️ _(P0·S·ürün sahibi + Opus)_ — **Tamam (21 Kasım 2026, ürün sahibinin onayıyla):** yalnız `nextPracticeQuestions` (europe-west1) ortak depo yerel `v-4.2.0` @ `6a9e67e`'den deploy edildi ("Successful update operation", durum ACTIVE); önce dry-run temiz. Servis hesabı `purchaseExamUnlock` ile aynı. Salt sağlık kontrolü: kimliksiz çağrı beklenen "giriş yapmış olman gerekiyor" yanıtını veriyor, hata logu yok. Lisanslı test hesabıyla Premium denemesi `SQA-02`'de. Asıl metin: Yalnız ilgili Function'lar, ürün sahibinin açık onayıyla;
   sonrasında `nextPracticeQuestions` canlı salt sağlık kontrolü. ⟶ `SRV-01`
 
 #### Hat G — Giriş güvenliği (eski reCAPTCHA taslağı)
