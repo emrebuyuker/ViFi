@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -13,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,13 +39,31 @@ class QuestionRichTextTest {
         }
     }
 
+    /**
+     * An inline formula is the `Text`'s inline content, and the text node clears its descendants' semantics
+     * (`TextAnnotatedStringNode.shouldClearDescendantSemantics` is always true), so the formula only exists in the
+     * unmerged tree. Asserts it is placed on screen with a non-empty size, inside its paragraph.
+     */
+    private fun assertInlineFormulaDrawn() {
+        val formula: SemanticsNodeInteraction =
+            composeRule.onNodeWithTag(FormulaTags.FORMULA, useUnmergedTree = true).assertIsDisplayed()
+        val bounds = formula.fetchSemanticsNode().boundsInRoot
+        assertTrue("formula has no size: $bounds", bounds.width > 0f && bounds.height > 0f)
+        val paragraph = composeRule.onNodeWithTag(FormulaTags.PARAGRAPH).fetchSemanticsNode().boundsInRoot
+        assertTrue("formula $bounds is outside its paragraph $paragraph", paragraph.contains(bounds.center))
+    }
+
+    /** Nodes tagged [tag] in the unmerged tree (inline formulas are not in the merged one, see above). */
+    private fun nodeCount(tag: String): Int =
+        composeRule.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().size
+
     @Test
     fun inlineFormula_isDrawnNextToItsText() {
         show("Eğer \$x^2 + 1\$ ise sonuç nedir?")
 
         composeRule.onNodeWithTag(FormulaTags.PARAGRAPH).assertIsDisplayed()
-        composeRule.onNodeWithTag(FormulaTags.FORMULA).assertIsDisplayed()
-        assertEquals(0, composeRule.onAllNodesWithTag(FormulaTags.SOURCE).fetchSemanticsNodes().size)
+        assertInlineFormulaDrawn()
+        assertEquals(0, nodeCount(FormulaTags.SOURCE))
     }
 
     @Test
@@ -57,8 +77,8 @@ class QuestionRichTextTest {
     fun turkishLettersInsideText_areTypeset() {
         show("\$\\text{hız } v = 5\\,\\text{m/s}\$")
 
-        composeRule.onNodeWithTag(FormulaTags.FORMULA).assertIsDisplayed()
-        assertEquals(0, composeRule.onAllNodesWithTag(FormulaTags.SOURCE).fetchSemanticsNodes().size)
+        assertInlineFormulaDrawn()
+        assertEquals(0, nodeCount(FormulaTags.SOURCE))
     }
 
     @Test
@@ -66,7 +86,7 @@ class QuestionRichTextTest {
         show("a \$\\frac{1}{\$ b")
 
         composeRule.onNodeWithText("a \$\\frac{1}{\$ b", substring = true).assertIsDisplayed()
-        assertEquals(0, composeRule.onAllNodesWithTag(FormulaTags.FORMULA).fetchSemanticsNodes().size)
+        assertEquals(0, nodeCount(FormulaTags.FORMULA))
     }
 
     @Test
@@ -74,7 +94,7 @@ class QuestionRichTextTest {
         show("\$\$\\begin{pmatrix}1&2\$\$")
 
         composeRule.onNodeWithTag(FormulaTags.SOURCE).assertIsDisplayed()
-        assertEquals(0, composeRule.onAllNodesWithTag(FormulaTags.FORMULA).fetchSemanticsNodes().size)
+        assertEquals(0, nodeCount(FormulaTags.FORMULA))
     }
 
     @Test
@@ -89,7 +109,7 @@ class QuestionRichTextTest {
         show("Sadece düz metin.")
 
         composeRule.onNodeWithText("Sadece düz metin.").assertIsDisplayed()
-        assertEquals(0, composeRule.onAllNodesWithTag(FormulaTags.FORMULA).fetchSemanticsNodes().size)
+        assertEquals(0, nodeCount(FormulaTags.FORMULA))
     }
 
     @Test
