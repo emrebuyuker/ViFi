@@ -38,14 +38,18 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **49'u tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **50'si tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
 > `DDEC-06` (iOS'ta da son görüntülenen kartı kilit kontrolünden geçmiyor; iki platform eşit). Faz 0 ve Hat A, B, C, E, F
 > (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). Hat D tamamı ve `SIT-01` (pratik oturum ekranı, Browse'da
-> Sınava gir, admin bağlantıları) birleşti. `SIT-02`/`03` tamam, `SIT-04` kısmen (API 24/34 yok). Sıradaki:
-> `SRV-02` deploy onayı (+ ortak depo dalının birleştirilmesi), Faz 3 canlı doğrulama (onaylı), `DDEC-06`.
+> Sınava gir, admin bağlantıları) birleşti. `SIT-02`/`03` tamam, `SIT-04` kısmen (API 24/34 yok). `SRV-01` ortak depoda `v-4.2.0`'a
+> birleşti (push/deploy yok). 21 Kasım kararları: `DDEC-06` iOS gibi; gönderen kartı profil yoksa iOS gibi not gösterir;
+> `Slug` girdisi NFC'ye normalleşir; paywall'a "Sınava gir'de sınırsız soru" (Android); pratikte bildirme yolu yok
+> (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
+> S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Sıradaki: `SRV-02` deploy onayı
+> (önce Play API izni kontrolü), Faz 3 canlı doğrulama (onaylı).
 
 ---
 
@@ -188,7 +192,7 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 - [x] **`DDEC-05`** reCAPTCHA bağımlılığı _(P1·S·ürün sahibi)_ — **Karar (21 Kasım 2026): açık yazılır (18.5.1).** Eski `RDEC-02`. **Öneri:**
   `com.google.android.recaptcha:recaptcha:18.5.1` `libs.versions.toml`'a açık yazılsın (BoM değişirse alt sınır korunur);
   BoM yükseltmesi kapsam dışı.
-- [ ] **`DDEC-06`** Son görüntülenen kilit kontrolü _(P2·S·ürün sahibi)_ — Android'de son görüntülenen kartı kilit
+- [x] **`DDEC-06`** Son görüntülenen kilit kontrolü _(P2·S·ürün sahibi)_ — **Karar (21 Kasım 2026): iOS gibi kalır.** iOS'ta da son görüntülenen kartı kilit kontrolünden geçmiyor (`HomeView.openRecentExam`); kod değişmez. Asıl metin: Android'de son görüntülenen kartı kilit
   denetimi yapmadan açıyor. iOS'ta aynı yol `ExamAccessResolver`'dan geçiyorsa parite için eklensin mi? `SQS-01`
   sırasında iOS davranışı kesinleştirilip ürün sahibine sunulur. **Öneri:** iOS geçiriyorsa evet.
 - [x] **`SOPS-01`** Canlı salt okuma _(P0·S·Opus)_ — **Sonuç (21 Kasım 2026, yazım yok):** canlıda 2 yapılandırılmış sınav (5 + 3 soru); `questions (examId, order)` indeksi READY; şekil yolu `questionFigures/<jobId>/<nnn>-<k>.jpg`; 2 havuz özeti (`types.<tür>.{tr, u-…, c-…}`), ders düğümünde `subjectId` var; 14 fonksiyonun hepsi europe-west1'de; SMS Defense **AUDIT**, toll fraud açık. Ayrışmalar: `files[].order` 0 ya da 1 tabanlı, `label` "1" ya da "Soru 1)", `examConversions.error` düz metin, `usage.costUsd` int/double, gönderimde sağlayıcı alanı **`conversionProvider`**. Asıl metin: **Yazım yok.** Test hesabıyla emülatörden ya da gcloud ile:
