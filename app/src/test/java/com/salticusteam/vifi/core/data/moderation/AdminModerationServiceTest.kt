@@ -16,7 +16,10 @@ import com.salticusteam.vifi.core.model.SubmissionTier
 import com.salticusteam.vifi.fake.FakeModerationBackend
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
@@ -257,12 +260,115 @@ class AdminModerationServiceTest {
         assertEquals(1, backend.commits.size)
     }
 
+    // A transaction is never queued offline, but its outcome is unknown when the reply is lost: the copies stay.
     @Test
-    fun `approve when commit fails removes the copied files`() = runTest {
+    fun `approve when the commit fails uncertainly keeps the copied files`() = runTest {
         backend.commitFailure = ModerationError.Offline
 
         assertThrows(ModerationError.Offline) { sut().approve(record(), AIProvider.GEMINI) }
+        assertTrue(backend.deletedFiles.isEmpty())
+    }
+
+    @Test
+    fun `approve when the commit is denied with the submission still pending removes the copies`() = runTest {
+        backend.commitFailure = ModerationError.PermissionDenied
+
+        assertThrows(ModerationError.PermissionDenied) { sut().approve(record(), AIProvider.GEMINI) }
         assertEquals(listOf("imagess/file-1.jpg", "imagess/file-2.jpg"), backend.deletedFiles)
+    }
+
+    // K2: the rules rejected a write another admin had already made moot — the loser sees the right message.
+    @Test
+    fun `approve when the commit is denied after another admin approved reports notPending`() = runTest {
+        val record = record()
+        backend.commitFailure = ModerationError.PermissionDenied
+        backend.beforeCommit = { backend.statuses[record.id] = "approved" }
+
+        assertThrows(ModerationError.NotPending) { sut().approve(record, AIProvider.GEMINI) }
+        assertEquals(listOf("imagess/file-1.jpg", "imagess/file-2.jpg"), backend.deletedFiles)
+    }
+
+    @Test
+    fun `approve when the commit is denied after another admin credited reports alreadyCredited`() = runTest {
+        val record = record()
+        backend.commitFailure = ModerationError.PermissionDenied
+        backend.beforeCommit = { backend.ledger += "u1/${record.id}" }
+
+        assertThrows(ModerationError.AlreadyCredited) { sut().approve(record, AIProvider.GEMINI) }
+    }
+
+    // Ö1: another admin acts between the pre-check and the commit; the transaction re-check stops it.
+    @Test
+    fun `approve when another admin approves between the check and the commit throws notPending`() = runTest {
+        val record = record()
+        backend.beforeCommit = { backend.statuses[record.id] = "approved" }
+
+        assertThrows(ModerationError.NotPending) { sut().approve(record, AIProvider.CLAUDE) }
+        assertTrue(backend.commits.isEmpty())
+        assertEquals(listOf("imagess/file-1.jpg", "imagess/file-2.jpg"), backend.deletedFiles)
+    }
+
+    @Test
+    fun `approve when another admin credits between the check and the commit throws alreadyCredited`() = runTest {
+        val record = record()
+        backend.beforeCommit = { backend.ledger += "u1/${record.id}" }
+
+        assertThrows(ModerationError.AlreadyCredited) { sut().approve(record, AIProvider.CLAUDE) }
+        assertTrue(backend.commits.isEmpty())
+        assertEquals(2, backend.deletedFiles.size)
+    }
+
+    // K1: with no reward there is no ledger entry; the status re-check alone keeps a second admin out.
+    @Test
+    fun `approve without coins when another admin approves meanwhile throws notPending`() = runTest {
+        val record = record()
+        backend.beforeCommit = { backend.statuses[record.id] = "approved" }
+
+        assertThrows(ModerationError.NotPending) {
+            sut(rewards = FakeRewardsConfigReader(null)).approve(record, AIProvider.GEMINI)
+        }
+        assertTrue(backend.commits.isEmpty())
+    }
+
+    @Test
+    fun `approve when another admin approves during the pre-check throws notPending before committing`() = runTest {
+        val record = record()
+        backend.beforeStatusRead = { backend.statuses[record.id] = "approved" }
+
+        assertThrows(ModerationError.NotPending) { sut().approve(record, AIProvider.GEMINI) }
+        assertTrue(backend.commits.isEmpty())
+        assertEquals(2, backend.deletedFiles.size)
+    }
+
+    // Ö2: once started, the commit finishes and its copies are kept even if the admin leaves the screen.
+    @Test
+    fun `approve cancelled during the commit finishes the commit and keeps the copies`() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        backend.commitGate = gate
+        val job = launch { sut().approve(record(), AIProvider.CLAUDE) }
+        advanceUntilIdle()
+
+        job.cancel()
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        assertTrue(job.isCancelled)
+        assertEquals(1, backend.commits.size)
+        assertTrue(backend.deletedFiles.isEmpty())
+    }
+
+    @Test
+    fun `approve cancelled while copying removes the earlier copies and never commits`() = runTest {
+        backend.copyGate = CompletableDeferred() // the second copy waits
+        val job = launch { sut().approve(record(), AIProvider.CLAUDE) }
+        advanceUntilIdle()
+        assertEquals(1, backend.copies.size)
+
+        job.cancel()
+        advanceUntilIdle()
+
+        assertTrue(backend.commits.isEmpty())
+        assertEquals(listOf("imagess/file-1.jpg"), backend.deletedFiles)
     }
 
     @Test

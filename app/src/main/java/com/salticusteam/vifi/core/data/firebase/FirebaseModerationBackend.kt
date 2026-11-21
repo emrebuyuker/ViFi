@@ -79,26 +79,27 @@ class FirebaseModerationBackend @Inject constructor(
     override suspend fun commitApproval(commit: ApprovalCommit) = call {
         // 4.2.0 first approval: coins + ledger + the submission update only; `catalogNodes` / `exams` / `childCount`
         // are written by the server's `publishExamConversion` at the second approval, from `publishPlan`.
-        val batch = firestore.batch()
-        if (commit.coins > 0) {
-            batch.set(
-                firestore.collection(WALLETS).document(commit.ownerId),
-                FirstApprovalWrites.wallet(
-                    balanceIncrement = FieldValue.increment(commit.coins.toLong()),
-                    serverTimestamp = FieldValue.serverTimestamp(),
-                ),
-                SetOptions.merge(),
-            )
-            batch.set(
-                ledgerEntry(commit.ownerId, commit.submissionId),
-                FirstApprovalWrites.ledger(commit, FieldValue.serverTimestamp()),
-            )
-        }
-        batch.update(
-            submission(commit.submissionId),
-            FirstApprovalWrites.submission(commit, FieldValue.serverTimestamp()),
-        )
-        batch.commit().await()
+        // A transaction (never queued offline) re-reads the submission and the ledger entry, so the check and the
+        // writes are atomic: a second admin — also when no coins are credited — fails with NotPending/AlreadyCredited.
+        val submissionRef = submission(commit.submissionId)
+        val ledgerRef = ledgerEntry(commit.ownerId, commit.submissionId)
+        firestore.runTransaction { transaction ->
+            if (transaction.get(submissionRef).getString(STATUS) != PENDING) throw ModerationError.NotPending
+            if (commit.coins > 0 && transaction.get(ledgerRef).exists()) throw ModerationError.AlreadyCredited
+            if (commit.coins > 0) {
+                transaction.set(
+                    firestore.collection(WALLETS).document(commit.ownerId),
+                    FirstApprovalWrites.wallet(
+                        balanceIncrement = FieldValue.increment(commit.coins.toLong()),
+                        serverTimestamp = FieldValue.serverTimestamp(),
+                    ),
+                    SetOptions.merge(),
+                )
+                transaction.set(ledgerRef, FirstApprovalWrites.ledger(commit, FieldValue.serverTimestamp()))
+            }
+            transaction.update(submissionRef, FirstApprovalWrites.submission(commit, FieldValue.serverTimestamp()))
+            null
+        }.await()
         Unit
     }
 
@@ -166,7 +167,12 @@ class FirebaseModerationBackend @Inject constructor(
 
         /** Maps a Firestore or Storage failure to a domain error (iOS `moderationError(from:)`). */
         fun moderationError(error: Throwable): ModerationError {
-            val mapped = when (error) {
+            val cause = error.cause
+            val mapped = when {
+                // A transaction function's own failure may reach the Task wrapped.
+                error !is ModerationError && cause is ModerationError -> cause
+                else -> null
+            } ?: when (error) {
                 is ModerationError -> error
                 is FirebaseFirestoreException -> firestoreError(error.code)
                 is StorageException -> storageError(error.errorCode)

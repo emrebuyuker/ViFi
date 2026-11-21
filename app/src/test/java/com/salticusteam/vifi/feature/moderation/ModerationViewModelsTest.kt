@@ -3,6 +3,9 @@ package com.salticusteam.vifi.feature.moderation
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
+import com.salticusteam.vifi.core.data.repository.fake.FakeAuthService
+import com.salticusteam.vifi.core.data.session.SessionStore
+import kotlinx.coroutines.test.TestScope
 import com.salticusteam.vifi.core.data.repository.fake.FakeModerationService
 import com.salticusteam.vifi.core.data.repository.fake.FakeSubmitterProfileReader
 import com.salticusteam.vifi.core.model.AIProvider
@@ -36,7 +39,8 @@ class ModerationViewModelsTest {
     private val service = FakeModerationService(latency = Duration.ZERO)
     private val queue = ModerationQueue(service)
     private val reader = FakeSubmitterProfileReader()
-    private val directory = SubmitterDirectory(reader)
+    private val sessionScope = TestScope(mainDispatcherRule.testDispatcher)
+    private val directory = SubmitterDirectory(reader, SessionStore(FakeAuthService(), sessionScope), sessionScope)
 
     private fun list() = ModerationViewModel(queue, directory, analytics)
 

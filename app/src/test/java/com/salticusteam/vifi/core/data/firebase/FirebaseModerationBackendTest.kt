@@ -36,6 +36,14 @@ class FirebaseModerationBackendTest {
     }
 
     @Test
+    fun `moderationError unwraps a transaction function's domain error`() {
+        assertSame(
+            ModerationError.AlreadyCredited,
+            FirebaseModerationBackend.moderationError(RuntimeException("transaction failed", ModerationError.AlreadyCredited)),
+        )
+    }
+
+    @Test
     fun `moderationError passes a domain error through and falls back to the generic message`() {
         assertSame(ModerationError.NotPending, FirebaseModerationBackend.moderationError(ModerationError.NotPending))
         assertEquals(

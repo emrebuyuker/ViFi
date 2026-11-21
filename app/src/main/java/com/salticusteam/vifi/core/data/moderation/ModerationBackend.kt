@@ -29,8 +29,10 @@ interface ModerationBackend {
     suspend fun deleteFile(storagePath: String)
 
     /**
-     * Writes the whole first approval in one atomic batch (see [ApprovalCommit]; shape in [FirstApprovalWrites]):
-     * the coin credit and the submission update. Never writes `catalogNodes` or `exams` (4.2.0).
+     * Writes the whole first approval atomically (see [ApprovalCommit]; shape in [FirstApprovalWrites]): the coin
+     * credit and the submission update, in one transaction that first re-reads the submission (`NotPending` unless
+     * still `pending`) and, when crediting, the ledger entry (`AlreadyCredited` if it exists). Never queued offline.
+     * Never writes `catalogNodes` or `exams` (4.2.0).
      */
     suspend fun commitApproval(commit: ApprovalCommit)
 

@@ -5,6 +5,7 @@ import com.salticusteam.vifi.core.data.moderation.ModerationBackend
 import com.salticusteam.vifi.core.data.moderation.PublishedExamRef
 import com.salticusteam.vifi.core.model.ExamSubmissionRecord
 import com.salticusteam.vifi.core.model.ModerationError
+import kotlinx.coroutines.CompletableDeferred
 
 /**
  * In-memory moderation backend: submission statuses, ledger entries, Storage objects and published exams are
@@ -53,7 +54,11 @@ class FakeModerationBackend : ModerationBackend {
     override suspend fun ledgerEntryExists(ownerId: String, submissionId: String): Boolean =
         "$ownerId/$submissionId" in ledger
 
+    /** When set, every copy after the first suspends on it (to cancel the caller mid-copy). */
+    var copyGate: CompletableDeferred<Unit>? = null
+
     override suspend fun copyFile(sourcePath: String, destinationPath: String, contentType: String, maxBytes: Long) {
+        if (copies.isNotEmpty()) copyGate?.await()
         copyFailure?.let { throw it }
         if (sourcePath !in files) throw ModerationError.Unknown("missing $sourcePath")
         files += destinationPath
@@ -66,9 +71,18 @@ class FakeModerationBackend : ModerationBackend {
         deletedFiles += storagePath
     }
 
+    /** When set, the commit suspends on it before applying (to cancel the caller mid-commit). */
+    var commitGate: CompletableDeferred<Unit>? = null
+
+    /** Like the live transaction: re-checks the status and (when crediting) the ledger, then applies atomically. */
     override suspend fun commitApproval(commit: ApprovalCommit) {
         beforeCommit()
+        commitGate?.await()
         commitFailure?.let { throw it }
+        if (statuses[commit.submissionId] != "pending") throw ModerationError.NotPending
+        if (commit.coins > 0 && "${commit.ownerId}/${commit.submissionId}" in ledger) {
+            throw ModerationError.AlreadyCredited
+        }
         commits += commit
         statuses[commit.submissionId] = "approved"
         if (commit.coins > 0) ledger += "${commit.ownerId}/${commit.submissionId}"

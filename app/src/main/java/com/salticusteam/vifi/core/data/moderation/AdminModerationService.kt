@@ -38,10 +38,11 @@ import kotlinx.coroutines.withTimeout
  * batch. Since 4.2.0 this first approval writes no catalog nodes or exams; the server's `publishExamConversion` does
  * at the second one.
  *
- * Approving is idempotent: right before the commit the submission must still be `pending` on the server and,
- * when crediting, its ledger entry (keyed by the submission id) must not exist yet — so a stale list, a double
- * tap or a second admin cannot double-credit. Files copied for a commit that then fails are removed best-effort
- * (an Android addition; iOS leaves the orphans).
+ * Approving is idempotent: the submission must still be `pending` on the server and, when crediting, its ledger
+ * entry (keyed by the submission id) must not exist yet — checked once right before the commit and again inside the
+ * commit's transaction, so a stale list, a double tap or a second admin cannot double-credit or double-approve.
+ * Files copied for a commit that never started or was definitely rejected are removed best-effort (an Android
+ * addition; iOS leaves the orphans); after an uncertain failure they stay.
  */
 class AdminModerationService internal constructor(
     private val backend: ModerationBackend,
@@ -81,22 +82,26 @@ class AdminModerationService internal constructor(
         val plan = ArchivePublishPlan.make(record, placement)
 
         val copied = mutableListOf<SubmissionFileRef>()
+        var commitStarted = false
         try {
             if (plan.examId != null) copyFiles(record, into = copied)
             ensureStillCreditable(record, coins)
-            backend.commitApproval(
-                ApprovalCommit(
-                    submissionId = record.id,
-                    ownerId = record.ownerId,
-                    tier = placement.tier,
-                    coins = coins,
-                    provider = provider,
-                    publishPlan = plan.publishPlanDocument(record, copied),
-                ),
+            val commit = ApprovalCommit(
+                submissionId = record.id,
+                ownerId = record.ownerId,
+                tier = placement.tier,
+                coins = coins,
+                provider = provider,
+                publishPlan = plan.publishPlanDocument(record, copied),
             )
+            commitStarted = true
+            // Once started the commit is finished regardless of the caller's cancellation, so its outcome is known.
+            withContext(NonCancellable) { commitResolvingRace(record, commit) }
         } catch (e: Exception) {
-            // Nothing references the copies unless the batch committed; also on cancellation.
-            withContext(NonCancellable) { removeCopies(copied) }
+            // The copies are removed only when nothing can reference them: the commit never started, or the server
+            // definitely rejected it. After an uncertain failure (offline, unknown, cancelled after the commit) they
+            // stay, since a committed plan may point at them (an orphan is harmless; a missing page is not).
+            if (!commitStarted || e.isDefiniteRejection) withContext(NonCancellable) { removeCopies(copied) }
             throw e
         }
         return ApprovalResult(tier = placement.tier, coins = coins, publishedExamId = plan.examId)
@@ -153,6 +158,31 @@ class AdminModerationService internal constructor(
         } catch (e: TimeoutCancellationException) {
             throw ModerationError.Offline
         }
+
+    /**
+     * Commits; a `PermissionDenied` (the rules rejecting a write another admin already made moot) is re-read from the
+     * server and reported as `NotPending` / `AlreadyCredited` when that is what happened, so the admin who lost the race
+     * sees the right message. A failing re-read keeps the original error.
+     */
+    private suspend fun commitResolvingRace(record: ExamSubmissionRecord, commit: ApprovalCommit) {
+        try {
+            backend.commitApproval(commit)
+        } catch (e: ModerationError.PermissionDenied) {
+            val resolved = try {
+                when {
+                    backend.submissionStatus(record.id) != PENDING -> ModerationError.NotPending
+                    commit.coins > 0 && backend.ledgerEntryExists(record.ownerId, record.id) ->
+                        ModerationError.AlreadyCredited
+                    else -> e
+                }
+            } catch (reread: CancellationException) {
+                throw reread
+            } catch (reread: Exception) {
+                e
+            }
+            throw resolved
+        }
+    }
 
     /** Re-checks right before committing that the submission is still pending and not already credited. */
     private suspend fun ensureStillCreditable(record: ExamSubmissionRecord, coins: Int) {
@@ -215,6 +245,11 @@ class AdminModerationService internal constructor(
         }
     }
 }
+
+/** A failure after which the server certainly did not apply the commit, so the copied files can go. */
+private val Exception.isDefiniteRejection: Boolean
+    get() = this is ModerationError.PermissionDenied || this is ModerationError.NotPending ||
+        this is ModerationError.AlreadyCredited
 
 /** The public archive folder of a published exam's files (the legacy `imagess/` spelling is the contract). */
 internal val ExamKind.archiveFolder: String

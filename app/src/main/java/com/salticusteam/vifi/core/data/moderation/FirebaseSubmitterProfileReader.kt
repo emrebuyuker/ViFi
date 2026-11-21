@@ -17,27 +17,43 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 
 /**
  * Live [SubmitterProfileReader] over the Realtime Database `users/<uid>/profile` node (ADM-03, iOS
- * `FirebaseSubmitterProfileReader`). Admin-only: the rules let an admin read any profile. The snapshot is parsed
- * inside the callback by [SubmitterInfoParser], so the phone number and gender never leave the data layer. Fails with
- * [ProfileError.Offline] after [timeout].
+ * `FirebaseSubmitterProfileReader`). Admin-only: the rules let an admin read any profile.
+ *
+ * Unlike iOS (which reads the whole `profile` node and drops the rest in `SubmitterInfoParser`), only the five
+ * display fields ([FIELDS]) are read, each on its own child reference, so the phone number and gender never reach this
+ * device — not even the Realtime Database disk cache. Fails with [ProfileError.Offline] after [timeout].
  */
 class FirebaseSubmitterProfileReader internal constructor(
-    private val database: FirebaseDatabase,
+    /** Reads one child of `users/<uid>/profile`; `null` when it does not exist. Throws `ProfileError`. */
+    private val readField: suspend (uid: String, field: String) -> Any?,
     private val timeout: Duration,
 ) : SubmitterProfileReader {
 
     @Inject
-    constructor(database: FirebaseDatabase) : this(database, DEFAULT_TIMEOUT)
+    constructor(database: FirebaseDatabase) : this(
+        readField = { uid, field -> readChild(database, uid, field) },
+        timeout = DEFAULT_TIMEOUT,
+    )
 
     override suspend fun submitter(uid: String): SubmitterInfo? =
         try {
-            withContext(Dispatchers.IO) { withTimeout(timeout) { read(uid) } }
+            withContext(Dispatchers.IO) {
+                withTimeout(timeout) {
+                    val values = coroutineScope {
+                        FIELDS.map { field -> async { field to readField(uid, field) } }.awaitAll()
+                    }
+                    SubmitterInfoParser.info(values.filter { it.second != null }.toMap())
+                }
+            }
         } catch (e: TimeoutCancellationException) {
             throw ProfileError.Offline
         } catch (e: CancellationException) {
@@ -49,24 +65,28 @@ class FirebaseSubmitterProfileReader internal constructor(
             throw FirebaseProfileService.profileError(e)
         }
 
-    private suspend fun read(uid: String): SubmitterInfo? = suspendCancellableCoroutine { continuation ->
-        val reference = database.getReference(ROOT_KEY).child(uid).child(PROFILE_KEY)
-        val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                continuation.resume(SubmitterInfoParser.info(snapshot.value))
-            }
+    internal companion object {
+        /** The only profile children read: what `SubmitterInfoParser` shows. Never `phoneNumber` or `gender`. */
+        val FIELDS = listOf("name", "surname", "university", "faculty", "department")
 
-            override fun onCancelled(error: DatabaseError) {
-                continuation.resumeWithException(FirebaseProfileService.profileError(error.code))
-            }
-        }
-        reference.addListenerForSingleValueEvent(listener)
-        continuation.invokeOnCancellation { reference.removeEventListener(listener) }
-    }
+        private const val ROOT_KEY = "users"
+        private const val PROFILE_KEY = "profile"
+        private val DEFAULT_TIMEOUT = 15.seconds
 
-    private companion object {
-        const val ROOT_KEY = "users"
-        const val PROFILE_KEY = "profile"
-        val DEFAULT_TIMEOUT = 15.seconds
+        private suspend fun readChild(database: FirebaseDatabase, uid: String, field: String): Any? =
+            suspendCancellableCoroutine { continuation ->
+                val reference = database.getReference(ROOT_KEY).child(uid).child(PROFILE_KEY).child(field)
+                val listener = object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        continuation.resume(snapshot.value)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        continuation.resumeWithException(FirebaseProfileService.profileError(error.code))
+                    }
+                }
+                reference.addListenerForSingleValueEvent(listener)
+                continuation.invokeOnCancellation { reference.removeEventListener(listener) }
+            }
     }
 }
