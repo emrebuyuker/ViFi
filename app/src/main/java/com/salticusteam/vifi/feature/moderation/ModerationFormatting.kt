@@ -4,8 +4,10 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import com.salticusteam.vifi.R
+import com.salticusteam.vifi.core.model.AIProvider
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamSubmissionRecord
+import com.salticusteam.vifi.core.model.SubmitterInfo
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -24,6 +26,17 @@ val ExamKind.moderationLabelRes: Int
         ExamKind.IMAGES -> R.string.moderation_kind_images
         ExamKind.PDF -> R.string.moderation_kind_pdf
     }
+
+/** "Onayla · Claude ile ilerle" / "Onayla · Gemini ile ilerle" (iOS `"Onayla · \(provider.displayName) ile ilerle"`). */
+@get:StringRes
+val AIProvider.approveLabelRes: Int
+    get() = when (this) {
+        AIProvider.CLAUDE -> R.string.moderation_approve_claude
+        AIProvider.GEMINI -> R.string.moderation_approve_gemini
+    }
+
+/** "Üniversite · Bölüm" of a submitter, skipping whichever part is empty (iOS `SubmitterSummary.affiliation`). */
+fun SubmitterInfo.affiliation(): String = listOf(university, department).filter { it.isNotEmpty() }.joinToString(" · ")
 
 /** "2 görsel" / "1 PDF". */
 @Composable

@@ -80,10 +80,10 @@ class AdminModerationServiceTest {
     // --- approve ---
 
     @Test
-    fun `approve when new exam copies files in order and commits publish and credit`() = runTest {
+    fun `approve when new exam copies files in order and commits credit provider and create plan`() = runTest {
         val record = record()
 
-        val result = sut().approve(record, AIProvider.GEMINI)
+        val result = sut().approve(record, AIProvider.CLAUDE)
 
         assertEquals(SubmissionTier.NEW_EXAM, result.tier)
         assertEquals(60, result.coins)
@@ -93,19 +93,43 @@ class AdminModerationServiceTest {
             backend.copies,
         )
         val commit = backend.commits.single()
-        assertEquals(60, commit.coins)
+        assertEquals("sub-1", commit.submissionId)
         assertEquals("u1", commit.ownerId)
-        assertEquals(listOf("blg101"), commit.childCountIncrements)
-        assertTrue(commit.nodesToCreate.isEmpty())
-        assertEquals("blg101__2019-vize", commit.examId)
+        assertEquals(SubmissionTier.NEW_EXAM, commit.tier)
+        assertEquals(60, commit.coins)
+        assertEquals(AIProvider.CLAUDE, commit.provider)
+
+        val plan = commit.publishPlan ?: error("no publishPlan")
+        assertEquals(
+            setOf(
+                "examId", "universityId", "facultyId", "departmentId", "courseId",
+                "nodesToCreate", "childCountIncrements", "exam", "mode",
+            ),
+            plan.keys,
+        )
+        assertEquals("blg101__2019-vize", plan["examId"])
+        assertEquals("blg101", plan["courseId"])
+        assertEquals("create", plan["mode"])
+        assertEquals(emptyList<Any>(), plan["nodesToCreate"])
+        assertEquals(listOf("blg101"), plan["childCountIncrements"])
+        val exam = plan["exam"] as Map<*, *>
         assertEquals(
             listOf(
                 mapOf("storagePath" to "imagess/file-1.jpg", "order" to 1),
                 mapOf("storagePath" to "imagess/file-2.jpg", "order" to 2),
             ),
-            commit.examDocument?.get("files"),
+            exam["files"],
         )
+        assertEquals("2019 VİZE", exam["title"])
+        assertEquals("JPG", exam["kind"])
         assertTrue(backend.deletedFiles.isEmpty())
+    }
+
+    @Test
+    fun `approve passes the chosen provider through unchanged`() = runTest {
+        sut().approve(record(), AIProvider.GEMINI)
+
+        assertEquals(AIProvider.GEMINI, backend.commits.single().provider)
     }
 
     @Test
@@ -117,28 +141,61 @@ class AdminModerationServiceTest {
         assertEquals(listOf("pending/u1/sub-1/1.pdf" to "pdfs/file-1.pdf"), backend.copies)
     }
 
+    // ADM-02 (K22): a duplicate also starts the conversion; its second approval replaces the existing exam.
     @Test
-    fun `approve when duplicate copies nothing and only credits`() = runTest {
+    fun `approve when duplicate copies the files and commits a replace plan for the existing exam`() = runTest {
         val result = sut().approve(record(exam = "2023 VİZE"), AIProvider.GEMINI)
 
         assertEquals(SubmissionTier.DUPLICATE, result.tier)
         assertEquals(10, result.coins)
-        assertNull(result.publishedExamId)
-        assertTrue(backend.copies.isEmpty())
+        assertEquals("2023-vize", result.publishedExamId)
+        assertEquals(
+            listOf("pending/u1/sub-1/1.jpg" to "imagess/file-1.jpg", "pending/u1/sub-1/2.jpg" to "imagess/file-2.jpg"),
+            backend.copies,
+        )
         val commit = backend.commits.single()
-        assertNull(commit.examId)
-        assertNull(commit.examDocument)
-        assertTrue(commit.nodesToCreate.isEmpty())
-        assertTrue(commit.childCountIncrements.isEmpty())
+        assertEquals(10, commit.coins)
+        assertEquals(AIProvider.GEMINI, commit.provider)
+        val plan = commit.publishPlan ?: error("no publishPlan")
+        assertEquals("2023-vize", plan["examId"])
+        assertEquals("replace", plan["mode"])
+        assertEquals("blg101", plan["courseId"])
+        assertEquals(emptyList<Any>(), plan["nodesToCreate"])
+        assertEquals(emptyList<Any>(), plan["childCountIncrements"])
+        assertEquals(
+            listOf(
+                mapOf("storagePath" to "imagess/file-1.jpg", "order" to 1),
+                mapOf("storagePath" to "imagess/file-2.jpg", "order" to 2),
+            ),
+            (plan["exam"] as Map<*, *>)["files"],
+        )
     }
 
     @Test
-    fun `approve when new university creates the whole chain`() = runTest {
+    fun `approve when new university plans the whole chain in Turkish upper case`() = runTest {
         val result = sut().approve(record(university = "Ege Üniversitesi"), AIProvider.GEMINI)
 
         assertEquals(SubmissionTier.NEW_UNIVERSITY, result.tier)
         assertEquals(500, result.coins)
-        assertEquals(4, backend.commits.single().nodesToCreate.size)
+        val nodes = backend.commits.single().publishPlan?.get("nodesToCreate") as List<*>
+        assertEquals(4, nodes.size)
+        val university = nodes.map { it as Map<*, *> }.single { it["level"] == "university" }
+        assertEquals("EGE ÜNİVERSİTESİ", university["name"])
+        assertEquals("ege-universitesi", university["id"])
+        assertEquals("", university["parentId"])
+    }
+
+    @Test
+    fun `duplicateExamId names the existing exam for a duplicate and null for a new one`() = runTest {
+        assertEquals("2023-vize", sut().duplicateExamId(record(exam = "2023 VİZE")))
+        assertNull(sut().duplicateExamId(record(id = "sub-2")))
+    }
+
+    @Test
+    fun `duplicateExamId when the archive cannot be read is null`() = runTest {
+        archive.error = ArchiveError.Offline
+
+        assertNull(sut().duplicateExamId(record(exam = "2023 VİZE")))
     }
 
     @Test
@@ -147,7 +204,9 @@ class AdminModerationServiceTest {
         val result = sut(rewards = FakeRewardsConfigReader(null)).approve(record(), AIProvider.GEMINI)
 
         assertEquals(0, result.coins)
-        assertEquals(0, backend.commits.single().coins)
+        val commit = backend.commits.single()
+        assertEquals(0, commit.coins)
+        assertEquals("blg101__2019-vize", commit.publishPlan?.get("examId"))
     }
 
     @Test

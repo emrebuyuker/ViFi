@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class ModerationViewModel @Inject constructor(
     private val queue: ModerationQueue,
+    private val submitterDirectory: SubmitterDirectory,
     private val analytics: AnalyticsTracker,
 ) : ViewModel() {
 
@@ -34,8 +35,13 @@ class ModerationViewModel @Inject constructor(
     private val _load = MutableStateFlow(LoadState())
 
     val uiState: StateFlow<ModerationUiState> =
-        combine(_load, queue.records) { load, records -> load.uiState(records) }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, _load.value.uiState(null))
+        combine(_load, queue.records, submitterDirectory.submitters) { load, records, submitters ->
+            load.uiState(records).copy(submitters = submitters)
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            _load.value.uiState(null).copy(submitters = submitterDirectory.submitters.value),
+        )
 
     // Internal state
     /** Set while a request is in flight, so a pull-to-refresh or retry can't overlap another load. */
@@ -55,6 +61,11 @@ class ModerationViewModel @Inject constructor(
 
     /** Retry after a failure, with the loading state. */
     fun retry() = load(showLoading = true)
+
+    /** A row became visible: looks up its submitter once (a failed lookup is retried next time). */
+    fun onRowShown(ownerId: String) {
+        viewModelScope.launch { submitterDirectory.load(ownerId) }
+    }
 
     // Helpers
     private fun load(showLoading: Boolean) {

@@ -15,6 +15,7 @@ import com.salticusteam.vifi.core.model.GENERIC_ERROR_MESSAGE
 import com.salticusteam.vifi.core.model.ModerationError
 import com.salticusteam.vifi.core.model.RewardsConfig
 import com.salticusteam.vifi.core.model.SubmissionFileRef
+import com.salticusteam.vifi.core.model.SubmissionTier
 import com.salticusteam.vifi.core.model.fileExtension
 import com.salticusteam.vifi.core.model.uploadContentType
 import com.salticusteam.vifi.core.util.LogCategory
@@ -33,7 +34,9 @@ import kotlinx.coroutines.withTimeout
 /**
  * Serverless admin moderation (iOS `FirebaseModerationService`), Firebase-free over a [ModerationBackend]: the
  * admin's device resolves the submission against the archive, copies its files into the public archive storage,
- * and commits the catalog nodes, the exam document, the coin credit and the status change in one atomic batch.
+ * and commits the coin credit and the status change (with the AI provider and the `publishPlan`) in one atomic
+ * batch. Since 4.2.0 this first approval writes no catalog nodes or exams; the server's `publishExamConversion` does
+ * at the second one.
  *
  * Approving is idempotent: right before the commit the submission must still be `pending` on the server and,
  * when crediting, its ledger entry (keyed by the submission id) must not exist yet — so a stale list, a double
@@ -58,8 +61,12 @@ class AdminModerationService internal constructor(
     override suspend fun pendingSubmissions(): List<ExamSubmissionRecord> =
         backend.pendingSubmissions().sortedWith(NEWEST_FIRST)
 
-    // ADM-01 replaces this body with the two-stage first approval (provider + publishPlan, no `exams` write); until
-    // then it keeps the 4.1.0 direct-publish path and ignores [provider].
+    /**
+     * First approval (4.2.0, iOS `approve(_:provider:)`): copies the files into the public archive storage (for a
+     * new exam and for a duplicate alike — K22: a duplicate's second approval replaces the existing exam's pages with
+     * these copies), then commits the coin credit and the submission update (`approved`, `tier`, `coins`,
+     * `conversionProvider`, `publishPlan`, `reviewedAt`) in one batch. Writes no catalog node or exam.
+     */
     override suspend fun approve(record: ExamSubmissionRecord, provider: AIProvider): ApprovalResult {
         if (record.status != PENDING) throw ModerationError.NotPending
 
@@ -73,7 +80,6 @@ class AdminModerationService internal constructor(
         val coins = (currentRewards()?.coins(placement.tier) ?: 0).coerceAtLeast(0)
         val plan = ArchivePublishPlan.make(record, placement)
 
-        // Files are copied into the public archive storage only when a new exam is actually published.
         val copied = mutableListOf<SubmissionFileRef>()
         try {
             if (plan.examId != null) copyFiles(record, into = copied)
@@ -84,10 +90,8 @@ class AdminModerationService internal constructor(
                     ownerId = record.ownerId,
                     tier = placement.tier,
                     coins = coins,
-                    nodesToCreate = plan.nodesToCreate,
-                    childCountIncrements = plan.childCountIncrements,
-                    examId = plan.examId,
-                    examDocument = plan.examId?.let { plan.examDocument(record, copied) },
+                    provider = provider,
+                    publishPlan = plan.publishPlanDocument(record, copied),
                 ),
             )
         } catch (e: Exception) {
@@ -100,7 +104,7 @@ class AdminModerationService internal constructor(
 
     override suspend fun duplicateExamId(record: ExamSubmissionRecord): String? =
         try {
-            resolver.placement(record.location).examId
+            resolver.placement(record.location).takeIf { it.tier == SubmissionTier.DUPLICATE }?.examId
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
