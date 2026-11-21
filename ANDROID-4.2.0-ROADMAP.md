@@ -38,12 +38,13 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **11'i tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **35'i tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
-> `DDEC-06` (son görüntülenen kilit kontrolü, `SQS-01` sırasında sunulur). Sıradaki: `SOPS-01` ‖ `SPK-01` → `SCT-01`;
-> `SCT-01` bitmeden Faz 1 hatları başlamaz.
+> `DDEC-06` (iOS'ta da son görüntülenen kartı kilit kontrolünden geçmiyor; iki platform eşit). Faz 0 ve Hat A, B, C, E, F
+> (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). Sürüyor: Hat D (`ADM-*` Fable
+> düzeltmeleri, `ADX-*`), `SIT-01`.
 
 ---
 
@@ -221,54 +222,54 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 
 #### Hat A — Soru ekranı ve yönlendirme
 
-- [ ] **`SQS-01`** Tek yönlendirme kararı _(P0·M·Opus)_ — Browse, son görüntülenenler ve bildirim "Sınava Git"
+- [x] **`SQS-01`** Tek yönlendirme kararı _(P0·M·Opus)_ — Browse, son görüntülenenler ve bildirim "Sınava Git"
   `ExamRouting`'den geçer. Özetsiz açılışta `ExamViewerViewModel` belge structured çıkarsa soru ekranına **yer
   değiştirir** (geri yığınında sayfa görünümü kalmaz). Kilitli sınav soru ekranına ulaşmaz (mevcut `ExamLock` /
   `ExamAccessResolver`). Uzaktan bayrak yok. ⟶ `SCT-01`
-- [ ] **`SQS-02`** Soru ekranı _(P0·M·Sonnet)_ — `StructuredExamScreen` + `StructuredExamViewModel` + `UiState`: yükleme,
+- [x] **`SQS-02`** Soru ekranı _(P0·M·Sonnet)_ — `StructuredExamScreen` + `StructuredExamViewModel` + `UiState`: yükleme,
   hata + "Tekrar dene", boş "Bu sınavda soru yok"; yeniden yükleme başarısızsa eldeki sorular kalır; orijinal sayfaya
   otomatik dönüş yok (K23). Tüm içerik `ScreenCaptureProtection` içinde. testTag `questions.*`. ⟶ `SCT-01`
-- [ ] **`SQS-03`** `QuestionCard` _(P0·M·Sonnet)_ — Yeniden kullanılabilir kart (pratik de kullanır): başlık parametresi
+- [x] **`SQS-03`** `QuestionCard` _(P0·M·Sonnet)_ — Yeniden kullanılabilir kart (pratik de kullanır): başlık parametresi
   ("`<label>. Soru`" ya da "Soru N"), isteğe bağlı kaynak satırı, metin, şekiller, şıklar (açıkken "A ✓"), "Cevabı
   Göster/Gizle", cevap bölümü, çözüm adımları, yapay zekâ notu. Cevap durumu cihazda (`rememberSaveable`), Firestore'a
   yazılmaz. Turuncu üstünde siyah metin. ⟶ `SCT-01`
-- [ ] **`SQS-04`** Şekiller _(P0·S·Sonnet)_ — Coil + mevcut kimlikli `ImageLoader`; anahtar = `storagePath`; yalnız
+- [x] **`SQS-04`** Şekiller _(P0·S·Sonnet)_ — Coil + mevcut kimlikli `ImageLoader`; anahtar = `storagePath`; yalnız
   görünür olunca iner; oran yer tutucusu [0,1…2] (bilinmiyorsa 2/3); beyaz zemin, köşe 8; hata "Şekil yüklenemedi";
   çözme boyutu en çok 1600 px. `token=` kullanılmaz, yol üretilmez. ⟶ `SCT-01`
-- [ ] **`SQS-05`** Erişilebilirlik ve analytics _(P1·S·Sonnet)_ — Kart başına iki semantik düğüm: soru (`speech` →
+- [x] **`SQS-05`** Erişilebilirlik ve analytics _(P1·S·Sonnet)_ — Kart başına iki semantik düğüm: soru (`speech` →
   şıklar → "Şekil var.") ve cevap (yalnız açıkken; `answer.speech` → adımlar → not). Başlık `heading()`. Analytics
   `exam_open` (`kind: structured`, `question_count`) ilk başarılı yüklemede bir kez; `answer_revealed`
   (`question_order`) soru başına bir kez. Son görüntülenene kayıt ilk başarılı yüklemede. ⟶ `SQS-02`
-- [ ] **`SQS-06`** Liste ve son görüntülenen _(P1·S·Sonnet)_ — `ArchiveRow`: structured sınavda "N soru" + "Sorular"
+- [x] **`SQS-06`** Liste ve son görüntülenen _(P1·S·Sonnet)_ — `ArchiveRow`: structured sınavda "N soru" + "Sorular"
   rozeti + liste ikonu (kilit rozeti önceliği korunur). `RecentExam`'a `isStructured` (eski `recentExams.v1` kaydı
   `false` çözülür; anahtar değişmez, göç testi). Kart rozeti "Sorular". ⟶ `SCT-01`
 
 #### Hat B — Formül ve zengin metin
 
-- [ ] **`SMT-01`** LaTeX bağımlılığı ve sarmalayıcı _(P0·S·Sonnet)_ — `DDEC-02` seçimiyle `libs.versions.toml` +
+- [x] **`SMT-01`** LaTeX bağımlılığı ve sarmalayıcı _(P0·S·Sonnet)_ — `DDEC-02` seçimiyle `libs.versions.toml` +
   `app/build.gradle` (+ gerekirse R8 kuralı). `FormulaView` (satır içi / ekran), yazı ölçeği (gövde ≈ 17 sp, üst sınır),
   ekran formülü ~1,1 kat; çizilemeyen formülde kaynak `$…$` metin olarak düşer, çökme yok. ⟶ `SPK-01`, `DDEC-02`
-- [ ] **`SMT-02`** `QuestionRichText` _(P0·M·Sonnet)_ — Tokenizer parçalarını akıtır: metin (Markdown satır içi alt
+- [x] **`SMT-02`** `QuestionRichText` _(P0·M·Sonnet)_ — Tokenizer parçalarını akıtır: metin (Markdown satır içi alt
   kümesi; blok yapılar düz metin; satır sonları korunur), satır içi formül taban çizgisinde (`InlineTextContent` ya da
   özel düzen), ekran formülü kendi satırında ortalı. Her formül çizimden önce `LatexCompatibility`'den geçer. ⟶ `SMT-01`
-- [ ] **`SMT-03`** `MathLineBreaker` _(P1·M·Sonnet)_ — Sütundan geniş formül üst düzeyde (virgül sonrası, ilişki/ikili
+- [x] **`SMT-03`** `MathLineBreaker` _(P1·M·Sonnet)_ — Sütundan geniş formül üst düzeyde (virgül sonrası, ilişki/ikili
   işlem işaretleri) parçalara bölünür; gruplar asla bölünmez; hâlâ sığmayan parça küçültülür. iOS `MathLineBreakerTests`
   vakalarının aynısı. ⟶ `SMT-01`
-- [ ] **`SMT-04`** Performans _(P1·S·Sonnet)_ — Formül görsel önbelleği (anahtar: LaTeX + boyut + renk), `LazyColumn`'da
+- [x] **`SMT-04`** Performans _(P1·S·Sonnet)_ — Formül görsel önbelleği (anahtar: LaTeX + boyut + renk), `LazyColumn`'da
   yeniden çizimi önleme; 30 kartlık örnekte kaydırma ölçümü (Macrobenchmark gerekmez, `JankStats`/profiler notu yeter). ⟶ `SMT-02`
 
 #### Hat C — "Sınava gir"
 
-- [ ] **`PRC-01`** Veri katmanı _(P0·M·Sonnet)_ — `FirestorePoolIndexReader` (`questionPoolIndex/<subjectId>` tek okuma;
+- [x] **`PRC-01`** Veri katmanı _(P0·M·Sonnet)_ — `FirestorePoolIndexReader` (`questionPoolIndex/<subjectId>` tek okuma;
   yoksa düğme yok), `FirebasePracticeService.nextPracticeQuestions(...)` (callable, zaman aşımı, hata → `PracticeError`
   Türkçe `userMessage`). Ders düğümünden `subjectId` okuma (`FirestoreArchiveParser`, katalog). ⟶ `SCT-01`
-- [ ] **`PRC-02`** Seçim ekranı _(P0·M·Sonnet)_ — `PracticeEntry` (ders ekranında, yalnız özette soru varsa) →
+- [x] **`PRC-02`** Seçim ekranı _(P0·M·Sonnet)_ — `PracticeEntry` (ders ekranında, yalnız özette soru varsa) →
   `PracticeSetupScreen`: pratik türleri (materyaller yok), her birinde sayı; kapsam Bu ders / Üniversitem / Türkiye
   geneli, sayılarla, 1 soruluk kapsam da seçilebilir (P4). testTag `practice.*`. ⟶ `PRC-01`
-- [ ] **`PRC-03`** Premium kanıtı _(P0·S·Sonnet)_ — `PlayBillingSubscriptionService`'e etkin aboneliğin
+- [x] **`PRC-03`** Premium kanıtı _(P0·S·Sonnet)_ — `PlayBillingSubscriptionService`'e etkin aboneliğin
   `{platform: "android", purchaseToken, productId}` kanıtı; her çağrıda gönderilir; yoksa `null` (ücretsiz). Token
   günlüğe yazılmaz. ⟶ `SCT-01`
-- [ ] **`PRC-04`** Oturum ViewModel'i _(P0·M·Sonnet)_ — Sıralı "Soru 1, 2…"; `exclude` = son 300 id; boş dönüş = havuz
+- [x] **`PRC-04`** Oturum ViewModel'i _(P0·M·Sonnet)_ — Sıralı "Soru 1, 2…"; `exclude` = son 300 id; boş dönüş = havuz
   bitti → "Baştan başla" (`exclude` temizlenir, sayaç 1'den); ön-çekme yalnız `remainingToday == null` iken;
   `limitReached` → paywall olayı; analytics `practice_started`, `practice_answer_revealed`, `practice_limit_reached`,
   `practice_paywall_opened`. iOS `PracticeSessionViewModelTests` vakaları. ⟶ `PRC-01`, `PRC-03`
@@ -304,14 +305,14 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 
 #### Hat E — Küçük pariteler
 
-- [ ] **`SMP-01`** Sınav adı listesi 22 ad _(P0·S·Sonnet)_ — `ExamNameCatalog` iOS sırasıyla (VİZE … ÇÖZÜMLÜ SORULAR);
+- [x] **`SMP-01`** Sınav adı listesi 22 ad _(P0·S·Sonnet)_ — `ExamNameCatalog` iOS sırasıyla (VİZE … ÇÖZÜMLÜ SORULAR);
   `exam` metni `"<yıl> <AD>"`; Add Exam UI testi. ⟶ `SCT-01`
-- [ ] **`SMP-02`** Güncelleme uyarısı regresyon testi _(P2·S·Sonnet)_ — `vifi_optional_update` ile "Daha Sonra" /
+- [x] **`SMP-02`** Güncelleme uyarısı regresyon testi _(P2·S·Sonnet)_ — `vifi_optional_update` ile "Daha Sonra" /
   "Bu sürümü atla" sonrası uyarı aynı oturumda geri gelmiyor (iOS dca5c3c'nin Android karşılığı; kod değişikliği
   beklenmiyor). ⟶ —
-- [ ] **`SMP-03`** RTDB `Universitiess` kalıntısı _(P2·S·Sonnet)_ — Live `RepositoryModule` yorumunun güncellenmesi;
+- [x] **`SMP-03`** RTDB `Universitiess` kalıntısı _(P2·S·Sonnet)_ — Live `RepositoryModule` yorumunun güncellenmesi;
   başka referans yok. ⟶ —
-- [ ] **`SMP-04`** Bildirim uyumluluğu _(P1·S·Sonnet)_ — Yeni admin otomatik bildirimleri (`conversionReady`,
+- [x] **`SMP-04`** Bildirim uyumluluğu _(P1·S·Sonnet)_ — Yeni admin otomatik bildirimleri (`conversionReady`,
   `conversionFailed`, `conversionBudgetExceeded`) aksiyonsuz; Android bildirim ayrıştırıcısının bunları sorunsuz
   gösterdiği örnek yüklerle test edilir. ⟶ —
 
@@ -327,9 +328,9 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 
 #### Hat G — Giriş güvenliği (eski reCAPTCHA taslağı)
 
-- [ ] **`RCD-01`** reCAPTCHA bağımlılığını açık yaz _(P1·S·Sonnet)_ — `libs.versions.toml` + `app/build.gradle`,
+- [x] **`RCD-01`** reCAPTCHA bağımlılığını açık yaz _(P1·S·Sonnet)_ — `libs.versions.toml` + `app/build.gradle`,
   neden-yorumuyla; ağaçta `firebase-auth 23.1.0` + `recaptcha 18.5.1`, çakışma yok. ⟶ `DDEC-05`
-- [ ] **`RCD-02`** Hata eşlemesi testleri _(P1·S·Sonnet)_ — `FirebaseAuthErrorsTest`'e tüm reCAPTCHA kodları +
+- [x] **`RCD-02`** Hata eşlemesi testleri _(P1·S·Sonnet)_ — `FirebaseAuthErrorsTest`'e tüm reCAPTCHA kodları +
   `FirebaseAuthMissingActivityForRecaptchaException` → `AppVerificationFailed`, "Error code: 39" →
   `SmsTemporarilyUnavailable`. Uygulama kodu değişmez. ⟶ —
 - [x] **`RSD-02`** AUDIT açıldı _(eski taslak)_ — 18 Kasım 2026, ürün sahibinin onayıyla.
@@ -338,19 +339,19 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 
 - [x] **`RLG-01`** Veri güvenliği: reCAPTCHA SDK'sı _(eski taslak)_ — 18 Kasım 2026'da Console'a girildi
   (`PLAY-DATA-SAFETY.md` notu).
-- [ ] **`SLG-01`** Veri güvenliği: 4.2.0 _(P0·S·Sonnet)_ — Yeni toplanan veri: pratik günlük sayacı (sunucu, hesaba
+- [x] **`SLG-01`** Veri güvenliği: 4.2.0 _(P0·S·Sonnet)_ — Yeni toplanan veri: pratik günlük sayacı (sunucu, hesaba
   bağlı), abonelik–hesap bağı (sipariş kimliği), yeni analytics olayları (Uygulama etkileşimleri zaten beyanlı mı).
   Sınav sayfalarının Vertex AI'da işlenmesi kullanıcı verisi değil arşiv içeriği; gönderilen sınav dosyaları "Fotoğraflar
   / Dosyalar" beyanında üçüncü taraf işleyici notu gerekir mi. Forma etkisi tablosu. ⟶ —
-- [ ] **`SLG-02`** Play politikası kontrolü _(P0·S·Opus)_ — `PLAY-POLICY-4.2.0.md` (yeni): Yapay zekâ ile üretilmiş
+- [x] **`SLG-02`** Play politikası kontrolü _(P0·S·Opus)_ — `PLAY-POLICY-4.2.0.md` (yeni): Yapay zekâ ile üretilmiş
   içerik politikası (içerik sunucuda üretiliyor ve admin incelemesinden geçiyor; kullanıcı istemle üretmiyor →
   bildirme mekanizması şartı uygulanır mı), abonelik/ücretsiz deneme sınırı açıklığı (günde 5 soru, paywall metni),
   mutlak iddia yok. ⟶ —
-- [ ] **`SLG-03`** Mağaza metinleri _(P1·S·Sonnet)_ — `PLAY-STORE-LISTING.md`: 4.2.0 sürüm notu (iOS What's New ile
+- [x] **`SLG-03`** Mağaza metinleri _(P1·S·Sonnet)_ — `PLAY-STORE-LISTING.md`: 4.2.0 sürüm notu (iOS What's New ile
   aynı içerik: soru soru sınavlar, yapay zekâ notu, "Sınava gir"; mutlak iddia yok), gerekirse tam açıklama. ⟶ —
 - [ ] **`SLG-04`** Proje belgeleri _(P2·S·Haiku)_ — `CLAUDE.md` (durum, Mevcut durum tablosu: soru ekranı, pratik,
   LaTeX kütüphanesi, yeni callable'lar, yeni launch argümanları) + `README.md`. ⟶ Faz 1 hatları
-- [ ] **`SLG-05`** Sözleşme belgesinin Android'e alınması _(P2·S·Haiku)_ — `STRUCTURED-EXAMS.md`'nin Android'i
+- [x] **`SLG-05`** Sözleşme belgesinin Android'e alınması _(P2·S·Haiku)_ — `STRUCTURED-EXAMS.md`'nin Android'i
   ilgilendiren özeti (kişisel veri içermeden) `ANDROID-4.2.0-DETAIL.md` olarak; iOS test adları ↔ Android test
   sınıfları eşlemesi. ⟶ `SCT-01`
 
