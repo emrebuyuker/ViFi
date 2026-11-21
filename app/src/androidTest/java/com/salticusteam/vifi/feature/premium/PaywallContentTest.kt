@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -80,7 +81,7 @@ class PaywallContentTest {
         setContent(loaded)
 
         composeRule.onNodeWithTag("paywall.benefit.practice").performScrollTo().assertIsDisplayed()
-            .assert(hasText("Sınava gir'de sınırsız soru"))
+            .assert(hasAnyDescendant(hasText("Sınava gir'de sınırsız soru")))
     }
 
     @Test
