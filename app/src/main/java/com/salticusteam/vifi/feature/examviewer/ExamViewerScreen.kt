@@ -33,6 +33,9 @@ import com.salticusteam.vifi.core.navigation.ViFiRoute
 /**
  * The exam viewer destination: the image viewer (page list + full-screen pager) or the PDF viewer, chosen
  * by the exam's kind (VIEW-06). The whole screen is capture-protected (VIEW-10..12).
+ *
+ * @param bottomBar shown under the file viewers only (never the redirect wait), e.g. the admin "Yeni yapıya geçir"
+ * (ADX-04); draws nothing when the host passes the default.
  */
 @Composable
 fun ExamViewerScreen(
@@ -40,6 +43,7 @@ fun ExamViewerScreen(
     routeKind: ExamKind,
     onBack: () -> Unit,
     onReplaceWithQuestions: (ViFiRoute.StructuredExam) -> Unit = {},
+    bottomBar: @Composable (path: ArchivePath) -> Unit = {},
     viewModel: ExamViewerViewModel = hiltViewModel<ExamViewerViewModel, ExamViewerViewModel.Factory> {
         it.create(path, routeKind)
     },
@@ -70,8 +74,14 @@ fun ExamViewerScreen(
                     onBack = onBack,
                     onRetry = viewModel::load,
                     onFullScreenShown = viewModel::onFullScreenShown,
+                    bottomBar = { bottomBar(path) },
                 )
-                ExamKind.PDF -> ExamPdfScreen(state = state, onBack = onBack, onRetryDocument = viewModel::load)
+                ExamKind.PDF -> ExamPdfScreen(
+                    state = state,
+                    onBack = onBack,
+                    onRetryDocument = viewModel::load,
+                    bottomBar = { bottomBar(path) },
+                )
             }
         }
     }
@@ -94,6 +104,7 @@ internal fun ExamImagesScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onFullScreenShown: () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
 ) {
     var openedPage by rememberSaveable { mutableStateOf<Int?>(null) }
     val urls = state.document?.fileUrls.orEmpty()
@@ -108,6 +119,7 @@ internal fun ExamImagesScreen(
                     actions = { ContactSupportAction(supportPath = state.supportPath) },
                 )
             },
+            bottomBar = bottomBar,
         ) { padding ->
             ExamImagesContent(
                 state = state,
@@ -130,6 +142,7 @@ internal fun ExamPdfScreen(
     state: ExamViewerUiState,
     onBack: () -> Unit,
     onRetryDocument: () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
     pdfViewModel: ExamPdfViewModel = hiltViewModel(),
 ) {
     val pdf by pdfViewModel.uiState.collectAsStateWithLifecycle()
@@ -154,6 +167,7 @@ internal fun ExamPdfScreen(
                 },
             )
         },
+        bottomBar = bottomBar,
     ) { padding ->
         ExamPdfContent(
             state = state,

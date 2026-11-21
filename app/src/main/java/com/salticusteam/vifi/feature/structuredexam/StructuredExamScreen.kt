@@ -46,14 +46,16 @@ import com.salticusteam.vifi.feature.examviewer.ScreenCaptureProtection
  * "Cevabı Göster". Reached through `ExamRouting` only, after the archive's lock rule let the user in; the whole screen
  * (question content included) is capture-protected like the file viewers.
  *
- * @param questionAdminAction the admin "Yönetici" menu above each card (ADX-05); `null` for everyone else.
+ * @param questionAdminAction the admin "Yönetici" menu above each card (ADX-05); `null` for everyone else. It gets the
+ * question and a callback to call after a successful edit or regeneration, which re-reads the questions (the ones on
+ * screen stay meanwhile).
  */
 @Composable
 fun StructuredExamScreen(
     path: ArchivePath,
     kind: ExamKind,
     onBack: () -> Unit,
-    questionAdminAction: (@Composable (ExamQuestion) -> Unit)? = null,
+    questionAdminAction: (@Composable (question: ExamQuestion, onChange: () -> Unit) -> Unit)? = null,
     viewModel: StructuredExamViewModel = hiltViewModel<StructuredExamViewModel, StructuredExamViewModel.Factory> {
         it.create(path, kind)
     },
@@ -80,7 +82,9 @@ fun StructuredExamScreen(
                 figureImages = figureImages,
                 onRetry = viewModel::load,
                 onToggleAnswer = viewModel::onToggleAnswer,
-                questionAdminAction = questionAdminAction,
+                questionAdminAction = questionAdminAction?.let { action ->
+                    { question -> action(question, viewModel::load) }
+                },
                 modifier = Modifier.padding(padding),
             )
         }
