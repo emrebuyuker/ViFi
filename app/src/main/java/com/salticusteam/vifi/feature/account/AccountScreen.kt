@@ -64,6 +64,7 @@ import com.salticusteam.vifi.core.designsystem.component.IconBadge
 import com.salticusteam.vifi.core.designsystem.component.formatCoins
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
+import com.salticusteam.vifi.feature.conversionadmin.ConversionAdminEntryRows
 
 /**
  * The signed-in account (iOS AccountView), opened from the home screen: the profile (opens the editor), ViFi Premium
@@ -79,6 +80,11 @@ fun AccountScreen(
     onModeration: () -> Unit = {},
     /** Opens the admin's Bildirim Gönder form (its history is reached from there). */
     onNotificationComposer: () -> Unit = {},
+    /** The admin's AI-conversion entries (4.2.0): Hazır sınavlar, Başarısız işler, Toplu dönüştür, Ders eşleme. */
+    onConversionReady: () -> Unit = {},
+    onConversionFailed: () -> Unit = {},
+    onBulkConversion: () -> Unit = {},
+    onSubjectMapping: () -> Unit = {},
     /** Opens the Premium paywall from the upgrade row; `null` hides the row (the active status still shows). */
     onOpenPaywall: (() -> Unit)? = null,
     /** Opens Bildirim Ayarları; `null` hides the row. */
@@ -116,6 +122,10 @@ fun AccountScreen(
         onAbout = onAbout,
         onModeration = onModeration,
         onNotificationComposer = onNotificationComposer,
+        onConversionReady = onConversionReady,
+        onConversionFailed = onConversionFailed,
+        onBulkConversion = onBulkConversion,
+        onSubjectMapping = onSubjectMapping,
         onUpgradePremium = onOpenPaywall,
         // Google Play's own subscription page: change the plan, update the payment method, or cancel.
         onManageSubscription = { LegalLinks.open(context, PremiumLinks.MANAGE_SUBSCRIPTIONS_URL) },
@@ -140,6 +150,10 @@ fun AccountContent(
     onAbout: () -> Unit = {},
     onModeration: () -> Unit = {},
     onNotificationComposer: () -> Unit = {},
+    onConversionReady: () -> Unit = {},
+    onConversionFailed: () -> Unit = {},
+    onBulkConversion: () -> Unit = {},
+    onSubjectMapping: () -> Unit = {},
     onUpgradePremium: (() -> Unit)? = null,
     onManageSubscription: () -> Unit = {},
     onNotificationSettings: (() -> Unit)? = null,
@@ -202,6 +216,16 @@ fun AccountContent(
                 item(key = "notificationComposer") {
                     NotificationComposerRow(enabled = !state.isWorking, onClick = onNotificationComposer)
                     HorizontalDivider()
+                }
+                // The AI-conversion workflow's entries (4.2.0), iOS "Yapılandırılmış sınavlar" section.
+                item(key = "conversionAdmin") {
+                    ConversionAdminEntryRows(
+                        enabled = !state.isWorking,
+                        onReady = onConversionReady,
+                        onFailed = onConversionFailed,
+                        onBulk = onBulkConversion,
+                        onSubjects = onSubjectMapping,
+                    )
                 }
             }
             if (onNotificationSettings != null) {

@@ -1,7 +1,9 @@
 package com.salticusteam.vifi.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,6 +38,12 @@ fun ViFiNavHost(
     practiceSetup: @Composable (course: ArchivePath, subjectId: String) -> Unit = { _, _ -> },
     practiceSession: @Composable (selection: PracticeSelection) -> Unit = {},
     structuredExam: @Composable (path: ArchivePath, kind: ExamKind) -> Unit = { _, _ -> },
+    conversionJobs: @Composable (failed: Boolean) -> Unit = {},
+    conversionReview: @Composable (jobId: String) -> Unit = {},
+    conversionOriginal: @Composable (jobId: String) -> Unit = {},
+    bulkConversion: @Composable () -> Unit = {},
+    subjectMapping: @Composable () -> Unit = {},
+    subjectDetail: @Composable (subjectId: String, listEntry: NavBackStackEntry) -> Unit = { _, _ -> },
 ) {
     NavHost(
         navController = navController,
@@ -98,6 +106,26 @@ fun ViFiNavHost(
         }
         composable<ViFiRoute.PracticeSession> { entry ->
             practiceSession(entry.toRoute<ViFiRoute.PracticeSession>().selection)
+        }
+        composable<ViFiRoute.ConversionJobs> { entry ->
+            conversionJobs(entry.toRoute<ViFiRoute.ConversionJobs>().failed)
+        }
+        composable<ViFiRoute.ConversionReview> { entry ->
+            conversionReview(entry.toRoute<ViFiRoute.ConversionReview>().jobId)
+        }
+        composable<ViFiRoute.ConversionOriginal> { entry ->
+            conversionOriginal(entry.toRoute<ViFiRoute.ConversionOriginal>().jobId)
+        }
+        composable<ViFiRoute.BulkConversion> {
+            bulkConversion()
+        }
+        composable<ViFiRoute.SubjectMapping> {
+            subjectMapping()
+        }
+        composable<ViFiRoute.SubjectDetail> { entry ->
+            // The detail follows the list's reloads: the slot shares the list entry's view model.
+            val listEntry = remember(entry) { navController.getBackStackEntry<ViFiRoute.SubjectMapping>() }
+            subjectDetail(entry.toRoute<ViFiRoute.SubjectDetail>().subjectId, listEntry)
         }
     }
 }

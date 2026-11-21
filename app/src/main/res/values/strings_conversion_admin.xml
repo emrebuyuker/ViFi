@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Added in 4.2.0 — admin AI conversion: ready exams, failed jobs, review, bulk, subject mapping (ADX-01…06, iOS Features/Moderation) -->
+
+    <!-- Turkish keeps the noun singular after a number, so the strings that count something (marked PluralsCandidate) have no one/other difference. -->
+
+    <!-- Common -->
+    <string name="conversion_admin_cancel">Vazgeç</string>
+    <string name="conversion_admin_ok">Tamam</string>
+    <string name="conversion_admin_provider_claude">Claude</string>
+    <string name="conversion_admin_provider_gemini">Gemini</string>
+    <string name="conversion_admin_provider_proceed">%1$s ile ilerle</string>
+    <string name="conversion_admin_usage_title">Bu ayın yapay zekâ harcaması</string>
+    <string name="conversion_admin_usage_value">%1$s / %2$s</string>
+
+    <!-- Account entries (admins only) -->
+    <string name="conversion_admin_entry_ready">Hazır sınavlar</string>
+    <string name="conversion_admin_entry_ready_subtitle">Yapay zekâ taslaklarını incele ve yayınla</string>
+    <string name="conversion_admin_entry_failed">Başarısız işler</string>
+    <string name="conversion_admin_entry_failed_subtitle">Takılan dönüştürmeleri tekrar başlat</string>
+    <string name="conversion_admin_entry_bulk">Toplu dönüştür</string>
+    <string name="conversion_admin_entry_bulk_subtitle">Bir dersi ya da bölümü yeni yapıya geçir</string>
+    <string name="conversion_admin_entry_subjects">Ders eşleme</string>
+    <string name="conversion_admin_entry_subjects_subtitle">Konuları taşı, yeniden adlandır, birleştir</string>
+
+    <!-- Job lists -->
+    <string name="conversion_admin_ready_title">Hazır sınavlar</string>
+    <string name="conversion_admin_failed_title">Başarısız işler</string>
+    <string name="conversion_admin_jobs_loading">İşler yükleniyor…</string>
+    <string name="conversion_admin_ready_empty_title">Hazır sınav yok</string>
+    <string name="conversion_admin_ready_empty_message">Yapay zekâ bir sınavı bitirince burada incelemeye hazır görünür.</string>
+    <string name="conversion_admin_failed_empty_title">Başarısız iş yok</string>
+    <string name="conversion_admin_failed_empty_message">Tüm işler sorunsuz ilerliyor.</string>
+    <string name="conversion_admin_restart">Tekrar başlat</string>
+    <string name="conversion_admin_restart_provider_title">Hangi modelle yeniden başlatılsın?</string>
+
+    <!-- Review -->
+    <string name="conversion_admin_review_title">Sınav incelemesi</string>
+    <string name="conversion_admin_review_loading">Taslak yükleniyor…</string>
+    <string name="conversion_admin_review_refresh">Yenile</string>
+    <string name="conversion_admin_review_model_cost">Model ve maliyet</string>
+    <string name="conversion_admin_review_needs_review" tools:ignore="PluralsCandidate">%1$d soru dikkatli bakış istiyor</string>
+    <string name="conversion_admin_review_original">Orijinal sayfaları göster</string>
+    <string name="conversion_admin_review_questions">Sorular (%1$d)</string>
+    <string name="conversion_admin_review_publish">Yayınla</string>
+    <string name="conversion_admin_review_regenerate_all">Tümünü yeniden üret</string>
+    <string name="conversion_admin_review_discard">Sınavı iptal et</string>
+    <string name="conversion_admin_review_regenerate_question_provider">Soru hangi modelle yeniden üretilsin?</string>
+    <string name="conversion_admin_review_regenerate_all_provider">Tüm sınav hangi modelle yeniden üretilsin?</string>
+    <string name="conversion_admin_publish_confirm_title">Yayınlansın mı?</string>
+    <string name="conversion_admin_publish_confirm_message">Sorular tüm kullanıcılara açılır ve sınav yeni yapıya geçer.</string>
+    <string name="conversion_admin_discard_confirm_title">Sınav iptal edilsin mi?</string>
+    <string name="conversion_admin_discard_confirm_message">Taslak silinir ve sınav yapılandırılmaz. Gönderene verilen coin geri alınmaz.</string>
+    <string name="conversion_admin_outcome_published_title">Yayınlandı</string>
+    <string name="conversion_admin_outcome_published_message" tools:ignore="PluralsCandidate">%1$d soru yayınlandı.</string>
+    <string name="conversion_admin_outcome_discarded_title">İptal edildi</string>
+    <string name="conversion_admin_outcome_discarded_message">Sınav yapılandırılmayacak.</string>
+    <string name="conversion_admin_outcome_regenerating_title">Yeniden üretiliyor</string>
+    <string name="conversion_admin_outcome_regenerating_message">Sınav yeniden üretiliyor; hazır olunca listede tekrar görünür.</string>
+    <string name="conversion_admin_info_regenerating_question" tools:ignore="PluralsCandidate">Soru %1$d yeniden üretiliyor; liste kendiliğinden yenilenir.</string>
+    <string name="conversion_admin_error_subject_id">Ders kimliğini yaz ya da başka bir seçenek seç.</string>
+    <string name="conversion_admin_error_new_subject">Yeni dersin adını yaz ya da başka bir seçenek seç.</string>
+
+    <!-- Exam title (K28) -->
+    <string name="conversion_admin_title_section">Sınav adı</string>
+    <string name="conversion_admin_title_original">Orijinal ad</string>
+    <string name="conversion_admin_title_pick">Seç</string>
+    <string name="conversion_admin_title_year">Yıl (ör. 2019, boş bırakılabilir)</string>
+    <string name="conversion_admin_title_number">Sıra no (1–99, boş bırakılabilir)</string>
+    <string name="conversion_admin_title_footer">Yeni yapıya geçen sınavın adı listedeki adlardan biri olur: yıl + ad + sıra no.</string>
+    <string name="conversion_admin_title_problem_name">Listeden bir ad seç</string>
+    <string name="conversion_admin_title_problem_year">Yıl 4 haneli olmalı (ör. 2019) ya da boş kalmalı.</string>
+    <string name="conversion_admin_title_problem_number">Sıra no 1–99 arasında olmalı ya da boş kalmalı.</string>
+    <string name="conversion_admin_title_problem_numbered">Bu ad zaten numaralı; sıra no boş kalmalı.</string>
+
+    <!-- Draft question row -->
+    <string name="conversion_admin_draft_title">Soru %1$s</string>
+    <string name="conversion_admin_draft_check">Kontrol et</string>
+    <string name="conversion_admin_draft_confidence">%%%1$d</string>
+    <string name="conversion_admin_draft_choice">%1$s) %2$s</string>
+    <string name="conversion_admin_draft_answer">Cevap: %1$s%2$s</string>
+    <string name="conversion_admin_draft_regenerating">Yeniden üretiliyor…</string>
+    <string name="conversion_admin_draft_edit">Düzenle</string>
+    <string name="conversion_admin_draft_regenerate">Yeniden üret</string>
+
+    <!-- Course mapping on the review -->
+    <string name="conversion_admin_subject_section">Ders eşlemesi</string>
+    <string name="conversion_admin_subject_suggested">Önerilen ders</string>
+    <string name="conversion_admin_subject_mode_suggested">Önerilen</string>
+    <string name="conversion_admin_subject_mode_existing">Mevcut kimlik</string>
+    <string name="conversion_admin_subject_mode_new">Yeni ders</string>
+    <string name="conversion_admin_subject_id_hint">Ders kimliği (subjectId)</string>
+    <string name="conversion_admin_subject_new_hint">Yeni dersin adı</string>
+    <string name="conversion_admin_subject_footer">Türkiye geneli soru havuzunun doğruluğu bu eşlemeye bağlı; ders adı farklı yazılmış olabilir.</string>
+
+    <!-- Original pages -->
+    <string name="conversion_admin_original_title">Orijinal sayfalar</string>
+    <string name="conversion_admin_original_empty">Dosya yok</string>
+
+    <!-- Question editor -->
+    <string name="conversion_admin_edit_title">Soru %1$s</string>
+    <string name="conversion_admin_edit_save">Kaydet</string>
+    <string name="conversion_admin_edit_text">Soru metni (Markdown + LaTeX)</string>
+    <string name="conversion_admin_edit_speech">Sesli okuma metni</string>
+    <string name="conversion_admin_edit_choices">Şıklar</string>
+    <string name="conversion_admin_edit_choice_label_hint">A</string>
+    <string name="conversion_admin_edit_choice_text">Şık metni</string>
+    <string name="conversion_admin_edit_choice_add">Şık ekle</string>
+    <string name="conversion_admin_edit_choice_remove">Şıkkı sil</string>
+    <string name="conversion_admin_edit_answer">Cevap</string>
+    <string name="conversion_admin_edit_answer_text">Cevap metni</string>
+    <string name="conversion_admin_edit_answer_choice">Doğru şık (örn. C)</string>
+    <string name="conversion_admin_edit_answer_speech">Cevabın sesli okuma metni</string>
+    <string name="conversion_admin_edit_solution">Çözüm adımları</string>
+    <string name="conversion_admin_edit_step">Adım</string>
+    <string name="conversion_admin_edit_step_add">Adım ekle</string>
+    <string name="conversion_admin_edit_step_remove">Adımı sil</string>
+    <string name="conversion_admin_edit_problem_text_empty">Soru metni boş olamaz.</string>
+    <string name="conversion_admin_edit_problem_text_long">Metin çok uzun.</string>
+    <string name="conversion_admin_edit_problem_answer_empty">Cevap metni boş olamaz.</string>
+    <string name="conversion_admin_edit_problem_answer_long">Cevap metni çok uzun.</string>
+    <string name="conversion_admin_edit_problem_too_many">Çok fazla şık ya da çözüm adımı var.</string>
+    <string name="conversion_admin_edit_problem_choice_incomplete">Her şıkkın harfi ve metni dolu olmalı.</string>
+    <string name="conversion_admin_edit_problem_choice_long">Bir şık çok uzun.</string>
+    <string name="conversion_admin_edit_problem_step_long">Bir çözüm adımı çok uzun.</string>
+    <string name="conversion_admin_edit_problem_answer_choice">Doğru şık, şıklardan biri olmalı.</string>
+
+    <!-- Bulk conversion -->
+    <string name="conversion_admin_bulk_title">Toplu dönüştür</string>
+    <string name="conversion_admin_bulk_scope">Kapsam</string>
+    <string name="conversion_admin_bulk_scope_placeholder">Ders ya da bölüm seç</string>
+    <string name="conversion_admin_bulk_model">Model</string>
+    <string name="conversion_admin_bulk_model_footer">Her toplu işte modeli sen seçersin; varsayılan yok.</string>
+    <string name="conversion_admin_bulk_estimate">Tahmini hesapla</string>
+    <string name="conversion_admin_bulk_estimate_footer">Hesaplama hiçbir iş başlatmaz; yalnızca sınav sayısını ve tahmini maliyeti gösterir.</string>
+    <string name="conversion_admin_bulk_result">Tahmin</string>
+    <string name="conversion_admin_bulk_exam_count">Dönüştürülecek sınav</string>
+    <string name="conversion_admin_bulk_cost">Tahmini maliyet</string>
+    <string name="conversion_admin_bulk_over_budget">Bu ayın 50 $ sınırını aşabilir; sunucu aşan işi reddeder.</string>
+    <string name="conversion_admin_bulk_queue">Kuyruğa al</string>
+    <string name="conversion_admin_bulk_queueing">Kuyruğa alınıyor…</string>
+    <string name="conversion_admin_bulk_queued" tools:ignore="PluralsCandidate">%1$d sınav kuyruğa alındı.</string>
+    <string name="conversion_admin_bulk_confirm_title">Kuyruğa alınsın mı?</string>
+    <string name="conversion_admin_bulk_confirm_message" tools:ignore="PluralsCandidate">%1$d sınav, tahmini %2$s ile yapay zekâya gönderilecek.</string>
+    <string name="conversion_admin_bulk_picker_title">Kapsam seç</string>
+    <string name="conversion_admin_bulk_pick_department">Tüm bölümü seç</string>
+
+    <!-- Subject mapping -->
+    <string name="conversion_admin_subjects_title">Ders eşleme</string>
+    <string name="conversion_admin_subjects_loading">Dersler yükleniyor…</string>
+    <string name="conversion_admin_subjects_empty_title">Ders yok</string>
+    <string name="conversion_admin_subjects_empty_message">Yapılandırılmış bir sınav yayınlanınca dersi burada görünür.</string>
+    <string name="conversion_admin_subjects_search">Ders ara</string>
+    <string name="conversion_admin_subjects_possible_match">Olası eşleşme: %1$s</string>
+    <string name="conversion_admin_subjects_counts">%1$s · %2$s</string>
+    <string name="conversion_admin_subjects_picker_new">“%1$s” adında yeni ders oluştur</string>
+    <string name="conversion_admin_subject_menu">Ders işlemleri</string>
+    <string name="conversion_admin_subject_rename">Yeniden adlandır</string>
+    <string name="conversion_admin_subject_merge">Başka derse birleştir</string>
+    <string name="conversion_admin_subject_courses">Dersler</string>
+    <string name="conversion_admin_subject_questions">Sorular</string>
+    <string name="conversion_admin_subject_change_course">Değiştir</string>
+    <string name="conversion_admin_subject_change_course_description">%1$s dersinin konusunu değiştir</string>
+    <string name="conversion_admin_subject_pick_new">Yeni konu seç</string>
+    <string name="conversion_admin_subject_pick_merge">Birleştirilecek ders</string>
+    <string name="conversion_admin_move_title">Ders taşınsın mı?</string>
+    <string name="conversion_admin_move_message" tools:ignore="PluralsCandidate">“%1$s” dersi “%2$s” konusuna taşınacak: %3$d yayınlanmış sorusu ve soru havuzları yeni konuya geçer.</string>
+    <string name="conversion_admin_move_confirm">Taşı</string>
+    <string name="conversion_admin_merge_title">Dersler birleştirilsin mi?</string>
+    <string name="conversion_admin_merge_message" tools:ignore="PluralsCandidate">“%1$s”, “%2$s” içine birleştirilecek: %3$d dersi ve %4$d sorusu “%2$s” konusuna taşınır, soru havuzları güncellenir ve “%1$s” silinir.</string>
+    <string name="conversion_admin_merge_confirm">Birleştir</string>
+    <string name="conversion_admin_rename_title">Dersi yeniden adlandır</string>
+    <string name="conversion_admin_rename_hint">Ders adı</string>
+
+    <!-- "Yeni yapıya geçir" button and the Yönetici menu of a published question -->
+    <string name="conversion_admin_convert_button">Yeni yapıya geçir</string>
+    <string name="conversion_admin_convert_provider_title">Hangi modelle dönüştürülsün?</string>
+    <string name="conversion_admin_status_queued">Sıraya alındı</string>
+    <string name="conversion_admin_status_processing">İşleniyor</string>
+    <string name="conversion_admin_status_ready">Taslak hazır; Hesap › Hazır sınavlar\'dan incele</string>
+    <string name="conversion_admin_status_failed">İş başarısız oldu</string>
+    <string name="conversion_admin_status_published">Yayınlandı</string>
+    <string name="conversion_admin_status_discarded">İptal edildi</string>
+    <string name="conversion_admin_question_menu">Yönetici</string>
+    <string name="conversion_admin_question_regenerating">Soru yeniden üretiliyor; birkaç saniye sonra yenile.</string>
+
+    <!-- Counts of the subject list (iOS "\(courseCount) ders · \(questionCount) soru") -->
+    <plurals name="conversion_admin_subjects_course_count">
+        <item quantity="one">%1$d ders</item>
+        <item quantity="other">%1$d ders</item>
+    </plurals>
+    <plurals name="conversion_admin_subjects_question_count">
+        <item quantity="one">%1$d soru</item>
+        <item quantity="other">%1$d soru</item>
+    </plurals>
+    <plurals name="conversion_admin_subjects_footer">
+        <item quantity="one">%1$d ders</item>
+        <item quantity="other">%1$d ders</item>
+    </plurals>
+</resources>
