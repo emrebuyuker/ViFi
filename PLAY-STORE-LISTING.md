@@ -268,15 +268,11 @@ ViFi yenilendi: yeni tasarım, telefon numarasıyla giriş, coin ile kilitli sı
 - **4.1.0 metinleri:** Sürüm notu ve tam açıklama onaylandı (31 Ekim), ikisi de Console'da. "Hesap › Bildirim Ayarları"
   (`PRM-04`) ve bildirim düğmeleri 4.1.0'da hazır olmalı; olmazsa ilgili cümle çıkarılır.
 - **4.2.0 metinleri (açık noktalar / ürün sahibine sorular):**
-  - **M1 — Sürüm notu:** iOS taslağıyla birebir mi kalsın (öneri), yoksa Android'e özgü bir madde eklensin mi (ör.
-    Sınav Ekle'de genişleyen sınav adı listesi, arşiv satırındaki "N soru")? Eklenecekse 500 sınırı için bir satır
-    çıkarılmalı.
-  - **M2 — Tam açıklama:** Önerilen 4.2.0 açıklaması kullanılsın mı, yoksa 4.1.0 metni mi kalsın? Öneri: yeni metin
-    (Premium'un yeni faydası mağazada görünür olur).
-  - **M3 — Soru ekranı görseli:** Soru ekranı da ekran korumasında (`FLAG_SECURE`) olduğundan emülatörde ekran
-    görüntüsü siyah çıkar; yeni mağaza görseli planlanmadı. Görsel istenirse ayrı bir çekim yöntemi gerekir ve
-    yapay zekâyla üretilmiş öğe beyanı yeniden değerlendirilir.
-  - **M4 — Çıkış koşulu:** "Sınava gir" ve soru soru sınavlar 4.2.0 (22)'de hazır olmalı; Faz 3'te bir özellik
-    düşerse ilgili madde sürüm notundan ve açıklamadan çıkarılır.
-- **"Bağımsız uygulama" cümlesi:** Tam açıklamadaki üniversitelerle resmi bağlantı olmadığı cümlesinin doğruluğunu ürün
-  sahibi teyit etmeli; üniversite adları geçtiği için yanıltıcı içerik politikası açısından önerilir.
+  - **M1 — Sürüm notu:** **Karar (21 Kasım 2026):** iOS ile birebir; Android'e özgü madde eklenmez.
+  - **M2 — Tam açıklama:** **Karar (21 Kasım 2026):** Yeni 4.2.0 tam açıklaması kullanılır.
+  - **M3 — Soru ekranı görseli:** **Karar (21 Kasım 2026):** Yeni mağaza görseli yok (soru ekranı `FLAG_SECURE`
+    korumasında); yapay zekâyla üretilmiş öğe beyanı değişmez.
+  - **M4 — Çıkış koşulu:** **Karar (21 Kasım 2026):** Koşul olduğu gibi: "Sınava gir" ve soru soru sınavlar 4.2.0
+    (22)'de hazır olmalı; Faz 3'te bir özellik düşerse ilgili madde sürüm notundan ve açıklamadan çıkarılır.
+- **"Bağımsız uygulama" cümlesi:** Tam açıklamadaki üniversitelerle resmi bağlantı olmadığı cümlesi doğru; **Karar
+  (21 Kasım 2026):** olduğu gibi kalır (üniversite adları geçtiği için yanıltıcı içerik politikası açısından tutulur).
