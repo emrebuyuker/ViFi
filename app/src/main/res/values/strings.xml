@@ -213,6 +213,8 @@
     <string name="paywall_benefit_all_exams">Her dersin tüm sınavları açık</string>
     <string name="paywall_benefit_no_locks">Kilitli sınav kalmaz, coin gerekmez</string>
     <string name="paywall_benefit_unlimited">İstediğin kadar görüntüle ve indir</string>
+    <!-- Added in 4.2.0 — practice-mode benefit (Android-only for now). -->
+    <string name="paywall_benefit_unlimited_practice">Sınava gir\'de sınırsız soru</string>
     <string name="paywall_benefit_cancel">İstediğin zaman iptal et</string>
     <string name="paywall_plan_monthly">Aylık</string>
     <string name="paywall_plan_yearly">Yıllık</string>
