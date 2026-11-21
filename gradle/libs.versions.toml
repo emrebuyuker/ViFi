@@ -45,6 +45,8 @@ playServicesLocation = "21.3.0"
 
 
 firebaseBom = "33.5.1"
+# RCD-01 — Phone Auth reCAPTCHA Enterprise client; see app/build.gradle for why it is declared explicitly.
+recaptcha = "18.5.1"
 
 
 junit = "4.13.2"
@@ -104,6 +106,8 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
+# The only versioned entry among the Firebase artifacts: pinned on purpose (RCD-01, DDEC-05).
+recaptcha = { module = "com.google.android.recaptcha:recaptcha", version.ref = "recaptcha" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }

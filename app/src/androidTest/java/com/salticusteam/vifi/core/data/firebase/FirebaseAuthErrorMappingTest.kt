@@ -5,6 +5,7 @@ import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthMissingActivityForRecaptchaException
 import com.salticusteam.vifi.core.model.AuthError
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -35,5 +36,14 @@ class FirebaseAuthErrorMappingTest {
         val error = FirebaseTooManyRequestsException("We have blocked all requests. [ Error code: 39 ]")
 
         assertEquals(AuthError.SmsTemporarilyUnavailable, FirebaseAuthErrors.authError(error))
+    }
+
+    // RCD-02 — the recaptcha exception type (its constructor needs Android) is app verification failed.
+    @Test
+    fun authError_whenRecaptchaHasNoActivity_isAppVerificationFailed() {
+        assertEquals(
+            AuthError.AppVerificationFailed,
+            FirebaseAuthErrors.authError(FirebaseAuthMissingActivityForRecaptchaException()),
+        )
     }
 }

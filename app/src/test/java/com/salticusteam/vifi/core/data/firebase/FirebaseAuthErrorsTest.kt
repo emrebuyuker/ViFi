@@ -67,4 +67,27 @@ class FirebaseAuthErrorsTest {
         assertNull(FirebaseAuthErrors.backendCode("no code here"))
         assertNull(FirebaseAuthErrors.backendCode(null))
     }
+
+    // RCD-02 — every reCAPTCHA / app-verification code is the same user-facing failure.
+    @Test
+    fun `authError maps every recaptcha and app verification code to app verification failed`() {
+        val codes = listOf(
+            "ERROR_CAPTCHA_CHECK_FAILED", "ERROR_MISSING_RECAPTCHA_TOKEN", "ERROR_INVALID_RECAPTCHA_TOKEN",
+            "ERROR_RECAPTCHA_NOT_ENABLED", "ERROR_MISSING_RECAPTCHA_VERSION", "ERROR_INVALID_RECAPTCHA_VERSION",
+            "ERROR_INVALID_RECAPTCHA_ACTION", "ERROR_RECAPTCHA_SDK_NOT_LINKED",
+            "ERROR_MISSING_CLIENT_IDENTIFIER", "ERROR_INVALID_APP_CREDENTIAL", "ERROR_MISSING_APP_CREDENTIAL",
+            "ERROR_WEB_CONTEXT_ALREADY_PRESENTED", "ERROR_WEB_INTERNAL_ERROR", "ERROR_INVALID_CERT_HASH",
+            "ERROR_MISSING_PLAY_INTEGRITY_TOKEN", "ERROR_INVALID_PLAY_INTEGRITY_TOKEN", "ERROR_APP_NOT_AUTHORIZED",
+        )
+        codes.forEach { code ->
+            assertEquals(code, AuthError.AppVerificationFailed, FirebaseAuthErrors.authError(code))
+        }
+    }
+
+    @Test
+    fun `authError when error code 39 hides in a recaptcha related failure is sms temporarily unavailable`() {
+        val error = IllegalStateException("reCAPTCHA failed", RuntimeException("[ Error code: 39 ]"))
+
+        assertEquals(AuthError.SmsTemporarilyUnavailable, FirebaseAuthErrors.authError(error))
+    }
 }
