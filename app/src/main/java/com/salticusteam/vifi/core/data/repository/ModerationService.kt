@@ -19,9 +19,9 @@ interface ModerationService {
     /**
      * First approval (4.2.0, iOS `approve(_:provider:)`): copies the files into the public archive storage, credits
      * the owner the tier reward and marks the submission approved with the chosen AI [provider] and the publish plan;
-     * the server converts the pages into draft questions and the admin publishes them at the second approval.
-     *
-     * Until ADM-01 the implementation still publishes directly (the 4.1.0 path) and ignores [provider].
+     * the server converts the pages into draft questions and the admin publishes them at the second approval. It
+     * writes no catalog nodes or exams. For a duplicate (K22) [ApprovalResult.publishedExamId] is the existing exam
+     * the second approval replaces.
      */
     suspend fun approve(record: ExamSubmissionRecord, provider: AIProvider): ApprovalResult
 

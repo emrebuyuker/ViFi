@@ -16,7 +16,10 @@ import com.salticusteam.vifi.core.model.SubmissionTier
 import com.salticusteam.vifi.fake.FakeModerationBackend
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
@@ -80,10 +83,10 @@ class AdminModerationServiceTest {
     // --- approve ---
 
     @Test
-    fun `approve when new exam copies files in order and commits publish and credit`() = runTest {
+    fun `approve when new exam copies files in order and commits credit provider and create plan`() = runTest {
         val record = record()
 
-        val result = sut().approve(record, AIProvider.GEMINI)
+        val result = sut().approve(record, AIProvider.CLAUDE)
 
         assertEquals(SubmissionTier.NEW_EXAM, result.tier)
         assertEquals(60, result.coins)
@@ -93,19 +96,43 @@ class AdminModerationServiceTest {
             backend.copies,
         )
         val commit = backend.commits.single()
-        assertEquals(60, commit.coins)
+        assertEquals("sub-1", commit.submissionId)
         assertEquals("u1", commit.ownerId)
-        assertEquals(listOf("blg101"), commit.childCountIncrements)
-        assertTrue(commit.nodesToCreate.isEmpty())
-        assertEquals("blg101__2019-vize", commit.examId)
+        assertEquals(SubmissionTier.NEW_EXAM, commit.tier)
+        assertEquals(60, commit.coins)
+        assertEquals(AIProvider.CLAUDE, commit.provider)
+
+        val plan = commit.publishPlan ?: error("no publishPlan")
+        assertEquals(
+            setOf(
+                "examId", "universityId", "facultyId", "departmentId", "courseId",
+                "nodesToCreate", "childCountIncrements", "exam", "mode",
+            ),
+            plan.keys,
+        )
+        assertEquals("blg101__2019-vize", plan["examId"])
+        assertEquals("blg101", plan["courseId"])
+        assertEquals("create", plan["mode"])
+        assertEquals(emptyList<Any>(), plan["nodesToCreate"])
+        assertEquals(listOf("blg101"), plan["childCountIncrements"])
+        val exam = plan["exam"] as Map<*, *>
         assertEquals(
             listOf(
                 mapOf("storagePath" to "imagess/file-1.jpg", "order" to 1),
                 mapOf("storagePath" to "imagess/file-2.jpg", "order" to 2),
             ),
-            commit.examDocument?.get("files"),
+            exam["files"],
         )
+        assertEquals("2019 VİZE", exam["title"])
+        assertEquals("JPG", exam["kind"])
         assertTrue(backend.deletedFiles.isEmpty())
+    }
+
+    @Test
+    fun `approve passes the chosen provider through unchanged`() = runTest {
+        sut().approve(record(), AIProvider.GEMINI)
+
+        assertEquals(AIProvider.GEMINI, backend.commits.single().provider)
     }
 
     @Test
@@ -117,28 +144,61 @@ class AdminModerationServiceTest {
         assertEquals(listOf("pending/u1/sub-1/1.pdf" to "pdfs/file-1.pdf"), backend.copies)
     }
 
+    // ADM-02 (K22): a duplicate also starts the conversion; its second approval replaces the existing exam.
     @Test
-    fun `approve when duplicate copies nothing and only credits`() = runTest {
+    fun `approve when duplicate copies the files and commits a replace plan for the existing exam`() = runTest {
         val result = sut().approve(record(exam = "2023 VİZE"), AIProvider.GEMINI)
 
         assertEquals(SubmissionTier.DUPLICATE, result.tier)
         assertEquals(10, result.coins)
-        assertNull(result.publishedExamId)
-        assertTrue(backend.copies.isEmpty())
+        assertEquals("2023-vize", result.publishedExamId)
+        assertEquals(
+            listOf("pending/u1/sub-1/1.jpg" to "imagess/file-1.jpg", "pending/u1/sub-1/2.jpg" to "imagess/file-2.jpg"),
+            backend.copies,
+        )
         val commit = backend.commits.single()
-        assertNull(commit.examId)
-        assertNull(commit.examDocument)
-        assertTrue(commit.nodesToCreate.isEmpty())
-        assertTrue(commit.childCountIncrements.isEmpty())
+        assertEquals(10, commit.coins)
+        assertEquals(AIProvider.GEMINI, commit.provider)
+        val plan = commit.publishPlan ?: error("no publishPlan")
+        assertEquals("2023-vize", plan["examId"])
+        assertEquals("replace", plan["mode"])
+        assertEquals("blg101", plan["courseId"])
+        assertEquals(emptyList<Any>(), plan["nodesToCreate"])
+        assertEquals(emptyList<Any>(), plan["childCountIncrements"])
+        assertEquals(
+            listOf(
+                mapOf("storagePath" to "imagess/file-1.jpg", "order" to 1),
+                mapOf("storagePath" to "imagess/file-2.jpg", "order" to 2),
+            ),
+            (plan["exam"] as Map<*, *>)["files"],
+        )
     }
 
     @Test
-    fun `approve when new university creates the whole chain`() = runTest {
+    fun `approve when new university plans the whole chain in Turkish upper case`() = runTest {
         val result = sut().approve(record(university = "Ege Üniversitesi"), AIProvider.GEMINI)
 
         assertEquals(SubmissionTier.NEW_UNIVERSITY, result.tier)
         assertEquals(500, result.coins)
-        assertEquals(4, backend.commits.single().nodesToCreate.size)
+        val nodes = backend.commits.single().publishPlan?.get("nodesToCreate") as List<*>
+        assertEquals(4, nodes.size)
+        val university = nodes.map { it as Map<*, *> }.single { it["level"] == "university" }
+        assertEquals("EGE ÜNİVERSİTESİ", university["name"])
+        assertEquals("ege-universitesi", university["id"])
+        assertEquals("", university["parentId"])
+    }
+
+    @Test
+    fun `duplicateExamId names the existing exam for a duplicate and null for a new one`() = runTest {
+        assertEquals("2023-vize", sut().duplicateExamId(record(exam = "2023 VİZE")))
+        assertNull(sut().duplicateExamId(record(id = "sub-2")))
+    }
+
+    @Test
+    fun `duplicateExamId when the archive cannot be read is null`() = runTest {
+        archive.error = ArchiveError.Offline
+
+        assertNull(sut().duplicateExamId(record(exam = "2023 VİZE")))
     }
 
     @Test
@@ -147,7 +207,9 @@ class AdminModerationServiceTest {
         val result = sut(rewards = FakeRewardsConfigReader(null)).approve(record(), AIProvider.GEMINI)
 
         assertEquals(0, result.coins)
-        assertEquals(0, backend.commits.single().coins)
+        val commit = backend.commits.single()
+        assertEquals(0, commit.coins)
+        assertEquals("blg101__2019-vize", commit.publishPlan?.get("examId"))
     }
 
     @Test
@@ -198,12 +260,115 @@ class AdminModerationServiceTest {
         assertEquals(1, backend.commits.size)
     }
 
+    // A transaction is never queued offline, but its outcome is unknown when the reply is lost: the copies stay.
     @Test
-    fun `approve when commit fails removes the copied files`() = runTest {
+    fun `approve when the commit fails uncertainly keeps the copied files`() = runTest {
         backend.commitFailure = ModerationError.Offline
 
         assertThrows(ModerationError.Offline) { sut().approve(record(), AIProvider.GEMINI) }
+        assertTrue(backend.deletedFiles.isEmpty())
+    }
+
+    @Test
+    fun `approve when the commit is denied with the submission still pending removes the copies`() = runTest {
+        backend.commitFailure = ModerationError.PermissionDenied
+
+        assertThrows(ModerationError.PermissionDenied) { sut().approve(record(), AIProvider.GEMINI) }
         assertEquals(listOf("imagess/file-1.jpg", "imagess/file-2.jpg"), backend.deletedFiles)
+    }
+
+    // K2: the rules rejected a write another admin had already made moot — the loser sees the right message.
+    @Test
+    fun `approve when the commit is denied after another admin approved reports notPending`() = runTest {
+        val record = record()
+        backend.commitFailure = ModerationError.PermissionDenied
+        backend.beforeCommit = { backend.statuses[record.id] = "approved" }
+
+        assertThrows(ModerationError.NotPending) { sut().approve(record, AIProvider.GEMINI) }
+        assertEquals(listOf("imagess/file-1.jpg", "imagess/file-2.jpg"), backend.deletedFiles)
+    }
+
+    @Test
+    fun `approve when the commit is denied after another admin credited reports alreadyCredited`() = runTest {
+        val record = record()
+        backend.commitFailure = ModerationError.PermissionDenied
+        backend.beforeCommit = { backend.ledger += "u1/${record.id}" }
+
+        assertThrows(ModerationError.AlreadyCredited) { sut().approve(record, AIProvider.GEMINI) }
+    }
+
+    // Ö1: another admin acts between the pre-check and the commit; the transaction re-check stops it.
+    @Test
+    fun `approve when another admin approves between the check and the commit throws notPending`() = runTest {
+        val record = record()
+        backend.beforeCommit = { backend.statuses[record.id] = "approved" }
+
+        assertThrows(ModerationError.NotPending) { sut().approve(record, AIProvider.CLAUDE) }
+        assertTrue(backend.commits.isEmpty())
+        assertEquals(listOf("imagess/file-1.jpg", "imagess/file-2.jpg"), backend.deletedFiles)
+    }
+
+    @Test
+    fun `approve when another admin credits between the check and the commit throws alreadyCredited`() = runTest {
+        val record = record()
+        backend.beforeCommit = { backend.ledger += "u1/${record.id}" }
+
+        assertThrows(ModerationError.AlreadyCredited) { sut().approve(record, AIProvider.CLAUDE) }
+        assertTrue(backend.commits.isEmpty())
+        assertEquals(2, backend.deletedFiles.size)
+    }
+
+    // K1: with no reward there is no ledger entry; the status re-check alone keeps a second admin out.
+    @Test
+    fun `approve without coins when another admin approves meanwhile throws notPending`() = runTest {
+        val record = record()
+        backend.beforeCommit = { backend.statuses[record.id] = "approved" }
+
+        assertThrows(ModerationError.NotPending) {
+            sut(rewards = FakeRewardsConfigReader(null)).approve(record, AIProvider.GEMINI)
+        }
+        assertTrue(backend.commits.isEmpty())
+    }
+
+    @Test
+    fun `approve when another admin approves during the pre-check throws notPending before committing`() = runTest {
+        val record = record()
+        backend.beforeStatusRead = { backend.statuses[record.id] = "approved" }
+
+        assertThrows(ModerationError.NotPending) { sut().approve(record, AIProvider.GEMINI) }
+        assertTrue(backend.commits.isEmpty())
+        assertEquals(2, backend.deletedFiles.size)
+    }
+
+    // Ö2: once started, the commit finishes and its copies are kept even if the admin leaves the screen.
+    @Test
+    fun `approve cancelled during the commit finishes the commit and keeps the copies`() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        backend.commitGate = gate
+        val job = launch { sut().approve(record(), AIProvider.CLAUDE) }
+        advanceUntilIdle()
+
+        job.cancel()
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        assertTrue(job.isCancelled)
+        assertEquals(1, backend.commits.size)
+        assertTrue(backend.deletedFiles.isEmpty())
+    }
+
+    @Test
+    fun `approve cancelled while copying removes the earlier copies and never commits`() = runTest {
+        backend.copyGate = CompletableDeferred() // the second copy waits
+        val job = launch { sut().approve(record(), AIProvider.CLAUDE) }
+        advanceUntilIdle()
+        assertEquals(1, backend.copies.size)
+
+        job.cancel()
+        advanceUntilIdle()
+
+        assertTrue(backend.commits.isEmpty())
+        assertEquals(listOf("imagess/file-1.jpg"), backend.deletedFiles)
     }
 
     @Test

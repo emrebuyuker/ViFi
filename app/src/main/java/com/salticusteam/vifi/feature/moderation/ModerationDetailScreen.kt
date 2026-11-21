@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,20 +51,23 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.data.repository.fake.FakeModerationService
+import com.salticusteam.vifi.core.data.repository.fake.FakeSubmitterProfileReader
 import com.salticusteam.vifi.core.designsystem.component.EmptyView
 import com.salticusteam.vifi.core.designsystem.component.LoadingView
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.component.labelResId
 import com.salticusteam.vifi.core.designsystem.theme.ViFiTheme
 import com.salticusteam.vifi.core.designsystem.theme.ViFiThemePreviews
+import com.salticusteam.vifi.core.model.AIProvider
 import com.salticusteam.vifi.core.model.ApprovalResult
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamSubmissionRecord
 
 /**
- * One submission under review (iOS `ModerationDetailView`): its place in the archive, a link to preview the
- * files, and the approve / reject actions. While an action runs, every control and the back navigation are
- * locked (iOS `interactiveDismissDisabled`).
+ * One submission under review (iOS `ModerationDetailView`): the duplicate warning (K22), the submitter, its place in
+ * the archive, a link to preview the files, and the actions — "Onayla · Claude/Gemini ile ilerle" (the first approval
+ * credits the owner and starts the AI conversion with that provider) and "Reddet". While an action runs, every
+ * control and the back navigation are locked (iOS `interactiveDismissDisabled`).
  */
 @Composable
 fun ModerationDetailScreen(
@@ -103,7 +107,7 @@ fun ModerationDetailScreen(
 fun ModerationDetailContent(
     state: ModerationDetailUiState,
     onPreviewFiles: () -> Unit,
-    onApprove: () -> Unit,
+    onApprove: (AIProvider) -> Unit,
     onRejectRequested: () -> Unit,
     onRejectReasonChange: (String) -> Unit,
     onConfirmReject: () -> Unit,
@@ -142,6 +146,13 @@ fun ModerationDetailContent(
                     .verticalScroll(rememberScrollState())
                     .testTag("moderation.detail"),
             ) {
+                if (state.duplicateExamId != null) {
+                    DuplicateWarning()
+                    HorizontalDivider()
+                }
+                SubmitterSection(state.submitter)
+                HorizontalDivider()
+                SectionHeader(R.string.moderation_detail_title)
                 DetailRows(record)
                 HorizontalDivider()
                 PreviewRow(record = record, enabled = !state.isWorking, onClick = onPreviewFiles)
@@ -163,6 +174,84 @@ fun ModerationDetailContent(
     state.approval?.let { result ->
         ApprovedDialog(result = result, onAcknowledge = onApprovalAcknowledged)
     }
+}
+
+/** K22: the archive already has this exam; approving replaces its questions and pages at the second approval. */
+@Composable
+private fun DuplicateWarning() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {}
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .testTag("moderation.duplicateWarning"),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = stringResource(R.string.moderation_duplicate_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = stringResource(R.string.moderation_duplicate_message),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/**
+ * Who submitted this exam (ADM-03): name and affiliation only, never the phone number. A failed or missing lookup is
+ * shown as a note and never blocks approving or rejecting (iOS `submitterSection`).
+ */
+@Composable
+private fun SubmitterSection(submitter: SubmitterState?) {
+    SectionHeader(R.string.moderation_submitter_section)
+    when (submitter) {
+        // Each row is its own merged a11y element ("Ad Soyad, Ayşe Demir"), like the archive rows below.
+        is SubmitterState.Loaded -> Column(Modifier.testTag("moderation.detail.submitter")) {
+            val info = submitter.info
+            DetailRow(R.string.moderation_submitter_name, info.fullName)
+            if (info.university.isNotEmpty()) DetailRow(R.string.moderation_detail_university, info.university)
+            if (info.faculty.isNotEmpty()) DetailRow(R.string.moderation_detail_faculty, info.faculty)
+            if (info.department.isNotEmpty()) DetailRow(R.string.moderation_detail_department, info.department)
+        }
+        SubmitterState.Missing -> SubmitterNote(
+            text = stringResource(R.string.moderation_submitter_missing),
+            modifier = Modifier.testTag("moderation.detail.submitter"),
+        )
+        SubmitterState.Failed -> SubmitterNote(
+            text = stringResource(R.string.moderation_submitter_failed),
+            modifier = Modifier.testTag("moderation.detail.submitter"),
+        )
+        SubmitterState.Loading, null -> SubmitterNote(
+            text = stringResource(R.string.moderation_submitter_loading),
+            modifier = Modifier.testTag("moderation.detail.submitterLoading"),
+        )
+    }
+}
+
+@Composable
+private fun SectionHeader(title: Int) {
+    Text(
+        text = stringResource(title),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 2.dp),
+    )
+}
+
+@Composable
+private fun SubmitterNote(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+    )
 }
 
 @Composable
@@ -225,28 +314,33 @@ private fun PreviewRow(record: ExamSubmissionRecord, enabled: Boolean, onClick: 
     )
 }
 
-/** "Onayla ve Yayınla" (with a spinner while working), "Reddet", and the footer. */
+/**
+ * One "Onayla · <model> ile ilerle" button per AI provider (iOS `AIProvider.allCases`, with a spinner while working),
+ * "Reddet", and the footer.
+ */
 @Composable
-private fun Actions(isWorking: Boolean, onApprove: () -> Unit, onReject: () -> Unit) {
+private fun Actions(isWorking: Boolean, onApprove: (AIProvider) -> Unit, onReject: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Button(
-            onClick = onApprove,
-            enabled = !isWorking,
-            modifier = Modifier.fillMaxWidth().testTag("moderation.detail.approve"),
-        ) {
-            if (isWorking) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp).testTag("moderation.detail.progress"),
-                    strokeWidth = 2.dp,
-                )
-            } else {
-                Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+        for (provider in AIProvider.entries) {
+            Button(
+                onClick = { onApprove(provider) },
+                enabled = !isWorking,
+                modifier = Modifier.fillMaxWidth().testTag("moderation.approve.${provider.raw}"),
+            ) {
+                if (isWorking) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp).testTag("moderation.detail.progress.${provider.raw}"),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                }
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(provider.approveLabelRes))
             }
-            Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.moderation_approve_button))
         }
         OutlinedButton(
             onClick = onReject,
@@ -341,7 +435,11 @@ private fun ApprovedDialog(result: ApprovalResult, onAcknowledge: () -> Unit) {
 private fun ModerationDetailPreview() {
     ViFiTheme {
         ModerationDetailContent(
-            state = ModerationDetailUiState(record = FakeModerationService.SAMPLES.first()),
+            state = ModerationDetailUiState(
+                record = FakeModerationService.SAMPLES.first(),
+                submitter = SubmitterState.Loaded(FakeSubmitterProfileReader.SAMPLE),
+                duplicateExamId = "mock-existing-exam",
+            ),
             onPreviewFiles = {},
             onApprove = {},
             onRejectRequested = {},
@@ -361,6 +459,7 @@ private fun ModerationDetailWorkingPreview() {
         ModerationDetailContent(
             state = ModerationDetailUiState(
                 record = FakeModerationService.SAMPLES.last(),
+                submitter = SubmitterState.Missing,
                 isWorking = true,
                 error = "Bu gönderim artık beklemede değil; listeyi yenile.",
             ),

@@ -17,14 +17,17 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * One submission under review (iOS `ModerationDetailView` + `ModerationViewModel.approve/reject`): approving
- * publishes the exam and credits the owner, rejecting records an optional reason. Either removes the submission
- * from the [ModerationQueue] on success; a failure keeps it, with the Turkish message under the actions.
+ * One submission under review (iOS `ModerationDetailView` + `ModerationViewModel.approve/reject`): the first approval
+ * credits the owner and starts the AI conversion with the chosen provider (Claude / Gemini), rejecting records an
+ * optional reason. Either removes the submission from the [ModerationQueue] on success; a failure keeps it, with the
+ * Turkish message under the actions. Also shows the submitter (ADM-03) and warns about a duplicate (ADM-02).
  *
  * The route carries only the submission id; after process death the shared queue is empty, so it is reloaded to
  * find the record again, and a rejection being typed is kept in the [SavedStateHandle].
@@ -35,6 +38,7 @@ class ModerationDetailViewModel @AssistedInject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val queue: ModerationQueue,
     private val moderationService: ModerationService,
+    private val submitterDirectory: SubmitterDirectory,
     private val analytics: AnalyticsTracker,
 ) : ViewModel() {
 
@@ -52,23 +56,32 @@ class ModerationDetailViewModel @AssistedInject constructor(
     private val _events = Channel<ModerationDetailEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
+    // Internal state
+    /** The record whose submitter and duplicate check were started (once per record). */
+    private var lookedUpRecordId: String? = null
+
     // Intents
     init {
         // Never loaded in this process: it was recreated on this screen.
-        if (_uiState.value.record == null && queue.records.value == null) restoreRecord()
+        if (_uiState.value.record == null && queue.records.value == null) {
+            restoreRecord()
+        } else {
+            lookUp()
+        }
     }
 
-    /** "Onayla ve Yayınla": publishes and credits; the result dialog follows. Ignored while working. */
-    fun approve() {
+    /**
+     * "Onayla · Claude/Gemini ile ilerle" (iOS first approval): credits the owner and hands the exam to the AI
+     * conversion with [provider]; the result dialog follows. Ignored while working or once approved.
+     */
+    fun approve(provider: AIProvider) {
         val state = _uiState.value
         val record = state.record ?: return
         if (state.isWorking || state.approval != null) return
         _uiState.update { it.copy(isWorking = true, error = null) }
         viewModelScope.launch {
             try {
-                // ADM-01 replaces the single button with "Onayla · Claude/Gemini ile ilerle"; the 4.1.0 publish path
-                // still behind approve() ignores the provider until then.
-                val result = moderationService.approve(record, AIProvider.GEMINI)
+                val result = moderationService.approve(record, provider)
                 queue.remove(record.id)
                 analytics.track(AnalyticsEvent.SubmissionApproved(result.tier))
                 _uiState.update { it.copy(isWorking = false, approval = result) }
@@ -143,6 +156,28 @@ class ModerationDetailViewModel @AssistedInject constructor(
             _uiState.update {
                 it.copy(isLoading = false, record = record, isConfirmingReject = it.isConfirmingReject && record != null)
             }
+            lookUp()
+        }
+    }
+
+    /**
+     * Starts the record's submitter lookup (ADM-03, shared with the queue rows) and the duplicate check (ADM-02, K22),
+     * once per record. Neither blocks approving or rejecting.
+     */
+    private fun lookUp() {
+        val record = _uiState.value.record ?: return
+        if (lookedUpRecordId == record.id) return
+        lookedUpRecordId = record.id
+        viewModelScope.launch {
+            submitterDirectory.submitters
+                .map { it[record.ownerId] }
+                .distinctUntilChanged()
+                .collect { submitter -> _uiState.update { it.copy(submitter = submitter) } }
+        }
+        viewModelScope.launch { submitterDirectory.load(record.ownerId) }
+        viewModelScope.launch {
+            val duplicate = moderationService.duplicateExamId(record)
+            _uiState.update { it.copy(duplicateExamId = duplicate) }
         }
     }
 

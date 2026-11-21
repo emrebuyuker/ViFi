@@ -14,6 +14,8 @@ data class ModerationUiState(
     /** `null` until the first successful load. */
     val records: List<ExamSubmissionRecord>? = null,
     val error: String? = null,
+    /** Submitter lookups by owner uid (ADM-03); a row without an entry shows the loading placeholder. */
+    val submitters: Map<String, SubmitterState> = emptyMap(),
 )
 
 /**
@@ -34,6 +36,10 @@ data class ModerationDetailUiState(
     val rejectReason: String = "",
     /** Set once approved: the result dialog is shown until acknowledged. */
     val approval: ApprovalResult? = null,
+    /** The submitter of [record] (ADM-03); `null` until its lookup starts. */
+    val submitter: SubmitterState? = null,
+    /** The existing archive exam [record] duplicates (K22, ADM-02): the warning is shown when set. */
+    val duplicateExamId: String? = null,
 )
 
 /** Results of the detail's actions that end the screen; every branch must be handled (no `else`). */

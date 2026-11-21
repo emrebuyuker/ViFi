@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.core.data.conversion
 
+import com.salticusteam.vifi.core.data.moderation.FirebaseSubmitterProfileReader
 import com.salticusteam.vifi.core.data.repository.ExamConversionAdminService
 import com.salticusteam.vifi.core.data.repository.SubjectMappingService
 import com.salticusteam.vifi.core.data.repository.SubmitterProfileReader
@@ -14,7 +15,6 @@ import com.salticusteam.vifi.core.model.ExamConversionError
 import com.salticusteam.vifi.core.model.ExamQuestion
 import com.salticusteam.vifi.core.model.PublishedExamResult
 import com.salticusteam.vifi.core.model.SubjectTarget
-import com.salticusteam.vifi.core.model.SubmitterInfo
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -39,9 +39,10 @@ abstract class ConversionModule {
     @Singleton
     abstract fun bindSubjectMappingService(impl: UnavailableSubjectMappingService): SubjectMappingService
 
+    /** ADM-03: the RTDB `users/<uid>/profile` reader (name and affiliation only). */
     @Binds
     @Singleton
-    abstract fun bindSubmitterProfileReader(impl: NoopSubmitterProfileReader): SubmitterProfileReader
+    abstract fun bindSubmitterProfileReader(impl: FirebaseSubmitterProfileReader): SubmitterProfileReader
 }
 
 /** Placeholder until Hat D: every call fails, so an admin screen shows an error instead of silently doing nothing. */
@@ -79,9 +80,4 @@ class UnavailableSubjectMappingService @Inject constructor() : SubjectMappingSer
     override suspend fun setCourseSubject(courseId: String, target: SubjectTarget): Unit = throw failure
     override suspend fun renameSubject(id: String, name: String): Unit = throw failure
     override suspend fun mergeSubject(id: String, into: String): Unit = throw failure
-}
-
-/** Placeholder until ADM-03: every submitter is unknown, so the card stays hidden (iOS `NoopSubmitterProfileReader`). */
-class NoopSubmitterProfileReader @Inject constructor() : SubmitterProfileReader {
-    override suspend fun submitter(uid: String): SubmitterInfo? = null
 }

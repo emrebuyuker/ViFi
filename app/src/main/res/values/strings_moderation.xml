@@ -17,9 +17,23 @@
     <string name="moderation_detail_date">Tarih</string>
     <string name="moderation_kind_images">Görsel</string>
     <string name="moderation_kind_pdf">PDF</string>
-    <string name="moderation_approve_button">Onayla ve Yayınla</string>
+    <!-- Added in 4.2.0 — two-stage first approval with the AI provider (ADM-01, iOS ModerationDetailView) -->
+    <string name="moderation_approve_claude">Onayla · Claude ile ilerle</string>
+    <string name="moderation_approve_gemini">Onayla · Gemini ile ilerle</string>
     <string name="moderation_reject_button">Reddet</string>
-    <string name="moderation_actions_footer">Onaylarsan sınav arşive eklenir ve gönderene yenilik kademesine göre coin verilir.</string>
+    <string name="moderation_actions_footer">"Onaylarsan gönderene yenilik kademesine göre coin verilir; sayfalar seçtiğin yapay zekâ modeliyle sorulara dönüştürülür. Hazır olunca Hazır sınavlar'dan inceleyip yayınlarsın."</string>
+
+    <!-- Added in 4.2.0 — duplicate submission warning (ADM-02, K22) -->
+    <string name="moderation_duplicate_title">Bu sınav arşivde zaten yüklü</string>
+    <string name="moderation_duplicate_message">İkinci onayda bu sınavın soruları ve sayfaları bu gönderimle değiştirilir.</string>
+
+    <!-- Added in 4.2.0 — submitter card (ADM-03): name and affiliation only, never the phone number or gender -->
+    <string name="moderation_submitter_section">Gönderen</string>
+    <string name="moderation_submitter_name">Ad Soyad</string>
+    <string name="moderation_submitter_missing">Profil bulunamadı (hesap silinmiş olabilir)</string>
+    <string name="moderation_submitter_failed">Gönderen bilgisi yüklenemedi</string>
+    <string name="moderation_submitter_loading">Gönderen yükleniyor…</string>
+    <string name="moderation_row_submitter">Gönderen: %1$s</string>
     <string name="moderation_detail_missing_title">Gönderim bulunamadı</string>
     <string name="moderation_detail_missing_message">Kuyruk yenilenmiş olabilir; listeye dönüp tekrar dene.</string>
 
@@ -29,8 +43,8 @@
     <string name="moderation_dialog_cancel">Vazgeç</string>
 
     <string name="moderation_approved_title">Onaylandı</string>
-    <string name="moderation_approved_with_coins">%1$s: gönderene %2$d coin verildi.</string>
-    <string name="moderation_approved_plain">Gönderim onaylandı.</string>
+    <string name="moderation_approved_with_coins">%1$s: gönderene %2$d coin verildi. Sınav yapay zekâya gönderilecek.</string>
+    <string name="moderation_approved_plain">Gönderim onaylandı. Sınav yapay zekâya gönderilecek.</string>
 
     <string name="moderation_preview_title">Dosyalar</string>
     <string name="moderation_preview_empty">Dosya yok</string>

@@ -1,6 +1,6 @@
 package com.salticusteam.vifi.core.data.moderation
 
-import com.salticusteam.vifi.core.data.submission.CatalogNodeWrite
+import com.salticusteam.vifi.core.model.AIProvider
 import com.salticusteam.vifi.core.model.ExamSubmissionRecord
 import com.salticusteam.vifi.core.model.SubmissionTier
 
@@ -28,7 +28,12 @@ interface ModerationBackend {
     /** Deletes a Storage object. */
     suspend fun deleteFile(storagePath: String)
 
-    /** Writes the whole approval in one atomic batch (see [ApprovalCommit]). */
+    /**
+     * Writes the whole first approval atomically (see [ApprovalCommit]; shape in [FirstApprovalWrites]): the coin
+     * credit and the submission update, in one transaction that first re-reads the submission (`NotPending` unless
+     * still `pending`) and, when crediting, the ledger entry (`AlreadyCredited` if it exists). Never queued offline.
+     * Never writes `catalogNodes` or `exams` (4.2.0).
+     */
     suspend fun commitApproval(commit: ApprovalCommit)
 
     /** Marks the submission rejected (with `reviewedAt`), recording [reason] when given. */
@@ -46,21 +51,23 @@ interface ModerationBackend {
 
 // Added in 2.5 — everything one approval writes, committed atomically by [ModerationBackend.commitApproval].
 /**
- * The catalog nodes and child-count bumps, the exam document (when a new exam is published), the coin credit
- * (when [coins] > 0: `wallets/<owner>.balance += coins` plus the `ledger/<submissionId>` earn entry) and the
- * submission's status change to `approved`. Server timestamps are added by the backend.
+ * The first approval (4.2.0, iOS `FirebaseModerationService.commit`): the coin credit (when [coins] > 0:
+ * `wallets/<owner>.balance += coins` plus the `ledger/<submissionId>` earn entry) and the submission's change to
+ * `approved` with the tier, coins, AI provider and publish plan. Server timestamps are added by the backend. The
+ * catalog nodes and the exam are no longer part of it: the server publishes them from [publishPlan] at the second
+ * approval (`publishExamConversion`).
  */
 data class ApprovalCommit(
     val submissionId: String,
     val ownerId: String,
     val tier: SubmissionTier,
     val coins: Int,
-    val nodesToCreate: List<CatalogNodeWrite>,
-    val childCountIncrements: List<String>,
-    /** The exam to create, or `null` for a duplicate. */
-    val examId: String?,
-    /** The `exams/<examId>` fields; `null` exactly when [examId] is. */
-    val examDocument: Map<String, Any>?,
+
+    // Added in 4.2.0 — the AI model the admin picked; stored as `conversionProvider`.
+    val provider: AIProvider,
+
+    // Added in 4.2.0 — `ArchivePublishPlan.publishPlanDocument`; `null` only when there is no exam id to point at.
+    val publishPlan: Map<String, Any>?,
 )
 
 // Added in 2.5 — what an admin deletion needs from a published `exams/<id>` document.

@@ -22,12 +22,13 @@ import kotlinx.coroutines.delay
 class FakeModerationService(
     pending: List<ExamSubmissionRecord> = SAMPLES,
     private val latency: Duration = 300.milliseconds,
-    /** What a successful approval reports. */
-    private val approval: (ExamSubmissionRecord) -> ApprovalResult = {
-        ApprovalResult(tier = SubmissionTier.NEW_UNIVERSITY, coins = 500, publishedExamId = "pub-${it.id}")
-    },
     /** Submission id → the existing exam it duplicates (K22); absent ids are new. */
-    private val duplicates: Map<String, String> = emptyMap(),
+    private val duplicates: Map<String, String> = DUPLICATES,
+    /** What a successful approval reports (iOS mock: a duplicate reports the existing exam for 25 coins). */
+    private val approval: (ExamSubmissionRecord) -> ApprovalResult = { record ->
+        duplicates[record.id]?.let { ApprovalResult(tier = SubmissionTier.DUPLICATE, coins = 25, publishedExamId = it) }
+            ?: ApprovalResult(tier = SubmissionTier.NEW_UNIVERSITY, coins = 500, publishedExamId = "pub-${record.id}")
+    },
 ) : ModerationService {
 
     private val pending = pending.toMutableList()
@@ -84,7 +85,13 @@ class FakeModerationService(
     companion object {
         private const val SAMPLE_HOST = "https://example.com"
 
-        /** iOS MockModerationService's queue: an image submission and a PDF one. */
+        /** iOS MockModerationService's duplicates (ADM-02): `sub-dup` duplicates an exam already in the archive. */
+        val DUPLICATES = mapOf("sub-dup" to "mock-existing-exam")
+
+        /**
+         * iOS MockModerationService's queue: an image submission, a duplicate of an archived exam (K22 warning), and a
+         * PDF one whose owner has no profile (the "Profil bulunamadı" note, ADM-03).
+         */
         val SAMPLES = listOf(
             ExamSubmissionRecord(
                 id = "sub-1",
@@ -103,8 +110,21 @@ class FakeModerationService(
                 ),
             ),
             ExamSubmissionRecord(
-                id = "sub-2",
+                id = "sub-dup",
                 ownerId = "mock-user",
+                university = "Boğaziçi Üniversitesi",
+                faculty = "Mühendislik Fakültesi",
+                department = "Bilgisayar Mühendisliği",
+                lesson = "Ayrık Matematik",
+                exam = "2020 FİNAL",
+                kind = ExamKind.IMAGES,
+                status = "pending",
+                createdAt = Instant.ofEpochSecond(1_758_000_000),
+                files = listOf(SubmissionFileRef(storagePath = "pending/mock-user/sub-dup/page-1.jpg", order = 1)),
+            ),
+            ExamSubmissionRecord(
+                id = "sub-2",
+                ownerId = "mock-user-2",
                 university = "Sakarya Üniversitesi",
                 faculty = "İşletme Fakültesi",
                 department = "İşletme",

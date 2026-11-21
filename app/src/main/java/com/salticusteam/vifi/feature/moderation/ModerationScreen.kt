@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.data.repository.fake.FakeModerationService
+import com.salticusteam.vifi.core.data.repository.fake.FakeSubmitterProfileReader
 import com.salticusteam.vifi.core.designsystem.component.EmptyView
 import com.salticusteam.vifi.core.designsystem.component.ErrorView
 import com.salticusteam.vifi.core.designsystem.component.IconBadge
@@ -60,6 +62,7 @@ fun ModerationScreen(
     ModerationContent(
         state = state,
         onRecordClick = onRecordClick,
+        onRowShown = viewModel::onRowShown,
         onRetry = viewModel::retry,
         onRefresh = viewModel::refresh,
         onBack = onBack,
@@ -72,6 +75,8 @@ fun ModerationScreen(
 fun ModerationContent(
     state: ModerationUiState,
     onRecordClick: (String) -> Unit,
+    /** A row became visible: its owner's submitter lookup starts (once per uid). */
+    onRowShown: (ownerId: String) -> Unit,
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
     onBack: () -> Unit,
@@ -100,7 +105,12 @@ fun ModerationContent(
                         modifier = Modifier.testTag("moderation.empty"),
                     )
                 } else {
-                    RecordList(records = records, onRecordClick = onRecordClick)
+                    RecordList(
+                        records = records,
+                        submitters = state.submitters,
+                        onRecordClick = onRecordClick,
+                        onRowShown = onRowShown,
+                    )
                 }
             }
         }
@@ -108,10 +118,21 @@ fun ModerationContent(
 }
 
 @Composable
-private fun RecordList(records: List<ExamSubmissionRecord>, onRecordClick: (String) -> Unit) {
+private fun RecordList(
+    records: List<ExamSubmissionRecord>,
+    submitters: Map<String, SubmitterState>,
+    onRecordClick: (String) -> Unit,
+    onRowShown: (String) -> Unit,
+) {
     LazyColumn(modifier = Modifier.fillMaxSize().testTag("moderation.list")) {
         items(items = records, key = { it.id }) { record ->
-            ModerationRow(record = record, onClick = { onRecordClick(record.id) })
+            // Lazily, per visible row (iOS `.task { loadSubmitter }`); the directory reads a uid only once.
+            LaunchedEffect(record.ownerId) { onRowShown(record.ownerId) }
+            ModerationRow(
+                record = record,
+                submitter = submitters[record.ownerId],
+                onClick = { onRecordClick(record.id) },
+            )
             HorizontalDivider(Modifier.padding(start = 72.dp))
         }
         item(key = "footer") {
@@ -127,9 +148,9 @@ private fun RecordList(records: List<ExamSubmissionRecord>, onRecordClick: (Stri
     }
 }
 
-/** One row of the queue: the exam, its place in the archive, and its size (iOS `ModerationRow`). */
+/** One row of the queue: the exam, its place in the archive, its submitter and its size (iOS `ModerationRow`). */
 @Composable
-private fun ModerationRow(record: ExamSubmissionRecord, onClick: () -> Unit) {
+private fun ModerationRow(record: ExamSubmissionRecord, submitter: SubmitterState?, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -157,6 +178,7 @@ private fun ModerationRow(record: ExamSubmissionRecord, onClick: () -> Unit) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            SubmitterLines(submitter)
         }
         Text(
             text = fileCountText(record),
@@ -166,13 +188,66 @@ private fun ModerationRow(record: ExamSubmissionRecord, onClick: () -> Unit) {
     }
 }
 
+/** "Gönderen: Ad Soyad" plus "Üniversite · Bölüm", or a quiet placeholder / non-blocking note (iOS `submitterLines`). */
+@Composable
+private fun SubmitterLines(submitter: SubmitterState?) {
+    when (submitter) {
+        is SubmitterState.Loaded -> Column(Modifier.testTag("moderation.submitter")) {
+            Text(
+                text = stringResource(R.string.moderation_row_submitter, submitter.info.fullName),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            val affiliation = submitter.info.affiliation()
+            if (affiliation.isNotEmpty()) {
+                Text(
+                    text = affiliation,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        SubmitterState.Missing -> SubmitterRowNote(
+            text = stringResource(R.string.moderation_submitter_missing),
+            modifier = Modifier.testTag("moderation.submitter"),
+        )
+        SubmitterState.Failed -> SubmitterRowNote(
+            text = stringResource(R.string.moderation_submitter_failed),
+            modifier = Modifier.testTag("moderation.submitter"),
+        )
+        SubmitterState.Loading, null -> SubmitterRowNote(text = stringResource(R.string.moderation_submitter_loading))
+    }
+}
+
+@Composable
+private fun SubmitterRowNote(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier,
+    )
+}
+
 @ViFiThemePreviews
 @Composable
 private fun ModerationContentPreview() {
     ViFiTheme {
         ModerationContent(
-            state = ModerationUiState(isLoading = false, records = FakeModerationService.SAMPLES),
+            state = ModerationUiState(
+                isLoading = false,
+                records = FakeModerationService.SAMPLES,
+                submitters = mapOf(
+                    FakeSubmitterProfileReader.SAMPLE_UID to SubmitterState.Loaded(FakeSubmitterProfileReader.SAMPLE),
+                ),
+            ),
             onRecordClick = {},
+            onRowShown = {},
             onRetry = {},
             onRefresh = {},
             onBack = {},
@@ -187,6 +262,7 @@ private fun ModerationEmptyPreview() {
         ModerationContent(
             state = ModerationUiState(isLoading = false, records = emptyList()),
             onRecordClick = {},
+            onRowShown = {},
             onRetry = {},
             onRefresh = {},
             onBack = {},
