@@ -38,7 +38,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **56'sı tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **57'si tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
@@ -50,7 +50,7 @@
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
 > S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Yeniden üretilen yayındaki soru
 > ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. `SRV-02` deploy edildi. Faz 3: `SQA-01`, `SQA-04` tamam,
-> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini). `RSD-03` yayından sonraya ertelendi (AUDIT kalır).
+> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini). `RSD-03` yayından sonraya ertelendi (AUDIT kalır). Faz 4: `SRL-01` tamam (iOS 4.2.0 (13) onaylı, elle yayın bekliyor).
 
 ---
 
@@ -412,7 +412,10 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 
 ### Faz 4 — Yayın  ⚠️ (ürün sahibiyle · K16 · her dış adım ayrı onay)
 
-- [ ] **`SRL-01`** Önkoşul _(P0·S·Opus)_ — `SRV-02` canlıda (yoksa yayın yok), Faz 3 geçti, iOS 4.2.0 (13) incelemede /
+- [x] **`SRL-01`** Önkoşul _(P0·S·Opus)_ — **Tamam (22 Kasım 2026):** `SRV-02` canlıda; Faz 2 ve Faz 3 tamam (`RSD-03`
+  yayından sonraya ertelendi, engel değil); `SLG-01`…`03` hazır; iOS 4.2.0 (13) onaylandı, elle yayın bekliyor (ürün
+  sahibinin teyidi). Not: ortak depo `v-4.2.0` uzaktan 2 commit ileride (deploy edilen `6a9e67e` dahil) → `SRL-02`'de
+  push. Asıl metin: `SRV-02` canlıda (yoksa yayın yok), Faz 3 geçti, iOS 4.2.0 (13) incelemede /
   onaylı ve elle yayın bekliyor. ⟶ Faz 3
 - [ ] **`SRL-02`** Dalın push'u _(P0·S·ürün sahibi)_ — `v-4.2.0`. ⟶ `SRL-01`
 - [ ] **`SRL-03`** Release AAB _(P0·S·Opus)_ — `play-store/ViFi-4.2.0-22.aab`; R8 sonrası LaTeX kütüphanesi ve yazı
