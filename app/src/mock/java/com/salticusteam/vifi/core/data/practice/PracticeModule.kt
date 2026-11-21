@@ -17,7 +17,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * "Sınava gir" bindings of the mock flavor (4.2.0): TOPOLOJİ 1's sample index, the sample questions as a pool with the
- * in-memory free limit (5 a day), and a sample proof under `vifi_subscribed` (unlimited, iOS `-ViFiSubscribed`).
+ * in-memory free limit (5 a day; already used up under `vifi_practice_limit_reached`, iOS `-ViFiPracticeLimitReached`),
+ * and a sample proof under `vifi_subscribed` (unlimited, iOS `-ViFiSubscribed`).
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -30,7 +31,11 @@ object PracticeModule {
     @Provides
     @Singleton
     fun providePracticeService(): PracticeService =
-        FakePracticeService(isSubscribed = LaunchArgs.isSet(LaunchArg.SUBSCRIBED), latency = 150.milliseconds)
+        FakePracticeService(
+            isSubscribed = LaunchArgs.isSet(LaunchArg.SUBSCRIBED),
+            limitReached = LaunchArgs.isSet(LaunchArg.PRACTICE_LIMIT_REACHED),
+            latency = 150.milliseconds,
+        )
 
     @Provides
     @Singleton

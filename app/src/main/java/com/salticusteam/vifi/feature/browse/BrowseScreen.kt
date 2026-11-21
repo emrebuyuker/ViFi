@@ -110,6 +110,11 @@ fun BrowseScreen(
     onHomeClick: (() -> Unit)? = null,
     /** Opens the Premium paywall from the unlock sheet; `null` hides the sheet's "Premium'a geç" link. */
     onOpenPaywall: (() -> Unit)? = null,
+    /**
+     * A course's "Sınava gir" row above its exams (4.2.0, iOS `PracticeStartSection`), kept while searching; only
+     * lesson levels pass it, and it draws nothing until the course has practice questions.
+     */
+    practiceEntry: (@Composable () -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel(),
     unlockViewModel: ExamUnlockViewModel = hiltViewModel(),
     deletionViewModel: ExamDeletionViewModel = hiltViewModel(),
@@ -155,6 +160,7 @@ fun BrowseScreen(
         listHeader = listHeader,
         onBreadcrumbSelect = onBreadcrumbSelect,
         onHomeClick = onHomeClick,
+        practiceEntry = practiceEntry,
         // Admins may delete the exams listed under a course (iOS `canDeleteExams`).
         onDeleteExam = deletionViewModel::onDeleteRequested.takeIf {
             deletionState.isAdmin && state.path.childLevel == ArchiveLevel.EXAM
@@ -204,6 +210,7 @@ internal fun BrowseContent(
     onDeleteExam: ((ArchiveItem) -> Unit)? = null,
     onBreadcrumbSelect: ((ArchivePath) -> Unit)? = null,
     onHomeClick: (() -> Unit)? = null,
+    practiceEntry: (@Composable () -> Unit)? = null,
 ) {
     val listedLevel = state.path.childLevel ?: ArchiveLevel.EXAM
     val title = state.path.displayName ?: stringResource(R.string.archive_home_title)
@@ -289,6 +296,7 @@ internal fun BrowseContent(
                                 onItemClick = onItemClick,
                                 onLockedExamTap = onLockedExamTap,
                                 header = listHeader.takeUnless { state.isFiltering },
+                                practiceEntry = practiceEntry,
                                 onDelete = onDeleteExam,
                             )
                         }
@@ -345,6 +353,7 @@ private fun ArchiveList(
     onItemClick: (ArchiveItem) -> Unit,
     onLockedExamTap: (ArchiveItem) -> Unit,
     header: (@Composable () -> Unit)? = null,
+    practiceEntry: (@Composable () -> Unit)? = null,
     onDelete: ((ArchiveItem) -> Unit)? = null,
 ) {
     LazyColumn(
@@ -352,6 +361,7 @@ private fun ArchiveList(
         contentPadding = PaddingValues(bottom = 16.dp),
     ) {
         if (header != null) item(key = "homeHeader") { header() }
+        if (practiceEntry != null) item(key = "practiceEntry") { practiceEntry() }
         item(key = "sectionHeader") {
             SectionHeader(title = title, count = items.size)
         }

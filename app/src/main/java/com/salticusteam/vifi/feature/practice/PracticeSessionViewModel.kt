@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.PracticeService
 import com.salticusteam.vifi.core.model.AnalyticsEvent
+import com.salticusteam.vifi.core.model.AnalyticsScreen
 import com.salticusteam.vifi.core.model.PracticeBatch
 import com.salticusteam.vifi.core.model.PracticeLimits
 import com.salticusteam.vifi.core.model.PracticeQuestion
@@ -12,6 +13,7 @@ import com.salticusteam.vifi.core.model.PracticeRequest
 import com.salticusteam.vifi.core.model.PracticeSelection
 import com.salticusteam.vifi.core.model.userMessage
 import com.salticusteam.vifi.core.util.LogCategory
+import com.salticusteam.vifi.core.util.trackScreen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -90,6 +92,11 @@ class PracticeSessionViewModel @AssistedInject constructor(
         get() = seenIds.takeLast(PracticeLimits.MAX_EXCLUDE)
 
     // Intents
+    /** The screen is shown (also on every return from the paywall; iOS `screenView(name: "PracticeSession")`). */
+    fun onScreenShown() {
+        analytics.trackScreen(AnalyticsScreen.PRACTICE_SESSION)
+    }
+
     /** Starts the session once (the screen's effect runs again on every re-composition of a new entry). */
     fun onStart() {
         if (hasStarted) return

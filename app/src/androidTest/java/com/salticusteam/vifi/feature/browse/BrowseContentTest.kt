@@ -20,6 +20,7 @@ import com.salticusteam.vifi.core.model.ArchiveLevel
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamSummary
+import com.salticusteam.vifi.feature.practice.PracticeEntryRow
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -95,6 +96,35 @@ class BrowseContentTest {
     /** The nodes matching [matcher] inside the row tagged [rowTag]. */
     private fun inRow(rowTag: String, matcher: SemanticsMatcher) =
         composeRule.onAllNodes(matcher and hasAnyAncestor(hasTestTag(rowTag)), useUnmergedTree = true)
+
+    // iOS PracticeUITests: the course's "Sınava gir" row sits above its exams and opens the setup (SIT-01).
+    @Test
+    fun practiceEntry_showsAboveTheExams_andOpens() {
+        var opened = 0
+        composeRule.setContent {
+            ViFiTheme {
+                BrowseContent(
+                    BrowseUiState(path = lesson, isLoading = false, items = listOf(pdf)),
+                    onSearchTextChange = {}, onItemClick = {}, onRetry = {}, onRefresh = {}, onBack = {},
+                    practiceEntry = { PracticeEntryRow(onClick = { opened++ }) },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("practice.start").assertIsDisplayed()
+        composeRule.onNodeWithTag("row.2023 Vize").assertIsDisplayed()
+        composeRule.onNodeWithTag("practice.start").performClick()
+
+        assertEquals(1, opened)
+    }
+
+    @Test
+    fun practiceEntry_absentWithoutTheSlot() {
+        show(BrowseUiState(path = lesson, isLoading = false, items = listOf(pdf)))
+
+        composeRule.onNodeWithTag("browse.list").assertIsDisplayed()
+        composeRule.onNodeWithTag("practice.start").assertDoesNotExist()
+    }
 
     @Test
     fun loadedList_sectionHeaderShowsLevelTitleAndCount() {
