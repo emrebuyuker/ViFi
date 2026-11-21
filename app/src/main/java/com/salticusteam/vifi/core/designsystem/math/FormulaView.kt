@@ -136,6 +136,7 @@ internal fun FormulaBlock(
             pieces = plan.boxes,
             latex = latex,
             metrics = metrics,
+            lineWidthPx = lineWidthPx,
             style = style,
             textAlign = if (display) TextAlign.Center else null,
             modifier = modifier,
@@ -149,8 +150,9 @@ internal fun FormulaBlock(
  * rendered on a background thread and cached; every later frame, and every other place showing the same formula in
  * the same colour, blits that bitmap at its native pixel size (a bitmap is rescaled only for a formula shrunk to fit).
  *
- * @param baselineY where the baseline sits from the canvas top in pixels; `null` = the canvas bottom (inline boxes
- *   are as tall as the formula's ascent, its descent hangs below the text baseline like a glyph descender).
+ * @param baselineY where the baseline sits from the canvas top in pixels; `null` = the canvas bottom. Inline
+ *   boxes pass the ascent: their canvas spans the formula's ink, overflowing the ascent-high placeholder downwards so
+ *   the descent hangs below the text baseline like a glyph descender.
  */
 @Composable
 internal fun FormulaGlyph(
