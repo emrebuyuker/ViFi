@@ -50,7 +50,7 @@
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
 > S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Yeniden üretilen yayındaki soru
 > ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. `SRV-02` deploy edildi. Faz 3: `SQA-01`, `SQA-04` tamam,
-> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini).
+> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini). `RSD-03` yayından sonraya ertelendi (AUDIT kalır).
 
 ---
 
@@ -405,7 +405,10 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 - [x] **`SQA-04`** iOS ↔ Android çapraz _(P1·S·Opus)_ — Aynı sınav ve aynı pratik kapsamı iki platformda aynı soru
   sayısı, aynı başlıklar, aynı formül çıktısı (göz kontrolü, ekran görüntüsü yan yana). ⟶ `SQA-01`
 - [ ] **`RSD-03`** ENFORCE sonrası Android kontrolü _(P1·S·Opus)_ — Yalnız ürün sahibi ENFORCE'u açarsa: ANDROID uç
-  noktası 200, test numarasıyla giriş çalışıyor, `loginDiagnostics`'te reCAPTCHA kaynaklı artış yok (salt okuma). ⟶ ENFORCE onayı
+  noktası 200, test numarasıyla giriş çalışıyor, `loginDiagnostics`'te reCAPTCHA kaynaklı artış yok (salt okuma). **Ertelendi (22 Kasım 2026, ürün sahibinin
+  kararı):** iOS ve Android 4.2.0 yayına çıkıp eski sürümler zorunlu güncellemeyle kapatıldıktan sonra ENFORCE'a birlikte
+  karar verilecek; o zamana kadar AUDIT kalır. Yayını (`SRL-01`) engellemez; ENFORCE öncesi yayındaki Android 4.1.0'ın
+  davranışı ayrıca kontrol edilir. ⟶ ENFORCE onayı
 
 ### Faz 4 — Yayın  ⚠️ (ürün sahibiyle · K16 · her dış adım ayrı onay)
 
