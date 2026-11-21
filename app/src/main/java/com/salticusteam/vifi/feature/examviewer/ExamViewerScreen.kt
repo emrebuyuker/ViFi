@@ -23,10 +23,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.designsystem.component.ContactSupportDialog
+import com.salticusteam.vifi.core.designsystem.component.LoadingView
 import com.salticusteam.vifi.core.designsystem.component.ViFiTopAppBar
 import com.salticusteam.vifi.core.designsystem.component.rememberContactSupportLauncher
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
+import com.salticusteam.vifi.core.navigation.ViFiRoute
 
 /**
  * The exam viewer destination: the image viewer (page list + full-screen pager) or the PDF viewer, chosen
@@ -37,6 +39,7 @@ fun ExamViewerScreen(
     path: ArchivePath,
     routeKind: ExamKind,
     onBack: () -> Unit,
+    onReplaceWithQuestions: (ViFiRoute.StructuredExam) -> Unit = {},
     viewModel: ExamViewerViewModel = hiltViewModel<ExamViewerViewModel, ExamViewerViewModel.Factory> {
         it.create(path, routeKind)
     },
@@ -46,17 +49,41 @@ fun ExamViewerScreen(
 
     LaunchedEffect(state.kind) { viewModel.onViewerShown(state.kind) }
 
-    ScreenCaptureProtection {
-        when (state.kind) {
-            ExamKind.IMAGES -> ExamImagesScreen(
-                state = state,
-                imageLoader = imageLoader,
-                onBack = onBack,
-                onRetry = viewModel::load,
-                onFullScreenShown = viewModel::onFullScreenShown,
-            )
-            ExamKind.PDF -> ExamPdfScreen(state = state, onBack = onBack, onRetryDocument = viewModel::load)
+    // A structured exam reached without its list summary (recents, a notification) replaces this viewer (SQS-01).
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is ExamViewerEvent.ReplaceWithQuestions -> onReplaceWithQuestions(event.route)
+            }
         }
+    }
+
+    ScreenCaptureProtection {
+        if (state.redirectsToQuestions) {
+            // Waiting for the question screen to take this one's place; no file is downloaded meanwhile.
+            RedirectingScreen(title = state.title, onBack = onBack)
+        } else {
+            when (state.kind) {
+                ExamKind.IMAGES -> ExamImagesScreen(
+                    state = state,
+                    imageLoader = imageLoader,
+                    onBack = onBack,
+                    onRetry = viewModel::load,
+                    onFullScreenShown = viewModel::onFullScreenShown,
+                )
+                ExamKind.PDF -> ExamPdfScreen(state = state, onBack = onBack, onRetryDocument = viewModel::load)
+            }
+        }
+    }
+}
+
+@Composable
+private fun RedirectingScreen(title: String, onBack: () -> Unit) {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { ViFiTopAppBar(title = title, onBack = onBack) },
+    ) { padding ->
+        LoadingView(modifier = Modifier.padding(padding))
     }
 }
 
@@ -138,14 +165,17 @@ internal fun ExamPdfScreen(
     }
 }
 
-/** The "Bize Ulaş" envelope (iOS viewer toolbar): opens the support e-mail prefilled with the exam's location. */
+/**
+ * The "Bize Ulaş" envelope (iOS viewer toolbar `exam.contact`): opens the support e-mail prefilled with the exam's
+ * location. Shared by the file viewers and the structured exam's question screen (4.2.0).
+ */
 @Composable
-private fun ContactSupportAction(supportPath: String) {
+internal fun ContactSupportAction(supportPath: String, testTag: String = "examViewer.contactSupport") {
     val contactSupport = rememberContactSupportLauncher()
     val supportContext = stringResource(R.string.exam_viewer_support_context, supportPath)
     IconButton(
         onClick = { contactSupport.open(supportContext) },
-        modifier = Modifier.testTag("examViewer.contactSupport"),
+        modifier = Modifier.testTag(testTag),
     ) {
         Icon(
             imageVector = Icons.Outlined.MailOutline,

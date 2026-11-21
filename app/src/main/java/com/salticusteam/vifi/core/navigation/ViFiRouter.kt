@@ -2,9 +2,12 @@ package com.salticusteam.vifi.core.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
+import androidx.navigation.toRoute
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
+import com.salticusteam.vifi.core.util.ExamRouting
 
 /**
  * Owns stack operations so any screen can go home, jump to a breadcrumb or deep-link (iOS `Router` parity).
@@ -45,11 +48,31 @@ class ViFiRouter(private val navController: NavHostController) {
         }
     }
 
-    /** Opens an exam with its whole hierarchy on the stack, so Back walks up the archive. */
-    fun openExam(examPath: ArchivePath, kind: ExamKind) {
+    /**
+     * Opens an exam with its whole hierarchy on the stack, so Back walks up the archive. The screen is chosen by
+     * `ExamRouting`: callers that only know the exam's file kind (recents, notifications) pass no [questionCount] and
+     * open the file viewer, which replaces itself with the question screen once it sees the exam is structured
+     * ([replaceExamWithQuestions], iOS `Router.openExam`).
+     */
+    fun openExam(examPath: ArchivePath, kind: ExamKind, questionCount: Int? = null) {
         popToRoot()
         pushAncestorsAndSelf(examPath.parent ?: ArchivePath.ROOT)
-        navController.navigate(ViFiRoute.Exam(examPath, kind))
+        navController.navigate(ExamRouting.route(examPath, kind, questionCount))
+    }
+
+    /**
+     * Puts the question screen [route] in place of the file viewer of the same exam on top of the stack (SQS-01), so
+     * Back skips the viewer. Does nothing when that viewer is no longer on top (the user left meanwhile); single top
+     * keeps a repeated event from stacking a second question screen.
+     */
+    fun replaceExamWithQuestions(route: ViFiRoute.StructuredExam) {
+        val top = navController.currentBackStackEntry ?: return
+        if (!top.destination.hasRoute<ViFiRoute.Exam>()) return
+        if (top.toRoute<ViFiRoute.Exam>().path != route.path) return
+        navController.navigate(route) {
+            popUpTo(top.destination.id) { inclusive = true }
+            launchSingleTop = true
+        }
     }
 
     private fun pushAncestorsAndSelf(path: ArchivePath) {

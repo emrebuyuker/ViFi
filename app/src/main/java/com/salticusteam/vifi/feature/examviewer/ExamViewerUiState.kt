@@ -4,6 +4,8 @@ import com.salticusteam.vifi.core.data.files.PdfPages
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamDocument
 import com.salticusteam.vifi.core.model.ExamKind
+import com.salticusteam.vifi.core.navigation.ViFiRoute
+import com.salticusteam.vifi.core.util.ExamRouting
 
 /** The exam being viewed: its files once loaded. [routeKind] is the kind the list (or a recent entry) knew. */
 data class ExamViewerUiState(
@@ -29,6 +31,18 @@ data class ExamViewerUiState(
      * list was read opens in the right viewer (iOS `redirectIfKindChanged`).
      */
     val kind: ExamKind get() = document?.kind ?: routeKind
+
+    /**
+     * The loaded exam turned out to be structured (opened without its list summary): the question screen takes this
+     * viewer's place, so no viewer is shown meanwhile (iOS `structuredRedirect`).
+     */
+    val redirectsToQuestions: Boolean get() = document?.let(ExamRouting::redirect) != null
+}
+
+/** One-shot events of the file viewer. */
+sealed interface ExamViewerEvent {
+    /** Replace this viewer with the exam's question screen; Back then skips the file viewer (SQS-01). */
+    data class ReplaceWithQuestions(val route: ViFiRoute.StructuredExam) : ExamViewerEvent
 }
 
 /** The PDF file shown by the PDF viewer, out of the exam's [fileCount] files. */

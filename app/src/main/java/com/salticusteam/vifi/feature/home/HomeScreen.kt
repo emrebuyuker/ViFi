@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AddToPhotos
+import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -211,7 +212,10 @@ private fun RecentExamsSection(
     }
 }
 
-/** One recent exam: kind icon and badge, title, "University › Lesson" and when it was opened. Long press removes. */
+/**
+ * One recent exam: kind icon and badge ("Sorular" and the list icon for one opened on the question screen, 4.2.0),
+ * title, "University › Lesson" and when it was opened. Long press removes.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RecentExamCard(exam: RecentExam, onClick: () -> Unit, onRemove: () -> Unit) {
@@ -235,8 +239,10 @@ private fun RecentExamCard(exam: RecentExam, onClick: () -> Unit, onRemove: () -
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconBadge(icon = exam.kind.icon, size = 32.dp)
-                ExamKindBadge(text = stringResource(exam.kind.badgeRes))
+                IconBadge(icon = if (exam.isStructured) Icons.Filled.FormatListNumbered else exam.kind.icon, size = 32.dp)
+                ExamKindBadge(
+                    text = stringResource(if (exam.isStructured) R.string.structured_exam_badge else exam.kind.badgeRes),
+                )
             }
             Text(
                 text = exam.title,

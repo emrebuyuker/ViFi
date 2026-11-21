@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
@@ -476,14 +477,17 @@ private fun SectionHeader(title: String, count: Int) {
 
 /**
  * One entry: level icon, name and child count (or the exam's content); an exam also shows its format, or a lock
- * with the unlock cost when [isLocked].
+ * with the unlock cost when [isLocked]. A structured exam (4.2.0) shows "N soru", the "Sorular" badge and the list
+ * icon instead of its pages; the lock badge still wins.
  */
 @Composable
 private fun ArchiveRow(item: ArchiveItem, isLocked: Boolean, onClick: () -> Unit) {
     val exam = item.exam
     // An exam node without files cannot be opened (iOS shows it disabled).
     val enabled = item.level != ArchiveLevel.EXAM || exam != null
+    val questionCount = exam?.questionCount?.takeIf { it > 0 }
     val subtitle = when {
+        questionCount != null -> pluralStringResource(R.plurals.structured_exam_question_count, questionCount, questionCount)
         exam != null -> exam.kind.contentText(exam.fileCount)
         item.childCount != null -> item.level.childCountText(item.childCount)
         item.level == ArchiveLevel.EXAM -> stringResource(R.string.exam_no_files)
@@ -500,7 +504,11 @@ private fun ArchiveRow(item: ArchiveItem, isLocked: Boolean, onClick: () -> Unit
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconBadge(
-            icon = exam?.kind?.icon ?: item.level.icon,
+            icon = when {
+                questionCount != null -> Icons.Filled.FormatListNumbered
+                exam != null -> exam.kind.icon
+                else -> item.level.icon
+            },
             tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Column(Modifier.weight(1f)) {
@@ -523,7 +531,9 @@ private fun ArchiveRow(item: ArchiveItem, isLocked: Boolean, onClick: () -> Unit
             if (isLocked) {
                 LockBadge(cost = ExamLock.UNLOCK_COST, modifier = Modifier.testTag("row.lock"))
             } else {
-                ExamKindBadge(text = stringResource(exam.kind.badgeRes))
+                ExamKindBadge(
+                    text = stringResource(if (questionCount != null) R.string.structured_exam_badge else exam.kind.badgeRes),
+                )
             }
         }
     }

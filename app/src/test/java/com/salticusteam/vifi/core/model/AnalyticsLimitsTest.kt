@@ -41,6 +41,8 @@ class AnalyticsLimitsTest {
         AnalyticsEvent.MarketingConsentShown(NotificationPromptSource.REASK),
         AnalyticsEvent.MarketingConsentAccepted(NotificationPromptSource.SETTINGS),
         AnalyticsEvent.MarketingConsentDeclined(NotificationPromptSource.SETTINGS),
+        AnalyticsEvent.StructuredExamOpened(questionCount = 30),
+        AnalyticsEvent.AnswerRevealed(questionOrder = 12),
     )
 
     private fun kindIndex(event: AnalyticsEvent): Int = when (event) {
@@ -73,11 +75,13 @@ class AnalyticsLimitsTest {
         is AnalyticsEvent.MarketingConsentShown -> 26
         is AnalyticsEvent.MarketingConsentAccepted -> 27
         is AnalyticsEvent.MarketingConsentDeclined -> 28
+        is AnalyticsEvent.StructuredExamOpened -> 29
+        is AnalyticsEvent.AnswerRevealed -> 30
     }
 
     @Test
     fun `samples cover every event exactly once`() {
-        assertEquals((0..28).toList(), samples.map(::kindIndex).sorted())
+        assertEquals((0..30).toList(), samples.map(::kindIndex).sorted())
     }
 
     @Test
@@ -85,7 +89,9 @@ class AnalyticsLimitsTest {
         val names = samples.map { it.firebaseName }
 
         names.forEach { assertValidName(it, max = EVENT_NAME_MAX, what = "event name") }
-        assertEquals(names.size, names.toSet().size)
+        // The one shared name: the file viewer's and the question screen's opens are one event, told apart by `kind`.
+        assertEquals(listOf("exam_open"), names.groupBy { it }.filterValues { it.size > 1 }.keys.toList())
+        assertEquals(names.size - 1, names.toSet().size)
     }
 
     @Test
@@ -113,9 +119,10 @@ class AnalyticsLimitsTest {
             AnalyticsScreen.EXAM_VIEWER, AnalyticsScreen.EXAM_PDF, AnalyticsScreen.EXAM_IMAGES, AnalyticsScreen.INBOX,
             AnalyticsScreen.MODERATION, AnalyticsScreen.ABOUT, AnalyticsScreen.ACCOUNT, AnalyticsScreen.PAYWALL,
             AnalyticsScreen.NOTIFICATION_SETTINGS, AnalyticsScreen.NOTIFICATION_COMPOSER, AnalyticsScreen.NOTIFICATION_HISTORY,
+            AnalyticsScreen.STRUCTURED_EXAM,
         )
 
-        assertEquals(18, screens.toSet().size)
+        assertEquals(19, screens.toSet().size)
         screens.forEach { assertTrue(it.length <= PARAM_VALUE_MAX) }
     }
 

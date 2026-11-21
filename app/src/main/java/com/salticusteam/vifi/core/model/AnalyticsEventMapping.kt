@@ -8,6 +8,9 @@ val AnalyticsEvent.firebaseName: String
         is AnalyticsEvent.Browse -> "browse_level"
         is AnalyticsEvent.ExamOpened -> "exam_open"
         AnalyticsEvent.RecentExamOpened -> "recent_exam_open"
+        // The file viewer's and the question screen's opens are one event (iOS), told apart by `kind`.
+        is AnalyticsEvent.StructuredExamOpened -> "exam_open"
+        is AnalyticsEvent.AnswerRevealed -> "answer_revealed"
         is AnalyticsEvent.ExamUnlockSheetShown -> "unlock_sheet_shown"
         AnalyticsEvent.EarnCoinsTapped -> "earn_coins_tapped"
         is AnalyticsEvent.ExamUnlocked -> "exam_unlock"
@@ -41,6 +44,11 @@ val AnalyticsEvent.firebaseParameters: Map<String, Any>?
         is AnalyticsEvent.ScreenView -> mapOf(AnalyticsNames.SCREEN_NAME to name)
         is AnalyticsEvent.Browse -> mapOf("level" to level.analyticsName)
         is AnalyticsEvent.ExamOpened -> mapOf("kind" to kind.raw)
+        is AnalyticsEvent.StructuredExamOpened -> mapOf(
+            "kind" to AnalyticsValues.EXAM_KIND_STRUCTURED,
+            "question_count" to questionCount.toLong(),
+        )
+        is AnalyticsEvent.AnswerRevealed -> mapOf("question_order" to questionOrder.toLong())
         is AnalyticsEvent.ExamUnlockSheetShown -> mapOf("can_afford" to canAfford)
         is AnalyticsEvent.ExamUnlocked -> mapOf(
             "exam_kind" to kind.raw,
@@ -122,6 +130,9 @@ object AnalyticsScreen {
 
     // Added in 4.1.0 — the admin notification history (iOS `screenView(name: "NotificationHistory")`).
     const val NOTIFICATION_HISTORY = "NotificationHistory"
+
+    // Added in 4.2.0 — the structured exam's question screen (iOS `screenView(name: "StructuredExam")`).
+    const val STRUCTURED_EXAM = "StructuredExam"
 }
 
 // Added in 2.5 — fixed values of event parameters that iOS reports as plain strings.
@@ -140,4 +151,7 @@ object AnalyticsValues {
     const val UPDATE_ACTION_UPDATE = "update"
     const val UPDATE_ACTION_SKIP = "skip"
     const val UPDATE_ACTION_LATER = "later"
+
+    // Added in 4.2.0 — `exam_open.kind` of an exam opened on the question screen (file exams send `JPG` / `PDF`).
+    const val EXAM_KIND_STRUCTURED = "structured"
 }

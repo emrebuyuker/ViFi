@@ -18,7 +18,12 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.salticusteam.vifi.core.navigation.ViFiRoute
+import com.salticusteam.vifi.core.util.ExamRouting
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +33,8 @@ import kotlinx.coroutines.launch
 /**
  * Loads the files of one exam for the viewers and records the visit (iOS `ExamDocumentViewModel`).
  * The screens own their file downloads; this owns the document, the recents entry and the analytics events.
+ * An exam whose document turns out structured (opened from recents or a notification, without its list summary)
+ * is handed to the question screen instead ([ExamViewerEvent.ReplaceWithQuestions], 4.2.0 SQS-01).
  */
 @HiltViewModel(assistedFactory = ExamViewerViewModel.Factory::class)
 class ExamViewerViewModel @AssistedInject constructor(
@@ -42,9 +49,14 @@ class ExamViewerViewModel @AssistedInject constructor(
     private val _uiState = MutableStateFlow(ExamViewerUiState(path = path, routeKind = routeKind))
     val uiState: StateFlow<ExamViewerUiState> = _uiState.asStateFlow()
 
+    // One-shot events
+    private val _events = Channel<ExamViewerEvent>(Channel.BUFFERED)
+    val events: Flow<ExamViewerEvent> = _events.receiveAsFlow()
+
     // Internal state
     private var isFetching = false
     private var hasRecordedVisit = false
+    private var hasRedirected = false
 
     // Intents
     init {
@@ -64,7 +76,8 @@ class ExamViewerViewModel @AssistedInject constructor(
             try {
                 val document = archiveRepository.document(_uiState.value.path)
                 _uiState.update { it.copy(isLoading = false, document = document, error = null) }
-                recordVisitIfNeeded(document)
+                val redirect = ExamRouting.redirect(document)
+                if (redirect != null) redirectOnce(redirect) else recordVisitIfNeeded(document)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -92,6 +105,14 @@ class ExamViewerViewModel @AssistedInject constructor(
     }
 
     // Helpers
+
+    /** The question screen that replaces this viewer records the visit (recents + `exam_open`) itself, once. */
+    private suspend fun redirectOnce(route: ViFiRoute.StructuredExam) {
+        if (hasRedirected) return
+        hasRedirected = true
+        _events.send(ExamViewerEvent.ReplaceWithQuestions(route))
+    }
+
     private suspend fun recordVisitIfNeeded(document: ExamDocument) {
         if (hasRecordedVisit) return
         hasRecordedVisit = true

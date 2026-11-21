@@ -20,6 +20,7 @@ import com.salticusteam.vifi.core.navigation.ViFiNavHost
 import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.core.navigation.ViFiRouter
 import com.salticusteam.vifi.core.navigation.rememberViFiRouter
+import com.salticusteam.vifi.core.util.ExamRouting
 import com.salticusteam.vifi.feature.about.AboutScreen
 import com.salticusteam.vifi.feature.account.AccountScreen
 import com.salticusteam.vifi.feature.addexam.AddExamScreen
@@ -40,6 +41,7 @@ import com.salticusteam.vifi.feature.notificationsettings.NotificationSettingsSc
 import com.salticusteam.vifi.feature.onboarding.OnboardingGate
 import com.salticusteam.vifi.feature.premium.PaywallScreen
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
+import com.salticusteam.vifi.feature.structuredexam.StructuredExamScreen
 import com.salticusteam.vifi.feature.update.AppUpdateGate
 
 /**
@@ -118,7 +120,16 @@ private fun ArchiveHost(
             )
         },
         exam = { path, kind ->
-            ExamViewerScreen(path = path, routeKind = kind, onBack = { router.pop() })
+            ExamViewerScreen(
+                path = path,
+                routeKind = kind,
+                onBack = { router.pop() },
+                // Opened without a summary (recents, a notification), a structured exam swaps in its question screen.
+                onReplaceWithQuestions = { router.replaceExamWithQuestions(it) },
+            )
+        },
+        structuredExam = { path, kind ->
+            StructuredExamScreen(path = path, kind = kind, onBack = { router.pop() })
         },
         account = {
             AccountScreen(
@@ -199,12 +210,15 @@ private fun ArchiveHost(
     )
 }
 
-/** Drills into a list entry, or opens an exam that has files. */
+/**
+ * Drills into a list entry, or opens an exam that has files: its question screen when it is structured, else its
+ * file viewer (`ExamRouting`). A locked exam never gets here (Browse offers to unlock it instead).
+ */
 private fun ViFiRouter.open(item: ArchiveItem) {
-    val exam = item.exam
-    when {
-        item.level != ArchiveLevel.EXAM -> push(ViFiRoute.Browse(item.path))
-        exam != null -> push(ViFiRoute.Exam(item.path, exam.kind))
+    if (item.level != ArchiveLevel.EXAM) {
+        push(ViFiRoute.Browse(item.path))
+    } else {
+        ExamRouting.route(item)?.let(::push)
     }
 }
 
