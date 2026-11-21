@@ -292,7 +292,7 @@ incelemeye gönderilmeyen 1 değişiklik" olarak bekliyor; incelemeye `NRL-07`'d
 |---|---|---|---|---|---|
 | "Sınava gir" günlük sayacı | Sunucu `users/<uid>/practice/daily` = `{day, count, seenToday (günün son ≤ 50 soru kimliği), updatedAt}`. Yalnız sunucu yazar (`nextPracticeQuestions`), sahibi okur. Ücretsiz kullanıcıda her verilen yeni soruda artar, İstanbul gününde sıfırlanır. Premium'da sayaç tutulmaz | Çağrı parametreleri: ders (`subjectId`), sınav türü, kapsam, ders/üniversite kimliği, oturumda görülen ≤ 300 soru kimliği, istenen sayı. Hepsi arşiv kimliği; serbest metin yok | Hesap silinince (`users/<uid>` ile birlikte; hesap silme sayfası "en geç 30 gün") | Uygulama etkinliği → **Uygulama etkileşimleri** (öneri; gerekçe aşağıda) | Var; amaçlarda "Uygulama işlevi" 4.1.0'dan beri var |
 | Premium kanıtı (abonelik doğrulaması) | Her pratik çağrısında `subscriptionProof = {platform: "android", purchaseToken, productId}`. Sunucu Play Developer API ile doğrular (`SRV-01`), sonucu `subscriptions/<uid>` = `{platform, productId, originalTransactionId (Android'de Play sipariş kimliği), expiresAt, verifiedAt}` olarak en çok 24 saat hatırlar | Satın alma jetonu + ürün kimliği (`PRC-03`); jeton günlüğe yazılmaz | Hesap silinince (`accountCleanup.js`; sayfa "en geç 30 gün") | Finansal bilgiler → **Satın alma geçmişi** | Var (4.0.0); kapsam genişler |
-| Abonelik–hesap bağı | `subscriptionOwners/android-<sipariş kimliği>` = `{uid, platform, originalTransactionId, boundAt}`. Yalnız sunucu; istemci erişemez. Bir abonelik ilk doğrulandığı hesaba bağlanır, başka hesapta ücretsiz kurallar uygulanır | — (sunucu kanıttan üretir) | Hesap silinince bağ silinir, abonelik yeni hesapta kullanılabilir | Finansal bilgiler → **Satın alma geçmişi** | Var; amaç eklemesi açık nokta (S1) |
+| Abonelik–hesap bağı | `subscriptionOwners/android-<sipariş kimliği>` = `{uid, platform, originalTransactionId, boundAt}`. Yalnız sunucu; istemci erişemez. Bir abonelik ilk doğrulandığı hesaba bağlanır, başka hesapta ücretsiz kurallar uygulanır | — (sunucu kanıttan üretir) | Hesap silinince bağ silinir, abonelik yeni hesapta kullanılabilir | Finansal bilgiler → **Satın alma geçmişi** | Var; amaç eklenir (S1 kararı: evet) |
 | Yeni analytics olayları | `answer_revealed` (`question_order`), `practice_started` (`exam_type`, `scope`), `practice_answer_revealed`, `practice_limit_reached`, `practice_paywall_opened`; `exam_open`'a `kind: structured` + `question_count`. Yeni ekran adları `StructuredExam`, `PracticeSetup`, `PracticeSession` (iOS ile aynı) | Düşük kardinaliteli sabitler: soru sırası, sınav türü slug'ı, kapsam (`course`/`university`/`tr`), soru sayısı. Ders adı, soru metni, serbest metin yok | Analytics saklama süresi (en çok 14 ay) | Uygulama etkinliği → **Uygulama etkileşimleri** | Var ("Analiz" amacıyla, 3.1.0'dan beri) |
 | Soru ve şekil okuma | `questions` (yayınlanmış sorular) ve Storage `questionFigures/…` okunur; cevap aç/kapa durumu cihazda (`rememberSaveable`), Firestore'a yazılmaz | Yalnız okuma isteği (kimlik doğrulamalı, App Check'li) | — | — (kullanıcı verisi değil) | — |
 | Son görüntülenen kaydına `isStructured` | Cihazda (`recentExams.v1`) | Hiçbir şey; cihazda kalır | Uygulama verisi silinince / hesap silinince `purge` | — (cihazda kalır, toplama sayılmaz) | — |
@@ -302,7 +302,7 @@ incelemeye gönderilmeyen 1 değişiklik" olarak bekliyor; incelemeye `NRL-07`'d
 ilerlemesi, beğeniler). Sayaç "bugün kaç pratik sorusu görüldü" bilgisidir; ikisine de sığar. "Uygulama etkileşimleri"
 önerilir, çünkü tür zaten beyanlı ve 4.1.0'dan beri "Uygulama işlevi" amacını taşıyor; yeni bir satır açmak gerekmez.
 "Diğer işlemler" seçilirse de yeni satır gerekmez (4.1.0'da açıldı, "Uygulama işlevi" var). Seçim formun sonucunu
-değiştirmez; açık nokta S2.
+değiştirmez; karar S2: "Uygulama etkileşimleri" (21 Kasım 2026).
 
 **Abonelik neden "Satın alma geçmişi":** Play'in tanımı "kullanıcının yaptığı satın alma ya da işlemler hakkında
 bilgi". Ürün kimliği, sipariş kimliği ve bitiş tarihi bunun içinde. Ödeme bilgisi (kart, banka) yine Google Play'de
@@ -337,7 +337,7 @@ sayfası "Yapay zekâ ile soru hazırlama" bölümü). Sayfalar iki kaynaktan ge
 **Formda hangi tür?** Bu belgenin envanteri gönderimleri **"Uygulama etkinliği → Diğer kullanıcı içeriği"** olarak
 listeliyor (amaç Uygulama işlevi, isteğe bağlı). Play'in tanımına göre kullanıcının fotoğrafları "Fotoğraflar",
 dosyaları "Dosyalar ve dokümanlar" türüne de sığabilir. Console'da hangisinin işaretli olduğu bu depodan
-görülemiyor (açık nokta S3). Hangisi olursa olsun 4.2.0 yeni bir tür ya da amaç gerektirmez: veri zaten
+görülemiyor; ürün sahibi "Diğer kullanıcı içeriği" olduğunu teyit etti (S3, 21 Kasım 2026). Hangisi olursa olsun 4.2.0 yeni bir tür ya da amaç gerektirmez: veri zaten
 "toplanıyor, Uygulama işlevi"; soruları hazırlamak arşive ekleme işlevinin parçası. Play formunda "üçüncü taraf
 işleyici notu" diye bir alan yoktur; işleyici bilgisi gizlilik politikasında yer alır ve 21 Kasım sürümü bunu
 söylüyor ("Sınav sayfaları, soruların hazırlanması için Google Cloud Vertex AI hizmetinde işlenir").
@@ -370,10 +370,10 @@ silinmesini isteyebilir" cevabı "Evet" kalır.
 
 | Form satırı | 4.2.0 etkisi | Neden |
 |---|---|---|
-| Finansal bilgiler → Satın alma geçmişi | **Değişir (kapsam):** abonelik kanıtı ve hesap bağı eklenir. Toplanıyor, paylaşılmıyor, kısa süreli değil, isteğe bağlı, Uygulama işlevi aynı kalır. Amaçlara **"Dolandırıcılığı önleme, güvenlik ve uyumluluk"** eklenmesi önerilebilir (S1) | Bir aboneliğin tek hesapta kullanılması kötüye kullanımı önler |
+| Finansal bilgiler → Satın alma geçmişi | **Değişir (kapsam):** abonelik kanıtı ve hesap bağı eklenir. Toplanıyor, paylaşılmıyor, kısa süreli değil, isteğe bağlı, Uygulama işlevi aynı kalır. Amaçlara **"Dolandırıcılığı önleme, güvenlik ve uyumluluk"** eklenir (S1 kararı: evet, `SRL-05`'te Console'a) | Bir aboneliğin tek hesapta kullanılması kötüye kullanımı önler |
 | Uygulama etkinliği → Uygulama etkileşimleri | Değişmez | Yeni olaylar ve sayaç bu türde; Analiz + Uygulama işlevi zaten var |
 | Uygulama etkinliği → Diğer işlemler | Değişmez | (Sayaç buraya konursa da Uygulama işlevi var) |
-| Gönderilen sınav dosyaları (Diğer kullanıcı içeriği / Fotoğraflar / Dosyalar) | Değişmez | Vertex AI hizmet sağlayıcı; paylaşım yok; amaç aynı |
+| Gönderilen sınav dosyaları (Console'da "Diğer kullanıcı içeriği", S3) | Değişmez | Vertex AI hizmet sağlayıcı; paylaşım yok; amaç aynı |
 | Ad, Diğer bilgiler (kişisel) | Değişmez | Gönderen kartı ekip içi, Uygulama işlevi var |
 | Kullanıcı kimlikleri | Değişmez | Sayaç ve bağ UID'ye bağlı; Uygulama işlevi var |
 | Cihaz veya diğer kimlikler, Tanılama, Kilitlenme günlükleri, Uygulama içi arama geçmişi, Yüklü uygulamalar, Telefon numarası | Değişmez | 4.2.0'da yeni kullanım yok |
@@ -381,30 +381,44 @@ silinmesini isteyebilir" cevabı "Evet" kalır.
 | Aktarımda şifreleme, silme isteği, reklam kimliği | Değişmez | — |
 | Konum | Değişmez (beyan yok) | — |
 
-Sonuç: zorunlu bir form değişikliği yok; "Satın alma geçmişi" satırının cevapları aynı kalabilir. S1 "evet" ise
-tek değişiklik o satıra bir amaç eklemektir. Analytics envanterindeki olay sayısı 29'dan 34'e, ekran adı 18'den 21'e
+Sonuç: tek form değişikliği, "Satın alma geçmişi" satırına "Dolandırıcılığı önleme, güvenlik ve uyumluluk" amacını
+eklemektir (S1 kararı, 21 Kasım 2026); diğer cevaplar aynı kalır. Analytics envanterindeki olay sayısı 29'dan 34'e, ekran adı 18'den 21'e
 çıkar (yukarıdaki "Analytics envanteri" bölümü 4.2.0 kodu yazılınca `SLG-04` ile güncellenir).
 
 ### Açık noktalar / ürün sahibine sorular
 
 - **S1 — Satın alma geçmişine amaç eklenmesi:** Abonelik–hesap bağı kötüye kullanımı önlemek içindir. "Dolandırıcılığı
-  önleme, güvenlik ve uyumluluk" amacı eklensin mi? Zorunlu görünmüyor (bağ, Premium özelliğinin işleyişinin
-  parçası olarak "Uygulama işlevi" altında da savunulabilir). Fazla beyan zararsız.
-- **S2 — Sayacın türü:** "Uygulama etkileşimleri" (öneri) mi, "Diğer işlemler" mi? Form sonucu değişmez; yalnız
-  kayıt için.
-- **S3 — Gönderimlerin Console'daki türü:** Formda gönderilen sınav dosyaları hangi türde işaretli ("Diğer kullanıcı
-  içeriği", "Fotoğraflar", "Dosyalar ve dokümanlar")? Belgeyle Console ayrışıyorsa `SRL-05`'te hizalanmalı.
-- **S4 — Claude'un Vertex AI üzerinden işlenmesi:** Google'ın veri yönetişimi sayfası eğitim yasağını Vertex AI'daki
-  yönetilen modeller için yazıyor; Anthropic modellerinde verinin Anthropic'e ulaşıp ulaşmadığını ayrıca söylemiyor.
-  "Hizmet sağlayıcı" gerekçesi Google Cloud sözleşmesine dayanıyor; ürün sahibi kullanılan Claude modelinin Google
-  Cloud koşulları (ve Veri İşleme Eki) kapsamında olduğunu teyit etmeli. Değilse Anthropic ayrı bir hizmet sağlayıcı
-  olarak değerlendirilir; sonuç ("paylaşım değil") büyük olasılıkla değişmez, gerekçe değişir.
-- **S5 — Android kodunun doğrulanması:** Bu tablo yol haritasındaki tasarıma göre yazıldı. `PRC-03` (jeton günlüğe
-  yazılmaz), `SQS-05`/`PRC-04` (olay adları ve parametreleri) ve `SPK-01` (kütüphanenin veri toplamaması) bittikten
-  sonra `SRL-05`'ten önce koda karşı kontrol edilir.
-- **S6 — Abonelikte `obfuscatedAccountId`:** Bugün abonelik satın alımı (tek sınavdan farklı olarak)
-  `obfuscatedAccountId` göndermiyor. `SRV-01` bunu eklerse Google'a UID özeti gider; Google ödeme hizmet sağlayıcısı
-  olduğundan paylaşım sayılmaz, beyan değişmez. Bilgi notu.
+  önleme, güvenlik ve uyumluluk" amacı eklensin mi? **Karar (21 Kasım 2026): Evet.** Amaç `SRL-05`'te Console'da
+  "Satın alma geçmişi" satırına eklenir.
+- **S2 — Sayacın türü:** "Uygulama etkileşimleri" (öneri) mi, "Diğer işlemler" mi? **Karar (21 Kasım 2026):** Öneri
+  yönünde, "Uygulama etkileşimleri".
+- **S3 — Gönderimlerin Console'daki türü:** Formda gönderilen sınav dosyaları hangi türde işaretli? **Karar (21 Kasım
+  2026):** Console'da "Diğer kullanıcı içeriği" olarak işaretli; belgeyle aynı, hizalama gerekmez.
+- **S4 — Claude'un Vertex AI üzerinden işlenmesi:** **Karar (21 Kasım 2026): Teyit edildi.** Claude, Google Cloud
+  Vertex AI üzerinden, Google Cloud koşulları ve Veri İşleme Eki kapsamında kullanılıyor; "hizmet sağlayıcı, paylaşım
+  değil" gerekçesi geçerli.
+- **S5 — Android kodunun doğrulanması:** **Doğrulandı (21 Kasım 2026, `v-4.2.0` `e0e4f38`); tabloda düzeltme
+  gerekmedi.** Bulgular:
+  - (a) *Jeton günlüğe yazılmıyor.* `core/data/billing` ve `core/data/practice` altında `Timber`/`Log` çağrısı yok
+    (`grep` boş); uygulamanın tamamında jeton/kanıt içeren tek günlük satırı yok (`FirebaseNotificationService.kt:62`
+    yalnız FCM jetonu hatasını yazar, istisnayla). `SubscriptionProof.toString()` jetonu `…` ile gizliyor
+    (`core/model/Practice.kt:130`); kanıt yalnız `PracticeCalls.kt:32` içinde `payload()` ile çağrı gövdesine girer.
+    Not: `PlayPurchase` (`core/data/billing/PlayBillingClient.kt:70`) bir `data class` olduğundan otomatik `toString`'i
+    jetonu içerir; ancak hiçbir yerde günlüğe ya da metne yazılmıyor (`$purchase`/`toString` kullanımı yok). Bugün
+    sorun değil; ileride günlüğe yazılırsa jeton sızar.
+  - (b) *Analytics adları ve parametreleri tabloyla birebir* (`core/model/AnalyticsEventMapping.kt`): `exam_open` +
+    `kind: structured` + `question_count` (satır 12, 51–54, 170); `answer_revealed` + `question_order` (13, 55);
+    `practice_started` + `exam_type`, `scope` (39, 82); `practice_answer_revealed` (40), `practice_limit_reached`
+    (41), `practice_paywall_opened` (42); bu üçünün parametresi yok (satır 91–93). Ekran adları `PracticeSetup`,
+    `PracticeSession`, `StructuredExam` (143, 146, 149). Ders adı, soru metni ya da serbest metin parametresi yok.
+  - (c) *AndroidMath veri toplamıyor.* `AndroidMath-v1.1.0.aar` (Gradle önbelleği) açıldı: yalnız 96 sınıf, 3 yazı
+    tipi, `libmain.so`/`libc++_shared.so`; `classes.jar` içinde `java/net`, `HttpURLConnection`, `okhttp`, `firebase`,
+    `analytics`, `android/net` ya da herhangi bir `http` dizesi yok; yerel kitaplıkta ağ/soket dizesi yok; POM
+    bağımlılıkları yalnız Kotlin stdlib, appcompat, annotation (test: junit, runner, rules). Kütüphane manifesti
+    `WRITE/READ_EXTERNAL_STORAGE` istiyor, bizim `app/src/main/AndroidManifest.xml` bunları `tools:node="remove"` ile
+    kaldırıyor (satır 15–20); birleşik manifestte depolama izni kalmaz.
+- **S6 — Abonelikte `obfuscatedAccountId`:** **Karar (21 Kasım 2026):** Abonelik satın alımına `obfuscatedAccountId`
+  **eklenmedi** (sunucu bunu ret nedeni saymıyor; iOS'ta da yok). Google'a UID özeti gitmiyor; beyan değişmez.
 
 [ds]: https://support.google.com/googleplay/android-developer/answer/10787469
 [maps]: https://developers.google.com/maps/documentation/android-sdk/play-data-disclosure

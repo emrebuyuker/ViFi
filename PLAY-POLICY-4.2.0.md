@@ -14,10 +14,10 @@
 
 | Soru | Sonuç | Açık nokta |
 |---|---|---|
-| "Yapay zekâ ile üretilmiş içerik" politikası uygulanır mı; kullanıcı bildirme özelliği şart mı? | **Büyük olasılıkla kapsam dışı.** Politika içeriği "kullanıcı istemlerine göre üretilen" içerik olarak tanımlıyor; ViFi'de kullanıcı istem girmiyor, sorular sunucuda admin eylemiyle üretilip incelendikten sonra yayınlanıyor. Google'ın açıklama sayfası yalnız yapay zekâ içeriğini **barındıran** uygulamaları kapsam dışı sayıyor ve onları Kullanıcı içeriği politikasına yönlendiriyor. Yine de uygulama içinde bir bildirme yolu tutmak ihtiyatlı; bugünkü sayfa görüntüleyicide var, Android'in yeni soru ekranında ve pratik oturumunda planlanmamış | **P1**, **P2** |
-| Abonelik ve ücretsiz kullanım sınırı yeterince açık mı? | **Kısmen.** Pratik oturumu kalan hakkı ve sınır ekranını gösteriyor (iOS). Ancak paywall Premium'un faydaları arasında sınırsız pratiği saymıyor; kullanım koşullarının abonelik bölümü pratik modunu ve "bir abonelik bir hesap" kuralını anmıyor | **P3**, **P4** |
+| "Yapay zekâ ile üretilmiş içerik" politikası uygulanır mı; kullanıcı bildirme özelliği şart mı? | **Büyük olasılıkla kapsam dışı.** Politika içeriği "kullanıcı istemlerine göre üretilen" içerik olarak tanımlıyor; ViFi'de kullanıcı istem girmiyor, sorular sunucuda admin eylemiyle üretilip incelendikten sonra yayınlanıyor. Google'ın açıklama sayfası yalnız yapay zekâ içeriğini **barındıran** uygulamaları kapsam dışı sayıyor ve onları Kullanıcı içeriği politikasına yönlendiriyor. Yine de uygulama içinde bir bildirme yolu tutmak ihtiyatlı; bugünkü sayfa görüntüleyicide var; kararlar (21 Kasım 2026): soru ekranına sınav bağlamlı "Bize Ulaş" eklendi (P1), pratik oturumunda yol yok, iOS gibi (P2), okunuş kabul (P6) | **P1**, **P2**, **P6** |
+| Abonelik ve ücretsiz kullanım sınırı yeterince açık mı? | **Kısmen.** Pratik oturumu kalan hakkı ve sınır ekranını gösteriyor (iOS). Paywall'a "Sınava gir'de sınırsız soru" maddesi Android'de ekleniyor (P3, karar: evet); kullanım koşullarının abonelik bölümü pratik modunu ve "bir abonelik bir hesap" kuralını henüz anmıyor, metin ortak depoda ayrı dalda hazırlanıyor, yayın ayrı onayla (P4) | **P3**, **P4** |
 | Play abonelik doğrulaması olmadan yayın? | **Yapılmamalı.** Doğrulama canlıda değilken Android Premium kullanıcısı pratikte günde 5 soruyla sınırlanır; satın alınan aboneliğin vaat edileni vermemesi Abonelikler politikası açısından da risk. Yol haritasında zaten yayın engeli (`DDEC-03`, `SRL-01`) | — |
-| Mutlak iddia var mı? | **Yok** (önerilen metinlerde). Her cevabın altındaki not "yapay zekâ ile hazırlanmış ve incelenmiştir", koşullar ve sürüm notu "hata içerebilir" diyor. "İncelenmiştir" ifadesinin her yayın yolunda doğru kalması gerekir | **P5** |
+| Mutlak iddia var mı? | **Yok** (önerilen metinlerde). Her cevabın altındaki not "yapay zekâ ile hazırlanmış ve incelenmiştir", koşullar ve sürüm notu "hata içerebilir" diyor. "İncelenmiştir" ifadesi bir istisna dışında her yayın yolunda doğru: `regeneratePublishedQuestion` yeni içeriği admin görmeden yayına alır (P5 bulgusu) | **P5** |
 | Veri güvenliği değişir mi? | Zorunlu değişiklik yok; "Satın alma geçmişi"nin kapsamı genişliyor (`PLAY-DATA-SAFETY.md` §4.2.0) | S1…S6 |
 
 ## 2. Yapay zekâ ile üretilmiş içerik
@@ -106,11 +106,12 @@
   kuralı değişmedi). Premium'a fayda **ekleniyor**, azalmıyor.
 - **Eksik 1 (paywall):** Sınır ekranından açılan paywall, kullanıcıyı getiren faydayı (sınırsız pratik) listelemiyor.
   Teklif yanlış değil ama eksik; Abonelikler politikasının "teklif açık olmalı" beklentisine daha iyi uyması için
-  paywall'da bu faydanın anılması düşünülebilir. iOS'ta da aynı eksik var (parite). → P3
+  paywall'da bu faydanın anılması düşünülebilir. iOS'ta da aynı eksik var. **Karar (21 Kasım 2026):** Android'e
+  eklenir (bilinçli Android eklemesi); iOS'a sonraki sürüm için öneri. → P3
 - **Eksik 2 (koşullar):** Kullanım koşullarının abonelik bölümü Premium'un kapsamını yalnız sınav kilidiyle tarif
   ediyor; pratik sınırı ve aboneliğin ilk doğrulandığı hesaba bağlanması orada yok (gizlilik sayfasında var). Kural
   aboneliğin işleyişini etkileyen bir koşul olduğu için koşullarda da yazması tutarlı olur. Sayfa ortak depoda
-  (iOS), Android yazmaz. → P4
+  (iOS), Android yazmaz. **Karar (21 Kasım 2026):** metin ayrı dalda hazırlanıyor; yayın ayrı onayla. → P4
 - **Sayı tutarlılığı:** "5" yalnız mağaza metninde ve sunucuda (`PRACTICE_FREE_DAILY_LIMIT = 5`) sabit; uygulama
   sayıyı oturumdaki "Bugün kalan" ile dolaylı gösteriyor. Sunucu sınırı değiştirilirse mağaza metni de değişmeli.
 
@@ -121,8 +122,9 @@
   "%100" gibi ifade yok. Ekran koruması için "korumanın kapsamında" deniyor, "ekran görüntüsü alınamaz" denmiyor.
 - "İncelenmiştir" bir olgu iddiasıdır: her yayın yolu (1. ve 2. onay, "Yeni yapıya geçir", toplu dönüştürme, tek
   soruyu yeniden üretme, yayındaki soruyu düzenleme) yayından önce bir admin incelemesinden geçtiği sürece doğrudur.
-  Sunucu tasarımı buna göre (2. onay = yayın). İnceleme atlanarak yayın yapılabilen bir yol eklenirse not metni de
-  gözden geçirilmeli. → P5
+  Sunucu tasarımı buna göre (2. onay = yayın). **Doğrulama (21 Kasım 2026):** tek istisna, tek soruyu yeniden
+  üretme (`regeneratePublishedQuestion`): admin başlatır ama yeni içerik yayından önce görülmez; ayrıntı ve seçenekler
+  P5'te. → P5
 - "Bağımsız uygulama" cümlesi ve üniversite adları için 4.1.0'daki not geçerli (`PLAY-STORE-LISTING.md` §5).
 
 ## 5. Diğer beyanlar
@@ -139,21 +141,36 @@
 ## 6. Açık noktalar / ürün sahibine sorular
 
 - **P1 — Soru ekranında bildirme yolu:** iOS'un soru ekranında sınav bağlamlı "Bize Ulaş" düğmesi var; Android'in
-  `SQS-02` tanımında yok. Hem Kullanıcı içeriği politikasının bildirme beklentisi hem de olası "yapay zekâ içeriği"
-  okuması için soru ekranında da bir bildirme yolu bulunsun mu (iOS paritesi)? Karar ana oturumun yol haritası
-  işaretlemesine ve ürün sahibine bırakıldı; bu belge kod önermez.
-- **P2 — Pratik oturumunda bildirme yolu:** iOS'ta da yok. Yapay zekâ ile hazırlanmış çözümler orada da gösteriliyor.
-  Bildirme yolu gerekli görülürse iki platformda birlikte ele alınmalı; "Hata bildir" düğmesinin olmaması iOS kararı
-  (K10) olduğundan bu bir ürün kararıdır.
-- **P3 — Paywall'da sınırsız pratik:** Paywall'ın fayda listesine "Sınava gir'de sınırsız soru" eklensin mi (iki
-  platformda)? Öneri: evet; teklifin açıklığı için. Zorunlu bir politika maddesine dayanmıyor.
-- **P4 — Kullanım koşulları:** Abonelik bölümüne pratik modunun ücretsiz sınırı ve "abonelik ilk doğrulandığı hesaba
-  bağlanır" kuralı eklensin mi? Sayfa ortak depoda; yayını ayrı onay ister.
-- **P5 — "İncelenmiştir" ifadesi:** Her yayın yolunun admin incelemesinden geçtiği iOS/sunucu tarafında teyit edilsin
-  (özellikle toplu dönüştürme ve "Tümünü yeniden üret" sonrası yayın).
-- **P6 — Yapay zekâ politikasının okunuşu:** Bu belge "büyük olasılıkla kapsam dışı" diyor; resmî metin
-  geliştiricinin ürettiği içeriği açıkça düzenlemiyor. Ürün sahibi farklı bir okumayı tercih ederse (kapsam içi) P1 ve
-  P2 zorunlu hâle gelir.
+  `SQS-02` tanımında yoktu. **Karar (21 Kasım 2026):** iOS paritesi olarak Android soru ekranına sınav bağlamlı "Bize
+  Ulaş" eklendi (`SQS-02`, testTag `questions.contactSupport`).
+- **P2 — Pratik oturumunda bildirme yolu:** **Karar (21 Kasım 2026): Hayır.** Pratik oturumunda bildirme yolu yok, iOS
+  gibi ("Hata bildir" düğmesinin olmaması iOS kararı K10).
+- **P3 — Paywall'da sınırsız pratik:** **Karar (21 Kasım 2026): Evet, Android'e.** Paywall fayda listesine "Sınava
+  gir'de sınırsız soru" maddesi ekleniyor. Bu bilinçli bir Android eklemesidir; iOS için sonraki sürümde öneri olarak
+  iletilecek.
+- **P4 — Kullanım koşulları:** **Karar (21 Kasım 2026):** Koşullar metni (pratik modunun ücretsiz sınırı, "abonelik
+  ilk doğrulandığı hesaba bağlanır") ortak depoda ayrı bir dalda hazırlanıyor; yayın ayrı onay ister.
+- **P5 — "İncelenmiştir" ifadesi:** **Doğrulandı (21 Kasım 2026), tek istisnayla.** Ortak depo `firebase/functions`
+  (salt okundu) bulguları:
+  - `publishExamConversion` yalnız admin: `conversions/publish.js:81` `requireAdmin`; iş `ready` değilse reddeder
+    (`publish.js:102`). Sorular ancak bu çağrıyla (2. onay) `questions` koleksiyonuna yayınlanır.
+  - Toplu dönüştürme (`requestBulkConversion`, `conversions/admin.js:62–63` `requireAdmin`) yalnız iş başlatır; boru
+    hattı işi `ready` yapar (`conversions/pipeline.js:267`), otomatik yayın yok; yayın için admin `publishExamConversion`
+    çağırmalı. `regenerateExamConversion` (`admin.js:107–108`, `requireAdmin`) eski taslakları silip yeniden `ready`'ye
+    getirir; aynı şekilde yayın yine admin onayı ister.
+  - `updatePublishedQuestion` (`publish.js:759–760`, `requireAdmin`): yayındaki soruyu admin düzenler, değişiklik
+    anında yayında; içeriği admin yazdığı için inceleme yerine geçer.
+  - **Otomatik yayınlayan yol var: `regeneratePublishedQuestion`.** `admin.js:141–142` yalnız admin başlatır, ancak
+    boru hattı yapay zekâ çıktısını yeni taslağa yazıp hemen `publishDraftQuestion` ile aynı kimlikte yayına alır
+    (`pipeline.js:546–549`, `publish.js:786–805`); yeni içeriği yayından önce hiçbir admin görmez. Hata olursa (`publish-failed`)
+    taslakta `regenerationError` yazar, yayın değişmez. Yani bu yolda içerik admin tarafından **sonradan**
+    incelenebilir, **önceden** incelenmez. Soru ilk yayında incelendiği için "incelenmiştir" notu kısmen doğrudur;
+    ancak yeniden üretilmiş bir soru için ifade riskli. Seçenekler: (1) yeniden üretilen soruyu admin ekranında
+    yayından sonra gözden geçirme alışkanlığı (ürün/süreç), (2) sunucuda yeniden üretimi önce taslağa alıp onayla
+    yayınlama (iOS/sunucu işi, bu belge kod önermez), (3) not metnini "yapay zekâ ile hazırlanmıştır, hata içerebilir"
+    gibi yumuşatma. Karar ürün sahibinde.
+- **P6 — Yapay zekâ politikasının okunuşu:** **Karar (21 Kasım 2026):** Belgenin okunuşu ("büyük olasılıkla kapsam
+  dışı") kabul edildi; P1 zaten uygulandı.
 - **Kapsam dışı:** Yapay zekâ ile üretilmiş içeriğe ilişkin Türk ve AB mevzuatı (ör. AB Yapay Zekâ Yasası'nın şeffaflık
   yükümlülükleri) bu belgede değerlendirilmedi; hukuki görüş önerilir.
 
