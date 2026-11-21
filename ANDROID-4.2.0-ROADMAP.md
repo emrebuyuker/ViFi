@@ -38,7 +38,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **59'u tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **60'ı tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
@@ -50,7 +50,7 @@
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
 > S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Yeniden üretilen yayındaki soru
 > ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. `SRV-02` deploy edildi. Faz 3: `SQA-01`, `SQA-04` tamam,
-> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini). `RSD-03` yayından sonraya ertelendi (AUDIT kalır). Faz 4: `SRL-01`, `SRL-02`, `SRL-03` tamam (iOS 4.2.0 (13) onaylı, elle yayın bekliyor; iki dal push'landı).
+> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini). `RSD-03` yayından sonraya ertelendi (AUDIT kalır). Faz 4: `SRL-01`…`SRL-04` tamam (iOS 4.2.0 (13) onaylı, elle yayın bekliyor; iki dal push'landı).
 
 ---
 
@@ -425,7 +425,12 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   `latinmodern-math.otf`, `com.pvporbit.freetype` sınıfları pakette; gömülü anahtarlar 21 ile aynı türden (Firebase +
   Maps). Asıl metin: `play-store/ViFi-4.2.0-22.aab`; R8 sonrası LaTeX kütüphanesi ve yazı
   tipleri pakette; boyut farkı 21 ile karşılaştırılır. ⟶ `SRL-02`
-- [ ] **`SRL-04`** Dahili test _(P0·S·ürün sahibi + Opus)_ — 22'nin dahili teste yüklenmesi, Play önizleme raporu
+- [x] **`SRL-04`** Dahili test _(P0·S·ürün sahibi + Opus)_ — **Tamam (22 Kasım 2026, 01:07):** 22 (4.2.0) dahili teste
+  yayınlandı (Console, ürün sahibinin onayıyla; AAB'yi ürün sahibi seçti). Önizleme: desteklenen cihazlar 21 ile birebir
+  aynı (telefon 12.543, tablet 6.892, Chromebook 77, otomobil 30, TV 7, XR 2; desteği biten 0); yeni yükleme 6,83 MB
+  (+1,52), güncelleme 3,84 MB; tr-TR sürüm notu iOS ile aynı. Tek uyarı: yerel kod (AndroidMath `libmain.so`, hazır
+  derlenmiş) için hata ayıklama sembolü yok — engel değil. Ön lansman raporu (gerçek cihazda formül çizimi) üretime
+  geçmeden okunacak. Asıl metin: 22'nin dahili teste yüklenmesi, Play önizleme raporu
   (desteklenen cihaz sayısı 21 ile aynı mı). ⟶ `SRL-03`
 - [ ] **`SRL-05`** Veri güvenliği + politika beyanları _(P0·S·ürün sahibi + Opus)_ — `SLG-01`/`SLG-02` sonucu Console'a.
   ⟶ `SRL-04`
