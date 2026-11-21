@@ -38,13 +38,13 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **35'i tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **39'u tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
 > `DDEC-06` (iOS'ta da son görüntülenen kartı kilit kontrolünden geçmiyor; iki platform eşit). Faz 0 ve Hat A, B, C, E, F
-> (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). Sürüyor: Hat D (`ADM-*` Fable
-> düzeltmeleri, `ADX-*`), `SIT-01`.
+> (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). `ADM-01`…`04` birleşti. Sürüyor: `ADX-*`,
+> `SIT-01`.
 
 ---
 
@@ -276,15 +276,15 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 
 #### Hat D — Moderasyon ve admin (tam parite, `DDEC-01`)
 
-- [ ] **`ADM-01`** İki aşamalı 1. onay _(P0·M·Opus; birleşmeden önce Fable incelemesi)_ — `approve(record, provider)`:
+- [x] **`ADM-01`** İki aşamalı 1. onay _(P0·M·Opus; birleşmeden önce Fable incelemesi)_ — `approve(record, provider)`:
   Storage kopyası (yeni ve mükerrer için) + tek batch'te cüzdan + defter + gönderim (`approved`, `tier`, `coins`,
   `provider`, `publishPlan`); **`exams`/`catalogNodes`'e yazmaz**. Alan adları iOS `FirebaseModerationService` ve
   `onSubmissionModerated` ile birebir; mevcut yeniden giriş korumaları (pending + defter) korunur. İki düğme. ⟶ `SCT-01`, `DDEC-01`
-- [ ] **`ADM-02`** Mükerrer gönderim (K22) _(P0·S·Opus)_ — `duplicateExamId`; detayın başında "Bu sınav arşivde zaten
+- [x] **`ADM-02`** Mükerrer gönderim (K22) _(P0·S·Opus)_ — `duplicateExamId`; detayın başında "Bu sınav arşivde zaten
   yüklü" uyarısı (`moderation.duplicateWarning`); onay düğmeleri aynen; 1. onay mükerrerde de dönüştürme başlatır. ⟶ `ADM-01`
-- [ ] **`ADM-03`** Gönderen kartı _(P1·S·Sonnet)_ — RTDB `users/<uid>/profile`'dan yalnız ad soyad, üniversite,
+- [x] **`ADM-03`** Gönderen kartı _(P1·S·Sonnet)_ — RTDB `users/<uid>/profile`'dan yalnız ad soyad, üniversite,
   fakülte, bölüm (telefon ve cinsiyet okunmaz/gösterilmez); profil yoksa kart gizli. Liste ve detay. ⟶ `SCT-01`
-- [ ] **`ADM-04`** Katalog adı büyük harf _(P1·S·Sonnet)_ — `publishPlan`'daki yeni düğüm adları Türkçe büyük harf
+- [x] **`ADM-04`** Katalog adı büyük harf _(P1·S·Sonnet)_ — `publishPlan`'daki yeni düğüm adları Türkçe büyük harf
   (`CatalogName`, `Locale("tr")` kuralı; iOS `CatalogNameTests` vakaları). ⟶ `ADM-01`
 - [ ] **`ADX-01`** Hazır sınavlar listesi + inceleme _(P1·M·Sonnet)_ — `examConversions` (`status`, `createdAt desc`
   indeksi) listesi; inceleme ekranında orijinal sayfalar + taslak sorular yan yana; düzenleme yalnız kuralın izin
