@@ -11,6 +11,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // SMT-01: AndroidMath (LaTeX typesetting) is only published on JitPack; scoped so nothing else resolves from it.
+        maven {
+            url 'https://jitpack.io'
+            content { includeGroup 'com.github.gregcockroft' }
+        }
     }
 }
 
