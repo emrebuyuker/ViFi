@@ -38,7 +38,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **7'si tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **11'i tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
@@ -189,17 +189,17 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 - [ ] **`DDEC-06`** Son görüntülenen kilit kontrolü _(P2·S·ürün sahibi)_ — Android'de son görüntülenen kartı kilit
   denetimi yapmadan açıyor. iOS'ta aynı yol `ExamAccessResolver`'dan geçiyorsa parite için eklensin mi? `SQS-01`
   sırasında iOS davranışı kesinleştirilip ürün sahibine sunulur. **Öneri:** iOS geçiriyorsa evet.
-- [ ] **`SOPS-01`** Canlı salt okuma _(P0·S·Opus)_ — **Yazım yok.** Test hesabıyla emülatörden ya da gcloud ile:
+- [x] **`SOPS-01`** Canlı salt okuma _(P0·S·Opus)_ — **Sonuç (21 Kasım 2026, yazım yok):** canlıda 2 yapılandırılmış sınav (5 + 3 soru); `questions (examId, order)` indeksi READY; şekil yolu `questionFigures/<jobId>/<nnn>-<k>.jpg`; 2 havuz özeti (`types.<tür>.{tr, u-…, c-…}`), ders düğümünde `subjectId` var; 14 fonksiyonun hepsi europe-west1'de; SMS Defense **AUDIT**, toll fraud açık. Ayrışmalar: `files[].order` 0 ya da 1 tabanlı, `label` "1" ya da "Soru 1)", `examConversions.error` düz metin, `usage.costUsd` int/double, gönderimde sağlayıcı alanı **`conversionProvider`**. Asıl metin: **Yazım yok.** Test hesabıyla emülatörden ya da gcloud ile:
   (1) yayınlanmış bir yapılandırılmış sınavın `exams` dokümanında `format`/`questionCount` (ör. "Topoloji 2 › 2017 ARA
   SINAV", "Sakarya … 2017 FİNAL"); (2) `questions` sorgusu App Check ile 200, indeks mevcut; (3) `questionFigures/`
   tek dosya okuma; (4) `questionPoolIndex` örnek doküman şekli; (5) `nextPracticeQuestions`, `listSubjects` canlıda mı;
   (6) `recaptchaConfig` ANDROID uç noktası 200 ve AUDIT durumu. Anahtar/kişisel veri rapora yazılmaz. ⟶ —
-- [ ] **`SPK-01`** LaTeX motoru denemesi _(P0·M·Opus)_ — Atılabilir dalda: `AndroidMath`'i Compose'a (`AndroidView`)
+- [x] **`SPK-01`** LaTeX motoru denemesi _(P0·M·Opus)_ — **Sonuç (21 Kasım 2026): şartlı geçti.** AndroidMath `v1.1.0` (MIT, JitPack) §5.3 alt kümesini `LatexCompatibility` sonrası çiziyor; bozuk girdide çökme yok; `width/ascent/descent` ölçüsü var; 16 KB uyumlu (64 bit). Zorunlu ayarlar: test bağımlılıkları `exclude`, `READ_/WRITE_EXTERNAL_STORAGE` `tools:node="remove"`, R8 `-keep class com.pvporbit.freetype.** { *; }` (yoksa release'te native çökme), `MTMathView` yerine `MTTypesetter` + Compose `Canvas`, typeset/çizim tek iş parçacığında, bitmap önbelleği. Ayrıştırıcı ASCII dışı harfleri siliyor (`\text{hız}` → "hz"): ürün sahibinin kararıyla **uygulama içi yama** (yer tutucu + geri koyma, çatal yok). Boyut: cihaz başına ~2,5 MB. Asıl metin: Atılabilir dalda: `AndroidMath`'i Compose'a (`AndroidView`)
   bağla; `STRUCTURED-EXAMS.md` §5.3 alt kümesi (kesir, kök, üs/indis, toplam/integral/limit, Yunan, matris/`cases`,
   `\text{}`, birim) + `LatexCompatibility` tablosu sonrası örnekler; bozuk LaTeX'te çökme yok; satır içi taban çizgisi
   hizası; yazı ölçeği 1,0 / 2,0; `LazyColumn`'da 30 kartta kaydırma akıcılığı; R8 release; lisans ve son sürüm tarihi;
   16 KB sayfa uyumu (yerel kod var mı). Çıktı: bulgu notu + öneri. ⟶ —
-- [ ] **`SCT-01`** Sözleşme _(P0·L·Opus)_ — Tek oturum, Faz 1'in ön koşulu.
+- [x] **`SCT-01`** Sözleşme _(P0·L·Opus)_ — **Tamam (21 Kasım 2026, `4a29947`):** modeller, saf yardımcılar, parser'lar, 9 arayüz + Fake'ler, mock örnek sınav (KOCAELİ › TOPOLOJİ 1 › 2003 FİNAL, 3 soru) + havuz, route'lar, geçici `QuestionRichText`, sürüm 4.2.0 (22); iOS vakaları taşındı; `assembleDebug` + `test` + `lintLiveDebug` yeşil. Açık: `Slug` NFD girdide iOS'tan ayrışabilir (NFC aynı). Asıl metin: Tek oturum, Faz 1'in ön koşulu.
   - Modeller (`core/model/`, tip düzeyinde `// Added in 4.2.0 — …`): `ExamQuestion` (+ `QuestionChoice`,
     `QuestionFigure`, `QuestionAnswer`), `ExamType` (17 tür, `isPracticeEligible`), `AIProvider`, `PracticeScope`,
     `PoolIndex`, `PracticeBatch`; `ExamSummary`/`ExamDocument`'e `questionCount: Int?` (`// Added in 4.2.0 — …`).
@@ -317,7 +317,7 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 
 #### Hat F — Sunucu: Play abonelik doğrulaması (ortak depo, `DDEC-03` "evet" ise)
 
-- [ ] **`SRV-01`** `googlePlay.js` abonelik doğrulaması _(P0·M·Opus; birleşmeden önce Fable incelemesi)_ —
+- [x] **`SRV-01`** `googlePlay.js` abonelik doğrulaması _(P0·M·Opus; birleşmeden önce Fable incelemesi)_ — **Sonuç (21 Kasım 2026):** ortak depoda `android/srv-01-play-subscription` dalı (`bb6cd8b` + inceleme düzeltmeleri `6a9e67e`; push/deploy yok). `subscriptionsv2.get`; ACTIVE / IN_GRACE_PERIOD / CANCELED (süre sonuna kadar) Premium; tek hesap bağı `subscriptionOwners/android-<taban sipariş>` (transaction); 24 sa önbellek, Play kesintisinde aynı token için en çok 72 sa koruma; reddedilen token 10 dk negatif önbellek; `obfuscatedExternalAccountId` ret nedeni değil (hesap silme sözleşmesi). Fable incelemesi: kritik yok, önemli/küçük bulgular düzeltildi. `npm test` 731 test, 727 geçti, 0 başarısız (4 eski todo). Plan değişimi (`linkedPurchaseToken`) ve onaylanmamış satın alma bilinen sınır. `v-4.2.0`'a birleştirme ürün sahibinin onayıyla (ortak depo). Asıl metin:
   `purchases.subscriptionsv2.get`; etkin + paket + ürün kontrolü; `index.js` pratik kanıt dalında iOS'la aynı dönüş
   şekli; tek hesap bağı (`subscriptionOwners`, Play sipariş kimliği; `obfuscatedAccountId` mevcut sha256 düzeniyle
   uyumlu); 24 saat hatırlama; geçersiz kanıt hata değil, ücretsiz. Emulator testleri (`practice.test.mjs`). iOS yolu
