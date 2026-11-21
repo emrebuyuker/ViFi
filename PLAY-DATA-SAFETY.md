@@ -13,6 +13,8 @@
 > yönünde karara bağlandı. Console formu 4.1.0 sürümüyle
 > girilir (`NRL-05`); o zamana kadar yayındaki sürümün beyanı geçerlidir.
 
+> **SMS Defense / reCAPTCHA SDK (18 Kasım 2026, ürün sahibinin onayıyla Console'a girildi ve kaydedildi):** Firebase BoM 33.5.1 reCAPTCHA Android SDK 18.5.1'i dolaylı getiriyor; SMS Defense AUDIT 18 Kasım'da açıldı. Google'ın beyan sayfasına göre SDK IP adresi, SDK sürümü, paket adı, kullanıcı eylemi, cihaz bütünlüğü yanıtı, uygulama etkileşimleri, yüklü uygulamalar ve cihaz kimliği toplar ([kaynak](https://docs.cloud.google.com/recaptcha/docs/disclosure-requirements-android)). Forma: **Yüklü uygulamalar** (yeni; toplanıyor, paylaşılmıyor, kısa süreli değil, zorunlu, amaç *Sahtekarlığı önleme, güvenlik ve kanunlara uygunluk*); **Uygulama işlemleri** ve **Teşhisler**'e aynı amaç eklendi; **Cihaz veya diğer kimlikler**'de amaç zaten vardı; IP adresi Play'de ayrı tür olmadığından beyan edilmez. Değişiklik aynı gün Yayın özeti'nden ürün sahibinin onayıyla incelemeye gönderildi.
+
 ## Toplanan veriler
 
 | Play kategorisi → veri türü | Ne / nereden | Amaç | Hesaba bağlı | Zorunlu mu |
