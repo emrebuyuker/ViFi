@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
+import com.salticusteam.vifi.core.model.PracticeSelection
 
 /**
  * The app's single navigation graph. Destinations are slots so the host (AppRoot, FM-22) plugs in the
@@ -32,6 +33,8 @@ fun ViFiNavHost(
     notificationSettings: @Composable () -> Unit = {},
     notificationComposer: @Composable () -> Unit = {},
     notificationHistory: @Composable () -> Unit = {},
+    practiceSetup: @Composable (course: ArchivePath, subjectId: String) -> Unit = { _, _ -> },
+    practiceSession: @Composable (selection: PracticeSelection) -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -83,6 +86,13 @@ fun ViFiNavHost(
         }
         composable<ViFiRoute.NotificationHistory> {
             notificationHistory()
+        }
+        composable<ViFiRoute.PracticeSetup> { entry ->
+            val route = entry.toRoute<ViFiRoute.PracticeSetup>()
+            practiceSetup(route.course, route.subjectId)
+        }
+        composable<ViFiRoute.PracticeSession> { entry ->
+            practiceSession(entry.toRoute<ViFiRoute.PracticeSession>().selection)
         }
     }
 }

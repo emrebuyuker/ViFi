@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Added in 4.2.0 — "Sınava gir" (iOS PracticeStartSection / PracticeFlowView) -->
+
+    <!-- Course entry -->
+    <string name="practice_entry_title">Sınava gir</string>
+    <string name="practice_entry_subtitle">Bu dersin soruları arasından soru çöz</string>
+
+    <!-- Setup -->
+    <string name="practice_setup_title">Sınav Türü</string>
+    <string name="practice_setup_types_header">Hangi sınav türünden soru çözmek istersin?</string>
+    <string name="practice_setup_scopes_header">Sorular nereden gelsin?</string>
+    <string name="practice_setup_empty_title">Henüz soru yok</string>
+    <string name="practice_setup_empty_message">Bu dersin sorularına şu anda ulaşılamıyor.</string>
+    <plurals name="practice_question_count">
+        <item quantity="one">%1$d soru</item>
+        <item quantity="other">%1$d soru</item>
+    </plurals>
+
+    <!-- Scopes -->
+    <string name="practice_scope_course">Bu ders</string>
+    <string name="practice_scope_university">Üniversitem</string>
+    <string name="practice_scope_turkey">Türkiye geneli</string>
+
+    <!-- Exam types (the setup's list; the materials are never listed) -->
+    <string name="practice_type_vize">Vize</string>
+    <string name="practice_type_ara_sinav">Ara Sınav</string>
+    <string name="practice_type_final">Final</string>
+    <string name="practice_type_butunleme">Bütünleme</string>
+    <string name="practice_type_mazeret">Mazeret</string>
+    <string name="practice_type_kisa_sinav">Kısa Sınav</string>
+    <string name="practice_type_tek_ders">Tek Ders</string>
+    <string name="practice_type_ek_sinav">Ek Sınav</string>
+    <string name="practice_type_muafiyet">Muafiyet</string>
+    <string name="practice_type_seviye_tespit">Seviye Tespit</string>
+    <string name="practice_type_uygulama">Uygulama Sınavı</string>
+    <string name="practice_type_yaz_okulu">Yaz Okulu</string>
+    <string name="practice_type_laboratuvar">Laboratuvar</string>
+    <string name="practice_type_odev">Ödev</string>
+    <string name="practice_type_proje">Proje</string>
+    <string name="practice_type_calisma_sorulari">Çalışma Soruları</string>
+    <string name="practice_type_cozumlu_sorular">Çözümlü Sorular</string>
+</resources>

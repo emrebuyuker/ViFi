@@ -73,6 +73,20 @@ sealed interface AnalyticsEvent {
 
     // Added in 4.1.0 — campaigns were turned off (or refused) and the answer was saved.
     data class MarketingConsentDeclined(val source: NotificationPromptSource) : AnalyticsEvent
+
+    // Practice mode ("Sınava gir"); iOS names.
+
+    // Added in 4.2.0 — a practice session began (`practice_started`: exam_type, scope).
+    data class PracticeStarted(val examType: ExamType, val scope: PracticeScope) : AnalyticsEvent
+
+    // Added in 4.2.0 — the answer of a practice question was revealed (first reveal of each question only).
+    data object PracticeAnswerRevealed : AnalyticsEvent
+
+    // Added in 4.2.0 — the free daily limit stopped a practice session (once per session).
+    data object PracticeLimitReached : AnalyticsEvent
+
+    // Added in 4.2.0 — the paywall was opened from the practice limit screen.
+    data object PracticePaywallOpened : AnalyticsEvent
 }
 
 // Added in 2.5 — the signed-in user's analytics identity: a stable id plus low-cardinality segment properties.

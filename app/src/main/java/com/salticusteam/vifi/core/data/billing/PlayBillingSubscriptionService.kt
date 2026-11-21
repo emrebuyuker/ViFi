@@ -5,6 +5,7 @@ import com.salticusteam.vifi.core.model.PurchaseResult
 import com.salticusteam.vifi.core.model.StoreProductIds
 import com.salticusteam.vifi.core.model.SubscriptionError
 import com.salticusteam.vifi.core.model.SubscriptionOption
+import com.salticusteam.vifi.core.model.SubscriptionProof
 import com.salticusteam.vifi.core.model.SubscriptionPeriod
 import com.salticusteam.vifi.core.util.LogCategory
 import javax.inject.Inject
@@ -58,6 +59,22 @@ class PlayBillingSubscriptionService @Inject constructor(
             .map { isSubscribed() }
             .distinctUntilChanged()
 
+    /**
+     * The proof of the active Premium subscription for the practice callable (4.2.0 PRC-03, `{platform: "android",
+     * purchaseToken, productId}`), read from Google Play on every call; the server verifies it. `null` without an
+     * active subscription, or when Google Play cannot be read: the free rules apply then, never an error. The token
+     * is never logged.
+     */
+    suspend fun currentProof(): SubscriptionProof? =
+        try {
+            activePremiumPurchases().firstOrNull()?.let { SubscriptionProof(it.purchaseToken, StoreProductIds.PREMIUM) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            LogCategory.APP.log.w(e, "Could not read the subscription proof; the free rules apply")
+            null
+        }
+
     override suspend fun purchase(option: SubscriptionOption): PurchaseResult {
         val update = billing.purchaseAndAwait(
             PlayPurchaseRequest(StoreProductIds.PREMIUM, PlayProductType.SUBSCRIPTION, option.offerToken),
@@ -91,11 +108,16 @@ class PlayBillingSubscriptionService @Inject constructor(
      * @throws SubscriptionError when Google Play cannot be reached.
      */
     private suspend fun readEntitlement(): Boolean {
+        lastKnown = activePremiumPurchases().isNotEmpty()
+        return lastKnown
+    }
+
+    /** The purchased `vifi_premium` purchases of this Google account, each acknowledged if it still needs it. */
+    private suspend fun activePremiumPurchases(): List<PlayPurchase> {
         val active = billingCall { billing.queryPurchases(PlayProductType.SUBSCRIPTION) }
             .filter { StoreProductIds.PREMIUM in it.productIds && it.state == PlayPurchaseState.PURCHASED }
         active.filterNot { it.isAcknowledged }.forEach { acknowledge(it) }
-        lastKnown = active.isNotEmpty()
-        return lastKnown
+        return active
     }
 
     /** The subscription stays granted if this fails: the next read retries, well before Google's three-day refund. */

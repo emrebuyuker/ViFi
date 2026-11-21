@@ -41,6 +41,10 @@ class AnalyticsLimitsTest {
         AnalyticsEvent.MarketingConsentShown(NotificationPromptSource.REASK),
         AnalyticsEvent.MarketingConsentAccepted(NotificationPromptSource.SETTINGS),
         AnalyticsEvent.MarketingConsentDeclined(NotificationPromptSource.SETTINGS),
+        AnalyticsEvent.PracticeStarted(ExamType.ARA_SINAV, PracticeScope.UNIVERSITY),
+        AnalyticsEvent.PracticeAnswerRevealed,
+        AnalyticsEvent.PracticeLimitReached,
+        AnalyticsEvent.PracticePaywallOpened,
     )
 
     private fun kindIndex(event: AnalyticsEvent): Int = when (event) {
@@ -73,11 +77,15 @@ class AnalyticsLimitsTest {
         is AnalyticsEvent.MarketingConsentShown -> 26
         is AnalyticsEvent.MarketingConsentAccepted -> 27
         is AnalyticsEvent.MarketingConsentDeclined -> 28
+        is AnalyticsEvent.PracticeStarted -> 29
+        AnalyticsEvent.PracticeAnswerRevealed -> 30
+        AnalyticsEvent.PracticeLimitReached -> 31
+        AnalyticsEvent.PracticePaywallOpened -> 32
     }
 
     @Test
     fun `samples cover every event exactly once`() {
-        assertEquals((0..28).toList(), samples.map(::kindIndex).sorted())
+        assertEquals((0..32).toList(), samples.map(::kindIndex).sorted())
     }
 
     @Test
