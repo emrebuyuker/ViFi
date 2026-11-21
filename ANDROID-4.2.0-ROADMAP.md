@@ -38,14 +38,14 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **47'si tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **49'u tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
 > `DDEC-06` (iOS'ta da son görüntülenen kartı kilit kontrolünden geçmiyor; iki platform eşit). Faz 0 ve Hat A, B, C, E, F
 > (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). Hat D tamamı ve `SIT-01` (pratik oturum ekranı, Browse'da
-> Sınava gir, admin bağlantıları) birleşti. Sürüyor: satır içi formül kusurları (2.0 yazı ölçeğinde satır çakışması,
-> satır başı boşluğu, TalkBack), `SIT-02`…`04`.
+> Sınava gir, admin bağlantıları) birleşti. `SIT-02`/`03` tamam, `SIT-04` kısmen (API 24/34 yok). Sıradaki:
+> `SRV-02` deploy onayı (+ ortak depo dalının birleştirilmesi), Faz 3 canlı doğrulama (onaylı), `DDEC-06`.
 
 ---
 
@@ -361,10 +361,10 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 - [x] **`SIT-01`** Birleştirme _(P0·M·Opus)_ — Sıra: G → B → A → C → D → E. Pratik oturum ekranı (`PracticeSessionScreen`)
   A'nın `QuestionCard`'ıyla bağlanır; `PracticeEntry` Browse ders ekranına; paywall yönlendirmesi; ekran koruması
   pratikte de açık. `assembleDebug` + `lintLiveDebug` + `test`. ⟶ Faz 1 kod hatları
-- [ ] **`SIT-02`** Birim testleri _(P0·M·Sonnet)_ — iOS ile aynı vakalar: ayrıştırıcılar (36 + 32 + 20), tokenizer,
+- [x] **`SIT-02`** Birim testleri _(P0·M·Sonnet)_ — iOS ile aynı vakalar: ayrıştırıcılar (36 + 32 + 20), tokenizer,
   etiket, LaTeX tablosu, satır bölücü, soru/havuz/pratik parser'ları, `ExamRouting`, ViewModel'ler (Turbine), moderasyon
   1. onay yazım şekli (Fake backend), son görüntülenen göçü. ⟶ `SIT-01`
-- [ ] **`SIT-03`** UI testleri _(P0·M·Sonnet)_ — Mock: soru ekranı (cevap aç/kapa, not, boş/hata, şekil hatası),
+- [x] **`SIT-03`** UI testleri _(P0·M·Sonnet)_ — Mock: soru ekranı (cevap aç/kapa, not, boş/hata, şekil hatası),
   TalkBack semantiği (kapalı cevap ağaçta yok), büyük yazı, pratik (düğme görünürlüğü, 5. sorudan sonra paywall,
   Baştan başla), moderasyon iki düğme + mükerrer uyarısı + gönderen kartı, Add Exam 22 ad. Yeni launch argümanları
   (ör. `vifi_practice_limit`) `LaunchArgs.kt`'ye. ⟶ `SIT-01`
