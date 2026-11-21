@@ -38,6 +38,7 @@ import com.salticusteam.vifi.feature.notifications.NotificationPromptHost
 import com.salticusteam.vifi.feature.notifications.NotificationPromptViewModel
 import com.salticusteam.vifi.feature.notificationsettings.NotificationSettingsScreen
 import com.salticusteam.vifi.feature.onboarding.OnboardingGate
+import com.salticusteam.vifi.feature.practice.PracticeSetupScreen
 import com.salticusteam.vifi.feature.premium.PaywallScreen
 import com.salticusteam.vifi.feature.profile.EditProfileScreen
 import com.salticusteam.vifi.feature.update.AppUpdateGate
@@ -195,6 +196,15 @@ private fun ArchiveHost(
         },
         notificationHistory = {
             NotificationHistoryScreen(onBack = { router.pop() })
+        },
+        // The session screen is plugged in by SIT-01 (it needs the question card); only the setup opens today.
+        practiceSetup = { course, subjectId ->
+            PracticeSetupScreen(
+                subjectId = subjectId,
+                courseId = course.components.lastOrNull().orEmpty(),
+                onStartSession = { router.push(ViFiRoute.PracticeSession(it)) },
+                onBack = { router.pop() },
+            )
         },
     )
 }

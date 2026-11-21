@@ -33,6 +33,10 @@ val AnalyticsEvent.firebaseName: String
         is AnalyticsEvent.MarketingConsentShown -> "marketing_consent_shown"
         is AnalyticsEvent.MarketingConsentAccepted -> "marketing_consent_accepted"
         is AnalyticsEvent.MarketingConsentDeclined -> "marketing_consent_declined"
+        is AnalyticsEvent.PracticeStarted -> "practice_started"
+        AnalyticsEvent.PracticeAnswerRevealed -> "practice_answer_revealed"
+        AnalyticsEvent.PracticeLimitReached -> "practice_limit_reached"
+        AnalyticsEvent.PracticePaywallOpened -> "practice_paywall_opened"
     }
 
 /** Parameters as sent to Analytics (values are `String`, `Long` or `Boolean`), or `null` when the event has none. */
@@ -67,6 +71,7 @@ val AnalyticsEvent.firebaseParameters: Map<String, Any>?
         is AnalyticsEvent.MarketingConsentShown -> mapOf("source" to source.raw)
         is AnalyticsEvent.MarketingConsentAccepted -> mapOf("source" to source.raw)
         is AnalyticsEvent.MarketingConsentDeclined -> mapOf("source" to source.raw)
+        is AnalyticsEvent.PracticeStarted -> mapOf("exam_type" to examType.raw, "scope" to scope.raw)
         AnalyticsEvent.RecentExamOpened,
         AnalyticsEvent.EarnCoinsTapped,
         AnalyticsEvent.LoginSucceeded,
@@ -75,6 +80,9 @@ val AnalyticsEvent.firebaseParameters: Map<String, Any>?
         AnalyticsEvent.SignedOut,
         AnalyticsEvent.AccountDeleted,
         AnalyticsEvent.SubmissionRejected,
+        AnalyticsEvent.PracticeAnswerRevealed,
+        AnalyticsEvent.PracticeLimitReached,
+        AnalyticsEvent.PracticePaywallOpened,
         -> null
     }
 
@@ -122,6 +130,12 @@ object AnalyticsScreen {
 
     // Added in 4.1.0 — the admin notification history (iOS `screenView(name: "NotificationHistory")`).
     const val NOTIFICATION_HISTORY = "NotificationHistory"
+
+    // Added in 4.2.0 — the "Sınava gir" setup (iOS `screenView(name: "PracticeSetup")`).
+    const val PRACTICE_SETUP = "PracticeSetup"
+
+    // Added in 4.2.0 — the "Sınava gir" session (iOS `screenView(name: "PracticeSession")`).
+    const val PRACTICE_SESSION = "PracticeSession"
 }
 
 // Added in 2.5 — fixed values of event parameters that iOS reports as plain strings.
