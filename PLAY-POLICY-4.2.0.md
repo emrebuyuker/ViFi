@@ -168,7 +168,8 @@
     ancak yeniden üretilmiş bir soru için ifade riskli. Seçenekler: (1) yeniden üretilen soruyu admin ekranında
     yayından sonra gözden geçirme alışkanlığı (ürün/süreç), (2) sunucuda yeniden üretimi önce taslağa alıp onayla
     yayınlama (iOS/sunucu işi, bu belge kod önermez), (3) not metnini "yapay zekâ ile hazırlanmıştır, hata içerebilir"
-    gibi yumuşatma. Karar ürün sahibinde.
+    gibi yumuşatma. **Karar (21 Kasım 2026): iOS ile birebir aynı kalır** — sunucu davranışı ve not metni
+    değişmez; Android ayrıca bir şey yapmaz.
 - **P6 — Yapay zekâ politikasının okunuşu:** **Karar (21 Kasım 2026):** Belgenin okunuşu ("büyük olasılıkla kapsam
   dışı") kabul edildi; P1 zaten uygulandı.
 - **Kapsam dışı:** Yapay zekâ ile üretilmiş içeriğe ilişkin Türk ve AB mevzuatı (ör. AB Yapay Zekâ Yasası'nın şeffaflık

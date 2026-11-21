@@ -48,7 +48,8 @@
 > birleşti (push/deploy yok). 21 Kasım kararları: `DDEC-06` iOS gibi; gönderen kartı profil yoksa iOS gibi not gösterir;
 > `Slug` girdisi NFC'ye normalleşir; paywall'a "Sınava gir'de sınırsız soru" (Android); pratikte bildirme yolu yok
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
-> S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Sıradaki: `SRV-02` deploy onayı
+> S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Yeniden üretilen yayındaki soru
+> ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. Sıradaki: `SRV-02` deploy onayı
 > (önce Play API izni kontrolü), Faz 3 canlı doğrulama (onaylı).
 
 ---
