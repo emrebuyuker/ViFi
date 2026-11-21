@@ -11,6 +11,7 @@ import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.salticusteam.vifi.core.model.NotificationLocation
 import org.junit.After
@@ -27,6 +28,8 @@ import org.junit.runner.RunWith
  * nothing actually opened (the starts are caught on the way out). The missing Google Maps app is simulated by the
  * system's own "no such app" answer; whether any app takes a `geo:` link is the device's.
  */
+// ActivityMonitor.onStartActivity (how the starts are caught) exists from API 26; below it the monitor never sees them.
+@SdkSuppress(minSdkVersion = 26)
 @RunWith(AndroidJUnit4::class)
 class MapsLaunchDeviceTest {
 

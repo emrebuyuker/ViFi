@@ -38,13 +38,13 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **54'ü tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **55'i tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
 > `DDEC-06` (iOS'ta da son görüntülenen kartı kilit kontrolünden geçmiyor; iki platform eşit). Faz 0 ve Hat A, B, C, E, F
 > (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). Hat D tamamı ve `SIT-01` (pratik oturum ekranı, Browse'da
-> Sınava gir, admin bağlantıları) birleşti. `SIT-02`/`03` tamam, `SIT-04` kısmen (API 24/34 yok). `SRV-01` ortak depoda `v-4.2.0`'a
+> Sınava gir, admin bağlantıları) birleşti. `SIT-02`/`03`/`04` tamam (API 24, 34, 37). `SRV-01` ortak depoda `v-4.2.0`'a
 > birleşti (push/deploy yok). 21 Kasım kararları: `DDEC-06` iOS gibi; gönderen kartı profil yoksa iOS gibi not gösterir;
 > `Slug` girdisi NFC'ye normalleşir; paywall'a "Sınava gir'de sınırsız soru" (Android); pratikte bildirme yolu yok
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
@@ -373,8 +373,15 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   TalkBack semantiği (kapalı cevap ağaçta yok), büyük yazı, pratik (düğme görünürlüğü, 5. sorudan sonra paywall,
   Baştan başla), moderasyon iki düğme + mükerrer uyarısı + gönderen kartı, Add Exam 22 ad. Yeni launch argümanları
   (ör. `vifi_practice_limit`) `LaunchArgs.kt`'ye. ⟶ `SIT-01`
-- [ ] **`SIT-04`** Tam paket _(P0·S·Sonnet)_ — live + mock, debug + release; emülatör API 24, 34, 37; sonuçlar olduğu
-  gibi raporlanır. ⟶ `SIT-02`, `SIT-03`
+- [x] **`SIT-04`** Tam paket _(P0·S·Sonnet)_ — **Tamam (22 Kasım 2026):** live debug + mock debug + live release derlendi;
+  birim testleri (3 varyant) 4.331/4.331, lint 0 hata (60 uyarı, çoğu sürüm önerisi). Enstrümanlı: API 34 live + mock 0 hata,
+  API 37 live 0 hata (mock `SIT-03`'te), API 24 ilk koşuda 8 hata — hepsi test yardımcısının API 26 gerektirmesi
+  (`Notification.channelId`, `ActivityMonitor.onStartActivity`, `ACTION_APP_NOTIFICATION_SETTINGS`); uygulama kodunda
+  API 26 öncesi yedek yollar var, API 24'te çökme kaydı yok. Ürün sahibinin kararıyla bu testler `@SdkSuppress(minSdkVersion = 26)`
+  ile sınırlandı; yeniden koşuda API 24 ve 34 temiz. Release APK API 37'de açılıyor; AndroidMath `libmain.so`,
+  `latinmodern-math.otf` ve `com.pvporbit.freetype` sınıfları R8 sonrası pakette. Release'de formül çizimi emülatörde
+  denenemedi (canlı giriş + Play Integrity) → `SRL-04` önizleme raporu. Asıl metin: live + mock, debug + release;
+  emülatör API 24, 34, 37; sonuçlar olduğu gibi raporlanır. ⟶ `SIT-02`, `SIT-03`
 
 ### Faz 3 — Gerçek Ortam Doğrulaması (canlı backend; yayın değildir)  ⚠️ (canlı yazım her biri ayrı onay)
 

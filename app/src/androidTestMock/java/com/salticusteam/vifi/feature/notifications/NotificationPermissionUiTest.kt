@@ -17,6 +17,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.swipeDown
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.test.espresso.Espresso
+import androidx.test.filters.SdkSuppress
 import com.salticusteam.vifi.R
 import com.salticusteam.vifi.core.util.LaunchArg
 import com.salticusteam.vifi.testing.MockApp
@@ -215,6 +216,8 @@ class NotificationPermissionUiTest {
     }
 
     // NIT-01: after a "no" 31 days ago, a successful exam submission asks for the permission once more.
+    // answerDocumentPicker relies on ActivityMonitor.onStartActivity (API 26+); below it the real picker would open.
+    @SdkSuppress(minSdkVersion = 26)
     @Test
     fun aSubmittedExamAsksForThePermissionOnceMore() {
         hiltRule.inject()

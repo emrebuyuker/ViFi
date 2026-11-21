@@ -11,6 +11,7 @@ import android.os.SystemClock
 import android.service.notification.StatusBarNotification
 import androidx.core.content.ContextCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.salticusteam.vifi.core.model.NotificationKind
 import java.io.ByteArrayOutputStream
@@ -52,6 +53,8 @@ class PushNotifierDeviceTest {
         }
     }
 
+    // Asserts Notification.channelId, which exists from API 26 (channels); the app itself posts the same way on 24-25.
+    @SdkSuppress(minSdkVersion = 26)
     @Test
     fun show_postsNothingWithoutPermission_thenPostsOnTheKindsChannel() {
         val content = NotificationContent("Duyuru", "Bakım bu gece", notificationId = "n-text", kind = NotificationKind.SYSTEM)
@@ -72,6 +75,8 @@ class PushNotifierDeviceTest {
         assertNotNull(posted.contentIntent)
     }
 
+    // Asserts Notification.channelId, which exists from API 26 (channels); the app itself posts the same way on 24-25.
+    @SdkSuppress(minSdkVersion = 26)
     @Test
     fun show_withAnImage_postsABigPictureFetchedWithoutCredentials() {
         grantPermission()
@@ -93,6 +98,8 @@ class PushNotifierDeviceTest {
         assertNull(request.header("X-Firebase-AppCheck"))
     }
 
+    // Asserts Notification.channelId, which exists from API 26 (channels); the app itself posts the same way on 24-25.
+    @SdkSuppress(minSdkVersion = 26)
     @Test
     fun show_whenTheImageFails_fallsBackToTheText() {
         grantPermission()

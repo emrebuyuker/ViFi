@@ -16,6 +16,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.firebase.messaging.FirebaseMessaging
 import com.salticusteam.vifi.core.data.notifications.settings.NotificationSettingsStore
@@ -93,6 +94,8 @@ class NotificationPermissionMappingDeviceTest {
         scope.cancel()
     }
 
+    // Turns notifications off through ACTION_APP_NOTIFICATION_SETTINGS, which exists from API 26; still covered on API 26-32.
+    @SdkSuppress(minSdkVersion = 26)
     @Test
     fun android12AndBelow_notificationsOffReadAsDeniedAndNothingIsOffered() = runBlocking<Unit> {
         assumeTrue("Android 12 and below only", Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU)
