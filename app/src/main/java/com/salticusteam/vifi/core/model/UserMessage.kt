@@ -19,6 +19,8 @@ val Throwable.userMessage: String
         is InboxError -> userMessage
         is NotificationSettingsError -> userMessage
         is NotificationAdminError -> userMessage
+        is PracticeError -> userMessage
+        is ExamConversionError -> userMessage
         else -> GENERIC_ERROR_MESSAGE
     }
 

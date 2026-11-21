@@ -4,6 +4,7 @@ import com.salticusteam.vifi.core.data.repository.ModerationService
 import com.salticusteam.vifi.core.data.repository.RewardsConfigReader
 import com.salticusteam.vifi.core.data.submission.ArchivePublishPlan
 import com.salticusteam.vifi.core.data.submission.SubmissionTierResolver
+import com.salticusteam.vifi.core.model.AIProvider
 import com.salticusteam.vifi.core.model.ApprovalResult
 import com.salticusteam.vifi.core.model.ArchiveError
 import com.salticusteam.vifi.core.model.ArchivePath
@@ -57,7 +58,9 @@ class AdminModerationService internal constructor(
     override suspend fun pendingSubmissions(): List<ExamSubmissionRecord> =
         backend.pendingSubmissions().sortedWith(NEWEST_FIRST)
 
-    override suspend fun approve(record: ExamSubmissionRecord): ApprovalResult {
+    // ADM-01 replaces this body with the two-stage first approval (provider + publishPlan, no `exams` write); until
+    // then it keeps the 4.1.0 direct-publish path and ignores [provider].
+    override suspend fun approve(record: ExamSubmissionRecord, provider: AIProvider): ApprovalResult {
         if (record.status != PENDING) throw ModerationError.NotPending
 
         val placement = try {
@@ -94,6 +97,16 @@ class AdminModerationService internal constructor(
         }
         return ApprovalResult(tier = placement.tier, coins = coins, publishedExamId = plan.examId)
     }
+
+    override suspend fun duplicateExamId(record: ExamSubmissionRecord): String? =
+        try {
+            resolver.placement(record.location).examId
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            LogCategory.ARCHIVE.log.w(e, "Could not resolve a submission against the archive")
+            null
+        }
 
     override suspend fun reject(record: ExamSubmissionRecord, reason: String?) {
         if (record.status != PENDING) throw ModerationError.NotPending

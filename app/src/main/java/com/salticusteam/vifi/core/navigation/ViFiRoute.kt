@@ -2,6 +2,9 @@ package com.salticusteam.vifi.core.navigation
 
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
+import com.salticusteam.vifi.core.model.ExamType
+import com.salticusteam.vifi.core.model.PracticeScope
+import com.salticusteam.vifi.core.model.PracticeSelection
 import kotlinx.serialization.Serializable
 
 /**
@@ -35,6 +38,60 @@ sealed interface ViFiRoute {
         constructor(path: ArchivePath, kind: ExamKind) : this(path.components, path.displayNames, kind)
 
         val path: ArchivePath get() = ArchivePath(ids, names)
+    }
+
+    /**
+     * The question-by-question screen of the structured exam at [path] (4.2.0, iOS `Route.questions`). Chosen by
+     * `ExamRouting`; [kind] is the exam's file kind, kept for the admin's original-pages view.
+     */
+    @Serializable
+    data class StructuredExam(
+        val ids: List<String>,
+        val names: List<String>,
+        val kind: ExamKind,
+    ) : ViFiRoute {
+        constructor(path: ArchivePath, kind: ExamKind) : this(path.components, path.displayNames, kind)
+
+        val path: ArchivePath get() = ArchivePath(ids, names)
+    }
+
+    /**
+     * "Sınava gir" setup (4.2.0): exam type, then scope, for the course at [ids] / [names] (a lesson path; its last id
+     * is the course id). [subjectId] keys the practice pools (`questionPoolIndex/<subjectId>`); the "Üniversitem"
+     * scope uses the signed-in user's profile university, not the course's (iOS `PracticeStartSection`).
+     */
+    @Serializable
+    data class PracticeSetup(
+        val ids: List<String>,
+        val names: List<String>,
+        val subjectId: String,
+    ) : ViFiRoute {
+        constructor(course: ArchivePath, subjectId: String) : this(course.components, course.displayNames, subjectId)
+
+        val course: ArchivePath get() = ArchivePath(ids, names)
+    }
+
+    /** A "Sınava gir" session over one pool (4.2.0): cards "Soru 1, 2…" from `nextPracticeQuestions`. */
+    @Serializable
+    data class PracticeSession(
+        val subjectId: String,
+        val examType: ExamType,
+        val scope: PracticeScope,
+        val courseId: String,
+        val universityId: String? = null,
+        val poolCount: Int,
+    ) : ViFiRoute {
+        constructor(selection: PracticeSelection) : this(
+            selection.subjectId,
+            selection.examType,
+            selection.scope,
+            selection.courseId,
+            selection.universityId,
+            selection.poolCount,
+        )
+
+        val selection: PracticeSelection
+            get() = PracticeSelection(subjectId, examType, scope, courseId, universityId, poolCount)
     }
 
     /** The signed-in account: profile, phone number, sign out (opened from the home screen). */

@@ -151,6 +151,50 @@ class FirestoreArchiveParserTest {
         assertNull(FirestoreArchiveParser.document(exam("V", "PDF", files = listOf(file("x"))), path, bucket = ""))
     }
 
+    // --- Structured exams (4.2.0; iOS FirestoreArchiveParserTests) ---
+
+    @Test
+    fun `a structured exam carries its question count in the list summary and the document`() {
+        val data = exam("S", "JPG", files = listOf(file("imagess/s-0.jpg", 0), file("imagess/s-1.jpg", 1))) +
+            mapOf("format" to "structured", "questionCount" to 12L)
+
+        val items = FirestoreArchiveParser.items(listOf("s" to data), course)
+        val document = FirestoreArchiveParser.document(data, course.appending("s", "S"), BUCKET)
+
+        assertEquals(ExamSummary(ExamKind.IMAGES, 2, questionCount = 12), items.first().exam)
+        assertTrue(items.first().exam?.isStructured == true)
+        assertEquals(12, document?.questionCount)
+        assertTrue(document?.isStructured == true)
+    }
+
+    @Test
+    fun `other formats, a missing format, or no questions are plain file exams`() {
+        val variants = listOf<Pair<String?, Long?>>("files" to 12L, null to null, "structured" to null, "structured" to 0L)
+        for ((format, count) in variants) {
+            val data = buildMap {
+                putAll(exam("P", "PDF", files = listOf(file("pdfs/p.pdf"))))
+                if (format != null) put("format", format)
+                if (count != null) put("questionCount", count)
+            }
+
+            val items = FirestoreArchiveParser.items(listOf("p" to data), course)
+            val document = FirestoreArchiveParser.document(data, course.appending("p", "P"), BUCKET)
+
+            assertNull("$format/$count", items.first().exam?.questionCount)
+            assertTrue("$format/$count", document?.isStructured == false)
+        }
+    }
+
+    @Test
+    fun `a lesson node carries its subject, other levels never do`() {
+        val department = ArchivePath(listOf("u", "f", "d"))
+        val lessons = FirestoreArchiveParser.items(listOf("c1" to mapOf<String, Any?>("name" to "C", "subjectId" to " s1 ")), department)
+        val faculties = FirestoreArchiveParser.items(listOf("f1" to mapOf<String, Any?>("name" to "F", "subjectId" to "s1")), ArchivePath(listOf("u")))
+
+        assertEquals("s1", lessons.first().subjectId)
+        assertNull(faculties.first().subjectId)
+    }
+
     private fun exam(title: String, kind: String, files: List<Map<String, Any?>>): Map<String, Any?> =
         mapOf("title" to title, "courseId" to "itu-muh-blg-blg101", "kind" to kind, "status" to "published", "files" to files)
 

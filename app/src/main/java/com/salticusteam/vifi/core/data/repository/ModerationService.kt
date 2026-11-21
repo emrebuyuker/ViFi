@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.core.data.repository
 
+import com.salticusteam.vifi.core.model.AIProvider
 import com.salticusteam.vifi.core.model.ApprovalResult
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamSubmissionRecord
@@ -16,10 +17,19 @@ interface ModerationService {
     suspend fun pendingSubmissions(): List<ExamSubmissionRecord>
 
     /**
-     * Approves a submission: publishes it into the archive (creating any missing catalog nodes and copying the
-     * files into the public archive storage) and credits the owner the tier reward.
+     * First approval (4.2.0, iOS `approve(_:provider:)`): copies the files into the public archive storage, credits
+     * the owner the tier reward and marks the submission approved with the chosen AI [provider] and the publish plan;
+     * the server converts the pages into draft questions and the admin publishes them at the second approval.
+     *
+     * Until ADM-01 the implementation still publishes directly (the 4.1.0 path) and ignores [provider].
      */
-    suspend fun approve(record: ExamSubmissionRecord): ApprovalResult
+    suspend fun approve(record: ExamSubmissionRecord, provider: AIProvider): ApprovalResult
+
+    /**
+     * The id of the existing archive exam [record] duplicates, or `null` when it is new or the archive could not be
+     * resolved (K22: drives the "Bu sınav arşivde zaten yüklü" warning). Never throws (cancellation aside).
+     */
+    suspend fun duplicateExamId(record: ExamSubmissionRecord): String?
 
     /** Rejects a submission, with an optional [reason] recorded on it. */
     suspend fun reject(record: ExamSubmissionRecord, reason: String?)

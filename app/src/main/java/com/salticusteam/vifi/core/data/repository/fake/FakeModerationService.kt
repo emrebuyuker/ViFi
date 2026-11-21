@@ -1,6 +1,7 @@
 package com.salticusteam.vifi.core.data.repository.fake
 
 import com.salticusteam.vifi.core.data.repository.ModerationService
+import com.salticusteam.vifi.core.model.AIProvider
 import com.salticusteam.vifi.core.model.ApprovalResult
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
@@ -25,6 +26,8 @@ class FakeModerationService(
     private val approval: (ExamSubmissionRecord) -> ApprovalResult = {
         ApprovalResult(tier = SubmissionTier.NEW_UNIVERSITY, coins = 500, publishedExamId = "pub-${it.id}")
     },
+    /** Submission id → the existing exam it duplicates (K22); absent ids are new. */
+    private val duplicates: Map<String, String> = emptyMap(),
 ) : ModerationService {
 
     private val pending = pending.toMutableList()
@@ -44,12 +47,21 @@ class FakeModerationService(
         return pending.toList()
     }
 
-    override suspend fun approve(record: ExamSubmissionRecord): ApprovalResult {
+    /** Every approval as (submission id, provider), in order (for tests). */
+    val approvals = mutableListOf<Pair<String, AIProvider>>()
+
+    override suspend fun approve(record: ExamSubmissionRecord, provider: AIProvider): ApprovalResult {
         delay(latency)
         failure?.let { throw it }
         if (pending.none { it.id == record.id }) throw ModerationError.NotPending
         pending.removeAll { it.id == record.id }
+        approvals += record.id to provider
         return approval(record)
+    }
+
+    override suspend fun duplicateExamId(record: ExamSubmissionRecord): String? {
+        delay(latency)
+        return duplicates[record.id]
     }
 
     override suspend fun reject(record: ExamSubmissionRecord, reason: String?) {

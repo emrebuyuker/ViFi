@@ -19,6 +19,12 @@ import com.salticusteam.vifi.core.model.ExamSummary
 class FakeArchiveRepository(
     /** When non-null, every call throws it. */
     var error: ArchiveError? = null,
+    /**
+     * Adds the 4.2.0 structured sample (iOS `mockStructuredExam`): KOCAELİ ÜNİVERSİTESİ › MÜHENDİSLİK FAKÜLTESİ ›
+     * MATEMATİK BÖLÜMÜ › TOPOLOJİ 1 (subject [FakePoolIndexReader.SAMPLE_SUBJECT_ID]) › 2003 FİNAL, a structured exam
+     * with the 3 [SampleQuestions]. Off by default so existing tests keep their two-university tree; on in the mock flavor.
+     */
+    includeStructuredSample: Boolean = false,
 ) : ArchiveRepository {
 
     var itemsCallCount = 0
@@ -69,6 +75,32 @@ class FakeArchiveRepository(
                 (1..3).map { "https://example.com/${u.id}/2022-final-$it.jpg" },
             )
         }
+        if (includeStructuredSample) addStructuredSample()
+    }
+
+    private fun addStructuredSample() {
+        val university = ArchivePath.ROOT.appending("kocaeli-universitesi", "KOCAELİ ÜNİVERSİTESİ")
+        val faculty = university.appending("kocaeli-muhendislik", "MÜHENDİSLİK FAKÜLTESİ")
+        val department = faculty.appending("kocaeli-muhendislik-matematik", "MATEMATİK BÖLÜMÜ")
+        val lesson = department.appending(FakePoolIndexReader.SAMPLE_COURSE_ID, "TOPOLOJİ 1")
+        val exam = lesson.appending(SampleQuestions.EXAM_ID, "2003 FİNAL")
+        val questionCount = SampleQuestions.documents.size
+        children[ArchivePath.ROOT] = children[ArchivePath.ROOT].orEmpty() +
+            ArchiveItem(university, ArchiveLevel.UNIVERSITY, 1, null)
+        children[university] = listOf(ArchiveItem(faculty, ArchiveLevel.FACULTY, 1, null))
+        children[faculty] = listOf(ArchiveItem(department, ArchiveLevel.DEPARTMENT, 1, null))
+        children[department] = listOf(
+            ArchiveItem(lesson, ArchiveLevel.LESSON, 1, null, subjectId = FakePoolIndexReader.SAMPLE_SUBJECT_ID),
+        )
+        children[lesson] = listOf(
+            ArchiveItem(exam, ArchiveLevel.EXAM, null, ExamSummary(ExamKind.IMAGES, 3, questionCount = questionCount)),
+        )
+        documents[exam] = ExamDocument(
+            exam,
+            ExamKind.IMAGES,
+            (1..3).map { "https://example.com/kocaeli/2003-final-$it.jpg" },
+            questionCount = questionCount,
+        )
     }
 
     override suspend fun items(path: ArchivePath): List<ArchiveItem> {

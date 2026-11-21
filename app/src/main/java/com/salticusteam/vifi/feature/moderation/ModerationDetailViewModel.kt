@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.salticusteam.vifi.core.data.repository.AnalyticsTracker
 import com.salticusteam.vifi.core.data.repository.ModerationService
+import com.salticusteam.vifi.core.model.AIProvider
 import com.salticusteam.vifi.core.model.AnalyticsEvent
 import com.salticusteam.vifi.core.model.userMessage
 import dagger.assisted.Assisted
@@ -65,7 +66,9 @@ class ModerationDetailViewModel @AssistedInject constructor(
         _uiState.update { it.copy(isWorking = true, error = null) }
         viewModelScope.launch {
             try {
-                val result = moderationService.approve(record)
+                // ADM-01 replaces the single button with "Onayla · Claude/Gemini ile ilerle"; the 4.1.0 publish path
+                // still behind approve() ignores the provider until then.
+                val result = moderationService.approve(record, AIProvider.GEMINI)
                 queue.remove(record.id)
                 analytics.track(AnalyticsEvent.SubmissionApproved(result.tier))
                 _uiState.update { it.copy(isWorking = false, approval = result) }

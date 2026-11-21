@@ -4,6 +4,7 @@ import com.salticusteam.vifi.core.data.repository.RewardsConfigReader
 import com.salticusteam.vifi.core.data.repository.fake.FakeArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeRewardsConfigReader
 import com.salticusteam.vifi.core.data.submission.SubmissionTierResolver
+import com.salticusteam.vifi.core.model.AIProvider
 import com.salticusteam.vifi.core.model.ArchiveError
 import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamKind
@@ -82,7 +83,7 @@ class AdminModerationServiceTest {
     fun `approve when new exam copies files in order and commits publish and credit`() = runTest {
         val record = record()
 
-        val result = sut().approve(record)
+        val result = sut().approve(record, AIProvider.GEMINI)
 
         assertEquals(SubmissionTier.NEW_EXAM, result.tier)
         assertEquals(60, result.coins)
@@ -111,14 +112,14 @@ class AdminModerationServiceTest {
     fun `approve when pdf copies into pdfs folder`() = runTest {
         val record = record(kind = ExamKind.PDF, files = listOf(SubmissionFileRef("pending/u1/sub-1/1.pdf", 1)))
 
-        sut().approve(record)
+        sut().approve(record, AIProvider.GEMINI)
 
         assertEquals(listOf("pending/u1/sub-1/1.pdf" to "pdfs/file-1.pdf"), backend.copies)
     }
 
     @Test
     fun `approve when duplicate copies nothing and only credits`() = runTest {
-        val result = sut().approve(record(exam = "2023 VİZE"))
+        val result = sut().approve(record(exam = "2023 VİZE"), AIProvider.GEMINI)
 
         assertEquals(SubmissionTier.DUPLICATE, result.tier)
         assertEquals(10, result.coins)
@@ -133,7 +134,7 @@ class AdminModerationServiceTest {
 
     @Test
     fun `approve when new university creates the whole chain`() = runTest {
-        val result = sut().approve(record(university = "Ege Üniversitesi"))
+        val result = sut().approve(record(university = "Ege Üniversitesi"), AIProvider.GEMINI)
 
         assertEquals(SubmissionTier.NEW_UNIVERSITY, result.tier)
         assertEquals(500, result.coins)
@@ -143,7 +144,7 @@ class AdminModerationServiceTest {
     @Test
     fun `approve when no reward configured publishes for zero coins without a ledger check`() = runTest {
         backend.ledger += "u1/sub-1" // would block a credit; irrelevant without one
-        val result = sut(rewards = FakeRewardsConfigReader(null)).approve(record())
+        val result = sut(rewards = FakeRewardsConfigReader(null)).approve(record(), AIProvider.GEMINI)
 
         assertEquals(0, result.coins)
         assertEquals(0, backend.commits.single().coins)
@@ -155,13 +156,13 @@ class AdminModerationServiceTest {
             override fun rewardsChanges(): Flow<RewardsConfig?> = flow { awaitCancellation() }
         }
 
-        assertThrows(ModerationError.Offline) { sut(rewards = silent).approve(record()) }
+        assertThrows(ModerationError.Offline) { sut(rewards = silent).approve(record(), AIProvider.GEMINI) }
         assertTrue(backend.commits.isEmpty())
     }
 
     @Test
     fun `approve when record already handled throws notPending without touching the backend`() = runTest {
-        assertThrows(ModerationError.NotPending) { sut().approve(record(status = "approved")) }
+        assertThrows(ModerationError.NotPending) { sut().approve(record(status = "approved"), AIProvider.GEMINI) }
         assertTrue(backend.copies.isEmpty())
         assertTrue(backend.commits.isEmpty())
     }
@@ -171,7 +172,7 @@ class AdminModerationServiceTest {
         val record = record()
         backend.statuses[record.id] = "approved" // changed on the server after the list was loaded
 
-        assertThrows(ModerationError.NotPending) { sut().approve(record) }
+        assertThrows(ModerationError.NotPending) { sut().approve(record, AIProvider.GEMINI) }
         assertTrue(backend.commits.isEmpty())
         assertEquals(listOf("imagess/file-1.jpg", "imagess/file-2.jpg"), backend.deletedFiles)
     }
@@ -181,7 +182,7 @@ class AdminModerationServiceTest {
         val record = record()
         backend.ledger += "u1/sub-1"
 
-        assertThrows(ModerationError.AlreadyCredited) { sut().approve(record) }
+        assertThrows(ModerationError.AlreadyCredited) { sut().approve(record, AIProvider.GEMINI) }
         assertTrue(backend.commits.isEmpty())
     }
 
@@ -190,9 +191,9 @@ class AdminModerationServiceTest {
         val sut = sut()
         val record = record()
 
-        sut.approve(record)
+        sut.approve(record, AIProvider.GEMINI)
         // A stale copy of the record (still "pending" locally) tapped again.
-        assertThrows(ModerationError.NotPending) { sut.approve(record) }
+        assertThrows(ModerationError.NotPending) { sut.approve(record, AIProvider.GEMINI) }
 
         assertEquals(1, backend.commits.size)
     }
@@ -201,7 +202,7 @@ class AdminModerationServiceTest {
     fun `approve when commit fails removes the copied files`() = runTest {
         backend.commitFailure = ModerationError.Offline
 
-        assertThrows(ModerationError.Offline) { sut().approve(record()) }
+        assertThrows(ModerationError.Offline) { sut().approve(record(), AIProvider.GEMINI) }
         assertEquals(listOf("imagess/file-1.jpg", "imagess/file-2.jpg"), backend.deletedFiles)
     }
 
@@ -212,7 +213,7 @@ class AdminModerationServiceTest {
         backend.files -= "gone.jpg"
 
         try {
-            sut().approve(record)
+            sut().approve(record, AIProvider.GEMINI)
             fail("expected a failure")
         } catch (e: ModerationError.Unknown) {
             // expected
@@ -224,7 +225,7 @@ class AdminModerationServiceTest {
     fun `approve when archive read is offline maps to moderation offline`() = runTest {
         archive.error = ArchiveError.Offline
 
-        assertThrows(ModerationError.Offline) { sut().approve(record()) }
+        assertThrows(ModerationError.Offline) { sut().approve(record(), AIProvider.GEMINI) }
     }
 
     // --- reject ---

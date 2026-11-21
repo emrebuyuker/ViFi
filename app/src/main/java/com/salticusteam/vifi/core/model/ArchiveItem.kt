@@ -5,7 +5,12 @@ package com.salticusteam.vifi.core.model
 data class ExamSummary(
     val kind: ExamKind,
     val fileCount: Int,
-)
+    // Added in 4.2.0 — published question count; null unless `format == "structured"` with questionCount > 0 (opens the question screen).
+    val questionCount: Int? = null,
+) {
+    /** Whether the exam opens the structured question screen (`ExamRouting`). */
+    val isStructured: Boolean get() = (questionCount ?: 0) > 0
+}
 
 // Added in 2.5 — one entry of an archive list: a university, faculty, department, lesson or exam.
 data class ArchiveItem(
@@ -15,6 +20,8 @@ data class ArchiveItem(
     val childCount: Int?,
     /** Exams only. `null` when the exam node has no files. */
     val exam: ExamSummary?,
+    // Added in 4.2.0 — the course node's country-wide subject (`catalogNodes/<course>.subjectId`), keys the practice pools; lessons only.
+    val subjectId: String? = null,
 ) {
     /** Identity of the item is its path. */
     val id: ArchivePath get() = path
@@ -28,6 +35,11 @@ data class ExamDocument(
     val path: ArchivePath,
     val kind: ExamKind,
     val fileUrls: List<String>,
+    // Added in 4.2.0 — published question count of a `format == "structured"` exam, else null (viewer redirects to questions).
+    val questionCount: Int? = null,
 ) {
+    /** Whether the exam opens the structured question screen (`ExamRouting.redirect`). */
+    val isStructured: Boolean get() = (questionCount ?: 0) > 0
+
     val title: String get() = path.displayName.orEmpty()
 }

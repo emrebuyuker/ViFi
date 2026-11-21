@@ -40,7 +40,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideArchiveRepository(): ArchiveRepository = FakeArchiveRepository()
+    fun provideArchiveRepository(): ArchiveRepository = FakeArchiveRepository(includeStructuredSample = true)
 
     @Provides
     @Singleton

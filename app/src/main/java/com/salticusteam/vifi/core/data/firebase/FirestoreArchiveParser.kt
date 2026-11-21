@@ -6,6 +6,7 @@ import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamDocument
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.ExamSummary
+import com.salticusteam.vifi.core.util.RawValues
 import com.salticusteam.vifi.core.util.StorageUrl
 
 /**
@@ -17,7 +18,8 @@ import com.salticusteam.vifi.core.util.StorageUrl
  *   department / course; a level lists with `parentId == <node id>` (universities use [ROOT_PARENT_ID]), filtered
  *   to `status == published`.
  * - `exams/{examId}`: `{ title, courseId, kind: "JPG"|"PDF", status, files: [{ storagePath, order }] }` — the exams
- *   of a course, listed with `courseId == <course id>`.
+ *   of a course, listed with `courseId == <course id>`. A structured exam (4.2.0) adds `format: "structured"` and
+ *   `questionCount`; a course node may carry `subjectId`.
  */
 object FirestoreArchiveParser {
 
@@ -32,7 +34,13 @@ object FirestoreArchiveParser {
         const val FILES = "files"
         const val STORAGE_PATH = "storagePath"
         const val ORDER = "order"
+        const val FORMAT = "format"
+        const val QUESTION_COUNT = "questionCount"
+        const val SUBJECT_ID = "subjectId"
     }
+
+    /** `exams/<id>.format` of an exam converted to questions (4.2.0). The original `files` stay on it. */
+    const val STRUCTURED_FORMAT = "structured"
 
     /** Documents with this status are the published archive shown to users. */
     const val PUBLISHED_STATUS = "published"
@@ -55,7 +63,13 @@ object FirestoreArchiveParser {
                 val summary = examSummary(data) ?: return@mapNotNull null
                 ArchiveItem(childPath, ArchiveLevel.EXAM, childCount = null, exam = summary)
             } else {
-                ArchiveItem(childPath, childLevel, childCount = childCount(data), exam = null)
+                ArchiveItem(
+                    childPath,
+                    childLevel,
+                    childCount = childCount(data),
+                    exam = null,
+                    subjectId = if (childLevel == ArchiveLevel.LESSON) subjectId(data) else null,
+                )
             }
         }
         return ArchiveSort.sorted(items, childLevel)
@@ -68,7 +82,19 @@ object FirestoreArchiveParser {
             (entry[Field.STORAGE_PATH] as? String)?.let { StorageUrl.canonical(it, bucket) }
         }
         if (urls.isEmpty()) return null
-        return ExamDocument(path, kind, urls)
+        return ExamDocument(path, kind, urls, questionCount = structuredQuestionCount(data))
+    }
+
+    /** The `subjectId` of a course catalog node (4.2.0), `null` when absent or blank. */
+    fun subjectId(data: Map<String, Any?>): String? = (data[Field.SUBJECT_ID] as? String)?.trim()?.takeIf { it.isNotEmpty() }
+
+    /**
+     * The question count of a `format == "structured"` exam, `null` for every other exam. A structured exam that claims
+     * no questions is treated as a plain file exam, so it never opens an empty question list.
+     */
+    fun structuredQuestionCount(data: Map<String, Any?>): Int? {
+        if (data[Field.FORMAT] != STRUCTURED_FORMAT) return null
+        return RawValues.int(data[Field.QUESTION_COUNT])?.takeIf { it > 0 }
     }
 
     // Helpers
@@ -87,7 +113,7 @@ object FirestoreArchiveParser {
         val kind = examKind(data) ?: return null
         val count = fileEntries(data).size
         if (count == 0) return null
-        return ExamSummary(kind, count)
+        return ExamSummary(kind, count, questionCount = structuredQuestionCount(data))
     }
 
     /** The file entries with a non-empty `storagePath`, in `order` (stable for equal or absent orders). */
