@@ -17,6 +17,13 @@
     <uses-permission
         android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
         tools:node="remove" />
+    <!-- SMT-01: AndroidMath's library manifest asks for external storage it never uses. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:node="remove" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Android 14+: lets the exam viewers show "Sınav içeriği korumalıdır" when a screenshot is taken (VIEW-12). -->

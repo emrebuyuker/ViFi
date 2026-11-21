@@ -36,6 +36,12 @@ android {
         compose true
     }
 
+    // SMT-01: AndroidMath bundles three math fonts but the app only ever loads Latin Modern
+    // (MTFontManager.latinModernFontWithSize); drop the other two (~1 MB) next to aapt's default ignore pattern.
+    androidResources {
+        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:xits-math.otf:texgyretermes-math.otf'
+    }
+
     lint {
         checkReleaseBuilds = false
         // Or, if you prefer, you can continue to check for errors in release builds,
@@ -147,6 +153,12 @@ dependencies {
     implementation libs.okhttp
     implementation libs.coil.compose
     implementation libs.telephoto.zoomable.image.coil
+    // SMT-01: LaTeX typesetting (iosMath port). Its published runtime scope leaks test libraries; drop them.
+    implementation(libs.androidmath) {
+        exclude group: 'junit', module: 'junit'
+        exclude group: 'androidx.test'
+        exclude group: 'com.github.jitpack', module: 'gradle-simple'
+    }
 
     implementation libs.hilt.android
     ksp libs.hilt.compiler
