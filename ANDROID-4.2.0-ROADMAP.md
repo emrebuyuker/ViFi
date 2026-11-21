@@ -38,7 +38,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **55'i tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **56'sı tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
@@ -50,7 +50,7 @@
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
 > S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Yeniden üretilen yayındaki soru
 > ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. `SRV-02` deploy edildi. Faz 3: `SQA-01`, `SQA-04` tamam,
-> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` ürün sahibinin kararıyla şimdilik yapılmadı.
+> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini).
 
 ---
 
@@ -390,7 +390,16 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   kalıyor; dönüştürülmemiş sınav sayfa görünümünde; emülatörde `FLAG_SECURE` (ekran görüntüsü siyah). Yazım yok. ⟶ `SIT-04`
 - [x] **`SQA-02`** Canlı pratik _(P0·S·Opus)_ — Ücretsiz test hesabıyla 5 soru + paywall (sunucu sayacına yazar → onay);
   Premium kanıtı lisanslı test hesabıyla (`SRV-02` sonrası). ⟶ `SIT-04`, `SRV-02`
-- [ ] **`SQA-03`** Canlı iki aşamalı onay _(P0·M·Opus)_ — Test gönderimi → Android'den 1. onay (Gemini; Claude kotası
+- [x] **`SQA-03`** Canlı iki aşamalı onay _(P0·M·Opus)_ — **Tamam (22 Kasım 2026, ürün sahibiyle):** ürün sahibi iOS'tan
+  gerçek bir sınav gönderdi (Sakarya › EEM › ELEKTRONİK 1 › 2017 FİNAL, 1 görsel); Android admin (tablet emülatörü API 37,
+  live debug) gönderen kartını (telefon yok) ve iki onay düğmesini gördü, mükerrer uyarısı yoktu. 1. onay Gemini ile:
+  "gönderene 60 coin", arşive yazım yok; iş yaklaşık 1 dakikada Hazır sınavlar'a düştü (Gemini · 0,06 $, 4 soru, 2'si
+  "Kontrol et"). Taslak ekranı şekil göstermiyor (iOS `DraftQuestionRow` ile aynı). 2. onay "4 soru yayınlandı";
+  ders listesinde "4 soru" rozeti ve "Sınava gir" çıktı, yeni sınav kilitli geldi (100 coin); açılınca soru ekranı
+  4 kartla açıldı, 1. ve 4. soruda şekil alanı var (TalkBack "Şekil var"), şekil hatası yok; bakiye 460 + 60 − 100 = 420
+  tutarlı. Aynı sınav iOS'tan yeniden gönderildi: "Bu sınav arşivde zaten yüklü" uyarısı göründü, gönderim reddedildi.
+  Gerçek içerik olduğu için yayındaki sınav arşivde kaldı (ürün sahibinin kararı); temizlik yok. Gcloud ile salt okunur
+  belge kontrolü izin verilmediği için yapılmadı. Asıl metin: Test gönderimi → Android'den 1. onay (Gemini; Claude kotası
   açıksa Claude) → coin, iş `queued` → taslak hazır bildirimi → 2. onay Android'in Hazır sınavlar ekranından → Android'de
   soru ekranı. Mükerrer gönderim yolu. Test kayıtları sonra temizlenir. ⟶ `SIT-04`
 - [x] **`SQA-04`** iOS ↔ Android çapraz _(P1·S·Opus)_ — Aynı sınav ve aynı pratik kapsamı iki platformda aynı soru
