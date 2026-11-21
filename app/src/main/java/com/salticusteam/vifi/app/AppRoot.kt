@@ -1,6 +1,7 @@
 package com.salticusteam.vifi.app
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +33,8 @@ import com.salticusteam.vifi.feature.conversionadmin.ConversionJobsScreen
 import com.salticusteam.vifi.feature.conversionadmin.ConversionListKind
 import com.salticusteam.vifi.feature.conversionadmin.ConversionOriginalScreen
 import com.salticusteam.vifi.feature.conversionadmin.ConversionReviewScreen
+import com.salticusteam.vifi.feature.conversionadmin.ExamConversionAdminButton
+import com.salticusteam.vifi.feature.conversionadmin.PublishedQuestionAdminMenu
 import com.salticusteam.vifi.feature.conversionadmin.SubjectDetailScreen
 import com.salticusteam.vifi.feature.conversionadmin.SubjectMappingScreen
 import com.salticusteam.vifi.feature.examviewer.ExamViewerScreen
@@ -151,10 +154,24 @@ private fun ArchiveHost(
                 onBack = { router.pop() },
                 // Opened without a summary (recents, a notification), a structured exam swaps in its question screen.
                 onReplaceWithQuestions = { router.replaceExamWithQuestions(it) },
+                // "Yeni yapıya geçir" under a not-yet-structured exam (ADX-04, K12a); draws nothing for non-admins.
+                bottomBar = { examPath ->
+                    examPath.components.lastOrNull()?.let { examId ->
+                        ExamConversionAdminButton(examId = examId, modifier = Modifier.navigationBarsPadding())
+                    }
+                },
             )
         },
         structuredExam = { path, kind ->
-            StructuredExamScreen(path = path, kind = kind, onBack = { router.pop() })
+            StructuredExamScreen(
+                path = path,
+                kind = kind,
+                onBack = { router.pop() },
+                // The "Yönetici" menu above each published question (ADX-05, K15); draws nothing for non-admins.
+                questionAdminAction = { question, onChange ->
+                    key(question.id) { PublishedQuestionAdminMenu(question = question, onChange = onChange) }
+                },
+            )
         },
         account = {
             AccountScreen(
