@@ -38,13 +38,14 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **43'ü tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **47'si tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
 > `DDEC-06` (iOS'ta da son görüntülenen kartı kilit kontrolünden geçmiyor; iki platform eşit). Faz 0 ve Hat A, B, C, E, F
-> (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). `ADM-01`…`04`, `ADX-01`…`03`, `ADX-06` birleşti
-> (`ADX-04`/`05` servis + bileşen hazır, ekran bağlantısı `SIT-01`'de). Sürüyor: `SIT-01`, `SIT-03`.
+> (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). Hat D tamamı ve `SIT-01` (pratik oturum ekranı, Browse'da
+> Sınava gir, admin bağlantıları) birleşti. Sürüyor: satır içi formül kusurları (2.0 yazı ölçeğinde satır çakışması,
+> satır başı boşluğu, TalkBack), `SIT-02`…`04`.
 
 ---
 
@@ -295,9 +296,9 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   Yayınla (`publishExamConversion`). Her AI işleminde Claude/Gemini seçimi. ⟶ `ADX-01`
 - [x] **`ADX-03`** Başarısız işler + toplu dönüştür _(P1·M·Sonnet)_ — Başarısız listesi + "Tekrar başlat"; ders/bölüm
   seçip `requestBulkConversion` (`dryRun` ile tahmini maliyet + onay); `aiUsage/<YYYY-MM>` ile 50 $ göstergesi. ⟶ `ADM-01`
-- [ ] **`ADX-04`** "Yeni yapıya geçir" _(P1·S·Sonnet)_ — Dönüştürülmemiş sınavın ekranında yalnız admin için düğme
+- [x] **`ADX-04`** "Yeni yapıya geçir" _(P1·S·Sonnet)_ — Dönüştürülmemiş sınavın ekranında yalnız admin için düğme
   (`requestExamConversion {examId, provider}`) + iş durumu. ⟶ `SQS-01`
-- [ ] **`ADX-05`** Yayındaki soruda Yönetici menüsü (K15) _(P1·S·Sonnet)_ — Soru kartının üstünde (kart içeriği
+- [x] **`ADX-05`** Yayındaki soruda Yönetici menüsü (K15) _(P1·S·Sonnet)_ — Soru kartının üstünde (kart içeriği
   dışında) "Düzenle" (`updatePublishedQuestion`) / "Yeniden üret" (`regeneratePublishedQuestion`); değişiklik hemen
   yayında, soru id'si aynı, şekil yolu değişir. ⟶ `SQS-03`
 - [x] **`ADX-06`** Ders eşleme _(P1·M·Sonnet)_ — `listSubjects`, `setCourseSubject` (tek ders taşımada onay),
@@ -349,7 +350,7 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   mutlak iddia yok. ⟶ —
 - [x] **`SLG-03`** Mağaza metinleri _(P1·S·Sonnet)_ — `PLAY-STORE-LISTING.md`: 4.2.0 sürüm notu (iOS What's New ile
   aynı içerik: soru soru sınavlar, yapay zekâ notu, "Sınava gir"; mutlak iddia yok), gerekirse tam açıklama. ⟶ —
-- [ ] **`SLG-04`** Proje belgeleri _(P2·S·Haiku)_ — `CLAUDE.md` (durum, Mevcut durum tablosu: soru ekranı, pratik,
+- [x] **`SLG-04`** Proje belgeleri _(P2·S·Haiku)_ — `CLAUDE.md` (durum, Mevcut durum tablosu: soru ekranı, pratik,
   LaTeX kütüphanesi, yeni callable'lar, yeni launch argümanları) + `README.md`. ⟶ Faz 1 hatları
 - [x] **`SLG-05`** Sözleşme belgesinin Android'e alınması _(P2·S·Haiku)_ — `STRUCTURED-EXAMS.md`'nin Android'i
   ilgilendiren özeti (kişisel veri içermeden) `ANDROID-4.2.0-DETAIL.md` olarak; iOS test adları ↔ Android test
@@ -357,7 +358,7 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
 
 ### Faz 2 — Entegrasyon ve Testler
 
-- [ ] **`SIT-01`** Birleştirme _(P0·M·Opus)_ — Sıra: G → B → A → C → D → E. Pratik oturum ekranı (`PracticeSessionScreen`)
+- [x] **`SIT-01`** Birleştirme _(P0·M·Opus)_ — Sıra: G → B → A → C → D → E. Pratik oturum ekranı (`PracticeSessionScreen`)
   A'nın `QuestionCard`'ıyla bağlanır; `PracticeEntry` Browse ders ekranına; paywall yönlendirmesi; ekran koruması
   pratikte de açık. `assembleDebug` + `lintLiveDebug` + `test`. ⟶ Faz 1 kod hatları
 - [ ] **`SIT-02`** Birim testleri _(P0·M·Sonnet)_ — iOS ile aynı vakalar: ayrıştırıcılar (36 + 32 + 20), tokenizer,
