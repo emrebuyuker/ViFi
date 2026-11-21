@@ -7,6 +7,7 @@ import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.view.Window
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -45,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.salticusteam.vifi.R
 import kotlinx.coroutines.delay
+import java.util.WeakHashMap
 
 /**
  * Keeps exam content out of screenshots, recordings and the app switcher (iOS `screenCaptureProtection`).
@@ -72,12 +74,53 @@ fun ScreenCaptureProtection(
     }
 }
 
+/**
+ * FLAG_SECURE is one flag per window, but protected screens overlap during navigation: the file viewer that redirects
+ * to the question screen (recents, a notification's "Sınava Git") is disposed only after the question screen has set
+ * the flag, so a plain clear on dispose would leave the question screen unprotected (SQA-04). The flag is therefore
+ * held by count and cleared when the last protected screen of the window goes away.
+ */
 @Composable
 private fun SecureWindowEffect(activity: Activity?) {
     DisposableEffect(activity) {
         val window = activity?.window
-        window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
+        if (window != null && secureWindowHolds.acquire(window)) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        }
+        onDispose {
+            if (window != null && secureWindowHolds.release(window)) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            }
+        }
+    }
+}
+
+/** Protected screens currently shown per window; touched only from composition effects (the main thread). */
+private val secureWindowHolds = HoldCounter<Window>()
+
+/**
+ * Counts overlapping holds per key (weakly, so a destroyed window is not kept). [acquire] is `true` for the first hold
+ * of a key (set the flag), [release] is `true` when its last hold goes away (clear it). An unmatched release is ignored.
+ */
+internal class HoldCounter<K : Any> {
+
+    private val holds = WeakHashMap<K, Int>()
+
+    fun acquire(key: K): Boolean {
+        val count = holds[key] ?: 0
+        holds[key] = count + 1
+        return count == 0
+    }
+
+    fun release(key: K): Boolean {
+        val count = holds[key] ?: return false
+        return if (count <= 1) {
+            holds.remove(key)
+            true
+        } else {
+            holds[key] = count - 1
+            false
+        }
     }
 }
 
