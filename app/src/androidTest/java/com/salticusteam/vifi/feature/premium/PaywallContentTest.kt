@@ -76,6 +76,14 @@ class PaywallContentTest {
     }
 
     @Test
+    fun benefits_listsTheUnlimitedPracticeItem() {
+        setContent(loaded)
+
+        composeRule.onNodeWithTag("paywall.benefit.practice").performScrollTo().assertIsDisplayed()
+            .assert(hasText("Sınava gir'de sınırsız soru"))
+    }
+
+    @Test
     fun loading_showsTheSpinnerAndNothingToBuy() {
         setContent(PaywallUiState())
 

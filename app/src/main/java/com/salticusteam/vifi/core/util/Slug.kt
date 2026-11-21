@@ -1,5 +1,7 @@
 package com.salticusteam.vifi.core.util
 
+import java.text.Normalizer
+
 /**
  * Turns a display name into a stable, topic-safe slug (`[a-z0-9-]`), the canonical id of a university /
  * faculty / department the user types when it is not on the bundled list (iOS `Slug`).
@@ -20,7 +22,9 @@ object Slug {
     )
 
     fun make(input: String): String {
-        val lowered = input.map { TURKISH_MAP[it] ?: it }.joinToString("").lowercase()
+        // Compose decomposed input ("u" + U+0308) first, so it maps like the precomposed letter (iOS grapheme walk).
+        val composed = Normalizer.normalize(input, Normalizer.Form.NFC)
+        val lowered = composed.map { TURKISH_MAP[it] ?: it }.joinToString("").lowercase()
 
         // Keep ASCII letters/digits; collapse every other run into a single dash, with no leading or trailing
         // dash (the dash is only flushed right before the next kept character).

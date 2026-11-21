@@ -189,13 +189,14 @@ private fun Benefits() {
         BenefitRow(R.string.paywall_benefit_all_exams)
         BenefitRow(R.string.paywall_benefit_no_locks)
         BenefitRow(R.string.paywall_benefit_unlimited)
+        BenefitRow(R.string.paywall_benefit_unlimited_practice, Modifier.testTag("paywall.benefit.practice"))
         BenefitRow(R.string.paywall_benefit_cancel)
     }
 }
 
 @Composable
-private fun BenefitRow(@StringRes text: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+private fun BenefitRow(@StringRes text: Int, modifier: Modifier = Modifier) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = Icons.Filled.CheckCircle,
             contentDescription = null,

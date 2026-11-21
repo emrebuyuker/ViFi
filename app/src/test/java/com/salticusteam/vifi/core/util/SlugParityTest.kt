@@ -32,4 +32,14 @@ class SlugParityTest {
         assertEquals("unknown", Slug.make("   "))
         assertEquals("unknown", Slug.make("..."))
     }
+
+    @Test
+    fun `decomposed input gives the same slug as the composed one`() {
+        listOf("Mühendislik", "İstanbul", "Boğaziçi Üniversitesi", "Çaycuma", "Şişli Öğretmen").forEach { composed ->
+            val decomposed = java.text.Normalizer.normalize(composed, java.text.Normalizer.Form.NFD)
+            assertEquals(composed, Slug.make(composed), Slug.make(decomposed))
+        }
+        assertEquals("istanbul", Slug.make("I\u0307stanbul"))
+        assertEquals("muhendislik", Slug.make("Mu\u0308hendislik"))
+    }
 }
