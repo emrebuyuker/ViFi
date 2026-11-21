@@ -38,13 +38,13 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **39'u tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **43'ü tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
 > `DDEC-06` (iOS'ta da son görüntülenen kartı kilit kontrolünden geçmiyor; iki platform eşit). Faz 0 ve Hat A, B, C, E, F
-> (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). `ADM-01`…`04` birleşti. Sürüyor: `ADX-*`,
-> `SIT-01`.
+> (kod), G, H kod/belge kalemleri tamam ve `v-4.2.0`'da (F ortak depoda ayrı dalda). `ADM-01`…`04`, `ADX-01`…`03`, `ADX-06` birleşti
+> (`ADX-04`/`05` servis + bileşen hazır, ekran bağlantısı `SIT-01`'de). Sürüyor: `SIT-01`, `SIT-03`.
 
 ---
 
@@ -286,21 +286,21 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   fakülte, bölüm (telefon ve cinsiyet okunmaz/gösterilmez); profil yoksa kart gizli. Liste ve detay. ⟶ `SCT-01`
 - [x] **`ADM-04`** Katalog adı büyük harf _(P1·S·Sonnet)_ — `publishPlan`'daki yeni düğüm adları Türkçe büyük harf
   (`CatalogName`, `Locale("tr")` kuralı; iOS `CatalogNameTests` vakaları). ⟶ `ADM-01`
-- [ ] **`ADX-01`** Hazır sınavlar listesi + inceleme _(P1·M·Sonnet)_ — `examConversions` (`status`, `createdAt desc`
+- [x] **`ADX-01`** Hazır sınavlar listesi + inceleme _(P1·M·Sonnet)_ — `examConversions` (`status`, `createdAt desc`
   indeksi) listesi; inceleme ekranında orijinal sayfalar + taslak sorular yan yana; düzenleme yalnız kuralın izin
   verdiği alanlar (`text, speech, choices, answer, solution, needsReview`) + `editedBy == uid`, `editedAt` sunucu zamanı. ⟶ `ADM-01`
-- [ ] **`ADX-02`** Taslak işlemleri _(P1·M·Sonnet)_ — Tek soruyu yeniden üret (`regenerateDraftQuestion`, kira/ilerleme +
+- [x] **`ADX-02`** Taslak işlemleri _(P1·M·Sonnet)_ — Tek soruyu yeniden üret (`regenerateDraftQuestion`, kira/ilerleme +
   `regenerationError`), tümünü yeniden üret (`regenerateExamConversion`), Sınavı iptal et (`discardExamConversion`),
   başlık listeden (`ExamTitleParser.canonicalTitle` önerisi, `validate`), ders seçimi (`subjectId` / yeni ders adı),
   Yayınla (`publishExamConversion`). Her AI işleminde Claude/Gemini seçimi. ⟶ `ADX-01`
-- [ ] **`ADX-03`** Başarısız işler + toplu dönüştür _(P1·M·Sonnet)_ — Başarısız listesi + "Tekrar başlat"; ders/bölüm
+- [x] **`ADX-03`** Başarısız işler + toplu dönüştür _(P1·M·Sonnet)_ — Başarısız listesi + "Tekrar başlat"; ders/bölüm
   seçip `requestBulkConversion` (`dryRun` ile tahmini maliyet + onay); `aiUsage/<YYYY-MM>` ile 50 $ göstergesi. ⟶ `ADM-01`
 - [ ] **`ADX-04`** "Yeni yapıya geçir" _(P1·S·Sonnet)_ — Dönüştürülmemiş sınavın ekranında yalnız admin için düğme
   (`requestExamConversion {examId, provider}`) + iş durumu. ⟶ `SQS-01`
 - [ ] **`ADX-05`** Yayındaki soruda Yönetici menüsü (K15) _(P1·S·Sonnet)_ — Soru kartının üstünde (kart içeriği
   dışında) "Düzenle" (`updatePublishedQuestion`) / "Yeniden üret" (`regeneratePublishedQuestion`); değişiklik hemen
   yayında, soru id'si aynı, şekil yolu değişir. ⟶ `SQS-03`
-- [ ] **`ADX-06`** Ders eşleme _(P1·M·Sonnet)_ — `listSubjects`, `setCourseSubject` (tek ders taşımada onay),
+- [x] **`ADX-06`** Ders eşleme _(P1·M·Sonnet)_ — `listSubjects`, `setCourseSubject` (tek ders taşımada onay),
   `renameSubject`, `mergeSubjects`; iOS `SubjectMappingTests` vakaları. ⟶ `SCT-01`
 
 #### Hat E — Küçük pariteler
