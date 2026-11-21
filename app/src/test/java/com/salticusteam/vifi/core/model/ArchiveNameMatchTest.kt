@@ -53,9 +53,11 @@ class ArchiveNameMatchTest {
     @Test
     fun `exam name catalog ids match iOS`() {
         assertEquals(
-            listOf("vize", "final", "butunleme", "mazeret", "kisa-sinav", "yaz-okulu", "ara-sinav"),
+            ExamNameCatalog.entries.map { it.id },
             ExamNameCatalog.names.map { it.id },
         )
+        assertEquals(22, ExamNameCatalog.names.size)
         assertEquals("VİZE", ExamNameCatalog.names.first().name)
+        assertEquals("ÇÖZÜMLÜ SORULAR", ExamNameCatalog.names.last().name)
     }
 }

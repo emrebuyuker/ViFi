@@ -132,4 +132,32 @@ class AppUpdateViewModelTest {
         assertNull(preferences.skippedUpdateVersion.first())
         assertEquals(emptyList<Any>(), analytics.events)
     }
+
+    // SMP-02 — iOS dca5c3c regression: a dismissed optional prompt must not come back within the session.
+    @Test
+    fun `later keeps the same version hidden when the policy is re-emitted in the session`() = runTest {
+        status.value = AppUpdateStatus.Optional(update("3.2"))
+        val sut = AppUpdateViewModel(checker, analytics, preferences)
+        sut.onOptionalLaterChosen()
+        sut.onOptionalDismissed()
+        assertNull(sut.uiState.value.optional)
+
+        // Remote policy refreshes (equal payload, new instance) and a flap through up-to-date.
+        status.value = AppUpdateStatus.UpToDate
+        status.value = AppUpdateStatus.Optional(update("3.2"))
+
+        assertNull(sut.uiState.value.optional)
+    }
+
+    @Test
+    fun `skip keeps the same version hidden when the policy is re-emitted in the session`() = runTest {
+        status.value = AppUpdateStatus.Optional(update("3.2"))
+        val sut = AppUpdateViewModel(checker, analytics, preferences)
+        sut.onOptionalSkipChosen()
+
+        status.value = AppUpdateStatus.UpToDate
+        status.value = AppUpdateStatus.Optional(update("3.2"))
+
+        assertNull(sut.uiState.value.optional)
+    }
 }

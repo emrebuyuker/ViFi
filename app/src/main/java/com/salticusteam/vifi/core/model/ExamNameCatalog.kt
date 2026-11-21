@@ -6,23 +6,13 @@ package com.salticusteam.vifi.core.model
  * notification segments) and the uppercase display the archive stores; the ids must stay in lockstep with iOS.
  */
 object ExamNameCatalog {
-    val names: List<CatalogItem> = listOf(
-        CatalogItem(id = "vize", name = "VİZE"),
-        CatalogItem(id = "final", name = "FİNAL"),
-        CatalogItem(id = "butunleme", name = "BÜTÜNLEME"),
-        CatalogItem(id = "mazeret", name = "MAZERET"),
-        CatalogItem(id = "kisa-sinav", name = "KISA SINAV"),
-        CatalogItem(id = "yaz-okulu", name = "YAZ OKULU"),
-        CatalogItem(id = "ara-sinav", name = "ARA SINAV"),
-    )
-
     // Added in 4.2.0 — one name of the 22-name list (K27/K29) with the exam type it parses to.
     /** [id] and [name] are the shared contract (server `EXAM_NAME_LIST`, iOS `ExamNameCatalog.Entry`). */
     data class Entry(val id: String, val name: String, val examType: ExamType)
 
     /**
      * The owner's and the server's 22-name list, in order (iOS `ExamNameCatalog.entries`). `ExamTitleParser` builds
-     * list titles from it. "Sınav Ekle" still shows [names] until SMP-01 switches the picker to this list.
+     * list titles from it. "Sınav Ekle" shows the same list as [names].
      */
     val entries: List<Entry> = listOf(
         Entry("vize", "VİZE", ExamType.VIZE),
@@ -48,6 +38,9 @@ object ExamNameCatalog {
         Entry("calisma-sorulari", "ÇALIŞMA SORULARI", ExamType.CALISMA_SORULARI),
         Entry("cozumlu-sorular", "ÇÖZÜMLÜ SORULAR", ExamType.COZUMLU_SORULAR),
     )
+
+    /** The "Sınav Ekle" picker options, in [entries] order (iOS `ExamNameCatalog.names`). */
+    val names: List<CatalogItem> = entries.map { CatalogItem(id = it.id, name = it.name) }
 
     /** The list entry with [id], or `null`. */
     fun entry(id: String): Entry? = entries.firstOrNull { it.id == id }

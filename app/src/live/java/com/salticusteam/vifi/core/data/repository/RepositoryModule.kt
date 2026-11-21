@@ -76,7 +76,7 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindRewardsConfigReader(impl: RtdbRewardsConfigReader): RewardsConfigReader
 
-    /** The archive reads the named 'vifi' Firestore database (BE-15); the RTDB `Universitiess` tree is unused. */
+    /** The archive reads the named 'vifi' Firestore database (BE-15); the old RTDB archive tree is gone from the app. */
     @Binds
     @Singleton
     abstract fun bindArchiveRepository(impl: FirestoreArchiveRepository): ArchiveRepository
