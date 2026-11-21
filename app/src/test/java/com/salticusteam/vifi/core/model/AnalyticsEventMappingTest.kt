@@ -7,7 +7,7 @@ import org.junit.Test
 class AnalyticsEventMappingTest {
 
     @Test
-    fun `firebaseName matches the iOS event names for all 29 events`() {
+    fun `firebaseName matches the iOS event names for all 31 events`() {
         val expected = mapOf(
             AnalyticsEvent.ScreenView("Home") to "screen_view",
             AnalyticsEvent.Browse(ArchiveLevel.FACULTY) to "browse_level",
@@ -38,9 +38,11 @@ class AnalyticsEventMappingTest {
             AnalyticsEvent.MarketingConsentShown(NotificationPromptSource.PROMPT) to "marketing_consent_shown",
             AnalyticsEvent.MarketingConsentAccepted(NotificationPromptSource.PROMPT) to "marketing_consent_accepted",
             AnalyticsEvent.MarketingConsentDeclined(NotificationPromptSource.PROMPT) to "marketing_consent_declined",
+            AnalyticsEvent.StructuredExamOpened(3) to "exam_open",
+            AnalyticsEvent.AnswerRevealed(1) to "answer_revealed",
         )
 
-        assertEquals(29, expected.size)
+        assertEquals(31, expected.size)
         expected.forEach { (event, name) -> assertEquals(name, event.firebaseName) }
     }
 
@@ -122,6 +124,15 @@ class AnalyticsEventMappingTest {
             AnalyticsEvent.MarketingConsentShown(NotificationPromptSource.PROMPT),
             AnalyticsEvent.MarketingConsentAccepted(NotificationPromptSource.PROMPT),
         ).forEach { assertEquals(mapOf("source" to "prompt"), it.firebaseParameters) }
+    }
+
+    @Test
+    fun `structured exam events match iOS keys`() {
+        assertEquals(
+            mapOf("kind" to "structured", "question_count" to 12L),
+            AnalyticsEvent.StructuredExamOpened(12).firebaseParameters,
+        )
+        assertEquals(mapOf("question_order" to 4L), AnalyticsEvent.AnswerRevealed(4).firebaseParameters)
     }
 
     @Test

@@ -35,6 +35,7 @@ fun ViFiNavHost(
     notificationHistory: @Composable () -> Unit = {},
     practiceSetup: @Composable (course: ArchivePath, subjectId: String) -> Unit = { _, _ -> },
     practiceSession: @Composable (selection: PracticeSelection) -> Unit = {},
+    structuredExam: @Composable (path: ArchivePath, kind: ExamKind) -> Unit = { _, _ -> },
 ) {
     NavHost(
         navController = navController,
@@ -50,6 +51,10 @@ fun ViFiNavHost(
         composable<ViFiRoute.Exam> { entry ->
             val route = entry.toRoute<ViFiRoute.Exam>()
             exam(route.path, route.kind)
+        }
+        composable<ViFiRoute.StructuredExam> { entry ->
+            val route = entry.toRoute<ViFiRoute.StructuredExam>()
+            structuredExam(route.path, route.kind)
         }
         composable<ViFiRoute.Account> {
             account()

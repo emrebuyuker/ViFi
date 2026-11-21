@@ -47,8 +47,8 @@ class FakeRecentExamsRepository(initial: List<RecentExam> = emptyList()) : Recen
 
     override val exams: Flow<List<RecentExam>> = list
 
-    override suspend fun record(path: ArchivePath, kind: ExamKind, at: Long) {
-        list.update { RecentExam.recorded(it, path, kind, at) }
+    override suspend fun record(path: ArchivePath, kind: ExamKind, at: Long, isStructured: Boolean) {
+        list.update { RecentExam.recorded(it, path, kind, at, isStructured) }
     }
 
     override suspend fun remove(path: ArchivePath) {

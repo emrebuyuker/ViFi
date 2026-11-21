@@ -1,6 +1,11 @@
 package com.salticusteam.vifi.feature.browse
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -50,6 +55,46 @@ class BrowseContentTest {
 
         assertEquals(pdf, clicked)
     }
+
+    // iOS StructuredExamUITests.testStructuredExamRowShowsItsQuestionCount (4.2.0, SQS-06).
+    @Test
+    fun structuredExamRow_showsItsQuestionCountAndBadge_plainRowKeepsItsPages() {
+        val structured = ArchiveItem(
+            lesson.appending("f", "2003 FİNAL"), ArchiveLevel.EXAM, null, ExamSummary(ExamKind.IMAGES, 3, questionCount = 3),
+        )
+        val images = ArchiveItem(lesson.appending("v2", "2002 VİZE"), ArchiveLevel.EXAM, null, ExamSummary(ExamKind.IMAGES, 2))
+        show(BrowseUiState(path = lesson, isLoading = false, items = listOf(structured, images)))
+
+        inRow("row.2003 FİNAL", hasText("3 soru")).assertCountEquals(1)
+        inRow("row.2003 FİNAL", hasText("Sorular")).assertCountEquals(1)
+        inRow("row.2002 VİZE", hasText("2 sayfa")).assertCountEquals(1)
+        inRow("row.2002 VİZE", hasText("soru", substring = true)).assertCountEquals(0)
+    }
+
+    @Test
+    fun structuredExamRow_whenLocked_keepsTheLockBadge() {
+        // The newest exam is locked; the two oldest are free (ExamLock), structured or not.
+        val exams = listOf("2005 FİNAL", "2004 FİNAL", "2003 FİNAL").mapIndexed { index, name ->
+            ArchiveItem(lesson.appending("e$index", name), ArchiveLevel.EXAM, null, ExamSummary(ExamKind.IMAGES, 3, questionCount = 3))
+        }
+        composeRule.setContent {
+            ViFiTheme {
+                BrowseContent(
+                    state = BrowseUiState(path = lesson, isLoading = false, items = exams),
+                    onSearchTextChange = {}, onItemClick = {}, onRetry = {}, onRefresh = {}, onBack = {},
+                    lockState = ExamUnlockUiState(),
+                )
+            }
+        }
+
+        val locked = exams.first { it.path in ExamUnlockUiState().lockedPaths(exams) }
+        inRow("row.${locked.name}", hasTestTag("row.lock")).assertCountEquals(1)
+        inRow("row.${locked.name}", hasText("Sorular")).assertCountEquals(0)
+    }
+
+    /** The nodes matching [matcher] inside the row tagged [rowTag]. */
+    private fun inRow(rowTag: String, matcher: SemanticsMatcher) =
+        composeRule.onAllNodes(matcher and hasAnyAncestor(hasTestTag(rowTag)), useUnmergedTree = true)
 
     @Test
     fun loadedList_sectionHeaderShowsLevelTitleAndCount() {

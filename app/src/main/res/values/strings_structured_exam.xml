@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Added in 4.2.0 — the structured exam's question screen and card (SQS-02…06, iOS StructuredExamView /
+         QuestionCardView / QuestionContentView verbatim). -->
+    <string name="structured_exam_empty">Bu sınavda soru yok</string>
+    <string name="structured_exam_question_title">%1$s. Soru</string>
+    <string name="structured_exam_reveal_answer">Cevabı Göster</string>
+    <string name="structured_exam_hide_answer">Cevabı Gizle</string>
+    <string name="structured_exam_correct_choice_marker">%1$s ✓</string>
+    <string name="structured_exam_answer_heading">Cevap</string>
+    <string name="structured_exam_correct_choice">Doğru seçenek: %1$s</string>
+    <string name="structured_exam_solution_heading">Çözüm</string>
+    <string name="structured_exam_solution_step_marker">%1$d.</string>
+    <string name="structured_exam_ai_note">Bu çözüm yapay zekâ ile hazırlanmış ve incelenmiştir.</string>
+    <string name="structured_exam_figure_failed">Şekil yüklenemedi</string>
+
+    <!-- The format badge of a structured exam (Browse row, recent card), in place of "Görsel" / "PDF". -->
+    <string name="structured_exam_badge">Sorular</string>
+
+    <!-- "12 soru": the Browse row's subtitle and the question list's header. -->
+    <plurals name="structured_exam_question_count">
+        <item quantity="one">%1$d soru</item>
+        <item quantity="other">%1$d soru</item>
+    </plurals>
+
+    <!-- TalkBack: a card reads its question and (once revealed) its answer as two elements, in words, not LaTeX. -->
+    <string name="structured_exam_speech_figure">Şekil var.</string>
+    <string name="structured_exam_speech_choice">%1$s: %2$s</string>
+    <string name="structured_exam_speech_correct_choice">Doğru seçenek: %1$s.</string>
+    <string name="structured_exam_speech_answer">Cevap: %1$s</string>
+    <string name="structured_exam_speech_solution">Çözüm: %1$s</string>
+</resources>

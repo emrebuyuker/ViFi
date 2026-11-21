@@ -145,6 +145,54 @@ class ViFiRouterTest {
         assertEquals(listOf("home", "browse:itu", "inbox:-"), stack())
     }
 
+    // --- Structured exams (4.2.0, iOS ExamRoutingTests / SQS-01) ---
+
+    @Test
+    fun openExam_withQuestions_opensTheQuestionScreenWithItsAncestors() {
+        runOnUi { router.openExam(exam, ExamKind.IMAGES, questionCount = 4) }
+
+        val stack = stack()
+        assertEquals("questions:itu/muh/blg/blg101/2024-vize:JPG", stack.last())
+        assertEquals(exam.depth + 1, stack.size) // home + 4 lists + the exam
+    }
+
+    @Test
+    fun replaceExamWithQuestions_swapsTheViewer_andBackSkipsIt() {
+        runOnUi {
+            router.openExam(exam, ExamKind.IMAGES)
+            router.replaceExamWithQuestions(ViFiRoute.StructuredExam(exam, ExamKind.IMAGES))
+        }
+        assertEquals("questions:itu/muh/blg/blg101/2024-vize:JPG", stack().last())
+        assertEquals(exam.depth + 1, stack().size)
+
+        runOnUi { router.pop() }
+        assertEquals("browse:itu/muh/blg/blg101", stack().last())
+    }
+
+    @Test
+    fun replaceExamWithQuestions_twice_leavesOneQuestionScreen() {
+        val route = ViFiRoute.StructuredExam(exam, ExamKind.IMAGES)
+        runOnUi {
+            router.openExam(exam, ExamKind.IMAGES)
+            router.replaceExamWithQuestions(route)
+            router.replaceExamWithQuestions(route)
+        }
+
+        assertEquals(1, stack().count { it.startsWith("questions:") })
+        assertEquals(exam.depth + 1, stack().size)
+    }
+
+    @Test
+    fun replaceExamWithQuestions_afterLeavingTheViewer_doesNothing() {
+        runOnUi {
+            router.openExam(exam, ExamKind.IMAGES)
+            router.pop()
+            router.replaceExamWithQuestions(ViFiRoute.StructuredExam(exam, ExamKind.IMAGES))
+        }
+
+        assertEquals("browse:itu/muh/blg/blg101", stack().last())
+    }
+
     private fun runOnUi(block: () -> Unit) {
         composeRule.runOnUiThread(block)
         composeRule.waitForIdle()
@@ -162,6 +210,9 @@ class ViFiRouterTest {
         destination.hasRoute<ViFiRoute.Inbox>() -> "inbox:" + (toRoute<ViFiRoute.Inbox>().highlightId ?: "-")
         destination.hasRoute<ViFiRoute.Exam>() -> toRoute<ViFiRoute.Exam>().let {
             "exam:" + it.ids.joinToString("/") + ":" + it.kind.raw
+        }
+        destination.hasRoute<ViFiRoute.StructuredExam>() -> toRoute<ViFiRoute.StructuredExam>().let {
+            "questions:" + it.ids.joinToString("/") + ":" + it.kind.raw
         }
         else -> error("Unexpected destination ${destination.route}")
     }

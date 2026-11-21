@@ -109,6 +109,51 @@ class PreferencesRepositoriesTest {
         assertEquals(1, repo.exams.first().size)
     }
 
+    // iOS `CatalogNameTests.recentStructuredFlag` (4.2.0): the key stays recentExams.v1.
+
+    @Test
+    fun `a recent exam keeps whether it opened on the question screen`() = runTest {
+        val store = newStore()
+        val repo = DataStoreRecentExamsRepository(store)
+        repo.record(path("U", "F", "D", "C", "2017 FİNAL"), ExamKind.IMAGES, at = 1, isStructured = true)
+        repo.record(path("U", "F", "D", "C", "2016 VİZE"), ExamKind.PDF, at = 2)
+
+        val (file, structured) = repo.exams.first()
+        assertTrue(structured.isStructured)
+        assertEquals(ExamKind.IMAGES, structured.kind)
+        assertFalse(file.isStructured)
+        // A file exam is stored exactly as before 4.2.0 (no flag), so older builds read the same blob.
+        val raw = store.data.first()[stringPreferencesKey("recentExams.v1")].orEmpty()
+        assertEquals(1, Regex("isStructured").findAll(raw).count())
+    }
+
+    @Test
+    fun `entries saved before 4_2_0 decode as file exams`() = runTest {
+        val store = newStore()
+        store.edit {
+            it[stringPreferencesKey("recentExams.v1")] =
+                """[{"components":["u","f","d","c","e"],"displayNames":["U","F","D","C","E"],"kind":"JPG","openedAt":0}]"""
+        }
+        val repo = DataStoreRecentExamsRepository(store)
+
+        val reloaded = repo.exams.first()
+        assertEquals(1, reloaded.size)
+        assertFalse(reloaded.single().isStructured)
+        assertEquals(ExamKind.IMAGES, reloaded.single().kind)
+    }
+
+    @Test
+    fun `reopening refreshes the structured flag in place of the old entry`() = runTest {
+        val repo = DataStoreRecentExamsRepository(newStore())
+        val exam = path("U", "F", "D", "C", "E")
+        repo.record(exam, ExamKind.IMAGES, at = 1)
+        repo.record(exam, ExamKind.IMAGES, at = 2, isStructured = true)
+
+        val single = repo.exams.first().single()
+        assertTrue(single.isStructured)
+        assertEquals(2L, single.openedAt)
+    }
+
     @Test
     fun `fake recents follow the same rules`() = runTest {
         val repo = FakeRecentExamsRepository()

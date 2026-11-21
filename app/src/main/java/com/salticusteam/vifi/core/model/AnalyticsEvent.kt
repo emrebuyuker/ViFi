@@ -10,6 +10,12 @@ sealed interface AnalyticsEvent {
 
     data object RecentExamOpened : AnalyticsEvent
 
+    // Added in 4.2.0 — a structured exam's questions loaded for the first time on its screen (`exam_open`, kind structured).
+    data class StructuredExamOpened(val questionCount: Int) : AnalyticsEvent
+
+    // Added in 4.2.0 — "Cevabı Göster" was tapped, once per question per screen visit.
+    data class AnswerRevealed(val questionOrder: Int) : AnalyticsEvent
+
     // Coin economy
     data class ExamUnlockSheetShown(val canAfford: Boolean) : AnalyticsEvent
 

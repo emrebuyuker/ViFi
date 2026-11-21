@@ -45,6 +45,8 @@ class AnalyticsLimitsTest {
         AnalyticsEvent.PracticeAnswerRevealed,
         AnalyticsEvent.PracticeLimitReached,
         AnalyticsEvent.PracticePaywallOpened,
+        AnalyticsEvent.StructuredExamOpened(questionCount = 30),
+        AnalyticsEvent.AnswerRevealed(questionOrder = 12),
     )
 
     private fun kindIndex(event: AnalyticsEvent): Int = when (event) {
@@ -81,11 +83,13 @@ class AnalyticsLimitsTest {
         AnalyticsEvent.PracticeAnswerRevealed -> 30
         AnalyticsEvent.PracticeLimitReached -> 31
         AnalyticsEvent.PracticePaywallOpened -> 32
+        is AnalyticsEvent.StructuredExamOpened -> 33
+        is AnalyticsEvent.AnswerRevealed -> 34
     }
 
     @Test
     fun `samples cover every event exactly once`() {
-        assertEquals((0..32).toList(), samples.map(::kindIndex).sorted())
+        assertEquals((0..34).toList(), samples.map(::kindIndex).sorted())
     }
 
     @Test
@@ -93,7 +97,9 @@ class AnalyticsLimitsTest {
         val names = samples.map { it.firebaseName }
 
         names.forEach { assertValidName(it, max = EVENT_NAME_MAX, what = "event name") }
-        assertEquals(names.size, names.toSet().size)
+        // The one shared name: the file viewer's and the question screen's opens are one event, told apart by `kind`.
+        assertEquals(listOf("exam_open"), names.groupBy { it }.filterValues { it.size > 1 }.keys.toList())
+        assertEquals(names.size - 1, names.toSet().size)
     }
 
     @Test
@@ -121,9 +127,10 @@ class AnalyticsLimitsTest {
             AnalyticsScreen.EXAM_VIEWER, AnalyticsScreen.EXAM_PDF, AnalyticsScreen.EXAM_IMAGES, AnalyticsScreen.INBOX,
             AnalyticsScreen.MODERATION, AnalyticsScreen.ABOUT, AnalyticsScreen.ACCOUNT, AnalyticsScreen.PAYWALL,
             AnalyticsScreen.NOTIFICATION_SETTINGS, AnalyticsScreen.NOTIFICATION_COMPOSER, AnalyticsScreen.NOTIFICATION_HISTORY,
+            AnalyticsScreen.STRUCTURED_EXAM,
         )
 
-        assertEquals(18, screens.toSet().size)
+        assertEquals(19, screens.toSet().size)
         screens.forEach { assertTrue(it.length <= PARAM_VALUE_MAX) }
     }
 

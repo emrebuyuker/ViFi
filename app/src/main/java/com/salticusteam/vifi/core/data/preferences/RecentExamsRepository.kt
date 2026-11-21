@@ -10,8 +10,16 @@ interface RecentExamsRepository {
 
     val exams: Flow<List<RecentExam>>
 
-    /** Moves the exam to the top, replacing any earlier entry for [path]. */
-    suspend fun record(path: ArchivePath, kind: ExamKind, at: Long = System.currentTimeMillis())
+    /**
+     * Moves the exam to the top, replacing any earlier entry for [path]. [isStructured] marks an exam opened on the
+     * question screen (4.2.0); [kind] stays the exam's file kind.
+     */
+    suspend fun record(
+        path: ArchivePath,
+        kind: ExamKind,
+        at: Long = System.currentTimeMillis(),
+        isStructured: Boolean = false,
+    )
 
     /** Removes any entry for [path] (e.g. an exam that no longer exists); writes only when something changed. */
     suspend fun remove(path: ArchivePath)

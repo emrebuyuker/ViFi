@@ -1,5 +1,6 @@
 package com.salticusteam.vifi.feature.examviewer
 
+import app.cash.turbine.test
 import com.salticusteam.vifi.core.data.preferences.fake.FakeRecentExamsRepository
 import com.salticusteam.vifi.core.data.repository.ArchiveRepository
 import com.salticusteam.vifi.core.data.repository.fake.FakeAnalyticsTracker
@@ -11,6 +12,7 @@ import com.salticusteam.vifi.core.model.ArchivePath
 import com.salticusteam.vifi.core.model.ExamDocument
 import com.salticusteam.vifi.core.model.ExamKind
 import com.salticusteam.vifi.core.model.RecentExam
+import com.salticusteam.vifi.core.navigation.ViFiRoute
 import com.salticusteam.vifi.testing.MainDispatcherRule
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -144,6 +146,58 @@ class ExamViewerViewModelTest {
             listOf(AnalyticsScreen.EXAM_IMAGES, AnalyticsScreen.EXAM_PDF, AnalyticsScreen.EXAM_VIEWER),
             analytics.events.filterIsInstance<AnalyticsEvent.ScreenView>().map { it.name },
         )
+    }
+
+    // --- Structured redirect (4.2.0, iOS ExamRoutingTests) ---
+
+    @Test
+    fun `the file viewer leaves the visit to the question screen when it redirects`() = runTest {
+        val structured = document.copy(fileUrls = emptyList(), questionCount = 3)
+        val sut = viewModel(ScriptedArchiveRepository({ structured }), ExamKind.IMAGES)
+
+        sut.events.test {
+            advanceUntilIdle()
+
+            assertEquals(
+                ExamViewerEvent.ReplaceWithQuestions(ViFiRoute.StructuredExam(path, ExamKind.IMAGES)),
+                awaitItem(),
+            )
+            assertTrue(sut.uiState.value.redirectsToQuestions)
+            assertTrue(recents.exams.first().isEmpty())
+            assertTrue(analytics.events.isEmpty())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `the replacement is asked for once, even when the document is reloaded`() = runTest {
+        val structured = document.copy(questionCount = 3)
+        val sut = viewModel(ScriptedArchiveRepository({ structured }), ExamKind.IMAGES)
+
+        sut.events.test {
+            advanceUntilIdle()
+            awaitItem()
+
+            sut.load()
+            advanceUntilIdle()
+
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `a plain exam is not redirected and the file viewer records its visit`() = runTest {
+        val sut = viewModel(ScriptedArchiveRepository({ document }), ExamKind.IMAGES)
+
+        sut.events.test {
+            advanceUntilIdle()
+
+            expectNoEvents()
+            assertFalse(sut.uiState.value.redirectsToQuestions)
+            assertEquals(listOf(AnalyticsEvent.ExamOpened(ExamKind.IMAGES)), analytics.events)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     private fun viewModel(repo: ArchiveRepository, kind: ExamKind) = ExamViewerViewModel(

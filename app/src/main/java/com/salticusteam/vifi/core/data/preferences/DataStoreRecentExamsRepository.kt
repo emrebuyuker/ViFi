@@ -23,8 +23,8 @@ class DataStoreRecentExamsRepository @Inject constructor(
 
     override val exams: Flow<List<RecentExam>> = dataStore.data.map { decode(it[KEY]) }
 
-    override suspend fun record(path: ArchivePath, kind: ExamKind, at: Long) {
-        update { RecentExam.recorded(it, path, kind, at) }
+    override suspend fun record(path: ArchivePath, kind: ExamKind, at: Long, isStructured: Boolean) {
+        update { RecentExam.recorded(it, path, kind, at, isStructured) }
     }
 
     override suspend fun remove(path: ArchivePath) {
@@ -50,11 +50,16 @@ class DataStoreRecentExamsRepository @Inject constructor(
         val displayNames: List<String>,
         val kind: String,
         val openedAt: Long,
+        // Added in 4.2.0 — `true` for an exam opened on the question screen; absent (null) for a file exam, as in
+        // every entry saved before 4.2.0, so the key stays `recentExams.v1` (iOS `RecentExam.isStructured`).
+        val isStructured: Boolean? = null,
     )
 
     private fun encode(list: List<RecentExam>): String = json.encodeToString(
         listSerializer,
-        list.map { Entry(it.path.components, it.path.displayNames, it.kind.raw, it.openedAt) },
+        list.map {
+            Entry(it.path.components, it.path.displayNames, it.kind.raw, it.openedAt, it.isStructured.takeIf { flag -> flag })
+        },
     )
 
     // A corrupt or outdated blob starts empty rather than being retried forever (iOS behaviour).
@@ -63,7 +68,7 @@ class DataStoreRecentExamsRepository @Inject constructor(
         return try {
             json.decodeFromString(listSerializer, raw).mapNotNull { entry ->
                 val kind = ExamKind.fromRaw(entry.kind) ?: return@mapNotNull null
-                RecentExam(ArchivePath(entry.components, entry.displayNames), kind, entry.openedAt)
+                RecentExam(ArchivePath(entry.components, entry.displayNames), kind, entry.openedAt, entry.isStructured == true)
             }
         } catch (e: Exception) {
             Timber.w(e, "Discarding unreadable recent exams")
