@@ -33,6 +33,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -239,7 +241,10 @@ fun SubjectDetailContent(
         )
     }
     if (isRenaming) {
-        var newName by rememberSaveable(subject.id, subject.name) { mutableStateOf(subject.name) }
+        // The prefilled name opens with the cursor at its end, so typing continues it (not prepends to it).
+        var newName by rememberSaveable(subject.id, subject.name, stateSaver = TextFieldValue.Saver) {
+            mutableStateOf(TextFieldValue(subject.name, TextRange(subject.name.length)))
+        }
         AlertDialog(
             onDismissRequest = { isRenaming = false },
             title = { Text(stringResource(R.string.conversion_admin_rename_title)) },
@@ -256,7 +261,7 @@ fun SubjectDetailContent(
                 TextButton(
                     onClick = {
                         isRenaming = false
-                        actions.onRename(subject, newName)
+                        actions.onRename(subject, newName.text)
                     },
                     modifier = Modifier.testTag("subjects.rename.confirm"),
                 ) { Text(stringResource(R.string.conversion_admin_edit_save)) }

@@ -4,15 +4,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamConversionAdminService
 import com.salticusteam.vifi.core.data.repository.fake.InMemorySubjectMappingService
@@ -171,12 +176,18 @@ class ConversionAdminContentTest {
         composeRule.onNodeWithTag("conversion.review.question.${drafts.first().order}").performScrollTo().assertIsDisplayed()
     }
 
+    /** The review is a LazyColumn: off-screen rows are not composed, so scroll the list to the row by its tag. */
+    private fun scrollReviewTo(tag: String) {
+        composeRule.onNodeWithTag("conversion.review").performScrollToNode(hasTestTag(tag))
+    }
+
     @Test
     fun publishNeedsAListTitle() {
         setReview(reviewState(title = null))
 
         composeRule.onNodeWithTag("conversion.review.title").performScrollTo().assert(hasText("Listeden bir ad seç"))
-        composeRule.onNodeWithTag("conversion.review.publish").performScrollTo().assertIsNotEnabled()
+        scrollReviewTo("conversion.review.publish")
+        composeRule.onNodeWithTag("conversion.review.publish").assertIsNotEnabled()
     }
 
     @Test
@@ -184,7 +195,8 @@ class ConversionAdminContentTest {
         var published = 0
         setReview(reviewState(), ConversionReviewActions(onPublish = { published++ }))
 
-        composeRule.onNodeWithTag("conversion.review.publish").performScrollTo().assertIsEnabled().performClick()
+        scrollReviewTo("conversion.review.publish")
+        composeRule.onNodeWithTag("conversion.review.publish").assertIsEnabled().performClick()
         assertEquals("Nothing runs before the confirmation", 0, published)
         composeRule.onNodeWithText("Yayınlansın mı?").assertIsDisplayed()
         composeRule.onNodeWithTag("conversion.review.publish.confirm").performClick()
@@ -220,11 +232,13 @@ class ConversionAdminContentTest {
         val all = mutableListOf<AIProvider>()
         setReview(reviewState(), ConversionReviewActions(onDiscard = { discarded++ }, onRegenerateAll = { all += it }))
 
-        composeRule.onNodeWithTag("conversion.review.discard").performScrollTo().performClick()
+        scrollReviewTo("conversion.review.discard")
+        composeRule.onNodeWithTag("conversion.review.discard").performClick()
         composeRule.onNodeWithTag("conversion.review.discard.confirm").performClick()
         assertEquals(1, discarded)
 
-        composeRule.onNodeWithTag("conversion.review.regenerateAll").performScrollTo().performClick()
+        scrollReviewTo("conversion.review.regenerateAll")
+        composeRule.onNodeWithTag("conversion.review.regenerateAll").performClick()
         composeRule.onNodeWithTag("ai.provider.gemini").performClick()
         assertEquals(listOf(AIProvider.GEMINI), all)
     }
@@ -335,7 +349,9 @@ class ConversionAdminContentTest {
     fun bulkQueuedResultIsShown() {
         setBulk(BulkConversionUiState(phase = BulkPhase.Queued(BulkConversionEstimate(12, 5.0, emptyList()))))
 
-        composeRule.onNodeWithTag("bulk.queued").performScrollTo().assert(hasText("12 sınav kuyruğa alındı."))
+        // The result row merges its icon and text into one TalkBack node, so the tag lives on the unmerged text.
+        composeRule.onNodeWithTag("bulk.list").performScrollToNode(hasText("12 sınav kuyruğa alındı."))
+        composeRule.onNodeWithTag("bulk.queued", useUnmergedTree = true).assert(hasText("12 sınav kuyruğa alındı."))
     }
 
     // --- Subject mapping (ADX-06) ---
@@ -363,7 +379,12 @@ class ConversionAdminContentTest {
 
         composeRule.onNodeWithTag("subjects.list").assertIsDisplayed()
         composeRule.onNodeWithTag("subjects.row.algoritma").assertIsDisplayed()
-        composeRule.onNodeWithTag("subjects.possibleMatch", useUnmergedTree = true).assertIsDisplayed()
+        // Both near-duplicate subjects point at each other, so each row carries its own hint.
+        composeRule.onAllNodesWithTag("subjects.possibleMatch", useUnmergedTree = true).assertCountEquals(2)
+        composeRule.onNode(
+            hasTestTag("subjects.possibleMatch") and hasAnyAncestor(hasTestTag("subjects.row.algoritma")),
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
         composeRule.onNodeWithTag("subjects.row.algoritma").performClick()
 
         assertEquals("algoritma", opened)
