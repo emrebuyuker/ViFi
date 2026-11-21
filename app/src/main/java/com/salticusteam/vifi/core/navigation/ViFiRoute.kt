@@ -155,4 +155,31 @@ sealed interface ViFiRoute {
     /** The admin's sent and scheduled notifications (opened from the composer). */
     @Serializable
     data object NotificationHistory : ViFiRoute
+
+    /**
+     * The admin's job list of one kind (4.2.0, ADX-01 / ADX-03): "Hazır sınavlar" (drafts waiting for the second
+     * approval) or, with [failed], "Başarısız işler".
+     */
+    @Serializable
+    data class ConversionJobs(val failed: Boolean) : ViFiRoute
+
+    /** The second-approval review of the ready conversion job [jobId] (4.2.0, ADX-01 / ADX-02). */
+    @Serializable
+    data class ConversionReview(val jobId: String) : ViFiRoute
+
+    /** The original pages of the conversion job [jobId], next to its draft questions (4.2.0, ADX-01). */
+    @Serializable
+    data class ConversionOriginal(val jobId: String) : ViFiRoute
+
+    /** The admin bulk conversion: scope, model, dry-run estimate, confirm (4.2.0, ADX-03). */
+    @Serializable
+    data object BulkConversion : ViFiRoute
+
+    /** The admin's subject list ("Ders eşleme", 4.2.0, ADX-06). */
+    @Serializable
+    data object SubjectMapping : ViFiRoute
+
+    /** One subject of the mapping list: its courses and the move / rename / merge fixes (4.2.0, ADX-06). */
+    @Serializable
+    data class SubjectDetail(val subjectId: String) : ViFiRoute
 }

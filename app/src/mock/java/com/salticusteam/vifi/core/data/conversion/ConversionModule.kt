@@ -4,7 +4,8 @@ import com.salticusteam.vifi.core.data.repository.ExamConversionAdminService
 import com.salticusteam.vifi.core.data.repository.SubjectMappingService
 import com.salticusteam.vifi.core.data.repository.SubmitterProfileReader
 import com.salticusteam.vifi.core.data.repository.fake.FakeExamConversionAdminService
-import com.salticusteam.vifi.core.data.repository.fake.FakeSubjectMappingService
+import com.salticusteam.vifi.core.data.repository.fake.FakeConversionFileUrls
+import com.salticusteam.vifi.core.data.repository.fake.InMemorySubjectMappingService
 import com.salticusteam.vifi.core.data.repository.fake.FakeSubmitterProfileReader
 import dagger.Module
 import dagger.Provides
@@ -25,7 +26,11 @@ object ConversionModule {
 
     @Provides
     @Singleton
-    fun provideSubjectMappingService(): SubjectMappingService = FakeSubjectMappingService()
+    fun provideSubjectMappingService(): SubjectMappingService = InMemorySubjectMappingService()
+
+    @Provides
+    @Singleton
+    fun provideConversionFileUrls(): ConversionFileUrls = FakeConversionFileUrls()
 
     @Provides
     @Singleton

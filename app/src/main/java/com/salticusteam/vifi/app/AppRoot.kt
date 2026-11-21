@@ -24,6 +24,13 @@ import com.salticusteam.vifi.feature.about.AboutScreen
 import com.salticusteam.vifi.feature.account.AccountScreen
 import com.salticusteam.vifi.feature.addexam.AddExamScreen
 import com.salticusteam.vifi.feature.browse.BrowseScreen
+import com.salticusteam.vifi.feature.conversionadmin.BulkConversionScreen
+import com.salticusteam.vifi.feature.conversionadmin.ConversionJobsScreen
+import com.salticusteam.vifi.feature.conversionadmin.ConversionListKind
+import com.salticusteam.vifi.feature.conversionadmin.ConversionOriginalScreen
+import com.salticusteam.vifi.feature.conversionadmin.ConversionReviewScreen
+import com.salticusteam.vifi.feature.conversionadmin.SubjectDetailScreen
+import com.salticusteam.vifi.feature.conversionadmin.SubjectMappingScreen
 import com.salticusteam.vifi.feature.examviewer.ExamViewerScreen
 import com.salticusteam.vifi.feature.home.HomeScreen
 import com.salticusteam.vifi.feature.inbox.InboxScreen
@@ -126,6 +133,10 @@ private fun ArchiveHost(
                 onAbout = { router.push(ViFiRoute.About) },
                 onModeration = { router.push(ViFiRoute.Moderation) },
                 onNotificationComposer = { router.push(ViFiRoute.NotificationComposer) },
+                onConversionReady = { router.push(ViFiRoute.ConversionJobs(failed = false)) },
+                onConversionFailed = { router.push(ViFiRoute.ConversionJobs(failed = true)) },
+                onBulkConversion = { router.push(ViFiRoute.BulkConversion) },
+                onSubjectMapping = { router.push(ViFiRoute.SubjectMapping) },
                 onOpenPaywall = { router.push(ViFiRoute.Paywall) },
                 onNotificationSettings = { router.push(ViFiRoute.NotificationSettings) },
                 onBack = { router.pop() },
@@ -195,6 +206,41 @@ private fun ArchiveHost(
         },
         notificationHistory = {
             NotificationHistoryScreen(onBack = { router.pop() })
+        },
+        conversionJobs = { failed ->
+            ConversionJobsScreen(
+                kind = if (failed) ConversionListKind.FAILED else ConversionListKind.READY,
+                onOpenJob = { router.push(ViFiRoute.ConversionReview(it)) },
+                onBack = { router.pop() },
+            )
+        },
+        conversionReview = { jobId ->
+            ConversionReviewScreen(
+                jobId = jobId,
+                onShowOriginal = { router.push(ViFiRoute.ConversionOriginal(jobId)) },
+                onFinished = { router.pop() },
+                onBack = { router.pop() },
+            )
+        },
+        conversionOriginal = { jobId ->
+            ConversionOriginalScreen(jobId = jobId, onBack = { router.pop() })
+        },
+        bulkConversion = {
+            BulkConversionScreen(onBack = { router.pop() })
+        },
+        subjectMapping = {
+            SubjectMappingScreen(
+                onOpenSubject = { router.push(ViFiRoute.SubjectDetail(it)) },
+                onBack = { router.pop() },
+            )
+        },
+        subjectDetail = { subjectId, listEntry ->
+            // Both destinations share the list entry's view model, so the detail follows every reload.
+            SubjectDetailScreen(
+                subjectId = subjectId,
+                onBack = { router.pop() },
+                viewModel = hiltViewModel(listEntry),
+            )
         },
     )
 }
