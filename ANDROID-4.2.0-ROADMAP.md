@@ -38,7 +38,7 @@
 
 ## 0. Durum Özeti
 
-> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **60'ı tamam** (`RSD-02`, `RLG-01` eski taslaktan;
+> **İlerleme (21 Kasım 2026):** Toplam 64 kalemin **61'i tamam** (`RSD-02`, `RLG-01` eski taslaktan;
 > `DDEC-01`…`05` 21 Kasım'da ürün sahibince verildi) (`RSD-02` AUDIT açıldı, `RLG-01` veri güvenliği
 > girildi; ikisi de 18 Kasım'da). Kararlar: admin **tam parite**, LaTeX **yerel AndroidMath** (`SPK-01` şartıyla),
 > Play abonelik doğrulaması **ortak depoya istisna**, sürüm **4.2.0 (22)**, reCAPTCHA **açık bağımlılık**. Açık karar:
@@ -50,7 +50,7 @@
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
 > S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Yeniden üretilen yayındaki soru
 > ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. `SRV-02` deploy edildi. Faz 3: `SQA-01`, `SQA-04` tamam,
-> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini). `RSD-03` yayından sonraya ertelendi (AUDIT kalır). Faz 4: `SRL-01`…`SRL-04` tamam (iOS 4.2.0 (13) onaylı, elle yayın bekliyor; iki dal push'landı).
+> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini). `RSD-03` yayından sonraya ertelendi (AUDIT kalır). Faz 4: `SRL-01`…`SRL-05` tamam (iOS 4.2.0 (13) onaylı, elle yayın bekliyor; iki dal push'landı; 22 dahili testte; veri güvenliği formu kaydedildi, `SRL-06` ile incelemeye gider).
 
 ---
 
@@ -432,7 +432,12 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   derlenmiş) için hata ayıklama sembolü yok — engel değil. Ön lansman raporu (gerçek cihazda formül çizimi) üretime
   geçmeden okunacak. Asıl metin: 22'nin dahili teste yüklenmesi, Play önizleme raporu
   (desteklenen cihaz sayısı 21 ile aynı mı). ⟶ `SRL-03`
-- [ ] **`SRL-05`** Veri güvenliği + politika beyanları _(P0·S·ürün sahibi + Opus)_ — `SLG-01`/`SLG-02` sonucu Console'a.
+- [x] **`SRL-05`** Veri güvenliği + politika beyanları _(P0·S·ürün sahibi + Opus)_ — **Tamam (22 Kasım 2026):** Console'da
+  Veri güvenliği › Finansal bilgiler › "İşlem geçmişi" (Satın alma geçmişi) satırına "Sahtekarlığı önleme, güvenlik ve
+  kanunlara uygunluk" amacı eklendi (S1); diğer cevaplar değişmedi (toplanıyor, paylaşılmıyor, kısa süreli değil, isteğe
+  bağlı, Uygulama işlevselliği). Form kaydedildi; yayın özetinde "incelemeye gönderilmeyen 1 değişiklik" olarak bekliyor,
+  `SRL-06`'da üretim sürümüyle birlikte gönderilir (yönetilen yayın kapalı). Diğer beyanlar (reklam, hedef kitle, içerik
+  derecelendirmesi, yapay zekâ etiketi) değişmedi. Asıl metin: `SLG-01`/`SLG-02` sonucu Console'a.
   ⟶ `SRL-04`
 - [ ] **`SRL-06`** Üretim + inceleme, iOS ile aynı anda yayın _(P0·S·ürün sahibi)_ — %100 üretim, sürüm notu `SLG-03`;
   Play onayı gelince iOS elle yayınla aynı gün açılır (gerekirse Play'de yönetilen yayın). ⟶ `SRL-05`
