@@ -11,7 +11,7 @@
 > Console'a girildi (`NRL-06`); Yayın özeti'nde `NRL-07` ile incelemeye gitmeyi bekliyor. Uygulama içeriği satırlarına
 > 4.1.0 notları düşüldü. "Yapay zekayla üretilmiş öğe beyanı": "Öğeleri etiketleme" (ürün sahibi kararı, 31 Ekim). "Reklam yok." cümlesi ve reklam beyanı
 > [`PLAY-POLICY-4.1.0.md`](PLAY-POLICY-4.1.0.md)'deki R1/R2 kararına bağlıdır.
-> **4.2.0 (SLG-03, 21 Kasım 2026; öneri, onay bekliyor):** 4.2.0 sürüm notu (iOS "Yenilikler" taslağıyla aynı içerik)
+> **4.2.0 (SLG-03, 21 Kasım 2026; 22 Kasım'da Console'a girildi, `SRL-06` incelemesinde):** 4.2.0 sürüm notu (iOS "Yenilikler" taslağıyla aynı içerik)
 > ve tam açıklama önerisi ("SORU SORU ÇALIŞ", "SINAVA GİR" bölümleri, Premium maddesine pratik) eklendi. Console'a
 > `SRL-06`'da üretim sürümüyle girilir; o zamana kadar 4.1.0 metinleri kalır. Politika kontrolü:
 > [`PLAY-POLICY-4.2.0.md`](PLAY-POLICY-4.2.0.md).

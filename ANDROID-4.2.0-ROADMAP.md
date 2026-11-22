@@ -445,7 +445,8 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   ile aynı, desteklenen cihazlar değişmedi, tek uyarı yerel kod sembolü) ve veri güvenliği anketi birlikte incelemeye
   gönderildi. Onay gelince "Yayınlanmaya hazır"da bekler; iOS 4.2.0 (13) elle yayınlandığı gün Android'de "Yayınla"ya
   basılır. Ön lansman raporu hiç oluşmadı (giriş ekranı, test hesabı yok); formül çizimi riski `SRL-07` vitals ile izlenir.
-  Mağaza tam açıklamasının 4.2.0 önerisi girilmedi (4.1.0 metni kalır).
+  Mağaza tam açıklamasının 4.2.0 önerisi (`PLAY-STORE-LISTING.md`, 2763 karakter) de girildi; ürün sahibinin kararıyla
+  inceleme yeniden başlatıldı ve üç değişiklik (sürüm, veri güvenliği, tam açıklama) tek incelemede.
 - [ ] **`SRL-07`** İlk gözlem _(P1·S·Opus)_ — Mağaza, politika, vitals (formül çiziminden çökme / ANR), function
   hataları (`nextPracticeQuestions`, Play doğrulama). ⟶ `SRL-06`
 
