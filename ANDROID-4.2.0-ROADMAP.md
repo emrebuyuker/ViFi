@@ -50,7 +50,7 @@
 > (iOS gibi); kullanım koşulları metni ortak depoda ayrı dalda hazırlanır, yayın ayrı onay; veri güvenliği S1 evet,
 > S3 "Diğer kullanıcı içeriği", S4 teyitli; mağaza: iOS sürüm notu + yeni açıklama. Yeniden üretilen yayındaki soru
 > ("incelenmiştir" notu, P5): iOS ile birebir aynı kalır. `SRV-02` deploy edildi. Faz 3: `SQA-01`, `SQA-04` tamam,
-> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini). `RSD-03` yayından sonraya ertelendi (AUDIT kalır). Faz 4: `SRL-01`…`SRL-05` tamam (iOS 4.2.0 (13) onaylı, elle yayın bekliyor; iki dal push'landı; 22 dahili testte; veri güvenliği formu kaydedildi, `SRL-06` ile incelemeye gider).
+> `SQA-02` tamam (ücretsiz + Premium), `SQA-03` tamam (22 Kasım, iOS gönderimi + Android admin, Gemini). `RSD-03` yayından sonraya ertelendi (AUDIT kalır). Faz 4: `SRL-01`…`SRL-05` tamam (iOS 4.2.0 (13) onaylı, elle yayın bekliyor; iki dal push'landı; 22 dahili testte; veri güvenliği formu kaydedildi); `SRL-06` incelemede (yönetilen yayın açık).
 
 ---
 
@@ -441,6 +441,11 @@ Faz 4  SRL-01..07  ◄── K16: iOS ile aynı anda, her dış adım ayrı onay
   ⟶ `SRL-04`
 - [ ] **`SRL-06`** Üretim + inceleme, iOS ile aynı anda yayın _(P0·S·ürün sahibi)_ — %100 üretim, sürüm notu `SLG-03`;
   Play onayı gelince iOS elle yayınla aynı gün açılır (gerekirse Play'de yönetilen yayın). ⟶ `SRL-05`
+  **Durum (22 Kasım 2026): incelemede.** Yönetilen yayın açıldı; 22 (4.2.0) üretim %100 (21 dahil değil, tr-TR not iOS
+  ile aynı, desteklenen cihazlar değişmedi, tek uyarı yerel kod sembolü) ve veri güvenliği anketi birlikte incelemeye
+  gönderildi. Onay gelince "Yayınlanmaya hazır"da bekler; iOS 4.2.0 (13) elle yayınlandığı gün Android'de "Yayınla"ya
+  basılır. Ön lansman raporu hiç oluşmadı (giriş ekranı, test hesabı yok); formül çizimi riski `SRL-07` vitals ile izlenir.
+  Mağaza tam açıklamasının 4.2.0 önerisi girilmedi (4.1.0 metni kalır).
 - [ ] **`SRL-07`** İlk gözlem _(P1·S·Opus)_ — Mağaza, politika, vitals (formül çiziminden çökme / ANR), function
   hataları (`nextPracticeQuestions`, Play doğrulama). ⟶ `SRL-06`
 
